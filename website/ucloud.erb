@@ -1,0 +1,115 @@
+<% wrap_layout :inner do %>
+    <% content_for :sidebar do %>
+        <div class="docs-sidebar hidden-print affix-top" role="complementary">
+            <ul class="nav docs-sidenav">
+                <li<%= sidebar_current("docs-home") %>>
+                    <a href="/docs/providers/index.html">All Providers</a>
+                </li>
+
+                <li<%= sidebar_current("docs-ucloud-index") %>>
+                    <a href="/docs/providers/ucloud/index.html">UCloud Provider</a>
+                </li>
+
+                <li<%= sidebar_current("docs-ucloud-datasource") %>>
+                <a href="#">Data Sources</a>
+                    <ul class="nav nav-visible">
+
+                        <li<%= sidebar_current("docs-ucloud-datasource-projects") %>>
+                            <a href="/docs/providers/ucloud/d/projects.html">ucloud_projects</a>
+                        </li>
+
+                        <li<%= sidebar_current("docs-ucloud-datasource-instances") %>>
+                            <a href="/docs/providers/ucloud/d/instances.html">ucloud_instances</a>
+                        </li>
+
+                        <li<%= sidebar_current("docs-ucloud-datasource-eips") %>>
+                            <a href="/docs/providers/ucloud/d/eips.html">ucloud_eips</a>
+                        </li>
+
+                        <li<%= sidebar_current("docs-ucloud-datasource-images") %>>
+                            <a href="/docs/providers/ucloud/d/images.html">ucloud_images</a>
+                        </li>
+
+                        <li<%= sidebar_current("docs-ucloud-datasource-zones") %>>
+                            <a href="/docs/providers/ucloud/d/zones.html">ucloud_zones</a>
+                        </li>
+                    
+                    </ul>
+                </li>
+
+                <li<%= sidebar_current("docs-ucloud-resource-uhost") %>>
+                  <a href="#">UHost Resources</a>
+                  <ul class="nav nav-visible">
+
+                    <li<%= sidebar_current("docs-ucloud-resource-instance") %>>
+                      <a href="/docs/providers/ucloud/r/instance.html">ucloud_instance</a>
+                    </li>
+
+                    <li<%= sidebar_current("docs-ucloud-resource-disk") %>>
+                      <a href="/docs/providers/ucloud/r/disk.html">ucloud_disk</a>
+                    </li>
+
+                    <li<%= sidebar_current("docs-ucloud-resource-disk-attachment") %>>
+                      <a href="/docs/providers/ucloud/r/disk_attachment.html">ucloud_disk_attachment</a>
+                    </li>
+
+                    <li<%= sidebar_current("docs-ucloud-resource-security-group") %>>
+                      <a href="/docs/providers/ucloud/r/security_group.html">ucloud_security_group</a>
+                    </li>
+
+                    <li<%= sidebar_current("docs-ucloud-resource-eip") %>>
+                      <a href="/docs/providers/ucloud/r/eip.html">ucloud_eip</a>
+                    </li>
+
+                    <li<%= sidebar_current("docs-ucloud-resource-eip-association") %>>
+                      <a href="/docs/providers/ucloud/r/eip_association.html">ucloud_eip_association</a>
+                    </li>
+                  </ul>
+                </li>
+
+                <li<%= sidebar_current("docs-ucloud-resource-lb") %>>
+                  <a href="#">LB Resources</a>
+                  <ul class="nav nav-visible">
+
+                    <li<%= sidebar_current("docs-ucloud-resource-lb") %>>
+                      <a href="/docs/providers/ucloud/r/lb.html">ucloud_lb</a>
+                    </li>
+
+                    <li<%= sidebar_current("docs-ucloud-resource-lb-attachment") %>>
+                      <a href="/docs/providers/ucloud/r/lb_attachment.html">ucloud_lb_attachment</a>
+                    </li>
+
+                    <li<%= sidebar_current("docs-ucloud-resource-lb-listener") %>>
+                      <a href="/docs/providers/ucloud/r/lb_listener.html">ucloud_lb_listener</a>
+                    </li>
+
+                    <li<%= sidebar_current("docs-ucloud-resource-lb-rule") %>>
+                      <a href="/docs/providers/ucloud/r/lb_rule.html">ucloud_lb_rule</a>
+                    </li>
+                  </ul>
+                </li>
+
+                <li<%= sidebar_current("docs-ucloud-resource-vpc") %>>
+                <a href="#">VPC Resources</a>
+                <ul class="nav nav-visible">
+
+                  <li<%= sidebar_current("docs-ucloud-resource-vpc") %>>
+                    <a href="/docs/providers/ucloud/r/vpc.html">ucloud_vpc</a>
+                  </li>
+
+                  <li<%= sidebar_current("docs-ucloud-resource-vpc-peering-connection") %>>
+                    <a href="/docs/providers/ucloud/r/vpc_peering_connection.html">ucloud_vpc_peering_connection</a>
+                  </li>
+
+                  <li<%= sidebar_current("docs-ucloud-resource-subnet") %>>
+                    <a href="/docs/providers/ucloud/r/subnet.html">ucloud_subnet</a>
+                  </li>
+                </ul>
+              </li>
+
+            </ul>
+        </div>
+    <% end %>
+
+    <%= yield %>
+<% end %>
