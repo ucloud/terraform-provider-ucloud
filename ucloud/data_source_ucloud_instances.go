@@ -92,11 +92,6 @@ func dataSourceUCloudInstances() *schema.Resource {
 							Computed: true,
 						},
 
-						"data_disk_category": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-
 						"auto_renew": &schema.Schema{
 							Type:     schema.TypeString,
 							Computed: true,
@@ -115,6 +110,52 @@ func dataSourceUCloudInstances() *schema.Resource {
 						"status": &schema.Schema{
 							Type:     schema.TypeString,
 							Computed: true,
+						},
+
+						"disk_set": &schema.Schema{
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"disk_type": &schema.Schema{
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+
+									"size": &schema.Schema{
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+
+									"disk_id": &schema.Schema{
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+
+									"is_boot": &schema.Schema{
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
+						},
+
+						"ip_set": &schema.Schema{
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"ip": &schema.Schema{
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+
+									"type": &schema.Schema{
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
 						},
 					},
 				},
@@ -182,23 +223,41 @@ func dataSourceUCloudInstancesSave(d *schema.ResourceData, instances []uhost.UHo
 	ids := []string{}
 	data := []map[string]interface{}{}
 
-	for _, item := range instances {
-		ids = append(ids, string(item.UHostId))
+	for _, instance := range instances {
+		ids = append(ids, string(instance.UHostId))
+		ipSet := []map[string]interface{}{}
+		for _, item := range instance.IPSet {
+			ipSet = append(ipSet, map[string]interface{}{
+				"ip":   item.IP,
+				"type": item.Type,
+			})
+		}
+
+		diskSet := []map[string]interface{}{}
+		for _, item := range instance.DiskSet {
+			diskSet = append(diskSet, map[string]interface{}{
+				"disk_type": item.DiskType,
+				"size":      item.Size,
+				"disk_id":   item.DiskId,
+				"is_boot":   item.IsBoot,
+			})
+		}
 
 		data = append(data, map[string]interface{}{
-			"availability_zone":    item.Zone,
-			"id":                   item.UHostId,
-			"name":                 item.Name,
-			"data_disk_category":   item.StorageType,
-			"cpu":                  item.CPU,
-			"memory":               item.Memory,
-			"create_time":          timestampToString(item.CreateTime),
-			"expire_time":          timestampToString(item.ExpireTime),
-			"auto_renew":           item.AutoRenew,
-			"remark":               item.Remark,
-			"tag":                  item.Tag,
-			"status":               item.State,
-			"instance_charge_type": item.ChargeType,
+			"availability_zone":    instance.Zone,
+			"id":                   instance.UHostId,
+			"name":                 instance.Name,
+			"cpu":                  instance.CPU,
+			"memory":               instance.Memory,
+			"create_time":          timestampToString(instance.CreateTime),
+			"expire_time":          timestampToString(instance.ExpireTime),
+			"auto_renew":           instance.AutoRenew,
+			"remark":               instance.Remark,
+			"tag":                  instance.Tag,
+			"status":               instance.State,
+			"instance_charge_type": instance.ChargeType,
+			"ip_set":               ipSet,
+			"disk_set":             diskSet,
 		})
 	}
 

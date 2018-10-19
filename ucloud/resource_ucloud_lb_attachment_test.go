@@ -124,7 +124,8 @@ data "ucloud_zones" "default" {
 
 data "ucloud_images" "default" {
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	os_type = "Linux"
+	name_regex = "^CentOS 7.[1-2] 64"
+	image_type =  "Base"
 }
 
 resource "ucloud_lb" "foo" {
@@ -157,7 +158,8 @@ data "ucloud_zones" "default" {
 
 data "ucloud_images" "default" {
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	os_type = "Linux"
+	name_regex = "^CentOS 7.[1-2] 64"
+	image_type =  "Base"
 }
 
 resource "ucloud_lb" "foo" {

@@ -12,9 +12,9 @@ import (
 
 func resourceUCloudVPCPeeringConnection() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceUCloudPeeringConnectionCreate,
-		Read:   resourceUCloudPeeringConnectionRead,
-		Delete: resourceUCloudPeeringConnectionDelete,
+		Create: resourceUCloudVPCPeeringConnectionCreate,
+		Read:   resourceUCloudVPCPeeringConnectionRead,
+		Delete: resourceUCloudVPCPeeringConnectionDelete,
 
 		Schema: map[string]*schema.Schema{
 			"vpc_id": &schema.Schema{
@@ -38,7 +38,7 @@ func resourceUCloudVPCPeeringConnection() *schema.Resource {
 	}
 }
 
-func resourceUCloudPeeringConnectionCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceUCloudVPCPeeringConnectionCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
 	conn := client.vpcconn
 
@@ -59,7 +59,7 @@ func resourceUCloudPeeringConnectionCreate(d *schema.ResourceData, meta interfac
 
 	_, err := conn.CreateVPCIntercom(req)
 	if err != nil {
-		return fmt.Errorf("error in create peering connection, %s", err)
+		return fmt.Errorf("error in create vpc peering connection, %s", err)
 	}
 
 	assocId := fmt.Sprintf(
@@ -69,52 +69,74 @@ func resourceUCloudPeeringConnectionCreate(d *schema.ResourceData, meta interfac
 	)
 	d.SetId(assocId)
 
-	time.Sleep(4 * time.Second)
+	// after create vpc peering connection, we need to wait it initialized
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"pending"},
+		Target:     []string{"initialized"},
+		Timeout:    5 * time.Minute,
+		Delay:      2 * time.Second,
+		MinTimeout: 1 * time.Second,
+		Refresh: func() (interface{}, string, error) {
+			vpcPCSet, err := client.describeVPCIntercomById(vpcId, peerVpcId, peerRegion, peerProjectId)
+			if err != nil {
+				if isNotFoundError(err) {
+					return nil, "pending", nil
+				}
+				return nil, "", err
+			}
 
-	return resourceUCloudPeeringConnectionRead(d, meta)
+			return vpcPCSet, "initialized", nil
+		},
+	}
+	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("wait for vpc peering connection initialize failed in create vpc peering connection %s, %s", d.Id(), err)
+	}
+
+	return resourceUCloudVPCPeeringConnectionRead(d, meta)
 }
 
-func resourceUCloudPeeringConnectionRead(d *schema.ResourceData, meta interface{}) error {
+func resourceUCloudVPCPeeringConnectionRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
 
 	assoc, err := parseAssociationInfo(d.Id())
 	if err != nil {
-		return fmt.Errorf("error in parse peering connection %s, %s", d.Id(), err)
+		return fmt.Errorf("error in parse vpc peering connection %s, %s", d.Id(), err)
 	}
 
 	peerRegion, peerProjectId, err := parseVPCPeerDstType(assoc.ResourceType)
 	if err != nil {
-		return fmt.Errorf("error in parse peering connection %s, %s", d.Id(), err)
+		return fmt.Errorf("error in parse vpc peering connection %s, %s", d.Id(), err)
 	}
 
-	ins, err := client.describeVPCIntercomById(assoc.PrimaryId, assoc.ResourceId, peerRegion, peerProjectId)
+	vpcPCSet, err := client.describeVPCIntercomById(assoc.PrimaryId, assoc.ResourceId, peerRegion, peerProjectId)
 
 	if err != nil {
 		if isNotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("do %s failed in read peering connection %s, %s", "DescribeVPCIntercom", d.Id(), err)
+		return fmt.Errorf("do %s failed in read vpc peering connection %s, %s", "DescribeVPCIntercom", d.Id(), err)
 	}
 
 	d.Set("vpc_id", d.Get("vpc_id").(string))
-	d.Set("peer_vpc_id", ins.VPCId)
-	d.Set("peer_project_id", ins.ProjectId)
+	d.Set("peer_vpc_id", vpcPCSet.VPCId)
+	d.Set("peer_project_id", vpcPCSet.ProjectId)
 
 	return nil
 }
 
-func resourceUCloudPeeringConnectionDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceUCloudVPCPeeringConnectionDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
 	conn := client.vpcconn
 
 	assoc, err := parseAssociationInfo(d.Id())
 	if err != nil {
-		return fmt.Errorf("error in parse peering connection %s, %s", d.Id(), err)
+		return fmt.Errorf("error in parse vpc peering connection %s, %s", d.Id(), err)
 	}
 	peerRegion, peerProjectId, err := parseVPCPeerDstType(assoc.ResourceType)
 	if err != nil {
-		return fmt.Errorf("error in parse peering connection %s, %s", d.Id(), err)
+		return fmt.Errorf("error in parse vpc peering connection %s, %s", d.Id(), err)
 	}
 
 	req := conn.NewDeleteVPCIntercomRequest()
@@ -126,7 +148,7 @@ func resourceUCloudPeeringConnectionDelete(d *schema.ResourceData, meta interfac
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		// retry by sdk implementations
 		if _, err := conn.DeleteVPCIntercom(req); err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error in delete peering connection %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error in delete vpc peering connection %s, %s", d.Id(), err))
 		}
 
 		_, err = client.describeVPCIntercomById(assoc.PrimaryId, assoc.ResourceId, peerRegion, peerProjectId)
@@ -135,11 +157,11 @@ func resourceUCloudPeeringConnectionDelete(d *schema.ResourceData, meta interfac
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(fmt.Errorf("do %s failed in delete peering connection %s, %s", "DescribeVPCIntercom", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("do %s failed in delete vpc peering connection %s, %s", "DescribeVPCIntercom", d.Id(), err))
 		}
 
 		// delete but it still exists
-		return resource.RetryableError(fmt.Errorf("delete peering connection but it still exists"))
+		return resource.RetryableError(fmt.Errorf("delete vpc peering connection but it still exists"))
 	})
 }
 

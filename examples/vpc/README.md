@@ -1,6 +1,6 @@
-# Load Balance Example
+# VPC Example
 
-The lb example launches load balance and  attach UHost instance. It also create rule for the load balance.
+The vpc example launches an VPC Peering Connection for establish a connection between multiple VPC.
 
 To run, configure your UCloud provider as described in https://www.terraform.io/docs/providers/ucloud/index.html
 

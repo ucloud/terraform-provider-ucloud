@@ -21,15 +21,15 @@ const DefaultWaitIgnoreError = false
 
 //listenerStatus is used to tranform int to string for status after read lb listener
 var listenerStatus transformer = map[int]string{
-	0: "AllNormal",
-	1: "PartNormal",
-	2: "AllException",
+	0: "allNormal",
+	1: "partNormal",
+	2: "allException",
 }
 
-//attachmentStatus is used to tranform int to string for status after read lb attachment
-var attachmentStatus transformer = map[int]string{
-	0: "NormalRunning",
-	1: "ExceptionRunning",
+//lbAttachmentStatus is used to tranform int to string for status after read lb attachment
+var lbAttachmentStatus transformer = map[int]string{
+	0: "normalRunning",
+	1: "exceptionRunning",
 }
 
 //uhostMap is used to covert uhost to instance

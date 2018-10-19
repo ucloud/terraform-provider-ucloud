@@ -8,7 +8,7 @@ description: |-
 
 # ucloud_instances
 
-This data source providers a list UHost instance resources according to their availability zone, instance ID and tag.
+This data source providers a list of UHost instance resources according to their availability zone, instance ID and tag.
 
 ## Example Usage
 
@@ -26,7 +26,7 @@ output "first" {
 
 The following arguments are supported:
 
-* `availability_zone` - (Optional) Availability zone where instances are located. such as: "cn-bj-01". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
+* `availability_zone` - (Optional) Availability zone where instances are located. Such as: "cn-bj-01". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
 * `ids` - (Optional) The group of IDs of instances that require to be retrieved, all the instances belongs to the defined region will be retrieved if this argument is "".
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 * `tags` - (Optional) A mapping of tags to assign to instance.
@@ -45,10 +45,23 @@ The attribute (`instances`) support the following:
 * `memory` - The size of memory, measured in MB.
 * `create_time` - The time of creation for EIP.
 * `expire_time` - The expiration time for instance.
-* `data_disk_category` - The type of disk, the defination of disk type for both system disk and data disk. Possible values are: "LocalDisk" and "Disk" as cloud disk. The "Disk" is not supported in all regions as disk type, please proceed to UCloud console for more details.
 * `id` - The ID of instance.
 * `instance_charge_type` - The charge type of instance, possible values are: "Year", "Month" and "Dynamic" as pay by hour.
 * `name` - The name of the instance.
 * `remark` - The remarks of instance.
 * `status` - Instance current status. Possible values are "Initializing", "starting", "Running", "Stopping", "Stopped", "Install Fail" and "Rebooting".
 * `tag` - A mapping of tags to assign to the instance.
+* `ip_set` - ip_set is a nested type. ip_set documented below.
+* `disk_set` - disk_set is a nested type. disk_set documented below.
+
+The attribute (`disk_set`) support the following:
+
+* `disk_id` - The ID of disk.
+* `size` - The size of disk，measured in GB (Gigabyte).
+* `disk_type` - The type of disk.
+* `is_boot` - whether or not boot disk.
+
+The attribute (`ip_set`) support the following:
+
+* `type` - IP type.
+* `ip` - IP address.

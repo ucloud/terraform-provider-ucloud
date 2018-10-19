@@ -8,7 +8,7 @@ description: |-
 
 # ucloud_projects
 
-This data source providers a list projects owned by the user according to whether or not be finance account.
+This data source providers a list of projects owned by the user according to whether or not be finance account.
 
 ## Example Usage
 

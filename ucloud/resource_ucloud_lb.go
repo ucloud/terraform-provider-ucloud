@@ -106,7 +106,8 @@ func resourceUCloudLB() *schema.Resource {
 }
 
 func resourceUCloudLBCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*UCloudClient).ulbconn
+	client := meta.(*UCloudClient)
+	conn := client.ulbconn
 
 	req := conn.NewCreateULBRequest()
 	req.ChargeType = ucloud.String(d.Get("internet_charge_type").(string))
@@ -142,7 +143,29 @@ func resourceUCloudLBCreate(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId(resp.ULBId)
 
-	time.Sleep(5 * time.Second)
+	// after create lb, we need to wait it initialized
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"pending"},
+		Target:     []string{"initialized"},
+		Timeout:    5 * time.Minute,
+		Delay:      2 * time.Second,
+		MinTimeout: 1 * time.Second,
+		Refresh: func() (interface{}, string, error) {
+			eip, err := client.describeLBById(d.Id())
+			if err != nil {
+				if isNotFoundError(err) {
+					return nil, "pending", nil
+				}
+				return nil, "", err
+			}
+
+			return eip, "initialized", nil
+		},
+	}
+	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("wait for lb initialize failed in create lb %s, %s", d.Id(), err)
+	}
 
 	return resourceUCloudLBUpdate(d, meta)
 }

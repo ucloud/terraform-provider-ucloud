@@ -2,6 +2,7 @@ package ucloud
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -82,7 +83,8 @@ func resourceUCloudDisk() *schema.Resource {
 }
 
 func resourceUCloudDiskCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*UCloudClient).udiskconn
+	client := meta.(*UCloudClient)
+	conn := client.udiskconn
 
 	req := conn.NewCreateUDiskRequest()
 	req.Name = ucloud.String(d.Get("name").(string))
@@ -105,13 +107,19 @@ func resourceUCloudDiskCreate(d *schema.ResourceData, meta interface{}) error {
 		d.SetId(resp.UDiskId[0])
 	}
 
-	time.Sleep(10 * time.Second)
+	// after create disk, we need to wait it initialized
+	stateConf := diskWaitForState(client, d.Id())
+
+	if _, err = stateConf.WaitForState(); err != nil {
+		return fmt.Errorf("wait for disk initialize failed in create disk %s, %s", d.Id(), err)
+	}
 
 	return resourceUCloudDiskUpdate(d, meta)
 }
 
 func resourceUCloudDiskUpdate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*UCloudClient).udiskconn
+	client := meta.(*UCloudClient)
+	conn := client.udiskconn
 
 	d.Partial(true)
 
@@ -142,7 +150,12 @@ func resourceUCloudDiskUpdate(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("do %s failed in update disk %s, %s", "ResizeUDisk", d.Id(), err)
 		}
 
-		time.Sleep(10 * time.Second)
+		// after update disk size, we need to wait it completed
+		stateConf := diskWaitForState(client, d.Id())
+
+		if _, err = stateConf.WaitForState(); err != nil {
+			return fmt.Errorf("wait for disk update size failed in update disk %s, %s", d.Id(), err)
+		}
 	}
 
 	d.Partial(false)
@@ -199,4 +212,30 @@ func resourceUCloudDiskDelete(d *schema.ResourceData, meta interface{}) error {
 
 		return resource.RetryableError(fmt.Errorf("delete disk but it still exists"))
 	})
+}
+
+func diskWaitForState(client *UCloudClient, diskId string) *resource.StateChangeConf {
+	return &resource.StateChangeConf{
+		Pending:    []string{"pending"},
+		Target:     []string{"available"},
+		Timeout:    10 * time.Minute,
+		Delay:      5 * time.Second,
+		MinTimeout: 3 * time.Second,
+		Refresh: func() (interface{}, string, error) {
+			diskSet, err := client.describeDiskById(diskId)
+			if err != nil {
+				if isNotFoundError(err) {
+					return nil, "pending", nil
+				}
+				return nil, "", err
+			}
+
+			state := strings.ToLower(diskSet.Status)
+			if state != "available" {
+				state = "pending"
+			}
+
+			return diskSet, state, nil
+		},
+	}
 }

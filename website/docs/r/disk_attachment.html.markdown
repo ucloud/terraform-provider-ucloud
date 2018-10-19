@@ -30,6 +30,7 @@ resource "ucloud_security_group" "default" {
         policy     = "ACCEPT"
     }
 }
+
 resource "ucloud_instance" "web" {
     instance_type     = "n-standard-1"
     availability_zone = "cn-sh2-02"

@@ -16,17 +16,17 @@ Requirements
 Building The Provider
 ---------------------
 
-Clone repository to: `$GOPATH/src/github.com/terraform-providers/terraform-provider-ucloud`
+Clone repository to: `$GOPATH/src/github.com/ucloud/terraform-provider-ucloud`
 
 ```sh
-$ mkdir -p $GOPATH/src/github.com/terraform-providers; cd $GOPATH/src/github.com/terraform-providers
-$ git clone git@github.com:terraform-providers/terraform-provider-ucloud
+$ mkdir -p $GOPATH/src/github.com/ucloud; cd $GOPATH/src/github.com/ucloud
+$ git clone git@github.com:ucloud/terraform-provider-ucloud
 ```
 
 Enter the provider directory and build the provider
 
 ```sh
-$ cd $GOPATH/src/github.com/terraform-providers/terraform-provider-ucloud
+$ cd $GOPATH/src/github.com/ucloud/terraform-provider-ucloud
 $ make build
 ```
 
@@ -75,11 +75,8 @@ export UCLOUD_PUBLIC_KEY=xxx
 export UCLOUD_PRIVATE_KEY=xxx
 export UCLOUD_REGION=xxx
 export UCLOUD_PROJECT_ID=xxx
-export outfile=gotest.out
-TF_ACC=1 TF_LOG=INFO go test ./ucloud -v -run="^TestAccUCloud" -timeout=1440m | tee $outfile
+TF_ACC=1 TF_LOG=INFO go test ./ucloud -v -run="^TestAccUCloud" -timeout=1440m
 ```
-
--> **Note:** The last line is optional, it allows to convert test results into a XML format compatible with xUnit.
 
 ## Refer
 

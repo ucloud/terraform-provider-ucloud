@@ -74,7 +74,8 @@ func resourceUCloudVPC() *schema.Resource {
 }
 
 func resourceUCloudVPCCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*UCloudClient).vpcconn
+	client := meta.(*UCloudClient)
+	conn := client.vpcconn
 
 	req := conn.NewCreateVPCRequest()
 	req.Name = ucloud.String(d.Get("name").(string))
@@ -96,7 +97,29 @@ func resourceUCloudVPCCreate(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId(resp.VPCId)
 
-	time.Sleep(2 * time.Second)
+	// after create vpc, we need to wait it initialized
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"pending"},
+		Target:     []string{"initialized"},
+		Timeout:    5 * time.Minute,
+		Delay:      2 * time.Second,
+		MinTimeout: 1 * time.Second,
+		Refresh: func() (interface{}, string, error) {
+			vpcSet, err := client.describeVPCById(d.Id())
+			if err != nil {
+				if isNotFoundError(err) {
+					return nil, "pending", nil
+				}
+				return nil, "", err
+			}
+
+			return vpcSet, "initialized", nil
+		},
+	}
+	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("wait for vpc initialize failed in create vpc %s, %s", d.Id(), err)
+	}
 
 	return resourceUCloudVPCUpdate(d, meta)
 }
@@ -109,7 +132,7 @@ func resourceUCloudVPCUpdate(d *schema.ResourceData, meta interface{}) error {
 func resourceUCloudVPCRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
 
-	ins, err := client.describeVPCById(d.Id())
+	vpcSet, err := client.describeVPCById(d.Id())
 	if err != nil {
 		if isNotFoundError(err) {
 			d.SetId("")
@@ -118,18 +141,18 @@ func resourceUCloudVPCRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("do %s failed in read vpc %s, %s", "DescribeVPC", d.Id(), err)
 	}
 
-	d.Set("name", ins.Name)
-	d.Set("tag", ins.Tag)
+	d.Set("name", vpcSet.Name)
+	d.Set("tag", vpcSet.Tag)
 
 	// TODO: [API-ERROR] remark is not in api model, should be checked!
-	// d.Set("remark", ins.Remark)
+	// d.Set("remark", vpcSet.Remark)
 
-	d.Set("cidr_blocks", ins.Network)
-	d.Set("create_time", timestampToString(ins.CreateTime))
-	d.Set("update_time", timestampToString(ins.UpdateTime))
+	d.Set("cidr_blocks", vpcSet.Network)
+	d.Set("create_time", timestampToString(vpcSet.CreateTime))
+	d.Set("update_time", timestampToString(vpcSet.UpdateTime))
 
 	networkInfo := []map[string]interface{}{}
-	for _, item := range ins.NetworkInfo {
+	for _, item := range vpcSet.NetworkInfo {
 		networkInfo = append(networkInfo, map[string]interface{}{
 			"cidr_block": item.Network,
 		})

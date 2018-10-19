@@ -73,7 +73,7 @@ explained below:
 - Static credentials
 - Environment variables
 
-### Static credentials ###
+### Static credentials
 
 Static credentials can be provided by adding an `public_key` and `private_key` in-line in the
 UCloud provider block:

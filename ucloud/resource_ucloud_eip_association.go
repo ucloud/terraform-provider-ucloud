@@ -38,7 +38,8 @@ func resourceUCloudEIPAssociation() *schema.Resource {
 }
 
 func resourceUCloudEIPAssociationCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*UCloudClient).unetconn
+	client := meta.(*UCloudClient)
+	conn := client.unetconn
 
 	eipId := d.Get("eip_id").(string)
 	resourceType := ulbMap.convert(uhostMap.convert(d.Get("resource_type").(string)))
@@ -56,7 +57,31 @@ func resourceUCloudEIPAssociationCreate(d *schema.ResourceData, meta interface{}
 
 	d.SetId(fmt.Sprintf("eip#%s:%s#%s", eipId, resourceType, resourceId))
 
-	time.Sleep(5 * time.Second)
+	// after bind eip we need to wait it completed
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"pending"},
+		Target:     []string{"used"},
+		Timeout:    5 * time.Minute,
+		Delay:      2 * time.Second,
+		MinTimeout: 1 * time.Second,
+		Refresh: func() (interface{}, string, error) {
+			eip, err := client.describeEIPById(eipId)
+			if err != nil {
+				return nil, "", err
+			}
+
+			state := eip.Status
+			if state != "used" {
+				state = "pending"
+			}
+
+			return eip, state, nil
+		},
+	}
+	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("wait for bind eip failed in create eip association %s, %s", d.Id(), err)
+	}
 
 	return resourceUCloudEIPAssociationRead(d, meta)
 }

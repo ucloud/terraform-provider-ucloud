@@ -71,4 +71,4 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `private_ip` - The private ip address for backend servers.
-* `status` - The status of backend servers.
+* `status` - The status of backend servers. Possible values are: "normalRunning", "exceptionRunning".

@@ -17,7 +17,7 @@ test: fmtcheck
 	go test $(TEST) -timeout=30s -parallel=32
 
 testacc: fmtcheck
-	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m -parallel=32
+	TF_ACC=1 go test -cover $(TEST) -v $(TESTARGS) -timeout 120m -parallel=32
 
 vet:
 	@echo "go vet ."
@@ -76,15 +76,18 @@ clean:
 
 mac:
 	GOOS=darwin GOARCH=amd64 go build -o bin/terraform-provider-ucloud
-	tar czvf bin/terraform-provider-ucloud_darwin-amd64.tgz bin/terraform-provider-ucloud
-	rm -rf bin/terraform-provider-ucloud
+	chmod +x bin/terraform-provider-ucloud
+	cd bin/ && tar czvf ./terraform-provider-ucloud_darwin-amd64.tgz ./terraform-provider-ucloud
+	rm -rf ./bin/terraform-provider-ucloud
 
 windows:
 	GOOS=windows GOARCH=amd64 go build -o bin/terraform-provider-ucloud.exe
-	tar czvf bin/terraform-provider-ucloud_windows-amd64.tgz bin/terraform-provider-ucloud.exe
-	rm -rf bin/terraform-provider-ucloud.exe
+	chmod +x bin/terraform-provider-ucloud.exe
+	cd bin/ && tar czvf ./terraform-provider-ucloud_windows-amd64.tgz ./terraform-provider-ucloud.exe
+	rm -rf ./bin/terraform-provider-ucloud.exe
 
 linux:
 	GOOS=linux GOARCH=amd64 go build -o bin/terraform-provider-ucloud
-	tar czvf bin/terraform-provider-ucloud_linux-amd64.tgz bin/terraform-provider-ucloud
-	rm -rf bin/terraform-provider-ucloud
+	chmod +x bin/terraform-provider-ucloud
+	cd bin/ && tar czvf ./terraform-provider-ucloud_linux-amd64.tgz ./terraform-provider-ucloud
+	rm -rf ./bin/terraform-provider-ucloud

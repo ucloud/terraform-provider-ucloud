@@ -61,7 +61,7 @@ resource "ucloud_instance" "web" {
 
     # use cloud disk as data disk
     data_disk_size     = 50
-    data_disk_category = "Disk"
+    data_disk_type     = "LOCAL_NORMAL"
     root_password      = "wA1234567"
 
     # we will put all the instances into same vpc and subnet,
@@ -82,10 +82,11 @@ The following arguments are supported:
 * `availability_zone` - (Required) Availability zone where instance is located. such as: "cn-bj-01". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
 * `image_id` - (Required) The ID for the image to use for the instance.
 * `root_password` - (Required) The password for the instance, should have between 8-30 characters.It must contain least 3 items of Capital letters, small letter, numbers and special characters. The special characters incloud <code>`()~!@#$%^&*-+=_|{}\[]:;'<>,.?/</code> When it is changed, the instance will reboot to make the change take effect.
-* `instance_type` - (Required) The type of instance.There are two types, one is Customized: "n-customized-CPU-Memory", eg."n-customized-1-3",the other is Standard: "n-Type-CPU", eg."n-highcpu-2". Thereinto,"Type" can be "highcpu", "basic", "standard", "highmem" represent the ratio of CPU and Memory respectively, 1:1, 1:2, 1:4, 1:8. In addition, CPU range from 1 to 32 ,Memory range from 1 to 128. When it is changed, the instance will reboot to make the change take effect.
-* `boot_disk_size` - (Optional) [will be invalid soon, not recommend to call] Size of the system disk, measured in GB (Giga byte). when the instance is created, the system disk fixed in size, 20GB for Linux system, 40GB for Windows system. when the instance is updated, the system disk range from 20GB to 100 GB, the volume adjustment must be a multiple of 10 GB. When it is changed, the instance will reboot to make the change take effect.
-* `data_disk_category` - (Optional) [will be invalid soon, not recommend to call] The type of disk, the defination of disk type for both system disk and data disk. Possible values are: "LocalDisk" and "Disk" as cloud disk, the default is "LocalDisk". The "Disk" is not supported in all regions as disk type, please proceed to UCloud console for more details.
-* `data_disk_size` - (Optional) [will be invalid soon, not recommend to call] Size of data disk, measured in GB (Giga byte), range from 0 to 8000 GB, the volume adjustment must be a multiple of 10 GB, default is 20 GB. Volume is from 0 to 8000GB as cloud disk, from 0 to 2000GB as local sata disk and from 100 to 1000GB as local ssd disk (all the GPU type instances are included). When it is changed, the instance will reboot to make the change take effect.
+* `instance_type` - (Required) The type of instance.There are two types, one is Customized: "n-customized-CPU-Memory", eg."n-customized-1-3",the other is Standard: "n-Type-CPU", eg."n-highcpu-2". Thereinto, "Type" can be "highcpu", "basic", "standard", "highmem" represent the ratio of CPU and Memory respectively, 1:1, 1:2, 1:4, 1:8. In addition, CPU range from 1 to 32 ,Memory range from 1 to 128. When it is changed, the instance will reboot to make the change take effect.
+* `boot_disk_size` - (Optional) Size of the boot disk, measured in GB (Giga byte). when the instance is creating, the boot disk can not be set and it fixed in size, 20GB for standard Linux image, 40GB for standard Windows image. when the instance is updating, the boot disk size range from 20GB to 100 GB by user set, the volume adjustment must be a multiple of 10 GB. When it is changed, the instance will reboot to make the change take effect and will spend about twenty minutes. In addition, reduce boot disk size is not supported.
+* `boot_disk_type` - (Optional) The type of boot disk. Possible values are: "LOCAL_NORMAL" and "LOCAL_SSD" belong to local boot disk, "CLOUD_NORMAL" and "CLOUD_SSD" belong to cloud boot disk, the default is "LOCAL_NORMAL". The "LOCAL_SSD", "CLOUD_NORMAL" and "CLOUD_SSD" are not supported in all regions as boot disk type, please proceed to UCloud console for more details.
+* `data_disk_type` - (Optional) The type of local data disk. Possible values are: "LOCAL_NORMAL" and "LOCAL_SSD" belong to local data disk, the default is "LOCAL_NORMAL". The "LOCAL_SSD" is not supported in all regions as disk type, please proceed to UCloud console for more details.
+* `data_disk_size` - (Optional) Size of data disk, measured in GB (Giga byte), range from 0 to 8000 GB, the volume adjustment must be a multiple of 10 GB, default is 20 GB. Volume is from 0 to 8000GB as cloud disk, from 0 to 2000GB as local sata disk and from 100 to 1000GB as local ssd disk (all the GPU type instances are included). When it is changed, the instance will reboot to make the change take effect. In addition, reduce data disk size is not supported.
 * `instance_charge_type` - (Optional) The charge type of instance, possible values are: "Year", "Month" and "Dynamic" as pay by hour (specific permission required). the dafault is "Month".
 * `instance_duration` - (Optional) The duration that you will buy the resource, the default value is "1". It is not required when "Dynamic" (pay by hour), the value is "0" when pay by month and the instance will be vaild till the last day of that month.
 * `name` - (Optional) The name of instance, the default is "Instance", should have 1 - 63 characters and only support chinese, english, numbers, '-', '_', '.'.
@@ -112,10 +113,10 @@ The attribute (`disk_set`) support the following:
 
 * `disk_id` - The ID of disk.
 * `size` - The size of disk，measured in GB (Gigabyte).
-* `type` - The type of disk. Possible values are "Boot" as system disk, "Data" as data disk and "Disk" as cloud disk.
+* `disk_type` - The type of disk.
+* `is_boot` - whether or not boot disk.
 
 The attribute (`ip_set`) support the following:
 
-* `bandwidth` - The size of bandwidth for the corresponding IP address, measured in Mbps (Mega bit per second), This atttibute is not exported if intranet IPs.
-* `internet_type` - The attached EIP route. Possible values are "Internaltionl" , "Bgp" and "Private" as intranet.
+* `type` - IP type.
 * `ip` - IP address.

@@ -54,11 +54,15 @@ func resourceUCloudLBRule() *schema.Resource {
 }
 
 func resourceUCloudLBRuleCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*UCloudClient).ulbconn
+	client := meta.(*UCloudClient)
+	conn := client.ulbconn
+
+	lbId := d.Get("load_balancer_id").(string)
+	listenerId := d.Get("listener_id").(string)
 
 	req := conn.NewCreatePolicyRequest()
-	req.ULBId = ucloud.String(d.Get("load_balancer_id").(string))
-	req.VServerId = ucloud.String(d.Get("listener_id").(string))
+	req.ULBId = ucloud.String(lbId)
+	req.VServerId = ucloud.String(listenerId)
 	req.BackendId = ifaceToStringSlice(d.Get("backend_ids"))
 
 	if val, ok := d.GetOk("domain"); ok {
@@ -79,7 +83,14 @@ func resourceUCloudLBRuleCreate(d *schema.ResourceData, meta interface{}) error 
 
 	d.SetId(resp.PolicyId)
 
-	time.Sleep(5 * time.Second)
+	// after create lb rule, we need to wait it initialized
+	stateConf := lbRuleWaitForState(client, lbId, listenerId, d.Id())
+
+	_, err = stateConf.WaitForState()
+
+	if err != nil {
+		return fmt.Errorf("wait for lb rule initialize failed in create lb rule %s, %s", d.Id(), err)
+	}
 
 	return resourceUCloudLBRuleUpdate(d, meta)
 }
@@ -88,10 +99,15 @@ func resourceUCloudLBRuleUpdate(d *schema.ResourceData, meta interface{}) error 
 	d.Partial(true)
 
 	isChanged := false
-	conn := meta.(*UCloudClient).ulbconn
+	client := meta.(*UCloudClient)
+	conn := client.ulbconn
+
+	lbId := d.Get("load_balancer_id").(string)
+	listenerId := d.Get("listener_id").(string)
+
 	req := conn.NewUpdatePolicyRequest()
-	req.ULBId = ucloud.String(d.Get("load_balancer_id").(string))
-	req.VServerId = ucloud.String(d.Get("listener_id").(string))
+	req.ULBId = ucloud.String(lbId)
+	req.VServerId = ucloud.String(listenerId)
 	req.BackendId = ifaceToStringSlice(d.Get("backend_ids"))
 	req.PolicyId = ucloud.String(d.Id())
 
@@ -116,7 +132,14 @@ func resourceUCloudLBRuleUpdate(d *schema.ResourceData, meta interface{}) error 
 			return fmt.Errorf("do %s failed in update lb rule %s, %s", "UpdatePolicy", d.Id(), err)
 		}
 
-		time.Sleep(5 * time.Second)
+		// after update lb rule, we need to wait it completed
+		stateConf := lbRuleWaitForState(client, lbId, listenerId, d.Id())
+
+		_, err = stateConf.WaitForState()
+
+		if err != nil {
+			return fmt.Errorf("wait for update lb rule failed in update lb rule %s, %s", d.Id(), err)
+		}
 	}
 
 	d.Partial(false)
@@ -178,4 +201,25 @@ func resourceUCloudLBRuleDelete(d *schema.ResourceData, meta interface{}) error 
 
 		return resource.RetryableError(fmt.Errorf("delete lb rule but still exists"))
 	})
+}
+
+func lbRuleWaitForState(client *UCloudClient, lbId, listenerId, policyId string) *resource.StateChangeConf {
+	return &resource.StateChangeConf{
+		Pending:    []string{"pending"},
+		Target:     []string{"initialized"},
+		Timeout:    5 * time.Minute,
+		Delay:      2 * time.Second,
+		MinTimeout: 1 * time.Second,
+		Refresh: func() (interface{}, string, error) {
+			policySet, err := client.describePolicyById(lbId, listenerId, policyId)
+			if err != nil {
+				if isNotFoundError(err) {
+					return nil, "pending", nil
+				}
+				return nil, "", err
+			}
+
+			return policySet, "initialized", nil
+		},
+	}
 }

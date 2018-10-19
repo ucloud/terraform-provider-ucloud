@@ -16,7 +16,7 @@ func (client *UCloudClient) describeLBById(lbId string) (*ulb.ULBSet, error) {
 	// [API-STYLE] lb api has not found err code, but others don't have
 	// TODO: don't use magic number
 	if err != nil {
-		if uErr, ok := err.(uerr.Error); ok && uErr.Code() == 4103 {
+		if uErr, ok := err.(uerr.Error); ok && (uErr.Code() == 4103 || uErr.Code() == 4086) {
 			return nil, newNotFoundError(getNotFoundMessage("lb", lbId))
 		}
 		return nil, err

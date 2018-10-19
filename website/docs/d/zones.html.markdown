@@ -13,8 +13,7 @@ This data source provides a list of available zones in the current region.
 ## Example Usage
 
 ```hcl
-data "ucloud_zones" "example" {
-}
+data "ucloud_zones" "example" {}
 
 output "first" {
     value = "${data.ucloud_instances.example.zones.0.id}"

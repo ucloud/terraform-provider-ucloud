@@ -99,10 +99,13 @@ func resourceUCloudLBListener() *schema.Resource {
 }
 
 func resourceUCloudLBListenerCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*UCloudClient).ulbconn
+	client := meta.(*UCloudClient)
+	conn := client.ulbconn
+
+	lbId := d.Get("load_balancer_id").(string)
 
 	req := conn.NewCreateVServerRequest()
-	req.ULBId = ucloud.String(d.Get("load_balancer_id").(string))
+	req.ULBId = ucloud.String(lbId)
 	req.Protocol = ucloud.String(d.Get("protocol").(string))
 	req.ListenType = ucloud.String(d.Get("listen_type").(string))
 	req.FrontendPort = ucloud.Int(d.Get("port").(int))
@@ -144,7 +147,37 @@ func resourceUCloudLBListenerCreate(d *schema.ResourceData, meta interface{}) er
 
 	d.SetId(resp.VServerId)
 
-	time.Sleep(10 * time.Second)
+	// after create lb listener, we need to wait it initialized
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"pending"},
+		Target:     []string{"initialized"},
+		Timeout:    10 * time.Minute,
+		Delay:      5 * time.Second,
+		MinTimeout: 3 * time.Second,
+		Refresh: func() (interface{}, string, error) {
+			vserverSet, err := client.describeVServerById(lbId, d.Id())
+			if err != nil {
+				if isNotFoundError(err) {
+					return nil, "pending", nil
+				}
+				return nil, "", err
+			}
+
+			state := listenerStatus.transform(vserverSet.Status)
+			if state != "allNormal" {
+				state = "pending"
+			} else {
+				state = "initialized"
+			}
+
+			return vserverSet, state, nil
+		},
+	}
+	_, err = stateConf.WaitForState()
+
+	if err != nil {
+		return fmt.Errorf("wait for lb listener initialize failed in create lb listener %s, %s", d.Id(), err)
+	}
 
 	return resourceUCloudLBListenerUpdate(d, meta)
 }

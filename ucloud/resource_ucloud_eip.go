@@ -132,7 +132,8 @@ func resourceUCloudEIP() *schema.Resource {
 }
 
 func resourceUCloudEIPCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*UCloudClient).unetconn
+	client := meta.(*UCloudClient)
+	conn := client.unetconn
 
 	req := conn.NewAllocateEIPRequest()
 	req.Bandwidth = ucloud.Int(d.Get("bandwidth").(int))
@@ -165,13 +166,20 @@ func resourceUCloudEIPCreate(d *schema.ResourceData, meta interface{}) error {
 	eip := resp.EIPSet[0]
 	d.SetId(eip.EIPId)
 
-	time.Sleep(5 * time.Second)
+	// after create eip, we need to wait it initialized
+	stateConf := eipWaitForState(client, d.Id())
+
+	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("wait for eip initialize failed in create eip %s, %s", d.Id(), err)
+	}
 
 	return resourceUCloudEIPUpdate(d, meta)
 }
 
 func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*UCloudClient).unetconn
+	client := meta.(*UCloudClient)
+	conn := client.unetconn
 
 	d.Partial(true)
 
@@ -187,7 +195,13 @@ func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("do %s failed in update eip %s, %s", "ModifyEIPBandwidth", d.Id(), err)
 		}
 
-		time.Sleep(5 * time.Second)
+		// after update eip bandwidth, we need to wait it completed
+		stateConf := eipWaitForState(client, d.Id())
+
+		_, err = stateConf.WaitForState()
+		if err != nil {
+			return fmt.Errorf("wait for update eip bandwidth failed in update eip %s, %s", d.Id(), err)
+		}
 	}
 
 	if d.HasChange("internet_charge_mode") && !d.IsNewResource() {
@@ -203,7 +217,13 @@ func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("do %s failed in update eip %s, %s", "SetEIPPayMode", d.Id(), err)
 		}
 
-		time.Sleep(5 * time.Second)
+		// after update eip internet charge mode, we need to wait it completed
+		stateConf := eipWaitForState(client, d.Id())
+
+		_, err = stateConf.WaitForState()
+		if err != nil {
+			return fmt.Errorf("wait for update eip internet charge mode failed in update eip %s, %s", d.Id(), err)
+		}
 	}
 
 	isChanged := false
@@ -235,7 +255,13 @@ func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("do %s failed in update eip %s, %s", "UpdateEIPAttribute", d.Id(), err)
 		}
 
-		time.Sleep(5 * time.Second)
+		// after eip update eip attribute, we need to wait it completed
+		stateConf := eipWaitForState(client, d.Id())
+
+		_, err = stateConf.WaitForState()
+		if err != nil {
+			return fmt.Errorf("wait for update eip attribute failed in update eip %s, %s", d.Id(), err)
+		}
 	}
 
 	d.Partial(false)
@@ -306,4 +332,30 @@ func resourceUCloudEIPDelete(d *schema.ResourceData, meta interface{}) error {
 
 		return resource.RetryableError(fmt.Errorf("delete eip but it still exists"))
 	})
+}
+
+func eipWaitForState(client *UCloudClient, eipId string) *resource.StateChangeConf {
+	return &resource.StateChangeConf{
+		Pending:    []string{"pending"},
+		Target:     []string{"free"},
+		Timeout:    5 * time.Minute,
+		Delay:      2 * time.Second,
+		MinTimeout: 1 * time.Second,
+		Refresh: func() (interface{}, string, error) {
+			eip, err := client.describeEIPById(eipId)
+			if err != nil {
+				if isNotFoundError(err) {
+					return nil, "pending", nil
+				}
+				return nil, "", err
+			}
+
+			state := eip.Status
+			if state != "free" {
+				state = "pending"
+			}
+
+			return eip, state, nil
+		},
+	}
 }

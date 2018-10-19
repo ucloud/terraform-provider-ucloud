@@ -45,4 +45,4 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `status` - Listener status. Possible values are: "AllNormal" as all resource functioning well, "PartNormal" as partial resource functioning well and "AllException" as all resource functioning exceptional.
+* `status` - Listener status. Possible values are: "allNormal" as all resource functioning well, "partNormal" as partial resource functioning well and "allException" as all resource functioning exceptional.

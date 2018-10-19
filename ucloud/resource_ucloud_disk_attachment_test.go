@@ -102,7 +102,8 @@ data "ucloud_zones" "default" {
 
 data "ucloud_images" "default" {
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	os_type = "Linux"
+	name_regex = "^CentOS 7.[1-2] 64"
+	image_type =  "Base"
 }
 
 resource "ucloud_disk" "foo" {
@@ -116,7 +117,7 @@ resource "ucloud_instance" "foo" {
 	instance_type = "n-highcpu-1"
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
 	image_id = "${data.ucloud_images.default.images.0.id}"
-	instance_charge_type = "Year"
+	instance_charge_type = "Month"
 	instance_duration = 1
 	root_password = "wA123456"
 }

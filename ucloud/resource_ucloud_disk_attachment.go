@@ -2,6 +2,7 @@ package ucloud
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -39,7 +40,8 @@ func resourceUCloudDiskAttachment() *schema.Resource {
 }
 
 func resourceUCloudDiskAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*UCloudClient).udiskconn
+	client := meta.(*UCloudClient)
+	conn := client.udiskconn
 
 	instanceId := d.Get("instance_id").(string)
 	diskId := d.Get("disk_id").(string)
@@ -56,7 +58,19 @@ func resourceUCloudDiskAttachmentCreate(d *schema.ResourceData, meta interface{}
 
 	d.SetId(fmt.Sprintf("disk#%s:uhost#%s", diskId, instanceId))
 
-	time.Sleep(10 * time.Second)
+	// after create disk attachment, we need to wait it initialized
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"attaching"},
+		Target:     []string{"inuse"},
+		Refresh:    diskAttachmentStateRefreshFunc(client, diskId),
+		Timeout:    10 * time.Minute,
+		Delay:      5 * time.Second,
+		MinTimeout: 3 * time.Second,
+	}
+
+	if _, err = stateConf.WaitForState(); err != nil {
+		return fmt.Errorf("wait for disk attaching failed in create disk attachment %s, %s", d.Id(), err)
+	}
 
 	return resourceUCloudDiskAttachmentRead(d, meta)
 }
@@ -100,39 +114,41 @@ func resourceUCloudDiskAttachmentDelete(d *schema.ResourceData, meta interface{}
 	req.UDiskId = ucloud.String(attach.PrimaryId)
 	req.UHostId = ucloud.String(attach.ResourceId)
 
-	return resource.Retry(5*time.Minute, func() *resource.RetryError {
+	return resource.Retry(15*time.Minute, func() *resource.RetryError {
 		if _, err := conn.DetachUDisk(req); err != nil {
 			if uErr, ok := err.(uerr.Error); ok && uErr.Code() != 17060 {
 				return resource.NonRetryableError(fmt.Errorf("error in delete disk attachment %s, %s", d.Id(), err))
 			}
 		}
 
+		// after detach disk, we need to wait it completed
 		stateConf := &resource.StateChangeConf{
-			Pending:    []string{"Detaching"},
-			Target:     []string{"Available"},
-			Refresh:    diskStateRefreshFunc(client, attach.PrimaryId, "Available"),
-			Timeout:    20 * time.Minute,
-			Delay:      10 * time.Second,
+			Pending:    []string{"detaching"},
+			Target:     []string{"available"},
+			Refresh:    diskAttachmentStateRefreshFunc(client, attach.PrimaryId),
+			Timeout:    10 * time.Minute,
+			Delay:      5 * time.Second,
 			MinTimeout: 3 * time.Second,
 		}
 
 		if _, err = stateConf.WaitForState(); err != nil {
 			if _, ok := err.(*resource.TimeoutError); ok {
-				return resource.RetryableError(fmt.Errorf("wait for disk detach faild %s, %s", d.Id(), err))
+				return resource.RetryableError(fmt.Errorf("wait for disk detach faild, in delete disk attachment %s, %s", d.Id(), err))
 			}
-			return resource.NonRetryableError(fmt.Errorf("wait for disk detach faild %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("wait for disk detach faild, in delete disk attachment %s, %s", d.Id(), err))
 		}
 
 		return nil
 	})
 }
-func diskStateRefreshFunc(client *UCloudClient, diskId, target string) resource.StateRefreshFunc {
+
+func diskAttachmentStateRefreshFunc(client *UCloudClient, diskId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		diskSet, err := client.describeDiskById(diskId)
 		if err != nil {
 			return nil, "", err
 		}
 
-		return diskSet, diskSet.Status, nil
+		return diskSet, strings.ToLower(diskSet.Status), nil
 	}
 }

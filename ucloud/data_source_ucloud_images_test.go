@@ -26,5 +26,7 @@ func TestAccUCloudImagesDataSource(t *testing.T) {
 const testAccDataImagesConfig = `
 data "ucloud_images" "foo" {
 	availability_zone = "cn-sh2-02"
+	name_regex = "^CentOS 7.[1-2] 64"
+	image_type =  "Base"
 }
 `

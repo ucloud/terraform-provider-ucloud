@@ -42,13 +42,13 @@ func (c *UCloudClient) describeSubnetById(subnetId string) (*vpc.VPCSubnetInfoSe
 	return &resp.DataSet[0], nil
 }
 
-func (c *UCloudClient) describeVPCIntercomById(vpcId, dstVPCId, dstRegion, dstProjectId string) (*vpc.VPCIntercomInfo, error) {
+func (c *UCloudClient) describeVPCIntercomById(vpcId, peerVPCId, peerRegion, peerProjectId string) (*vpc.VPCIntercomInfo, error) {
 	conn := c.vpcconn
 
 	req := conn.NewDescribeVPCIntercomRequest()
 	req.VPCId = ucloud.String(vpcId)
-	req.DstRegion = ucloud.String(dstRegion)
-	req.DstProjectId = ucloud.String(dstProjectId)
+	req.DstRegion = ucloud.String(peerRegion)
+	req.DstProjectId = ucloud.String(peerProjectId)
 
 	resp, err := conn.DescribeVPCIntercom(req)
 	if err != nil {
@@ -59,7 +59,7 @@ func (c *UCloudClient) describeVPCIntercomById(vpcId, dstVPCId, dstRegion, dstPr
 	}
 
 	for i := 0; i < len(resp.DataSet); i++ {
-		if resp.DataSet[i].VPCId == dstVPCId {
+		if resp.DataSet[i].VPCId == peerVPCId {
 			return &resp.DataSet[0], nil
 		}
 	}

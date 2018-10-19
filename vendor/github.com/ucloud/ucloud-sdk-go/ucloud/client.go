@@ -1,3 +1,6 @@
+/*
+Package ucloud is a package of utilities to setup ucloud sdk and improve using experience
+*/
 package ucloud
 
 import (
@@ -65,7 +68,7 @@ func (c *Client) InvokeAction(action string, req request.Common, resp response.C
 		httpResp, err = handler(c, httpReq, httpResp, err)
 	}
 
-	err = c.UnmarshalHTTPReponse(httpResp, resp)
+	err = c.unmarshalHTTPReponse(httpResp, resp)
 	if err != nil {
 		return err
 	}

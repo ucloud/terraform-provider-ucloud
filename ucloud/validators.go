@@ -197,3 +197,12 @@ func validateCidrBlock(v interface{}, k string) (ws []string, errors []error) {
 
 	return
 }
+
+func validateImageNameRegex(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+
+	if _, err := regexp.Compile(value); err != nil {
+		errors = append(errors, fmt.Errorf("%q contains an invalid regular expression: %s", k, err))
+	}
+	return
+}

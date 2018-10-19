@@ -2,6 +2,7 @@ package ucloud
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/ucloud/ucloud-sdk-go/services/uhost"
@@ -15,21 +16,32 @@ func dataSourceUCloudImages() *schema.Resource {
 			"availability_zone": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
+			},
+
+			"name_regex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validateImageNameRegex,
 			},
 
 			"image_type": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
 
 			"os_type": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
 
 			"image_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
 
 			"output_file": {
@@ -116,6 +128,8 @@ func dataSourceUCloudImagesRead(d *schema.ResourceData, meta interface{}) error 
 
 	req := conn.NewDescribeImageRequest()
 
+	nameRegex, nameRegexOk := d.GetOk("name_regex")
+
 	if v, ok := d.GetOk("availability_zone"); ok {
 		req.Zone = ucloud.String(v.(string))
 	}
@@ -159,8 +173,22 @@ func dataSourceUCloudImagesRead(d *schema.ResourceData, meta interface{}) error 
 		offset = offset + limit
 	}
 
+	var filteredImages []uhost.UHostImageSet
+	if nameRegexOk {
+		r := regexp.MustCompile(nameRegex.(string))
+		totalCount = 0
+		for _, image := range images {
+			if r.MatchString(image.ImageName) && image.State == "Available" {
+				filteredImages = append(filteredImages, image)
+				totalCount++
+			}
+		}
+	} else {
+		filteredImages = images[:]
+	}
+
 	d.Set("total_count", totalCount)
-	err := dataSourceUCloudImagesSave(d, images)
+	err := dataSourceUCloudImagesSave(d, filteredImages)
 	if err != nil {
 		return fmt.Errorf("error in read image list, %s", err)
 	}
