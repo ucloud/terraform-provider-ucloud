@@ -3,12 +3,12 @@ layout: "ucloud"
 page_title: "UCloud: ucloud_lb_attachment"
 sidebar_current: "docs-ucloud-resource-lb-attachment"
 description: |-
-  Provides a Load Balancer Attachment resource for attachment Load Balancer to UHost Instance, etc.
+  Provides a Load Balancer Attachment resource for attaching Load Balancer to UHost Instance, etc.
 ---
 
 # ucloud_lb_attachment
 
-Provides a Load Balancer Attachment resource for attachment Load Balancer to UHost Instance, etc.
+Provides a Load Balancer Attachment resource for attaching Load Balancer to UHost Instance, etc.
 
 ## Example Usage
 

@@ -3,12 +3,12 @@ layout: "ucloud"
 page_title: "UCloud: ucloud_vpc_peering_connection"
 sidebar_current: "docs-ucloud-resource-vpc-peering-connection"
 description: |-
-  Provides an VPC Peering Connection for establish a connection between multiple VPC.
+  Provides an VPC Peering Connection for establishing a connection between multiple VPC.
 ---
 
 # ucloud_vpc_peering_connection
 
-Provides an VPC Peering Connection for establish a connection between multiple VPC.
+Provides an VPC Peering Connection for establishing a connection between multiple VPC.
 
 ## Example Usage
 

@@ -6,3 +6,11 @@ variable "region" {
 variable "instance_password" {
   default = "wA123456"
 }
+
+variable "count" {
+  default = 2
+}
+
+variable "count_format" {
+  default = "%02d"
+}

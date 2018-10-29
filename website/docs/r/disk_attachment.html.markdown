@@ -3,12 +3,12 @@ layout: "ucloud"
 page_title: "UCloud: ucloud_disk_attachment"
 sidebar_current: "docs-ucloud-resource-disk-attachment"
 description: |-
-  Provides a Cloud Disk Attachment resource for attachment Cloud Disk to UHost Instance.
+  Provides a Cloud Disk Attachment resource for attaching Cloud Disk to UHost Instance.
 ---
 
 # ucloud_disk_attachment
 
-Provides a Cloud Disk Attachment resource for attachment Cloud Disk to UHost Instance.
+Provides a Cloud Disk Attachment resource for attaching Cloud Disk to UHost Instance.
 
 ## Example Usage
 

@@ -32,13 +32,13 @@ resource "ucloud_security_group" "default" {
   }
 }
 
-resource "ucloud_lb" "web" {
+resource "ucloud_lb" "default" {
   name = "tf-example-lb"
   tag  = "tf-example"
 }
 
 resource "ucloud_lb_listener" "default" {
-  load_balancer_id = "${ucloud_lb.web.id}"
+  load_balancer_id = "${ucloud_lb.default.id}"
   protocol         = "HTTPS"
 }
 
@@ -52,21 +52,23 @@ resource "ucloud_instance" "web" {
   # this ecurity group to allow HTTP and HTTPS access
   security_group = "${ucloud_security_group.default.id}"
 
-  name = "tf-example-lb"
+  name = "tf-example-lb-${format(var.count_format, count.index+1)}"
   tag  = "tf-example"
+  count = "${var.count}"
 }
 
 resource "ucloud_lb_attachment" "default" {
-  load_balancer_id = "${ucloud_lb.web.id}"
+  load_balancer_id = "${ucloud_lb.default.id}"
   listener_id      = "${ucloud_lb_listener.default.id}"
   resource_type    = "instance"
-  resource_id      = "${ucloud_instance.web.id}"
+  resource_id      = "${element(ucloud_instance.web.*.id, count.index)}"
   port             = 80
+  count            = "${var.count}"
 }
 
 resource "ucloud_lb_rule" "default" {
-  load_balancer_id = "${ucloud_lb.web.id}"
+  load_balancer_id = "${ucloud_lb.default.id}"
   listener_id      = "${ucloud_lb_listener.default.id}"
-  backend_ids      = ["${ucloud_lb_attachment.default.id}"]
+  backend_ids      = ["${ucloud_lb_attachment.default.*.id}"]
   domain           = "www.ucloud.cn"
 }
