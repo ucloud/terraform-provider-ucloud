@@ -13,7 +13,6 @@ func resourceUCloudVPC() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceUCloudVPCCreate,
 		Read:   resourceUCloudVPCRead,
-		Update: resourceUCloudVPCUpdate,
 		Delete: resourceUCloudVPCDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -21,30 +20,37 @@ func resourceUCloudVPC() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      resource.PrefixedUniqueId("tf-vpc-"),
+				ValidateFunc: validateName,
 			},
 
 			"cidr_blocks": &schema.Schema{
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Required: true,
 				ForceNew: true,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
 					ValidateFunc: validateUCloudCidrBlock,
 				},
+				Set: hashCIDR,
 			},
 
 			"tag": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ForceNew:     true,
+				ValidateFunc: validateTag,
 			},
 
 			"remark": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 
 			"network_info": &schema.Schema{
@@ -79,53 +85,29 @@ func resourceUCloudVPCCreate(d *schema.ResourceData, meta interface{}) error {
 
 	req := conn.NewCreateVPCRequest()
 	req.Name = ucloud.String(d.Get("name").(string))
-	req.Network = ifaceToStringSlice(d.Get("cidr_blocks"))
+	req.Network = schemaSetToStringSlice(d.Get("cidr_blocks"))
 
-	if val, ok := d.GetOk("tag"); ok {
-		req.Tag = ucloud.String(val.(string))
+	if v, ok := d.GetOk("tag"); ok {
+		req.Tag = ucloud.String(v.(string))
 	}
 
-	if val, ok := d.GetOk("remark"); ok {
-		req.Remark = ucloud.String(val.(string))
+	if v, ok := d.GetOk("remark"); ok {
+		req.Remark = ucloud.String(v.(string))
 	}
 
 	resp, err := conn.CreateVPC(req)
-
 	if err != nil {
-		return fmt.Errorf("error in create vpc, %s", err)
+		return fmt.Errorf("error on creating vpc, %s", err)
 	}
 
 	d.SetId(resp.VPCId)
 
 	// after create vpc, we need to wait it initialized
-	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"pending"},
-		Target:     []string{"initialized"},
-		Timeout:    5 * time.Minute,
-		Delay:      2 * time.Second,
-		MinTimeout: 1 * time.Second,
-		Refresh: func() (interface{}, string, error) {
-			vpcSet, err := client.describeVPCById(d.Id())
-			if err != nil {
-				if isNotFoundError(err) {
-					return nil, "pending", nil
-				}
-				return nil, "", err
-			}
-
-			return vpcSet, "initialized", nil
-		},
-	}
-	_, err = stateConf.WaitForState()
+	_, err = vpcWaitForState(client, d.Id()).WaitForState()
 	if err != nil {
-		return fmt.Errorf("wait for vpc initialize failed in create vpc %s, %s", d.Id(), err)
+		return fmt.Errorf("error on waiting for vpc %s complete creating, %s", d.Id(), err)
 	}
 
-	return resourceUCloudVPCUpdate(d, meta)
-}
-
-func resourceUCloudVPCUpdate(d *schema.ResourceData, meta interface{}) error {
-	//TODO:need backend API support
 	return resourceUCloudVPCRead(d, meta)
 }
 
@@ -138,7 +120,7 @@ func resourceUCloudVPCRead(d *schema.ResourceData, meta interface{}) error {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("do %s failed in read vpc %s, %s", "DescribeVPC", d.Id(), err)
+		return fmt.Errorf("error on reading vpc %s, %s", d.Id(), err)
 	}
 
 	d.Set("name", vpcSet.Name)
@@ -157,7 +139,10 @@ func resourceUCloudVPCRead(d *schema.ResourceData, meta interface{}) error {
 			"cidr_block": item.Network,
 		})
 	}
-	d.Set("network_info", networkInfo)
+
+	if err := d.Set("network_info", networkInfo); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -171,7 +156,7 @@ func resourceUCloudVPCDelete(d *schema.ResourceData, meta interface{}) error {
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		if _, err := conn.DeleteVPC(req); err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error in delete vpc %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on deleting vpc %s, %s", d.Id(), err))
 		}
 
 		_, err := client.describeVPCById(d.Id())
@@ -180,9 +165,30 @@ func resourceUCloudVPCDelete(d *schema.ResourceData, meta interface{}) error {
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(fmt.Errorf("do %s failed in delete vpc %s, %s", "DescribeVPC", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on reading vpc when deleting %s, %s", d.Id(), err))
 		}
 
-		return resource.RetryableError(fmt.Errorf("delete vpc but it still exists"))
+		return resource.RetryableError(fmt.Errorf("the specified vpc %s has not been deleted due to unknown error", d.Id()))
 	})
+}
+
+func vpcWaitForState(client *UCloudClient, id string) *resource.StateChangeConf {
+	return &resource.StateChangeConf{
+		Pending:    []string{statusPending},
+		Target:     []string{statusInitialized},
+		Timeout:    5 * time.Minute,
+		Delay:      2 * time.Second,
+		MinTimeout: 1 * time.Second,
+		Refresh: func() (interface{}, string, error) {
+			v, err := client.describeVPCById(id)
+			if err != nil {
+				if isNotFoundError(err) {
+					return nil, statusPending, nil
+				}
+				return nil, "", err
+			}
+
+			return v, statusInitialized, nil
+		},
+	}
 }

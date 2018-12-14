@@ -39,7 +39,7 @@ func dataSourceUCloudZonesRead(d *schema.ResourceData, meta interface{}) error {
 
 	resp, err := conn.GetRegion(req)
 	if err != nil {
-		return fmt.Errorf("error in read region list, %s", err)
+		return fmt.Errorf("error on reading region list, %s", err)
 	}
 
 	var zones []uaccount.RegionInfo
@@ -52,7 +52,7 @@ func dataSourceUCloudZonesRead(d *schema.ResourceData, meta interface{}) error {
 
 	err = dataSourceUCloudZonesSave(d, zones, meta)
 	if err != nil {
-		return fmt.Errorf("error in read region list, %s", err)
+		return fmt.Errorf("error on reading region list, %s", err)
 	}
 
 	return nil

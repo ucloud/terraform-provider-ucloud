@@ -65,7 +65,7 @@ $ make testacc
 
 ## Acceptance Testing
 
-Before making a release, the resources and data sources are tested automatically with acceptance tests (the tests are located in the ucloud/*_test.go files).
+Before making a release, the resources and data sources are tested automatically with acceptance tests (the tests are located in the `ucloud/*_test.go` files).
 
 You can run them by entering the following instructions in a terminal:
 
@@ -78,6 +78,6 @@ export UCLOUD_PROJECT_ID=xxx
 TF_ACC=1 TF_LOG=INFO go test ./ucloud -v -run="^TestAccUCloud" -timeout=1440m
 ```
 
-## Refer
+## Reference
 
 UCloud Provider [Official Docs](https://www.terraform.io/docs/providers/ucloud/index.html)

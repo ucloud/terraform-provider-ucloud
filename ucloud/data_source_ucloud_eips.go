@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform/helper/schema"
+
 	"github.com/ucloud/ucloud-sdk-go/services/unet"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 )
@@ -14,12 +15,12 @@ func dataSourceUCloudEips() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"ids": &schema.Schema{
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
-				ForceNew: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Set: schema.HashString,
 			},
 
 			"output_file": {
@@ -60,12 +61,12 @@ func dataSourceUCloudEips() *schema.Resource {
 							Computed: true,
 						},
 
-						"internet_charge_type": &schema.Schema{
+						"charge_type": &schema.Schema{
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"internet_charge_mode": &schema.Schema{
+						"charge_mode": &schema.Schema{
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -111,8 +112,8 @@ func dataSourceUCloudEipsRead(d *schema.ResourceData, meta interface{}) error {
 
 	req := conn.NewDescribeEIPRequest()
 
-	if ids, ok := d.GetOk("ids"); ok && len(ids.([]interface{})) > 0 {
-		req.EIPIds = ifaceToStringSlice(ids)
+	if ids, ok := d.GetOk("ids"); ok {
+		req.EIPIds = schemaSetToStringSlice(ids)
 	}
 
 	var eips []unet.UnetEIPSet
@@ -124,7 +125,7 @@ func dataSourceUCloudEipsRead(d *schema.ResourceData, meta interface{}) error {
 		req.Offset = ucloud.Int(offset)
 		resp, err := conn.DescribeEIP(req)
 		if err != nil {
-			return fmt.Errorf("error in read eip list, %s", err)
+			return fmt.Errorf("error on reading eip list, %s", err)
 		}
 
 		if resp == nil || len(resp.EIPSet) < 1 {
@@ -145,7 +146,7 @@ func dataSourceUCloudEipsRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("total_count", totalCount)
 	err := dataSourceUCloudEipsSave(d, eips)
 	if err != nil {
-		return fmt.Errorf("error in read eip list, %s", err)
+		return fmt.Errorf("error on reading eip list, %s", err)
 	}
 
 	return nil
@@ -167,16 +168,16 @@ func dataSourceUCloudEipsSave(d *schema.ResourceData, eips []unet.UnetEIPSet) er
 		}
 
 		data = append(data, map[string]interface{}{
-			"bandwidth":            item.Bandwidth,
-			"internet_charge_type": item.ChargeType,
-			"internet_charge_mode": item.PayMode,
-			"name":                 item.Name,
-			"remark":               item.Remark,
-			"tag":                  item.Tag,
-			"status":               item.Status,
-			"create_time":          timestampToString(item.CreateTime),
-			"expire_time":          timestampToString(item.ExpireTime),
-			"ip_set":               eipAddr,
+			"bandwidth":   item.Bandwidth,
+			"charge_type": item.ChargeType,
+			"charge_mode": item.PayMode,
+			"name":        item.Name,
+			"remark":      item.Remark,
+			"tag":         item.Tag,
+			"status":      item.Status,
+			"create_time": timestampToString(item.CreateTime),
+			"expire_time": timestampToString(item.ExpireTime),
+			"ip_set":      eipAddr,
 		})
 	}
 

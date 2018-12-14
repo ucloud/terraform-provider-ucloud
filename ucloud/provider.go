@@ -41,25 +41,23 @@ func Provider() terraform.ResourceProvider {
 			"max_retries": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Default:     DefaultMaxRetries,
+				Default:     defaultMaxRetries,
 				Description: descriptions["max_retries"],
 			},
 
 			"insecure": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     DefaultInSecure,
+				Default:     defaultInSecure,
 				Description: descriptions["insecure"],
 			},
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"ucloud_instances":      dataSourceUCloudInstances(),
-			"ucloud_projects":       dataSourceUCloudProjects(),
-			"ucloud_images":         dataSourceUCloudImages(),
-			"ucloud_zones":          dataSourceUCloudZones(),
-			"ucloud_eips":           dataSourceUCloudEips(),
-			"ucloud_instance_types": dataSourceUCloudInstanceTypes(),
+			"ucloud_projects": dataSourceUCloudProjects(),
+			"ucloud_images":   dataSourceUCloudImages(),
+			"ucloud_zones":    dataSourceUCloudZones(),
+			"ucloud_eips":     dataSourceUCloudEips(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"ucloud_instance":               resourceUCloudInstance(),

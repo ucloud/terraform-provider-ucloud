@@ -15,7 +15,6 @@ func dataSourceUCloudProjects() *schema.Resource {
 			"is_finance": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				ForceNew: true,
 			},
 
 			"output_file": {
@@ -80,16 +79,12 @@ func dataSourceUCloudProjectsRead(d *schema.ResourceData, meta interface{}) erro
 	req := conn.NewGetProjectListRequest()
 
 	if v, ok := d.GetOk("is_finance"); ok {
-		isFinanceTranslateMap := map[bool]string{
-			true:  "yes",
-			false: "no",
-		}
-		req.IsFinance = ucloud.String(isFinanceTranslateMap[v.(bool)])
+		req.IsFinance = ucloud.String(boolLowerCvt.convert(v.(bool)))
 	}
 
 	resp, err := conn.GetProjectList(req)
 	if err != nil {
-		return fmt.Errorf("error in read project list, %s", err)
+		return fmt.Errorf("error on reading project list, %s", err)
 	}
 
 	var projects []uaccount.ProjectListInfo
@@ -103,7 +98,7 @@ func dataSourceUCloudProjectsRead(d *schema.ResourceData, meta interface{}) erro
 	d.Set("total_count", resp.ProjectCount)
 	err = dataSourceUCloudProjectsSave(d, projects)
 	if err != nil {
-		return fmt.Errorf("error in read project list, %s", err)
+		return fmt.Errorf("error on reading project list, %s", err)
 	}
 
 	return nil

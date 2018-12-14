@@ -16,7 +16,7 @@ func TestAccUCloudEIPAssociation_basic(t *testing.T) {
 	var eip unet.UnetEIPSet
 	var instance uhost.UHostInstanceSet
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -55,7 +55,7 @@ func testAccCheckEIPAssociationExists(n string, eip *unet.UnetEIPSet, instance *
 
 		eipId := rs.Primary.Attributes["eip_id"]
 		resourceId := rs.Primary.Attributes["resource_id"]
-		resourceType := ulbMap.convert(uhostMap.convert(rs.Primary.Attributes["resource_type"]))
+		resourceType := lowerCaseProdCvt.convert(rs.Primary.Attributes["resource_type"])
 
 		return resource.Retry(3*time.Minute, func() *resource.RetryError {
 			d, err := client.describeEIPResourceById(eipId, resourceType, resourceId)
@@ -99,34 +99,36 @@ func testAccCheckEIPAssociationDestroy(s *terraform.State) error {
 }
 
 const testAccEIPAssociationConfig = `
-data "ucloud_zones" "default" {
-}
+data "ucloud_zones" "default" {}
 
 data "ucloud_images" "default" {
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	name_regex = "^CentOS 7.[1-2] 64"
-	image_type =  "Base"
+	name_regex        = "^CentOS 7.[1-2] 64"
+	image_type        =  "base"
 }
 
 resource "ucloud_eip" "foo" {
-	name = "testAcc"
-	bandwidth = 1
-	eip_duration = 1
+	name          = "tf-acc-eip-association-eip"
+	tag           = "tf-acc"
+	internet_type = "bgp"
+	bandwidth     = 1
+	duration      = 1
 }
 
 resource "ucloud_instance" "foo" {
-	name = "testAccInstance"
-	instance_type = "n-highcpu-1"
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	image_id = "${data.ucloud_images.default.images.0.id}"
-	instance_charge_type = "Month"
-	instance_duration = 1
-	root_password = "wA123456"
+	name              = "tf-acc-eip-association-intance"
+	tag               = "tf-acc"
+	instance_type     = "n-highcpu-1"
+	image_id          = "${data.ucloud_images.default.images.0.id}"
+	root_password     = "wA123456"
+	duration          = 1
+	charge_type       = "month"
 }
 
 resource "ucloud_eip_association" "foo" {
-	eip_id = "${ucloud_eip.foo.id}"
-	resource_id = "${ucloud_instance.foo.id}"
+	eip_id        = "${ucloud_eip.foo.id}"
+	resource_id   = "${ucloud_instance.foo.id}"
 	resource_type = "instance"
 }
 `

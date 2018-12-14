@@ -13,7 +13,7 @@ import (
 func TestAccUCloudSubnet_basic(t *testing.T) {
 	var val vpc.VPCSubnetInfoSet
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -30,8 +30,8 @@ func TestAccUCloudSubnet_basic(t *testing.T) {
 					testAccCheckSubnetExists("ucloud_subnet.foo", &val),
 					testAccCheckSubnetAttributes(&val),
 					resource.TestCheckResourceAttr("ucloud_subnet.foo", "cidr_block", "192.168.1.0/24"),
-					resource.TestCheckResourceAttr("ucloud_subnet.foo", "name", "testAcc"),
-					resource.TestCheckResourceAttr("ucloud_subnet.foo", "tag", "testTag"),
+					resource.TestCheckResourceAttr("ucloud_subnet.foo", "name", "tf-acc-subnet"),
+					resource.TestCheckResourceAttr("ucloud_subnet.foo", "tag", "tf-acc"),
 				),
 			},
 
@@ -42,8 +42,8 @@ func TestAccUCloudSubnet_basic(t *testing.T) {
 					testAccCheckSubnetExists("ucloud_subnet.foo", &val),
 					testAccCheckSubnetAttributes(&val),
 					resource.TestCheckResourceAttr("ucloud_subnet.foo", "cidr_block", "192.168.1.0/24"),
-					resource.TestCheckResourceAttr("ucloud_subnet.foo", "name", "testAccTwo"),
-					resource.TestCheckResourceAttr("ucloud_subnet.foo", "tag", "testTagTwo"),
+					resource.TestCheckResourceAttr("ucloud_subnet.foo", "name", "tf-acc-subnet-two"),
+					resource.TestCheckResourceAttr("ucloud_subnet.foo", "tag", "tf-acc-two"),
 				),
 			},
 		},
@@ -117,27 +117,29 @@ func testAccCheckSubnetDestroy(s *terraform.State) error {
 
 const testAccSubnetConfig = `
 resource "ucloud_vpc" "foo" {
-	name = "testAccVPC"
+	name        = "tf-acc-vpc"
+	tag         = "tf-acc"
 	cidr_blocks = ["192.168.0.0/16"]
 }
 
 resource "ucloud_subnet" "foo" {
-	name = "testAcc"
-	tag = "testTag"
+	name       = "tf-acc-subnet"
+	tag        = "tf-acc"
 	cidr_block = "192.168.1.0/24"
-	vpc_id = "${ucloud_vpc.foo.id}"
+	vpc_id     = "${ucloud_vpc.foo.id}"
 }
 `
 const testAccSubnetConfigTwo = `
 resource "ucloud_vpc" "foo" {
-	name = "testAccVPC"
+	name        = "tf-acc-vpc"
+	tag         = "tf-acc"
 	cidr_blocks = ["192.168.0.0/16"]
 }
 
 resource "ucloud_subnet" "foo" {
-	name = "testAccTwo"
-	tag = "testTagTwo"
+	name       = "tf-acc-subnet-two"
+	tag        = "tf-acc-two"
 	cidr_block = "192.168.1.0/24"
-	vpc_id = "${ucloud_vpc.foo.id}"
+	vpc_id     = "${ucloud_vpc.foo.id}"
 }
 `

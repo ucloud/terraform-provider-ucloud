@@ -5,6 +5,8 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
+
 	"github.com/ucloud/ucloud-sdk-go/services/uhost"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 )
@@ -16,32 +18,29 @@ func dataSourceUCloudImages() *schema.Resource {
 			"availability_zone": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
 			},
 
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validateImageNameRegex,
+				ValidateFunc: validation.ValidateRegexp,
 			},
 
 			"image_type": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"base", "business", "custom"}, false),
 			},
 
 			"os_type": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"linux", "windows"}, false),
 			},
 
 			"image_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
 			},
 
 			"output_file": {
@@ -135,11 +134,11 @@ func dataSourceUCloudImagesRead(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	if v, ok := d.GetOk("image_type"); ok {
-		req.ImageType = ucloud.String(v.(string))
+		req.ImageType = ucloud.String(upperCamelCvt.unconvert(v.(string)))
 	}
 
 	if v, ok := d.GetOk("os_type"); ok {
-		req.OsType = ucloud.String(v.(string))
+		req.OsType = ucloud.String(upperCamelCvt.unconvert(v.(string)))
 	}
 
 	if v, ok := d.GetOk("image_id"); ok {
@@ -147,15 +146,15 @@ func dataSourceUCloudImagesRead(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	var images []uhost.UHostImageSet
-	var limit int = 100
 	var totalCount int
 	var offset int
+	limit := 100
 	for {
 		req.Limit = ucloud.Int(limit)
 		req.Offset = ucloud.Int(offset)
 		resp, err := conn.DescribeImage(req)
 		if err != nil {
-			return fmt.Errorf("error in read image list, %s", err)
+			return fmt.Errorf("error on reading image list, %s", err)
 		}
 
 		if resp == nil || len(resp.ImageSet) < 1 {
@@ -190,7 +189,7 @@ func dataSourceUCloudImagesRead(d *schema.ResourceData, meta interface{}) error 
 	d.Set("total_count", totalCount)
 	err := dataSourceUCloudImagesSave(d, filteredImages)
 	if err != nil {
-		return fmt.Errorf("error in read image list, %s", err)
+		return fmt.Errorf("error on reading image list, %s", err)
 	}
 
 	return nil
@@ -205,9 +204,9 @@ func dataSourceUCloudImagesSave(d *schema.ResourceData, projects []uhost.UHostIm
 		data = append(data, map[string]interface{}{
 			"id":                item.ImageId,
 			"name":              item.ImageName,
-			"type":              item.ImageType,
 			"availability_zone": item.Zone,
-			"os_type":           item.OsType,
+			"type":              upperCamelCvt.convert(item.ImageType),
+			"os_type":           upperCamelCvt.convert(item.OsType),
 			"os_name":           item.OsName,
 			"features":          item.Features,
 			"create_time":       timestampToString(item.CreateTime),

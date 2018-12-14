@@ -30,8 +30,8 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `zones` - zones is a nested type. zones documented below.
+* `zones` - Zones is a nested type which documented below.
 
 The attribute (`zones`) support the following:
 
-* `id` - Availability zone where instances are located, such as: "cn-bj-01". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
+* `id` - Availability zone where instances are located (such as: `"cn-bj-02"`). You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)

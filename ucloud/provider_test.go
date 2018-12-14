@@ -39,8 +39,8 @@ func testAccPreCheck(t *testing.T) {
 		t.Fatal("UCLOUD_PRIVATE_KEY must be set for acceptance tests")
 	}
 	if v := os.Getenv("UCLOUD_REGION"); v == "" {
-		log.Println("[INFO] Test: Using cn-sh2 as test region")
-		os.Setenv("UCLOUD_REGION", "cn-sh2")
+		log.Println("[INFO] Test: Using cn-bj2 as test region")
+		os.Setenv("UCLOUD_REGION", "cn-bj2")
 	}
 	if v := os.Getenv("UCLOUD_PROJECT_ID"); v == "" {
 		t.Fatal("UCLOUD_PROJECT_ID must be set for acceptance tests")

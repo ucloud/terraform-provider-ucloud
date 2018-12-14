@@ -66,10 +66,9 @@ endif
 
 all: mac windows linux
 
-dev: clean fmt linux devcopy
-
-devcopy:
-	tar -xvf bin/terraform-provider-ucloud_linux-amd64.tgz && mv bin/terraform-provider-ucloud $(shell dirname `which terraform`)
+dev: clean fmt
+	@chmod +x scripts/devinit.sh
+	@sh ./scripts/devinit.sh
 
 clean:
 	rm -rf bin/*

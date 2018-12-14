@@ -1,6 +1,6 @@
 # Disk Example
 
-The disk example launches disk and also attach UHost instance.
+The disk example launches disk and also attach Host instance.
 
 To run, configure your UCloud provider as described in https://www.terraform.io/docs/providers/ucloud/index.html
 

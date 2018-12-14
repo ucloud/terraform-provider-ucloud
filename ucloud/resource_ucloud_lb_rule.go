@@ -15,6 +15,9 @@ func resourceUCloudLBRule() *schema.Resource {
 		Update: resourceUCloudLBRuleUpdate,
 		Read:   resourceUCloudLBRuleRead,
 		Delete: resourceUCloudLBRuleDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"load_balancer_id": &schema.Schema{
@@ -30,12 +33,13 @@ func resourceUCloudLBRule() *schema.Resource {
 			},
 
 			"backend_ids": &schema.Schema{
-				Type: schema.TypeList,
+				Type: schema.TypeSet,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 				Required: true,
 				ForceNew: true,
+				Set:      schema.HashString,
 			},
 
 			"domain": &schema.Schema{
@@ -63,7 +67,7 @@ func resourceUCloudLBRuleCreate(d *schema.ResourceData, meta interface{}) error 
 	req := conn.NewCreatePolicyRequest()
 	req.ULBId = ucloud.String(lbId)
 	req.VServerId = ucloud.String(listenerId)
-	req.BackendId = ifaceToStringSlice(d.Get("backend_ids"))
+	req.BackendId = schemaSetToStringSlice(d.Get("backend_ids"))
 
 	if val, ok := d.GetOk("domain"); ok {
 		req.Type = ucloud.String("Domain")
@@ -72,13 +76,13 @@ func resourceUCloudLBRuleCreate(d *schema.ResourceData, meta interface{}) error 
 		req.Type = ucloud.String("Path")
 		req.Match = ucloud.String(val.(string))
 	} else {
-		return fmt.Errorf("error in create lb rule, shoule set one of domain and path")
+		return fmt.Errorf("error on creating lb rule, shoule set one of domain and path")
 	}
 
 	resp, err := conn.CreatePolicy(req)
 
 	if err != nil {
-		return fmt.Errorf("error in create lb rule, %s", err)
+		return fmt.Errorf("error on creating lb rule, %s", err)
 	}
 
 	d.SetId(resp.PolicyId)
@@ -87,58 +91,57 @@ func resourceUCloudLBRuleCreate(d *schema.ResourceData, meta interface{}) error 
 	stateConf := lbRuleWaitForState(client, lbId, listenerId, d.Id())
 
 	_, err = stateConf.WaitForState()
-
 	if err != nil {
-		return fmt.Errorf("wait for lb rule initialize failed in create lb rule %s, %s", d.Id(), err)
+		return fmt.Errorf("error on waiting for lb rule %s complete creating, %s", d.Id(), err)
 	}
 
-	return resourceUCloudLBRuleUpdate(d, meta)
+	return resourceUCloudLBRuleRead(d, meta)
 }
 
 func resourceUCloudLBRuleUpdate(d *schema.ResourceData, meta interface{}) error {
-	d.Partial(true)
-
-	isChanged := false
 	client := meta.(*UCloudClient)
 	conn := client.ulbconn
 
+	d.Partial(true)
+
+	isChanged := false
 	lbId := d.Get("load_balancer_id").(string)
 	listenerId := d.Get("listener_id").(string)
 
 	req := conn.NewUpdatePolicyRequest()
 	req.ULBId = ucloud.String(lbId)
 	req.VServerId = ucloud.String(listenerId)
-	req.BackendId = ifaceToStringSlice(d.Get("backend_ids"))
+	req.BackendId = schemaSetToStringSlice(d.Get("backend_ids"))
 	req.PolicyId = ucloud.String(d.Id())
 
 	if d.HasChange("domain") && !d.IsNewResource() {
 		isChanged = true
 		req.Type = ucloud.String("Domain")
 		req.Match = ucloud.String(d.Get("domain").(string))
-		d.SetPartial("domain")
 	}
 
 	if d.HasChange("path") && !d.IsNewResource() {
 		isChanged = true
 		req.Type = ucloud.String("Path")
 		req.Match = ucloud.String(d.Get("path").(string))
-		d.SetPartial("path")
 	}
 
 	if isChanged {
 		_, err := conn.UpdatePolicy(req)
 
 		if err != nil {
-			return fmt.Errorf("do %s failed in update lb rule %s, %s", "UpdatePolicy", d.Id(), err)
+			return fmt.Errorf("error on %s to lb rule %s, %s", "UpdatePolicy", d.Id(), err)
 		}
+
+		d.SetPartial("domain")
+		d.SetPartial("path")
 
 		// after update lb rule, we need to wait it completed
 		stateConf := lbRuleWaitForState(client, lbId, listenerId, d.Id())
 
 		_, err = stateConf.WaitForState()
-
 		if err != nil {
-			return fmt.Errorf("wait for update lb rule failed in update lb rule %s, %s", d.Id(), err)
+			return fmt.Errorf("error on waiting for %s complete to lb rule %s, %s", "UpdatePolicy", d.Id(), err)
 		}
 	}
 
@@ -154,13 +157,12 @@ func resourceUCloudLBRuleRead(d *schema.ResourceData, meta interface{}) error {
 	listenerId := d.Get("listener_id").(string)
 
 	policySet, err := client.describePolicyById(lbId, listenerId, d.Id())
-
 	if err != nil {
 		if isNotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("do %s failed in read lb rule %s, %s", "DescribeVServer", d.Id(), err)
+		return fmt.Errorf("error on reading lb rule %s, %s", d.Id(), err)
 	}
 
 	if policySet.Type == "Path" {
@@ -187,26 +189,25 @@ func resourceUCloudLBRuleDelete(d *schema.ResourceData, meta interface{}) error 
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		if _, err := conn.DeletePolicy(req); err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error in delete lb rule %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on deleting lb rule %s, %s", d.Id(), err))
 		}
 
 		_, err := client.describePolicyById(lbId, listenerId, d.Id())
-
 		if err != nil {
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(fmt.Errorf("do %s failed in delete lb rule %s, %s", "DescribeVServer", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on reading lb rule when deleting %s, %s", d.Id(), err))
 		}
 
-		return resource.RetryableError(fmt.Errorf("delete lb rule but still exists"))
+		return resource.RetryableError(fmt.Errorf("the specified lb rule %s has not been deleted due to unknown error", d.Id()))
 	})
 }
 
 func lbRuleWaitForState(client *UCloudClient, lbId, listenerId, policyId string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
-		Pending:    []string{"pending"},
-		Target:     []string{"initialized"},
+		Pending:    []string{statusPending},
+		Target:     []string{statusInitialized},
 		Timeout:    5 * time.Minute,
 		Delay:      2 * time.Second,
 		MinTimeout: 1 * time.Second,
@@ -214,12 +215,12 @@ func lbRuleWaitForState(client *UCloudClient, lbId, listenerId, policyId string)
 			policySet, err := client.describePolicyById(lbId, listenerId, policyId)
 			if err != nil {
 				if isNotFoundError(err) {
-					return nil, "pending", nil
+					return nil, statusPending, nil
 				}
 				return nil, "", err
 			}
 
-			return policySet, "initialized", nil
+			return policySet, statusInitialized, nil
 		},
 	}
 }

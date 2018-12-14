@@ -262,7 +262,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:99e121142722ee300eab3fa2d261a70f7a6de45970b9a9034638ab5b4d8c7b2c"
+  digest = "1:b8b7d649612662c195ce4426e12645edee2b2d12333287538d1a69b6b6661a6c"
   name = "github.com/hashicorp/terraform"
   packages = [
     "config",
@@ -271,6 +271,7 @@
     "config/module",
     "dag",
     "flatmap",
+    "helper/acctest",
     "helper/config",
     "helper/hashcode",
     "helper/hilmapstructure",
@@ -278,6 +279,8 @@
     "helper/mutexkv",
     "helper/resource",
     "helper/schema",
+    "helper/structure",
+    "helper/validation",
     "httpclient",
     "moduledeps",
     "plugin",
@@ -293,8 +296,8 @@
     "version",
   ]
   pruneopts = "UT"
-  revision = "6dfc4d748de9cda23835bc5704307ed45e839622"
-  version = "v0.11.8"
+  revision = "17850e9a55d33c43d7c31fd6ac122ba97a51d899"
+  version = "v0.11.10"
 
 [[projects]]
   branch = "master"
@@ -420,7 +423,7 @@
   version = "v1.1.2"
 
 [[projects]]
-  digest = "1:16a4f174e150b12758188687fe19d29f856e5e697a3baa0b7d7ca6ebc4fb4f5e"
+  digest = "1:f82119a2541974dd1f906ce29297383e28d2a30e6f26df14806cf92957ebcb76"
   name = "github.com/ucloud/ucloud-sdk-go"
   packages = [
     "private/protocol/http",
@@ -440,8 +443,8 @@
     "ucloud/version",
   ]
   pruneopts = "UT"
-  revision = "ae92fcdf66a5f34c27d8ae1f81b10033648275f4"
-  version = "v0.5.7"
+  revision = "4fa00b359dfdb735f8ac72e90d24c19134772c07"
+  version = "v0.5.8"
 
 [[projects]]
   digest = "1:4aeb3860275fa1fd60cccfb5a6ef85da438bf17402e1e84412ade4d4b55066a0"
@@ -473,18 +476,25 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d850fee4ca504d04d76f899a13a7fd25e67248b38eb228eb5276c12ffd81fd2d"
+  digest = "1:906718e7c8b23e40edfaf7250a384b0b3b7a3aaddf8d98e8e774057452127669"
   name = "golang.org/x/crypto"
   packages = [
     "bcrypt",
     "blowfish",
     "cast5",
+    "curve25519",
+    "ed25519",
+    "ed25519/internal/edwards25519",
+    "internal/chacha20",
+    "internal/subtle",
     "openpgp",
     "openpgp/armor",
     "openpgp/elgamal",
     "openpgp/errors",
     "openpgp/packet",
     "openpgp/s2k",
+    "poly1305",
+    "ssh",
     "ssh/terminal",
   ]
   pruneopts = "UT"
@@ -591,10 +601,12 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/hashicorp/terraform/helper/acctest",
     "github.com/hashicorp/terraform/helper/hashcode",
     "github.com/hashicorp/terraform/helper/mutexkv",
     "github.com/hashicorp/terraform/helper/resource",
     "github.com/hashicorp/terraform/helper/schema",
+    "github.com/hashicorp/terraform/helper/validation",
     "github.com/hashicorp/terraform/plugin",
     "github.com/hashicorp/terraform/terraform",
     "github.com/ucloud/ucloud-sdk-go/services/uaccount",

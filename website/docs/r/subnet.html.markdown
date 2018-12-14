@@ -36,14 +36,14 @@ resource "ucloud_subnet" "example" {
 
 The following arguments are supported:
 
-* `cidr_block` - (Required) The cidr block of the desired subnet, should like "0.0.0.0/0",such as: "192.168.0.0/24".
-* `name` - (Optional) The name of the desired subnet, default is "Subnet".
-* `remark` - (Optional) The remarks of the subnet, the default value is "".
-* `tag` - (Optional)  A mapping of tags to assign to the subnet, the default value is"Default"(means no tag assigned).
+* `cidr_block` - (Required) The cidr block of the desired subnet, format in "0.0.0.0/0", such as: `"192.168.0.0/24"`.
 * `vpc_id` - (Required) The id of the VPC that the desired subnet belongs to.
+* `name` - (Optional) The name of the desired subnet. If not specified, terraform will autogenerate a name beginning with `"tf-subnet"`.
+* `remark` - (Optional) The remarks of the subnet. (Default: `""`).
+* `tag` - (Optional)  A mapping of tags to assign to the subnet, which contains 1-63 characters and only support Chinese, English, numbers, '-', '_' and '.'. (Default: `"Default"`).
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-* `create_time` - The time of creation of subnet.
+* `create_time` - The time of creation of subnet, formatted in RFC3339 time string.

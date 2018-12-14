@@ -16,7 +16,7 @@ func TestAccUCloudLBAttachment_basic(t *testing.T) {
 	var vserverSet ulb.ULBVServerSet
 	var instance uhost.UHostInstanceSet
 	var backendSet ulb.ULBBackendSet
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -124,32 +124,36 @@ data "ucloud_zones" "default" {
 
 data "ucloud_images" "default" {
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	name_regex = "^CentOS 7.[1-2] 64"
-	image_type =  "Base"
+	name_regex        = "^CentOS 7.[1-2] 64"
+	image_type        =  "base"
 }
 
 resource "ucloud_lb" "foo" {
+	name = "tf-acc-lb-attachment"
+	tag  = "tf-acc"
 }
 
 resource "ucloud_lb_listener" "foo" {
+	name             = "tf-acc-lb-attachment"
 	load_balancer_id = "${ucloud_lb.foo.id}"
-	protocol = "HTTPS"
+	protocol         = "https"
 }
 
 resource "ucloud_instance" "foo"{
-	name = "Instanceforbackend"
-	instance_type = "n-highcpu-1"
+	name              = "tf-acc-lb-attachment"
+	tag               = "tf-acc"
+	instance_type     = "n-highcpu-1"
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	image_id = "${data.ucloud_images.default.images.0.id}"
-	root_password = "wA123456"
+	image_id          = "${data.ucloud_images.default.images.0.id}"
+	root_password     = "wA123456"
 }
 
 resource "ucloud_lb_attachment" "foo" {
 	load_balancer_id = "${ucloud_lb.foo.id}"
-	listener_id = "${ucloud_lb_listener.foo.id}"
-	resource_type = "instance"
-	resource_id = "${ucloud_instance.foo.id}"
-	port = 80
+	listener_id      = "${ucloud_lb_listener.foo.id}"
+	resource_type    = "instance"
+	resource_id      = "${ucloud_instance.foo.id}"
+	port             = 80
 }
 `
 const testAccLBAttachmentConfigTwo = `
@@ -158,31 +162,36 @@ data "ucloud_zones" "default" {
 
 data "ucloud_images" "default" {
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	name_regex = "^CentOS 7.[1-2] 64"
-	image_type =  "Base"
+	name_regex        = "^CentOS 7.[1-2] 64"
+	image_type        =  "base"
 }
 
 resource "ucloud_lb" "foo" {
+	name = "tf-acc-lb-attachment"
+	tag  = "tf-acc"
 }
 
+
 resource "ucloud_lb_listener" "foo" {
+	name             = "tf-acc-lb-attachment"
 	load_balancer_id = "${ucloud_lb.foo.id}"
-	protocol = "HTTPS"
+	protocol         = "https"
 }
 
 resource "ucloud_instance" "foo"{
-	name = "Instanceforbackend"
-	instance_type = "n-highcpu-1"
+	name              = "tf-acc-lb-attachment"
+	tag               = "tf-acc"
+	instance_type     = "n-highcpu-1"
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	image_id = "${data.ucloud_images.default.images.0.id}"
-	root_password = "wA123456"
+	image_id          = "${data.ucloud_images.default.images.0.id}"
+	root_password     = "wA123456"
 }
 
 resource "ucloud_lb_attachment" "foo" {
 	load_balancer_id = "${ucloud_lb.foo.id}"
-	listener_id = "${ucloud_lb_listener.foo.id}"
-	resource_type = "instance"
-	resource_id = "${ucloud_instance.foo.id}"
-	port = 1080
+	listener_id      = "${ucloud_lb_listener.foo.id}"
+	resource_type    = "instance"
+	resource_id      = "${ucloud_instance.foo.id}"
+	port             = 1080
 }
 `

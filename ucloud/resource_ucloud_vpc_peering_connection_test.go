@@ -15,7 +15,7 @@ func TestAccUCloudVPCPeeringConnection_basic(t *testing.T) {
 	var vpc2 vpc.VPCInfo
 	var val vpc.VPCIntercomInfo
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -113,17 +113,19 @@ func testAccCheckVPCPeeringConnectionDestroy(s *terraform.State) error {
 
 const testAccVPCPeeringConnectionConfig = `
 resource "ucloud_vpc" "foo" {
-	name = "testAcc"
+	name        = "tf-acc-vpc"
+	tag         = "tf-acc"
 	cidr_blocks = ["192.168.0.0/16"]
 }
 
 resource "ucloud_vpc" "bar" {
-	name = "testAcc"
+	name        = "tf-acc-vpc"
+	tag         = "tf-acc"
 	cidr_blocks = ["10.10.0.0/16"]
 }
 
 resource "ucloud_vpc_peering_connection" "foo" {
-	vpc_id = "${ucloud_vpc.foo.id}"
+	vpc_id      = "${ucloud_vpc.foo.id}"
 	peer_vpc_id = "${ucloud_vpc.bar.id}"
 }
 `

@@ -13,7 +13,7 @@ import (
 func TestAccUCloudLBListener_basic(t *testing.T) {
 	var lbSet ulb.ULBSet
 	var vserverSet ulb.ULBVServerSet
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -30,13 +30,13 @@ func TestAccUCloudLBListener_basic(t *testing.T) {
 					testAccCheckLBExists("ucloud_lb.foo", &lbSet),
 					testAccCheckLBListenerExists("ucloud_lb_listener.foo", &lbSet, &vserverSet),
 					testAccCheckLBListenerAttributes(&vserverSet),
-					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "protocol", "HTTPS"),
-					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "method", "Source"),
-					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "name", "testAcc"),
+					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "protocol", "https"),
+					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "method", "source"),
+					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "name", "tf-acc-lb-listener"),
 					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "idle_timeout", "80"),
-					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "persistence_type", "ServerInsert"),
-					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "health_check_type", "Path"),
-					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "path", "/l"),
+					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "persistence_type", "server_insert"),
+					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "health_check_type", "path"),
+					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "path", "/foo"),
 				),
 			},
 
@@ -47,12 +47,12 @@ func TestAccUCloudLBListener_basic(t *testing.T) {
 					testAccCheckLBExists("ucloud_lb.foo", &lbSet),
 					testAccCheckLBListenerExists("ucloud_lb_listener.foo", &lbSet, &vserverSet),
 					testAccCheckLBListenerAttributes(&vserverSet),
-					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "protocol", "HTTP"),
-					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "method", "Roundrobin"),
-					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "name", "testAccTwo"),
+					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "protocol", "https"),
+					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "method", "roundrobin"),
+					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "name", "tf-acc-lb-listener-two"),
 					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "idle_timeout", "100"),
-					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "persistence_type", "None"),
-					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "health_check_type", "Port"),
+					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "persistence_type", "none"),
+					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "health_check_type", "port"),
 					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "domain", "www.ucloud.cn"),
 				),
 			},
@@ -122,32 +122,36 @@ func testAccCheckLBListenerDestroy(s *terraform.State) error {
 
 const testAccLBListenerConfig = `
 resource "ucloud_lb" "foo" {
+	name = "tf-acc-lb-listener"
+	tag  = "tf-acc"
 }
 
 resource "ucloud_lb_listener" "foo" {
-	load_balancer_id = "${ucloud_lb.foo.id}"
-	protocol = "HTTPS"
-	method = "Source"
-	name = "testAcc"
-	idle_timeout = 80
-	persistence_type = "ServerInsert"
-	health_check_type = "Path"
-	path = "/l"
-
+	load_balancer_id  = "${ucloud_lb.foo.id}"
+	protocol          = "https"
+	method            = "source"
+	name              = "tf-acc-lb-listener"
+	path              = "/foo"
+	idle_timeout      = 80
+	persistence_type  = "server_insert"
+	health_check_type = "path"
 }
 `
+
 const testAccLBListenerConfigTwo = `
 resource "ucloud_lb" "foo" {
+	name = "tf-acc-lb-listener"
+	tag  = "tf-acc"
 }
 
 resource "ucloud_lb_listener" "foo" {
-	load_balancer_id = "${ucloud_lb.foo.id}"
-	protocol = "HTTP"
-	method = "Roundrobin"
-	name = "testAccTwo"
-	idle_timeout = 100
-	persistence_type = "None"
-	health_check_type = "Port"
-	domain = "www.ucloud.cn"
+	load_balancer_id  = "${ucloud_lb.foo.id}"
+	protocol          = "https"
+	method            = "roundrobin"
+	name              = "tf-acc-lb-listener-two"
+	idle_timeout      = 100
+	persistence_type  = "none"
+	health_check_type = "port"
+	domain            = "www.ucloud.cn"
 }
 `

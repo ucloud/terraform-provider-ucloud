@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"reflect"
 	"testing"
 )
 
@@ -71,4 +72,44 @@ func isFileExists(filePath string) bool {
 		return true
 	}
 	return false
+}
+
+func Test_buildReversedStringMap(t *testing.T) {
+	type args struct {
+		input map[string]string
+	}
+	tests := []struct {
+		name string
+		args args
+		want map[string]string
+	}{
+		{"ok", args{map[string]string{"key": "value"}}, map[string]string{"value": "key"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := buildReversedStringMap(tt.args.input); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("buildReversedStringMap() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_hashCIDR(t *testing.T) {
+	type args struct {
+		v interface{}
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{"ok", args{"192.168.0.0/16"}, 494140204},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := hashCIDR(tt.args.v); got != tt.want {
+				t.Errorf("hashCIDR() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

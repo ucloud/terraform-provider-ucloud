@@ -23,24 +23,28 @@ func resourceUCloudSubnet() *schema.Resource {
 			"cidr_block": &schema.Schema{
 				Type:         schema.TypeString,
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validateUCloudCidrBlock,
 			},
 
 			"vpc_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 
 			"name": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      resource.PrefixedUniqueId("tf-subnet-"),
+				ValidateFunc: validateName,
 			},
 
 			"tag": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validateTag,
 			},
 
 			"remark": &schema.Schema{
@@ -70,21 +74,21 @@ func resourceUCloudSubnetCreate(d *schema.ResourceData, meta interface{}) error 
 	req.Subnet = ucloud.String(cidr.Network)
 	req.Netmask = ucloud.Int(cidr.Mask)
 
-	if val, ok := d.GetOk("name"); ok {
-		req.SubnetName = ucloud.String(val.(string))
+	if v, ok := d.GetOk("name"); ok {
+		req.SubnetName = ucloud.String(v.(string))
 	}
 
-	if val, ok := d.GetOk("tag"); ok {
-		req.Tag = ucloud.String(val.(string))
+	if v, ok := d.GetOk("tag"); ok {
+		req.Tag = ucloud.String(v.(string))
 	}
 
-	if val, ok := d.GetOk("remark"); ok {
-		req.Remark = ucloud.String(val.(string))
+	if v, ok := d.GetOk("remark"); ok {
+		req.Remark = ucloud.String(v.(string))
 	}
 
 	resp, err := conn.CreateSubnet(req)
 	if err != nil {
-		return fmt.Errorf("error in create subnet, %s", err)
+		return fmt.Errorf("error on creating subnet, %s", err)
 	}
 
 	d.SetId(resp.SubnetId)
@@ -94,10 +98,10 @@ func resourceUCloudSubnetCreate(d *schema.ResourceData, meta interface{}) error 
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("wait for subnet initialize failed in create subnet %s, %s", d.Id(), err)
+		return fmt.Errorf("error on waiting for subnet %s complete creating, %s", d.Id(), err)
 	}
 
-	return resourceUCloudSubnetUpdate(d, meta)
+	return resourceUCloudSubnetRead(d, meta)
 }
 
 func resourceUCloudSubnetUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -113,28 +117,27 @@ func resourceUCloudSubnetUpdate(d *schema.ResourceData, meta interface{}) error 
 	if d.HasChange("name") && !d.IsNewResource() {
 		isChanged = true
 		req.Name = ucloud.String(d.Get("name").(string))
-		d.SetPartial("name")
 	}
 
 	if d.HasChange("tag") && !d.IsNewResource() {
 		isChanged = true
 		req.Tag = ucloud.String(d.Get("tag").(string))
-		d.SetPartial("tag")
 	}
 
 	if isChanged {
 		_, err := conn.UpdateSubnetAttribute(req)
-
 		if err != nil {
-			return fmt.Errorf("do %s failed in update subnet %s, %s", "UpdateSubnetAttribute", d.Id(), err)
+			return fmt.Errorf("error on %s to subnet %s, %s", "UpdateSubnetAttribute", d.Id(), err)
 		}
+
+		d.SetPartial("name")
+		d.SetPartial("tag")
 
 		// after update subnet attribute, we need to wait it completed
 		stateConf := subnetWaitForState(client, d.Id())
-
 		_, err = stateConf.WaitForState()
 		if err != nil {
-			return fmt.Errorf("wait for update subnet attribute failed in update subnet %s, %s", d.Id(), err)
+			return fmt.Errorf("error on waiting for %s complete to subnet %s, %s", "UpdateSubnetAttribute", d.Id(), err)
 		}
 	}
 
@@ -152,11 +155,11 @@ func resourceUCloudSubnetRead(d *schema.ResourceData, meta interface{}) error {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("do %s failed in read subnet %s, %s", "DescribeSubnet", d.Id(), err)
+		return fmt.Errorf("error on reading subnet %s, %s", d.Id(), err)
 	}
 
 	d.Set("name", subnetSet.SubnetName)
-	d.Set("cidr_block", subnetSet.Subnet+"/"+string(subnetSet.Netmask))
+	d.Set("cidr_block", fmt.Sprintf("%s/%s", subnetSet.Subnet, subnetSet.Netmask))
 	d.Set("vpc_id", subnetSet.VPCId)
 	d.Set("tag", subnetSet.Tag)
 	d.Set("remark", subnetSet.Remark)
@@ -174,26 +177,25 @@ func resourceUCloudSubnetDelete(d *schema.ResourceData, meta interface{}) error 
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		if _, err := conn.DeleteSubnet(req); err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error in delete subnet %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on deleting subnet %s, %s", d.Id(), err))
 		}
 
 		_, err := client.describeSubnetById(d.Id())
-
 		if err != nil {
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(fmt.Errorf("do %s failed in delete subnet %s, %s", "DescribeSubnet", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on reading subnet when deleting %s, %s", d.Id(), err))
 		}
 
-		return resource.RetryableError(fmt.Errorf("delete subnet but it still exists"))
+		return resource.RetryableError(fmt.Errorf("the specified subnet %s has not been deleted due to unknown error", d.Id()))
 	})
 }
 
 func subnetWaitForState(client *UCloudClient, subnetId string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
-		Pending:    []string{"pending"},
-		Target:     []string{"initialized"},
+		Pending:    []string{statusPending},
+		Target:     []string{statusInitialized},
 		Timeout:    5 * time.Minute,
 		Delay:      2 * time.Second,
 		MinTimeout: 1 * time.Second,
@@ -201,12 +203,12 @@ func subnetWaitForState(client *UCloudClient, subnetId string) *resource.StateCh
 			subnetSet, err := client.describeSubnetById(subnetId)
 			if err != nil {
 				if isNotFoundError(err) {
-					return nil, "pending", nil
+					return nil, statusPending, nil
 				}
 				return nil, "", err
 			}
 
-			return subnetSet, "initialized", nil
+			return subnetSet, statusInitialized, nil
 		},
 	}
 }

@@ -33,7 +33,7 @@ func parseCidrBlock(s string) (*cidrBlock, error) {
 }
 
 /*
-parseUCloudCidrBlock will parse cidr with specific range constriants
+parseUCloudCidrBlock will parse cidr with specific range constraints
 cidr must contained by subnet as followed
 	- 192.168.*.[8, 16, 24 ...]
 	- 172.[16-32].*.[8, 16, 24 ...]
@@ -122,7 +122,7 @@ var instanceTypeScaleMap = map[string]int{
 	"highmem":  8 * 1024,
 }
 
-var avaliableHostTypes = []string{"n"}
+var availableHostTypes = []string{"n"}
 
 func parseInstanceTypeByCustomize(splited ...string) (*instanceType, error) {
 	if len(splited) != 4 {
@@ -130,7 +130,7 @@ func parseInstanceTypeByCustomize(splited ...string) (*instanceType, error) {
 	}
 
 	hostType := splited[0]
-	err := checkStringIn(hostType, avaliableHostTypes)
+	err := checkStringIn(hostType, availableHostTypes)
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +151,7 @@ func parseInstanceTypeByCustomize(splited ...string) (*instanceType, error) {
 		return nil, fmt.Errorf("memory count is invalid, please use a number")
 	}
 
-	if memory < 1 || 128 < memory {
+	if memory < 1 || 256 < memory {
 		return nil, fmt.Errorf("memory count is invalid, it must between 1 ~ 128")
 	}
 
@@ -169,7 +169,7 @@ func parseInstanceTypeByNormal(splited ...string) (*instanceType, error) {
 	}
 
 	hostType := splited[0]
-	err := checkStringIn(hostType, avaliableHostTypes)
+	err := checkStringIn(hostType, availableHostTypes)
 	if err != nil {
 		return nil, err
 	}
@@ -223,31 +223,4 @@ func parseAssociationInfo(assocId string) (*associationInfo, error) {
 		ResourceType: matched[3],
 		ResourceId:   matched[4],
 	}, nil
-}
-
-type converter map[string]string
-
-func (c converter) convert(src string) string {
-	if dst, ok := c[src]; ok {
-		return dst
-	}
-	return src
-}
-
-func (c converter) unconvert(dst string) string {
-	for src, v := range c {
-		if v == dst {
-			return src
-		}
-	}
-	return dst
-}
-
-type transformer map[int]string
-
-func (c transformer) transform(src int) string {
-	if dst, ok := c[src]; ok {
-		return dst
-	}
-	return string(src)
 }

@@ -17,7 +17,7 @@ func TestAccUCloudLBRule_basic(t *testing.T) {
 	var instance uhost.UHostInstanceSet
 	var backendSet ulb.ULBBackendSet
 	var policySet ulb.ULBPolicySet
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -51,7 +51,7 @@ func TestAccUCloudLBRule_basic(t *testing.T) {
 					testAccCheckInstanceExists("ucloud_instance.foo", &instance),
 					testAccCheckLBRuleExists("ucloud_lb_rule.foo", &lbSet, &vserverSet, &backendSet, &policySet),
 					testAccCheckLBRuleAttributes(&policySet),
-					resource.TestCheckResourceAttr("ucloud_lb_rule.foo", "path", "/ll"),
+					resource.TestCheckResourceAttr("ucloud_lb_rule.foo", "path", "/foo"),
 				),
 			},
 		},
@@ -128,8 +128,8 @@ data "ucloud_zones" "default" {
 
 data "ucloud_images" "default" {
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	name_regex = "^CentOS 7.[1-2] 64"
-	image_type =  "Base"
+	name_regex        = "^CentOS 7.[1-2] 64"
+	image_type        =  "base"
 }
 
 resource "ucloud_lb" "foo" {
@@ -137,30 +137,31 @@ resource "ucloud_lb" "foo" {
 
 resource "ucloud_lb_listener" "foo" {
 	load_balancer_id = "${ucloud_lb.foo.id}"
-	protocol = "HTTP"
+	protocol         = "http"
 }
 
 resource "ucloud_instance" "foo"{
-	name = "Instanceforbackend"
-	instance_type = "n-highcpu-1"
+	name              = "tf-acc-lb"
+	tag               = "tf-acc"
+	instance_type     = "n-highcpu-1"
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	image_id = "${data.ucloud_images.default.images.0.id}"
-	root_password = "wA123456"
+	image_id          = "${data.ucloud_images.default.images.0.id}"
+	root_password     = "wA123456"
 }
 
 resource "ucloud_lb_attachment" "foo" {
 	load_balancer_id = "${ucloud_lb.foo.id}"
-	listener_id = "${ucloud_lb_listener.foo.id}"
-	resource_type = "instance"
-	resource_id = "${ucloud_instance.foo.id}"
-	port = 80
+	listener_id      = "${ucloud_lb_listener.foo.id}"
+	resource_type    = "instance"
+	resource_id      = "${ucloud_instance.foo.id}"
+	port             = 80
 }
 
 resource "ucloud_lb_rule" "foo" {
 	load_balancer_id = "${ucloud_lb.foo.id}"
-	listener_id = "${ucloud_lb_listener.foo.id}"
-	backend_ids = ["${ucloud_lb_attachment.foo.id}"]
-	domain = "www.ucloud.cn"
+	listener_id      = "${ucloud_lb_listener.foo.id}"
+	backend_ids      = ["${ucloud_lb_attachment.foo.id}"]
+	domain           = "www.ucloud.cn"
 }
 `
 const testAccLBRuleConfigTwo = `
@@ -169,38 +170,41 @@ data "ucloud_zones" "default" {
 
 data "ucloud_images" "default" {
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	name_regex = "^CentOS 7.[1-2] 64"
-	image_type =  "Base"
+	name_regex        = "^CentOS 7.[1-2] 64"
+	image_type        =  "base"
 }
 
 resource "ucloud_lb" "foo" {
+	name = "tf-acc-lb-rule"
+	tag  = "tf-acc"
 }
 
 resource "ucloud_lb_listener" "foo" {
 	load_balancer_id = "${ucloud_lb.foo.id}"
-	protocol = "HTTP"
+	protocol         = "http"
 }
 
 resource "ucloud_instance" "foo"{
-	name = "Instanceforbackend"
-	instance_type = "n-highcpu-1"
+	name              = "tf-acc-lb-rule"
+	tag               = "tf-acc"
+	instance_type     = "n-highcpu-1"
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	image_id = "${data.ucloud_images.default.images.0.id}"
-	root_password = "wA123456"
+	image_id          = "${data.ucloud_images.default.images.0.id}"
+	root_password     = "wA123456"
 }
 
 resource "ucloud_lb_attachment" "foo" {
 	load_balancer_id = "${ucloud_lb.foo.id}"
-	listener_id = "${ucloud_lb_listener.foo.id}"
-	resource_type = "instance"
-	resource_id = "${ucloud_instance.foo.id}"
-	port = 80
+	listener_id      = "${ucloud_lb_listener.foo.id}"
+	resource_type    = "instance"
+	resource_id      = "${ucloud_instance.foo.id}"
+	port             = 80
 }
 
 resource "ucloud_lb_rule" "foo" {
 	load_balancer_id = "${ucloud_lb.foo.id}"
-	listener_id = "${ucloud_lb_listener.foo.id}"
-	backend_ids = ["${ucloud_lb_attachment.foo.id}"]
-	path = "/ll"
+	listener_id      = "${ucloud_lb_listener.foo.id}"
+	backend_ids      = ["${ucloud_lb_attachment.foo.id}"]
+	path             = "/foo"
 }
 `

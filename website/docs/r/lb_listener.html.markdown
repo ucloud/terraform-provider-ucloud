@@ -20,7 +20,7 @@ resource "ucloud_lb" "web" {
 
 resource "ucloud_lb_listener" "example" {
     load_balancer_id = "${ucloud_lb.web.id}"
-    protocol         = "HTTPS"
+    protocol         = "https"
 }
 ```
 
@@ -29,20 +29,23 @@ resource "ucloud_lb_listener" "example" {
 The following arguments are supported:
 
 * `load_balancer_id` - (Required) The ID of load balancer instance.
-* `protocol` - (Required) Listener protocol. Possible values: HTTP, HTTPS if if "ListenType" is "RequestProxy", TCP and UDP if "ListenType" is "PacketsTransmit".
-* `name` - (Optional) The name of the listener, default is "Listener".
-* `listen_type` - (Optional) The type of listener, possible values are "RequestProxy" and "PacketsTransmit", default is "PacketsTransmit".
-* `port` - (Optional) Port opened on the listeners to receive requests, range from 1 to 65535, and default is 80.
-* `idle_timeout` - (Optional) Amount of time in seconds to wait for the response for in between two sessions if "ListenType" is "RequestProxy", range from 0 to 86400 seconds and default is 60. Amount of time in seconds to wait for one session if "ListenType" is "PacketsTransmit", range from 60 to 900, the session will be closed as soon as no response if it is 0.
-* `method` - (Optional) The load balance method in which the listener is, possible values are: "Roundrobin", "Source", "ConsistentHash", "SourcePort" and "ConsistentHashPort" . The "ConsistentHash", "SourcePort" and "ConsistentHashPort" is only valid if "listen_type" is "PacketsTransmit" and "Roundrobin", "Source" is vaild if "listen_type" is "RequestProxy" or "PacketsTransmit". Default is "Roundrobin".
-* `persistence` - (Optional) Indicate whether the persistence session is enabled, it is invaild if "PersistenceType" is "None", an auto-generated string will be exported if "PersistenceType" is "ServerInsert", a custom string will be exported if "PersistenceType" is "UserDefined".
-* `persistence_type` - (Optional) The type of session persistence of listener, it is disabled by default. Possible values are: "None" as disabled, "ServerInsert" as auto-generated string and "UserDefined" as cutom string.
-* `health_check_type` - (Optional) Health check method, possible values are "Port" as port checking and "Path" as http checking.
-* `path` - (Optional) Health check path checking
-* `domain` - (Optional) Health check domain checking
+* `protocol` - (Required) Listener protocol. Possible values: `"http"`, `"https"` if `listen_type` is `"request_proxy"`, `"tcp"` and `"udp"` if `listen_type` is `"packets_transmit"`.
+* `name` - (Optional) The name of the listener. (Default: `"Listener"`).
+* `listen_type` - (Optional) The type of listener. Possible values are `"request_proxy"` and `"packets_transmit"`. (Default: `"packets_transmit"`).
+* `port` - (Optional) Port opened on the listeners to receive requests, range: 1-65535. (Default: `"80"`).
+* `idle_timeout` - (Optional) Amount of time in seconds to wait for the response for in between two sessions if `listen_type` is `"request_proxy"`, range: 0-86400. (Default: `"60"`). Amount of time in seconds to wait for one session if `listen_type` is `"packets_transmit"`, range: 60-900. The session will be closed as soon as no response if it is `0`.
+* `method` - (Optional) The load balance method in which the listener is. Possible values are: `"roundrobin"`, `"source"`, `"consistent_hash"`, `"source_port"` , `"consistent_hash_port"`, `"weight_roundrobin"` and `"leastconn"`. (Default: `"roundrobin"`).
+    - The `"consistent_hash"`, `"source_port"` , `"consistent_hash_port"`, `"roundrobin"`, `"source"` and `"weight_roundrobin"` are valid if `"listen_type"` is `"packets_transmit"`.
+    - The `"Roundrobin"`, `"Source"` and `"WeightRoundrobin"` and `"Leastconn"` are vaild if `"listen_type"` is `"request_proxy"`.
+* `persistence` - (Optional) Indicate whether the persistence session is enabled, it is invaild if `PersistenceType` is `"none"`, an auto-generated string will be exported if `persistence_type` is `"server_insert"`, a custom string will be exported if `persistence_type` is `"user_defined"`.
+* `persistence_type` - (Optional) The type of session persistence of listener. Possible values are: `"none"` as disabled, `"server_insert"` as auto-generated string and `"user_defined"` as cutom string. (Default: `"none"`).
+* `health_check_type` - (Optional) Health check method. Possible values are `"port"` as port checking and `"path"` as http checking.
+* `path` - (Optional) Health check path checking.
+* `domain` - (Optional) Health check domain checking.
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-* `status` - Listener status. Possible values are: "allNormal" as all resource functioning well, "partNormal" as partial resource functioning well and "allException" as all resource functioning exceptional.
+* `status` - Listener status. Possible values are: `"allNormal"` for all resource functioning well, `"partNormal"` for partial resource functioning well and `"allException"` for all resource functioning exceptional.
+`

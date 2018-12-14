@@ -8,13 +8,13 @@ description: |-
 
 # ucloud_projects
 
-This data source providers a list of projects owned by the user according to whether or not be finance account.
+This data source providers a list of projects owned by user with finance permission.
 
 ## Example Usage
 
 ```hcl
 data "ucloud_projects" "example" {
-    is_finance = "No"
+    is_finance = false
 }
 
 output "first" {
@@ -26,22 +26,22 @@ output "first" {
 
 The following arguments are supported:
 
-* `is_finance` - (Optional) To identify if the current account is granted with financial permission, possible values are: "Yes" and "No".
+* `is_finance` - (Optional) To identify if the current account is granted with financial permission.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-* `projects` - projects is a nested type. projects documented below.
+* `projects` - It is a nested type which documented below.
 * `total_count` - Total number of project that satisfy the condition.
 
 The attribute (`projects`) support the following:
 
-* `create_time` - The time of creation for instance.
+* `create_time` - The time of creation for instance, formatted in RFC3339 time string.
 * `id` - The ID of project defined.
 * `member_count` - The number of members belongs to the defined project.
 * `name` - The name of the defined project.
-* `parent_id` - The ID of the parent Project where the sub project belongs to.
-* `parent_name` - The name of the parent Project where the sub project belongs to.
-* `resource_count` - The number of the resounce instance belong to the defined project.
+* `parent_id` - The ID of the parent project where the sub project belongs to.
+* `parent_name` - The name of the parent project where the sub project belongs to.
+* `resource_count` - The number of the resounce instance belong/s to the defined project.

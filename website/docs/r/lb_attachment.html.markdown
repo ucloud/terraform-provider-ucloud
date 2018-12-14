@@ -20,7 +20,7 @@ resource "ucloud_lb" "web" {
 
 resource "ucloud_lb_listener" "default" {
     load_balancer_id = "${ucloud_lb.web.id}"
-    protocol         = "HTTPS"
+    protocol         = "https"
 }
 
 resource "ucloud_security_group" "default" {
@@ -29,15 +29,15 @@ resource "ucloud_security_group" "default" {
 
     rules {
         port_range = "80"
-        protocol   = "TCP"
+        protocol   = "tcp"
         cidr_block = "192.168.0.0/16"
-        policy     = "ACCEPT"
+        policy     = "accept"
     }
 }
 
 resource "ucloud_instance" "web" {
     instance_type     = "n-standard-1"
-    availability_zone = "cn-sh2-02"
+    availability_zone = "cn-bj2-02"
 
     root_password      = "wA1234567"
     image_id           = "uimage-of3pac"
@@ -62,13 +62,13 @@ The following arguments are supported:
 
 * `load_balancer_id` - (Required) The ID of load balancer instance.
 * `listener_id` - (Required) The ID of listener servers.
-* `resource_type` - (Required) The types of backend servers, possible values are: "instance" as Elastic computing host, "UPM" as physical sever, "UDHost" as dedicated server, "UDocker" as docker host.
+* `resource_type` - (Required) The types of backend servers. The current possible values are: `"instance"` as Elastic computing host.
 * `resource_id` - (Required) The ID of backend servers.
-* `port` - (Optional) Port opened on the backend server to receive requests, range [from 1 to 65535], and default is 80.
+* `port` - (Optional) Port opened on the backend server to receive requests, range: 1-65535, (Default: `80`).
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
 * `private_ip` - The private ip address for backend servers.
-* `status` - The status of backend servers. Possible values are: "normalRunning", "exceptionRunning".
+* `status` - The status of backend servers. Possible values are: `"normalRunning"`, `"exceptionRunning"`.

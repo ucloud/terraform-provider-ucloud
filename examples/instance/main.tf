@@ -6,17 +6,11 @@ provider "ucloud" {
 # Query availability zone
 data "ucloud_zones" "default" {}
 
-# bulid instance type
-data "ucloud_instance_types" "default" {
-  cpu    = 1
-  memory = 4
-}
-
 # Query image
 data "ucloud_images" "default" {
   availability_zone = "${data.ucloud_zones.default.zones.0.id}"
   name_regex        = "^CentOS 7.[1-2] 64"
-  image_type        = "Base"
+  image_type        = "base"
 }
 
 # Create security group
@@ -27,17 +21,17 @@ resource "ucloud_security_group" "default" {
   # HTTP access from LAN
   rules {
     port_range = "80"
-    protocol   = "TCP"
+    protocol   = "tcp"
     cidr_block = "192.168.0.0/16"
-    policy     = "ACCEPT"
+    policy     = "accept"
   }
 
   # HTTPS access from LAN
   rules {
     port_range = "443"
-    protocol   = "TCP"
+    protocol   = "tcp"
     cidr_block = "192.168.0.0/16"
-    policy     = "ACCEPT"
+    policy     = "accept"
   }
 }
 
@@ -68,11 +62,11 @@ resource "ucloud_instance" "web" {
   tag               = "tf-example"
   availability_zone = "${data.ucloud_zones.default.zones.0.id}"
   image_id          = "${data.ucloud_images.default.images.0.id}"
-  instance_type     = "${data.ucloud_instance_types.default.instance_types.0.id}"
+  instance_type     = "n-highcpu-1"
 
   # use cloud disk as data disk
   data_disk_size = 50
-  data_disk_type = "LOCAL_NORMAL"
+  data_disk_type = "local_normal"
   root_password  = "${var.instance_password}"
 
   # we will put all the instances into same vpc and subnet,
@@ -81,7 +75,7 @@ resource "ucloud_instance" "web" {
 
   subnet_id = "${ucloud_subnet.default.id}"
 
-  # this ecurity group to allow HTTP and HTTPS access
+  # this security group allows HTTP and HTTPS access
   security_group = "${ucloud_security_group.default.id}"
 
   count = "${var.count}"

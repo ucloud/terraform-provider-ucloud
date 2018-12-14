@@ -16,7 +16,7 @@ func TestAccUCloudDiskAttachment_basic(t *testing.T) {
 	var diskSet udisk.UDiskDataSet
 	var instance uhost.UHostInstanceSet
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -97,34 +97,33 @@ func testAccCheckDiskAttachmentDestroy(s *terraform.State) error {
 }
 
 const testAccDiskAttachmentConfig = `
-data "ucloud_zones" "default" {
-}
+data "ucloud_zones" "default" {}
 
 data "ucloud_images" "default" {
-	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	name_regex = "^CentOS 7.[1-2] 64"
-	image_type =  "Base"
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  name_regex        = "^CentOS 7.[1-2] 64"
+  image_type        = "base"
 }
 
 resource "ucloud_disk" "foo" {
-	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	name = "testAcc"
-	disk_size = 10
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  name              = "tf-acc-disk-attachment"
+  disk_size         = 10
 }
 
 resource "ucloud_instance" "foo" {
-	name = "testAccInstance"
-	instance_type = "n-highcpu-1"
-	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	image_id = "${data.ucloud_images.default.images.0.id}"
-	instance_charge_type = "Month"
-	instance_duration = 1
-	root_password = "wA123456"
+  name                 = "tf-acc-disk-attachment"
+  instance_type        = "n-highcpu-1"
+  availability_zone    = "${data.ucloud_zones.default.zones.0.id}"
+  image_id             = "${data.ucloud_images.default.images.0.id}"
+  charge_type          = "month"
+  duration             = 1
+  root_password        = "wA123456"
 }
 
 resource "ucloud_disk_attachment" "foo" {
-	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	disk_id = "${ucloud_disk.foo.id}"
-	instance_id = "${ucloud_instance.foo.id}"
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  disk_id           = "${ucloud_disk.foo.id}"
+  instance_id       = "${ucloud_instance.foo.id}"
 }
 `

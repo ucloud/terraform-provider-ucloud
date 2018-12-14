@@ -8,10 +8,10 @@ description: |-
 
 # UCloud Provider
 
-~> **NOTE:** This guide required an avaliable ucloud account or sub-account with project to create any resources.
+~> **NOTE:** This guide requires an avaliable UCloud account or sub-account with project to create resources.
 
 The UCloud provider is used to interact with the
-many resources supported by UCloud. The provider needs to be configured
+resources supported by UCloud. The provider needs to be configured
 with the proper credentials before it can be used.
 
 Use the navigation to the left to read about the available resources.
@@ -44,7 +44,7 @@ resource "ucloud_security_group" "default" {
 
     rules {
         port_range = "80"
-        protocol   = "TCP"
+        protocol   = "tcp"
         cidr_block = "192.168.0.0/16"
         policy     = "ACCEPT"
     }
@@ -125,12 +125,12 @@ In addition to [generic `provider` arguments](https://www.terraform.io/docs/conf
 * `region` - (Required) This is the UCloud region. It must be provided, but
   it can also be sourced from the `UCLOUD_REGION` environment variables.
 
-* `project_id` - (Required) This is the UCloud project id.It must be provided, but
+* `project_id` - (Required) This is the UCloud project id. It must be provided, but
   it can also be sourced from the `UCLOUD_PROJECT_ID` environment variables.
 
-* `max_retries` - (Optional) This is the max retry attempts number. Default max retry attempts number is '0'.
+* `max_retries` - (Optional) This is the max retry attempts number. Default max retry attempts number is `0`.
 
-* `insecure` - (Optional) This is a switch to disable/enable https. Default "false", means enable https.
+* `insecure` - (Optional) This is a switch to disable/enable https. (Default: `false`, means enable https).
 
 ## Testing
 

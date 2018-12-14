@@ -7,7 +7,7 @@ import (
 )
 
 func TestAccUCloudEipsDataSource_basic(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -26,11 +26,11 @@ func TestAccUCloudEipsDataSource_basic(t *testing.T) {
 
 const testAccDataEipsConfig = `
 resource "ucloud_eip" "foo" {
-	count = 2
-
-	name = "testAcc"
-	bandwidth = 1
-	eip_duration = 1
+	count         = 2
+	name          = "tf-test-acc-eip"
+	bandwidth     = 1
+	internet_type = "bgp"
+	duration      = 1
 }
 
 data "ucloud_eips" "foo" {

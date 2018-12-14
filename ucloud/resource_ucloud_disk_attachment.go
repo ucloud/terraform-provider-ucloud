@@ -53,7 +53,7 @@ func resourceUCloudDiskAttachmentCreate(d *schema.ResourceData, meta interface{}
 
 	_, err := conn.AttachUDisk(req)
 	if err != nil {
-		return fmt.Errorf("error in create disk attachment, %s", err)
+		return fmt.Errorf("error on creating disk attachment, %s", err)
 	}
 
 	d.SetId(fmt.Sprintf("disk#%s:uhost#%s", diskId, instanceId))
@@ -69,7 +69,7 @@ func resourceUCloudDiskAttachmentCreate(d *schema.ResourceData, meta interface{}
 	}
 
 	if _, err = stateConf.WaitForState(); err != nil {
-		return fmt.Errorf("wait for disk attaching failed in create disk attachment %s, %s", d.Id(), err)
+		return fmt.Errorf("error on waiting for disk attachment %s complete creating, %s", d.Id(), err)
 	}
 
 	return resourceUCloudDiskAttachmentRead(d, meta)
@@ -80,7 +80,7 @@ func resourceUCloudDiskAttachmentRead(d *schema.ResourceData, meta interface{}) 
 
 	attach, err := parseAssociationInfo(d.Id())
 	if err != nil {
-		return fmt.Errorf("error in parse disk attachment %s, %s", d.Id(), err)
+		return fmt.Errorf("error on parsing disk attachment %s, %s", d.Id(), err)
 	}
 
 	resourceSet, err := client.describeDiskResource(attach.PrimaryId, attach.ResourceId)
@@ -90,7 +90,7 @@ func resourceUCloudDiskAttachmentRead(d *schema.ResourceData, meta interface{}) 
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("do %s failed in read disk attachment %s, %s", "DescribeUDisk", d.Id(), err)
+		return fmt.Errorf("error on reading disk attachment %s, %s", d.Id(), err)
 	}
 
 	d.Set("availability_zone", d.Get("availability_zone").(string))
@@ -106,7 +106,7 @@ func resourceUCloudDiskAttachmentDelete(d *schema.ResourceData, meta interface{}
 
 	attach, err := parseAssociationInfo(d.Id())
 	if err != nil {
-		return fmt.Errorf("error in parse disk attachment %s, %s", d.Id(), err)
+		return fmt.Errorf("error on parsing disk attachment %s, %s", d.Id(), err)
 	}
 
 	req := conn.NewDetachUDiskRequest()
@@ -117,7 +117,7 @@ func resourceUCloudDiskAttachmentDelete(d *schema.ResourceData, meta interface{}
 	return resource.Retry(15*time.Minute, func() *resource.RetryError {
 		if _, err := conn.DetachUDisk(req); err != nil {
 			if uErr, ok := err.(uerr.Error); ok && uErr.Code() != 17060 {
-				return resource.NonRetryableError(fmt.Errorf("error in delete disk attachment %s, %s", d.Id(), err))
+				return resource.NonRetryableError(fmt.Errorf("error on deleting disk attachment %s, %s", d.Id(), err))
 			}
 		}
 
@@ -133,9 +133,9 @@ func resourceUCloudDiskAttachmentDelete(d *schema.ResourceData, meta interface{}
 
 		if _, err = stateConf.WaitForState(); err != nil {
 			if _, ok := err.(*resource.TimeoutError); ok {
-				return resource.RetryableError(fmt.Errorf("wait for disk detach faild, in delete disk attachment %s, %s", d.Id(), err))
+				return resource.RetryableError(fmt.Errorf("error on waiting for deleting disk attachment %s, %s", d.Id(), err))
 			}
-			return resource.NonRetryableError(fmt.Errorf("wait for disk detach faild, in delete disk attachment %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on waiting for deleting disk attachment %s, %s", d.Id(), err))
 		}
 
 		return nil

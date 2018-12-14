@@ -6,6 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
+
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 )
 
@@ -15,6 +17,9 @@ func resourceUCloudLBAttachment() *schema.Resource {
 		Read:   resourceUCloudLBAttachmentRead,
 		Update: resourceUCloudLBAttachmentUpdate,
 		Delete: resourceUCloudLBAttachmentDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"load_balancer_id": &schema.Schema{
@@ -30,9 +35,10 @@ func resourceUCloudLBAttachment() *schema.Resource {
 			},
 
 			"resource_type": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"instance"}, false),
 			},
 
 			"resource_id": &schema.Schema{
@@ -45,7 +51,7 @@ func resourceUCloudLBAttachment() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Default:      80,
-				ValidateFunc: validateIntegerInRange(1, 65535),
+				ValidateFunc: validation.IntBetween(1, 65535),
 			},
 
 			"private_ip": &schema.Schema{
@@ -71,7 +77,7 @@ func resourceUCloudLBAttachmentCreate(d *schema.ResourceData, meta interface{}) 
 	req := conn.NewAllocateBackendRequest()
 	req.ULBId = ucloud.String(lbId)
 	req.VServerId = ucloud.String(listenerId)
-	req.ResourceType = ucloud.String(uHostMap.convert(d.Get("resource_type").(string)))
+	req.ResourceType = ucloud.String(titleCaseProdCvt.convert(d.Get("resource_type").(string)))
 	req.ResourceId = ucloud.String(d.Get("resource_id").(string))
 	req.Port = ucloud.Int(d.Get("port").(int))
 
@@ -83,61 +89,39 @@ func resourceUCloudLBAttachmentCreate(d *schema.ResourceData, meta interface{}) 
 	d.SetId(resp.BackendId)
 
 	// after create lb attachment, we need to wait it initialized
-	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"pending"},
-		Target:     []string{"initialized"},
-		Timeout:    10 * time.Minute,
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
-		Refresh: func() (interface{}, string, error) {
-			backendSet, err := client.describeBackendById(lbId, listenerId, d.Id())
-			if err != nil {
-				if isNotFoundError(err) {
-					return nil, "pending", nil
-				}
-				return nil, "", err
-			}
+	stateConf := lbAttachmentWaitForState(client, lbId, listenerId, d.Id())
 
-			state := lbAttachmentStatus.transform(backendSet.Status)
-			if state != "normalRunning" {
-				state = "pending"
-			} else {
-				state = "initialized"
-			}
-
-			return backendSet, state, nil
-		},
-	}
 	_, err = stateConf.WaitForState()
-
 	if err != nil {
-		return fmt.Errorf("wait for lb attachment initialize failed in create lb attachment %s, %s", d.Id(), err)
+		return fmt.Errorf("error on waiting for lb attachment %s complete creating, %s", d.Id(), err)
 	}
 
-	return resourceUCloudLBAttachmentUpdate(d, meta)
+	return resourceUCloudLBAttachmentRead(d, meta)
 }
 
 func resourceUCloudLBAttachmentUpdate(d *schema.ResourceData, meta interface{}) error {
+	conn := meta.(*UCloudClient).ulbconn
+
 	d.Partial(true)
 
-	isChanged := false
-	conn := meta.(*UCloudClient).ulbconn
 	req := conn.NewUpdateBackendAttributeRequest()
 	req.ULBId = ucloud.String(d.Get("load_balancer_id").(string))
 	req.BackendId = ucloud.String(d.Id())
 
+	isChanged := false
+
 	if d.HasChange("port") && !d.IsNewResource() {
 		isChanged = true
 		req.Port = ucloud.Int(d.Get("port").(int))
-		d.SetPartial("port")
 	}
 
 	if isChanged {
 		_, err := conn.UpdateBackendAttribute(req)
-
 		if err != nil {
-			return fmt.Errorf("do %s failed in update lb attachment %s, %s", "UpdateBackendAttribute", d.Id(), err)
+			return fmt.Errorf("error on %s to lb attachment %s, %s", "UpdateBackendAttribute", d.Id(), err)
 		}
+
+		d.SetPartial("port")
 	}
 
 	d.Partial(false)
@@ -152,20 +136,19 @@ func resourceUCloudLBAttachmentRead(d *schema.ResourceData, meta interface{}) er
 	listenerId := d.Get("listener_id").(string)
 
 	backendSet, err := client.describeBackendById(lbId, listenerId, d.Id())
-
 	if err != nil {
 		if isNotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("do %s failed in read lb attachment %s, %s", "DescribeVServer", d.Id(), err)
+		return fmt.Errorf("error on reading lb attachment %s, %s", d.Id(), err)
 	}
 
 	d.Set("resource_id", backendSet.ResourceId)
-	d.Set("resource_type", uHostMap.unconvert(backendSet.ResourceType))
+	d.Set("resource_type", titleCaseProdCvt.unconvert(backendSet.ResourceType))
 	d.Set("port", backendSet.Port)
 	d.Set("private_ip", backendSet.PrivateIP)
-	d.Set("status", lbAttachmentStatus.transform(backendSet.Status))
+	d.Set("status", lbAttachmentStatusCvt.convert(backendSet.Status))
 
 	return nil
 }
@@ -182,20 +165,46 @@ func resourceUCloudLBAttachmentDelete(d *schema.ResourceData, meta interface{}) 
 	req.BackendId = ucloud.String(d.Id())
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
-
 		if _, err := conn.ReleaseBackend(req); err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error in delete lb attachment %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on deleting lb attachment %s, %s", d.Id(), err))
 		}
 
 		_, err := client.describeBackendById(lbId, listenerId, d.Id())
-
 		if err != nil {
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(fmt.Errorf("do %s failed in delete lb attachment %s, %s", "DescribeVServer", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on reading lb attachment when deleting %s, %s", d.Id(), err))
 		}
 
-		return resource.RetryableError(fmt.Errorf("delete lb attachment but it still exists"))
+		return resource.RetryableError(fmt.Errorf("the specified lb attachment %s has not been deleted due to unknown error", d.Id()))
 	})
+}
+
+func lbAttachmentWaitForState(client *UCloudClient, lbId, listenerId, id string) *resource.StateChangeConf {
+	return &resource.StateChangeConf{
+		Pending:    []string{statusPending},
+		Target:     []string{statusInitialized},
+		Timeout:    10 * time.Minute,
+		Delay:      5 * time.Second,
+		MinTimeout: 3 * time.Second,
+		Refresh: func() (interface{}, string, error) {
+			backendSet, err := client.describeBackendById(lbId, listenerId, id)
+			if err != nil {
+				if isNotFoundError(err) {
+					return nil, statusPending, nil
+				}
+				return nil, "", err
+			}
+
+			state := lbAttachmentStatusCvt.convert(backendSet.Status)
+			if state != "normalRunning" {
+				state = statusPending
+			} else {
+				state = statusInitialized
+			}
+
+			return backendSet, state, nil
+		},
+	}
 }

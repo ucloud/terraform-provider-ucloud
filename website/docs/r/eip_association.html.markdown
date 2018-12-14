@@ -13,41 +13,57 @@ Provides an EIP Association resource for associating Elastic IP to UHost Instanc
 ## Example Usage
 
 ```hcl
+# Query availability zone
+data "ucloud_zones" "default" {}
+
+# Query image
+data "ucloud_images" "default" {
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  name_regex        = "^CentOS 7.[1-2] 64"
+  image_type        = "base"
+}
+
+# Create security group
 resource "ucloud_security_group" "default" {
-    name = "tf-example-eip"
-    tag  = "tf-example"
+  name = "tf-example-eip"
+  tag  = "tf-example"
 
-    rules {
-        port_range = "80"
-        protocol   = "TCP"
-        cidr_block = "192.168.0.0/16"
-        policy     = "ACCEPT"
-    }
+  rules {
+    port_range = "80"
+    protocol   = "tcp"
+    cidr_block = "192.168.0.0/16"
+    policy     = "accept"
+  }
 }
 
+# Create an eip
 resource "ucloud_eip" "default" {
-    bandwidth            = 2
-    internet_charge_mode = "Bandwidth"
-    name                 = "tf-example-eip"
-    tag                  = "tf-example"
+  bandwidth     = 2
+  charge_mode   = "bandwidth"
+  name          = "tf-example-eip"
+  tag           = "tf-example"
+  internet_type = "bgp"
 }
 
+# Create a web server
 resource "ucloud_instance" "web" {
-    instance_type     = "n-standard-1"
-    availability_zone = "cn-sh2-02"
+  instance_type     = "n-standard-1"
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  image_id          = "${data.ucloud_images.default.images.0.id}"
 
-    root_password      = "wA1234567"
-    image_id           = "uimage-of3pac"
-    security_group     = "${ucloud_security_group.default.id}"
+  data_disk_size = 50
+  root_password  = "${var.instance_password}"
+  security_group = "${ucloud_security_group.default.id}"
 
-    name              = "tf-example-eip"
-    tag               = "tf-example"
+  name = "tf-example-eip"
+  tag  = "tf-example"
 }
 
+# Bind eip to instance
 resource "ucloud_eip_association" "default" {
-    resource_type = "instance"
-    resource_id   = "${ucloud_instance.web.id}"
-    eip_id        = "${ucloud_eip.default.id}"
+  resource_type = "instance"
+  resource_id   = "${ucloud_instance.web.id}"
+  eip_id        = "${ucloud_eip.default.id}"
 }
 ```
 
@@ -57,4 +73,4 @@ The following arguments are supported:
 
 * `eip_id` - (Required) The ID of EIP.
 * `resource_id` - (Required) The ID of resource with EIP attached.
-* `resource_type` - (Required) The type of resource with EIP attached, possible values are "instance" as instance, "vrouter" as virtual router, "lb" as load balancer, "upm" as physical server, "hadoophost" as hadoop cluster, "fortresshost" as fortress host server, "udockhost" as docker host, "udhost" as dedicated host, "natgw" as NAT GateWay host, "udb" as data base host, "vpngw" as ipsec vpn host, "ucdr" as cloud diaster recovery host, "dbaudit" as data base auditing host.
+* `resource_type` - (Required) The type of resource with EIP attached. The current possible values are `"instance"` as instance, `"lb"` as load balancer.

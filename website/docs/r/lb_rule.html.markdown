@@ -20,7 +20,7 @@ resource "ucloud_lb" "web" {
 
 resource "ucloud_lb_listener" "default" {
     load_balancer_id = "${ucloud_lb.web.id}"
-    protocol         = "HTTPS"
+    protocol         = "https"
 }
 
 resource "ucloud_security_group" "default" {
@@ -29,15 +29,15 @@ resource "ucloud_security_group" "default" {
 
     rules {
         port_range = "80"
-        protocol   = "TCP"
+        protocol   = "tcp"
         cidr_block = "192.168.0.0/16"
-        policy     = "ACCEPT"
+        policy     = "accept"
     }
 }
 
 resource "ucloud_instance" "web" {
     instance_type     = "n-standard-1"
-    availability_zone = "cn-sh2-02"
+    availability_zone = "cn-bj2-02"
 
     root_password      = "wA1234567"
     image_id           = "uimage-of3pac"
@@ -68,7 +68,7 @@ resource "ucloud_lb_rule" "example" {
 The following arguments are supported:
 
 * `load_balancer_id` - (Required) The ID of the load balancer which requires the rule.
-* `listener_id` - (Required) The ID of the listeners which require the rule.
-* `backend_ids` - (Required) The ID of the backend server where rule applies , this argument is populated base on the "BackendId" responed from "lb attachment create".
-* `path` - (Optional) The path of Content forward matching fields. path and domain cannot coexist. path and domain must fill in one.
-* `domain` - (Optional) The domain of Content forward matching fields.path and domain cannot coexist. path and domain must fill in one.
+* `listener_id` - (Required) The ID of the listener which requires the rule.
+* `backend_ids` - (Required) The IDs of the backend servers where rule applies, this argument is populated base on the `"backend_id"` responed from `"lb_attachment create"`.
+* `path` - (Optional) The path of Content forward matching fields. `path` and `domain` cannot coexist. `path` and `domain` must be filled in one.
+* `domain` - (Optional) The domain of content forward matching fields. `path` and `domain` cannot coexist. `path` and `domain` must be filled in one.

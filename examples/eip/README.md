@@ -1,6 +1,6 @@
 # Elastic IP Example
 
-The eip example launches elastic ip and also bind UHost instance.
+The eip example launches elastic ip and also bind Host instance.
 
 To run, configure your UCloud provider as described in https://www.terraform.io/docs/providers/ucloud/index.html
 

@@ -13,7 +13,7 @@ import (
 func TestAccUCloudDisk_basic(t *testing.T) {
 	var diskSet udisk.UDiskDataSet
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -29,18 +29,18 @@ func TestAccUCloudDisk_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDiskExists("ucloud_disk.foo", &diskSet),
 					testAccCheckDiskAttributes(&diskSet),
-					resource.TestCheckResourceAttr("ucloud_disk.foo", "name", "testAcc"),
+					resource.TestCheckResourceAttr("ucloud_disk.foo", "name", "tf-acc-disk-basic"),
 					resource.TestCheckResourceAttr("ucloud_disk.foo", "disk_size", "10"),
 				),
 			},
 
 			resource.TestStep{
-				Config: testAccDiskConfigTwo,
+				Config: testAccDiskConfigUpdate,
 
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDiskExists("ucloud_disk.foo", &diskSet),
 					testAccCheckDiskAttributes(&diskSet),
-					resource.TestCheckResourceAttr("ucloud_disk.foo", "name", "testAccTwo"),
+					resource.TestCheckResourceAttr("ucloud_disk.foo", "name", "tf-acc-disk-basic-update"),
 					resource.TestCheckResourceAttr("ucloud_disk.foo", "disk_size", "20"),
 				),
 			},
@@ -103,7 +103,7 @@ func testAccCheckDiskDestroy(s *terraform.State) error {
 		}
 
 		if d.UDiskId != "" {
-			return fmt.Errorf("Disk still exist")
+			return fmt.Errorf("disk still exist")
 		}
 	}
 
@@ -111,16 +111,23 @@ func testAccCheckDiskDestroy(s *terraform.State) error {
 }
 
 const testAccDiskConfig = `
+data "ucloud_zones" "default" {}
+
 resource "ucloud_disk" "foo" {
-	availability_zone = "cn-sh2-02"
-	name = "testAcc"
-	disk_size = 10
+	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+	name              = "tf-acc-disk-basic"
+	tag               = "tf-acc"
+	disk_size         = 10
 }
 `
-const testAccDiskConfigTwo = `
+const testAccDiskConfigUpdate = `
+data "ucloud_zones" "default" {
+}
+
 resource "ucloud_disk" "foo" {
-	availability_zone = "cn-sh2-02"
-	name = "testAccTwo"
-	disk_size = 20
+	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+	name              = "tf-acc-disk-basic-update"
+	tag               = "tf-acc"
+	disk_size         = 20
 }
 `

@@ -13,7 +13,7 @@ import (
 func TestAccUCloudLB_basic(t *testing.T) {
 	var lbSet ulb.ULBSet
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -29,7 +29,7 @@ func TestAccUCloudLB_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBExists("ucloud_lb.foo", &lbSet),
 					testAccCheckLBAttributes(&lbSet),
-					resource.TestCheckResourceAttr("ucloud_lb.foo", "name", "testAcc"),
+					resource.TestCheckResourceAttr("ucloud_lb.foo", "name", "tf-acc-lb"),
 				),
 			},
 
@@ -39,7 +39,7 @@ func TestAccUCloudLB_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBExists("ucloud_lb.foo", &lbSet),
 					testAccCheckLBAttributes(&lbSet),
-					resource.TestCheckResourceAttr("ucloud_lb.foo", "name", "testAccTwo"),
+					resource.TestCheckResourceAttr("ucloud_lb.foo", "name", "tf-acc-lb-two"),
 				),
 			},
 		},
@@ -110,11 +110,13 @@ func testAccCheckLBDestroy(s *terraform.State) error {
 
 const testAccLBConfig = `
 resource "ucloud_lb" "foo" {
-	name = "testAcc"
+	name = "tf-acc-lb"
+	tag  = "tf-acc"
 }
 `
 const testAccLBConfigTwo = `
 resource "ucloud_lb" "foo" {
-	name = "testAccTwo"
+	name = "tf-acc-lb-two"
+	tag  = "tf-acc"
 }
 `
