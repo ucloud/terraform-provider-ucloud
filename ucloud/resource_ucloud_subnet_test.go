@@ -43,7 +43,7 @@ func TestAccUCloudSubnet_basic(t *testing.T) {
 					testAccCheckSubnetAttributes(&val),
 					resource.TestCheckResourceAttr("ucloud_subnet.foo", "cidr_block", "192.168.1.0/24"),
 					resource.TestCheckResourceAttr("ucloud_subnet.foo", "name", "tf-acc-subnet-two"),
-					resource.TestCheckResourceAttr("ucloud_subnet.foo", "tag", "tf-acc-two"),
+					resource.TestCheckResourceAttr("ucloud_subnet.foo", "tag", defaultTag),
 				),
 			},
 		},
@@ -138,7 +138,7 @@ resource "ucloud_vpc" "foo" {
 
 resource "ucloud_subnet" "foo" {
 	name       = "tf-acc-subnet-two"
-	tag        = "tf-acc-two"
+	tag        = ""
 	cidr_block = "192.168.1.0/24"
 	vpc_id     = "${ucloud_vpc.foo.id}"
 }

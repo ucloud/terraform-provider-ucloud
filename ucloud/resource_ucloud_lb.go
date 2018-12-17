@@ -62,8 +62,9 @@ func resourceUCloudLB() *schema.Resource {
 			"tag": &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
-				Computed:     true,
+				Default:      defaultTag,
 				ValidateFunc: validateTag,
+				StateFunc:    stateFuncTag,
 			},
 
 			"remark": &schema.Schema{
@@ -116,8 +117,11 @@ func resourceUCloudLBCreate(d *schema.ResourceData, meta interface{}) error {
 	req.ChargeType = ucloud.String(upperCamelCvt.convert(d.Get("charge_type").(string)))
 	req.ULBName = ucloud.String(d.Get("name").(string))
 
-	if val, ok := d.GetOk("tag"); ok {
-		req.Tag = ucloud.String(val.(string))
+	// if tag is empty string, use default tag
+	if v, ok := d.GetOk("tag"); ok {
+		req.Tag = ucloud.String(v.(string))
+	} else {
+		req.Tag = ucloud.String(defaultTag)
 	}
 
 	if val, ok := d.GetOk("remark"); ok {
@@ -172,7 +176,13 @@ func resourceUCloudLBUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	if d.HasChange("tag") && !d.IsNewResource() {
 		isChanged = true
-		req.Tag = ucloud.String(d.Get("tag").(string))
+
+		// if tag is empty string, use default tag
+		if v, ok := d.GetOk("tag"); ok {
+			req.Tag = ucloud.String(v.(string))
+		} else {
+			req.Tag = ucloud.String(defaultTag)
+		}
 	}
 
 	if d.HasChange("remark") && !d.IsNewResource() {

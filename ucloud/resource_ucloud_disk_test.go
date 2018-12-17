@@ -46,7 +46,34 @@ func TestAccUCloudDisk_basic(t *testing.T) {
 			},
 		},
 	})
+}
 
+func TestAccUCloudDisk_tag(t *testing.T) {
+	var diskSet udisk.UDiskDataSet
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		IDRefreshName: "ucloud_disk.foo",
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckDiskDestroy,
+
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccDiskDefaultTag,
+
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDiskExists("ucloud_disk.foo", &diskSet),
+					testAccCheckDiskAttributes(&diskSet),
+					resource.TestCheckResourceAttr("ucloud_disk.foo", "name", "tf-acc-disk-tag"),
+					resource.TestCheckResourceAttr("ucloud_disk.foo", "tag", defaultTag),
+					resource.TestCheckResourceAttr("ucloud_disk.foo", "disk_size", "10"),
+				),
+			},
+		},
+	})
 }
 
 func testAccCheckDiskExists(n string, diskSet *udisk.UDiskDataSet) resource.TestCheckFunc {
@@ -120,6 +147,7 @@ resource "ucloud_disk" "foo" {
 	disk_size         = 10
 }
 `
+
 const testAccDiskConfigUpdate = `
 data "ucloud_zones" "default" {
 }
@@ -129,5 +157,20 @@ resource "ucloud_disk" "foo" {
 	name              = "tf-acc-disk-basic-update"
 	tag               = "tf-acc"
 	disk_size         = 20
+}
+`
+
+const testAccDiskDefaultTag = `
+locals {
+	tag = ""
+}
+
+data "ucloud_zones" "default" {}
+
+resource "ucloud_disk" "foo" {
+	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+	name              = "tf-acc-disk-tag"
+	tag               = "${local.tag}"
+	disk_size         = 10
 }
 `

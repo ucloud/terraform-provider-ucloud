@@ -30,6 +30,7 @@ func TestAccUCloudVPC_basic(t *testing.T) {
 					testAccCheckVPCExists("ucloud_vpc.foo", &val),
 					testAccCheckVPCAttributes(&val),
 					resource.TestCheckResourceAttr("ucloud_vpc.foo", "name", "tf-acc-vpc"),
+					resource.TestCheckResourceAttr("ucloud_vpc.foo", "tag", defaultTag),
 					resource.TestCheckResourceAttr("ucloud_vpc.foo", "cidr_blocks.494140204", "192.168.0.0/16"),
 				),
 			},
@@ -102,7 +103,7 @@ func testAccCheckVPCDestroy(s *terraform.State) error {
 const testAccVPCConfig = `
 resource "ucloud_vpc" "foo" {
 	name        = "tf-acc-vpc"
-	tag         = "tf-acc"
+	tag         = ""
 	cidr_blocks = ["192.168.0.0/16"]
 }
 `

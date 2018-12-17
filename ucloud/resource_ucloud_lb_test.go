@@ -30,6 +30,7 @@ func TestAccUCloudLB_basic(t *testing.T) {
 					testAccCheckLBExists("ucloud_lb.foo", &lbSet),
 					testAccCheckLBAttributes(&lbSet),
 					resource.TestCheckResourceAttr("ucloud_lb.foo", "name", "tf-acc-lb"),
+					resource.TestCheckResourceAttr("ucloud_lb.foo", "tag", "tf-acc"),
 				),
 			},
 
@@ -40,6 +41,7 @@ func TestAccUCloudLB_basic(t *testing.T) {
 					testAccCheckLBExists("ucloud_lb.foo", &lbSet),
 					testAccCheckLBAttributes(&lbSet),
 					resource.TestCheckResourceAttr("ucloud_lb.foo", "name", "tf-acc-lb-two"),
+					resource.TestCheckResourceAttr("ucloud_lb.foo", "name", defaultTag),
 				),
 			},
 		},
@@ -117,6 +119,6 @@ resource "ucloud_lb" "foo" {
 const testAccLBConfigTwo = `
 resource "ucloud_lb" "foo" {
 	name = "tf-acc-lb-two"
-	tag  = "tf-acc"
+	tag  = ""
 }
 `

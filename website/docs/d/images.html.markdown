@@ -30,9 +30,9 @@ The following arguments are supported:
 
 * `availability_zone` - (Optional) Availability zone where instances are located. You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
 * `image_id` - (Optional) The ID of image.
-* `name_regex` - (Optional) A regex string to filter resulting images by name. (Such as: `"^CentOS 7.[1-2] 64"` means CentOS 7.1 of 64-bit operating system or CentOS 7.2 of 64-bit operating system, "^Ubuntu 16.04 64" means Ubuntu 16.04 of 64-bit operating system).
-* `image_type` - (Optional) The type of image. Possible values are: `"base"` as standard image, `"business"` as owned by market place, and `"custom"` as custom-image, all the image types will be retrieved by default.
-* `os_type` - (Optional) The type of OS. Possible values are: `"linux"` and `"windows"`, all the OS types will be retrieved by default.
+* `name_regex` - (Optional) A regex string to filter resulting images by name. (Such as: `^CentOS 7.[1-2] 64` means CentOS 7.1 of 64-bit operating system or CentOS 7.2 of 64-bit operating system, "^Ubuntu 16.04 64" means Ubuntu 16.04 of 64-bit operating system).
+* `image_type` - (Optional) The type of image. Possible values are: `base` as standard image, `business` as owned by market place, and `custom` as custom-image, all the image types will be retrieved by default.
+* `os_type` - (Optional) The type of OS. Possible values are: `linux` and `windows`, all the OS types will be retrieved by default.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
@@ -45,7 +45,7 @@ In addition to all arguments above, the following attributes are exported:
 The attribute (`images`) support the following:
 
 * `create_time` - The time of creation for EIP, formatted in RFC3339 time string.
-* `features` - To identify if any particular feature belongs to the instance, the value is `"NetEnhnced"` as I/O enhanced instance for now.
+* `features` - To identify if any particular feature belongs to the instance, the value is `NetEnhnced` as I/O enhanced instance for now.
 * `description` - The description of image if any.
 * `id` - The ID of image.
 * `name` - The name of image.
@@ -53,4 +53,4 @@ The attribute (`images`) support the following:
 * `type` - The type of image.
 * `os_name` - The name of OS.
 * `os_type` - The type of OS.
-* `status` - The status of image. Possible values are `"Available"`, `"Making"` and `"Unavailable"`.
+* `status` - The status of image. Possible values are `Available`, `Making` and `Unavailable`.

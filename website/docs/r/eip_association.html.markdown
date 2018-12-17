@@ -73,4 +73,4 @@ The following arguments are supported:
 
 * `eip_id` - (Required) The ID of EIP.
 * `resource_id` - (Required) The ID of resource with EIP attached.
-* `resource_type` - (Required) The type of resource with EIP attached. The current possible values are `"instance"` as instance, `"lb"` as load balancer.
+* `resource_type` - (Required) The type of resource with EIP attached. The current possible values are `instance` as instance, `lb` as load balancer.

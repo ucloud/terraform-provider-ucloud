@@ -97,8 +97,9 @@ func resourceUCloudSecurityGroup() *schema.Resource {
 			"tag": &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
-				Computed:     true,
+				Default:      defaultTag,
 				ValidateFunc: validateTag,
+				StateFunc:    stateFuncTag,
 			},
 
 			"remark": &schema.Schema{
@@ -123,8 +124,11 @@ func resourceUCloudSecurityGroupCreate(d *schema.ResourceData, meta interface{})
 	req.Name = ucloud.String(d.Get("name").(string))
 	req.Rule = buildRuleParameter(d.Get("rules"))
 
+	// if tag is empty string, use default tag
 	if v, ok := d.GetOk("tag"); ok {
 		req.Tag = ucloud.String(v.(string))
+	} else {
+		req.Tag = ucloud.String(defaultTag)
 	}
 
 	if v, ok := d.GetOk("remark"); ok {
@@ -187,7 +191,13 @@ func resourceUCloudSecurityGroupUpdate(d *schema.ResourceData, meta interface{})
 
 	if d.HasChange("tag") && !d.IsNewResource() {
 		isChanged = true
-		req.Tag = ucloud.String(d.Get("tag").(string))
+
+		// if tag is empty string, use default tag
+		if v, ok := d.GetOk("tag"); ok {
+			req.Tag = ucloud.String(v.(string))
+		} else {
+			req.Tag = ucloud.String(defaultTag)
+		}
 	}
 
 	if d.HasChange("remark") && !d.IsNewResource() {

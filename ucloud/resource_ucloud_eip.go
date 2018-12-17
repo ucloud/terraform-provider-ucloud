@@ -85,8 +85,9 @@ func resourceUCloudEIP() *schema.Resource {
 			"tag": &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
-				Computed:     true,
+				Default:      defaultTag,
 				ValidateFunc: validateTag,
+				StateFunc:    stateFuncTag,
 			},
 
 			"status": &schema.Schema{
@@ -159,8 +160,11 @@ func resourceUCloudEIPCreate(d *schema.ResourceData, meta interface{}) error {
 		req.Name = ucloud.String(v.(string))
 	}
 
+	// if tag is empty string, use default tag
 	if v, ok := d.GetOk("tag"); ok {
 		req.Tag = ucloud.String(v.(string))
+	} else {
+		req.Tag = ucloud.String(defaultTag)
 	}
 
 	if v, ok := d.GetOk("remark"); ok {
@@ -249,8 +253,14 @@ func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if d.HasChange("tag") && !d.IsNewResource() {
-		reqAttribute.Tag = ucloud.String(d.Get("tag").(string))
 		isChanged = true
+
+		// if tag is empty string, use default tag
+		if v, ok := d.GetOk("tag"); ok {
+			reqAttribute.Tag = ucloud.String(v.(string))
+		} else {
+			reqAttribute.Tag = ucloud.String(defaultTag)
+		}
 	}
 
 	if d.HasChange("remark") && !d.IsNewResource() {

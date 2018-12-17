@@ -34,4 +34,4 @@ In addition to all arguments above, the following attributes are exported:
 
 The attribute (`zones`) support the following:
 
-* `id` - Availability zone where instances are located (such as: `"cn-bj-02"`). You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
+* `id` - Availability zone where instances are located (such as: `cn-bj-02`). You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)

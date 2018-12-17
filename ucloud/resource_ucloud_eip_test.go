@@ -32,6 +32,7 @@ func TestAccUCloudEIP_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ucloud_eip.foo", "bandwidth", "1"),
 					resource.TestCheckResourceAttr("ucloud_eip.foo", "name", "tf-acc-eip"),
 					resource.TestCheckResourceAttr("ucloud_eip.foo", "charge_mode", "bandwidth"),
+					resource.TestCheckResourceAttr("ucloud_eip.foo", "tag", defaultTag),
 				),
 			},
 
@@ -44,17 +45,29 @@ func TestAccUCloudEIP_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ucloud_eip.foo", "bandwidth", "2"),
 					resource.TestCheckResourceAttr("ucloud_eip.foo", "name", "tf-acc-eip-two"),
 					resource.TestCheckResourceAttr("ucloud_eip.foo", "charge_mode", "traffic"),
+					resource.TestCheckResourceAttr("ucloud_eip.foo", "tag", "tf-acc"),
+				),
+			},
+
+			resource.TestStep{
+				Config: testAccEIPConfigThree,
+
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckEIPExists("ucloud_eip.foo", &eip),
+					testAccCheckEIPAttributes(&eip),
+					resource.TestCheckResourceAttr("ucloud_eip.foo", "bandwidth", "2"),
+					resource.TestCheckResourceAttr("ucloud_eip.foo", "name", "tf-acc-eip-three"),
+					resource.TestCheckResourceAttr("ucloud_eip.foo", "charge_mode", "traffic"),
+					resource.TestCheckResourceAttr("ucloud_eip.foo", "tag", defaultTag),
 				),
 			},
 		},
 	})
-
 }
 
 func testAccCheckEIPExists(n string, eip *unet.UnetEIPSet) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
-
 		if !ok {
 			return fmt.Errorf("not found: %s", n)
 		}
@@ -118,13 +131,26 @@ resource "ucloud_eip" "foo" {
 	bandwidth     = 1
 	internet_type = "bgp"
 	charge_mode   = "bandwidth"
+	tag           = ""
 }
 `
+
 const testAccEIPConfigTwo = `
 resource "ucloud_eip" "foo" {
 	name          = "tf-acc-eip-two"
 	bandwidth     = 2
 	internet_type = "bgp"
 	charge_mode   = "traffic"
+	tag           = "tf-acc"
+}
+`
+
+const testAccEIPConfigThree = `
+resource "ucloud_eip" "foo" {
+	name          = "tf-acc-eip-three"
+	bandwidth     = 2
+	internet_type = "bgp"
+	charge_mode   = "traffic"
+	tag           = ""
 }
 `
