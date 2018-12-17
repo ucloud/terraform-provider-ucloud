@@ -234,7 +234,7 @@ resource "ucloud_instance" "foo" {
   instance_type     = "n-basic-2"
   root_password     = "wA1234567"
   name              = "tf-acc-instance-config-basic-update"
-  tag               = "tf-acc"
+  tag               = ""
 }`, rInt)
 }
 
