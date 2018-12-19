@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/hashicorp/terraform/plugin"
-	"github.com/ucloud/terraform-provider-ucloud/ucloud"
+	"github.com/terraform-providers/terraform-provider-ucloud/ucloud"
 )
 
 func main() {
