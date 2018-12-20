@@ -11,22 +11,22 @@ Requirements
 ------------
 
 - [Terraform](https://www.terraform.io/downloads.html) 0.11.x
-- [Go](https://golang.org/doc/install) 1.10 (to build the provider plugin)
+- [Go](https://golang.org/doc/install) 1.11 (to build the provider plugin)
 
 Building The Provider
 ---------------------
 
-Clone repository to: `$GOPATH/src/github.com/ucloud/terraform-provider-ucloud`
+Clone repository to: `$GOPATH/src/github.com/terraform-providers/terraform-provider-ucloud`
 
 ```sh
-$ mkdir -p $GOPATH/src/github.com/ucloud; cd $GOPATH/src/github.com/ucloud
-$ git clone git@github.com:ucloud/terraform-provider-ucloud
+$ mkdir -p $GOPATH/src/github.com/terraform-providers; cd $GOPATH/src/github.com/terraform-providers
+$ git clone git@github.com:terraform-providers/terraform-provider-ucloud
 ```
 
 Enter the provider directory and build the provider
 
 ```sh
-$ cd $GOPATH/src/github.com/ucloud/terraform-provider-ucloud
+$ cd $GOPATH/src/github.com/terraform-providers/terraform-provider-ucloud
 $ make build
 ```
 
@@ -38,7 +38,7 @@ If you're building the provider, follow the instructions to [install it as a plu
 Developing the Provider
 ---------------------------
 
-If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (version 1.10+ is *required*). You'll also need to correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
+If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (version 1.11+ is *required*). You'll also need to correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
 
 To compile the provider, run `make build`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
 
@@ -70,7 +70,7 @@ Before making a release, the resources and data sources are tested automatically
 You can run them by entering the following instructions in a terminal:
 
 ```
-cd $GOPATH/src/github.com/ucloud/terraform-provider
+cd $GOPATH/src/github.com/terraform-providers/terraform-provider-ucloud
 export UCLOUD_PUBLIC_KEY=xxx
 export UCLOUD_PRIVATE_KEY=xxx
 export UCLOUD_REGION=xxx
