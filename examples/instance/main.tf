@@ -58,7 +58,7 @@ resource "ucloud_subnet" "default" {
 
 # Create a web server
 resource "ucloud_instance" "web" {
-  name              = "tf-example-instance-${format(var.count_format, count.index+1)}"
+  name              = "tf-example-instance"
   tag               = "tf-example"
   availability_zone = "${data.ucloud_zones.default.zones.0.id}"
   image_id          = "${data.ucloud_images.default.images.0.id}"
@@ -77,6 +77,4 @@ resource "ucloud_instance" "web" {
 
   # this security group allows HTTP and HTTPS access
   security_group = "${ucloud_security_group.default.id}"
-
-  count = "${var.count}"
 }

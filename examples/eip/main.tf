@@ -30,9 +30,11 @@ resource "ucloud_security_group" "default" {
 resource "ucloud_eip" "default" {
   bandwidth     = 2
   charge_mode   = "bandwidth"
-  name          = "tf-example-eip"
+  name          = "tf-example-eip-${format(var.count_format, count.index + 1)}"
   tag           = "tf-example"
   internet_type = "bgp"
+
+  count = "${var.count}"
 }
 
 # Create a web server
@@ -45,13 +47,17 @@ resource "ucloud_instance" "web" {
   root_password  = "${var.instance_password}"
   security_group = "${ucloud_security_group.default.id}"
 
-  name = "tf-example-eip"
+  name = "tf-example-eip-${format(var.count_format, count.index + 1)}"
   tag  = "tf-example"
+
+  count = "${var.count}"
 }
 
 # Bind eip to instance
 resource "ucloud_eip_association" "default" {
   resource_type = "instance"
-  resource_id   = "${ucloud_instance.web.id}"
-  eip_id        = "${ucloud_eip.default.id}"
+  resource_id   = "${element(ucloud_instance.web.*.id, count.index)}"
+  eip_id        = "${element(ucloud_eip.default.*.id, count.index)}"
+
+  count = "${var.count}"
 }

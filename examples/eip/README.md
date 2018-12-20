@@ -1,6 +1,6 @@
 # Elastic IP Example
 
-The eip example launches elastic ip and also bind Host instance.
+The eip example launches elastic ip and also bind Host instance. The count parameter in variables.tf can let you create specify number Host instances.
 
 To run, configure your UCloud provider as described in https://www.terraform.io/docs/providers/ucloud/index.html
 
