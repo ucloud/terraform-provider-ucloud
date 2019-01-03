@@ -35,7 +35,7 @@ func TestAccUCloudInstance_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "tag", "tf-acc"),
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "instance_type", "n-highcpu-1"),
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "cpu", "1"),
-					resource.TestCheckResourceAttr("ucloud_instance.foo", "memory", "1024"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "memory", "1"),
 				),
 			},
 			resource.TestStep{
@@ -47,7 +47,7 @@ func TestAccUCloudInstance_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "tag", defaultTag),
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "instance_type", "n-basic-2"),
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "cpu", "2"),
-					resource.TestCheckResourceAttr("ucloud_instance.foo", "memory", "4096"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "memory", "4"),
 				),
 			},
 		},

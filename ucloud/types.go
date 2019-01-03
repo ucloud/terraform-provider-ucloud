@@ -155,6 +155,11 @@ func parseInstanceTypeByCustomize(splited ...string) (*instanceType, error) {
 		return nil, fmt.Errorf("memory count is invalid, it must between 1 ~ 128")
 	}
 
+	if memory/cpu == 1 || memory/cpu == 2 || memory/cpu == 4 || memory/cpu == 8 {
+		return nil, fmt.Errorf("instance type is invalid, expected %s like %s,"+
+			"the Type can be highcpu, basic, standard, highmem when the ratio of cpu to memory is 1:1, 1:2, 1:4, 1:8", "n-Type-CPU", "n-standard-1")
+	}
+
 	t := &instanceType{}
 	t.HostType = hostType
 	t.HostScaleType = hostScaleType
