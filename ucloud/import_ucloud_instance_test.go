@@ -26,13 +26,9 @@ func TestAccUCloudInstance_import(t *testing.T) {
 				ImportStateVerify: true,
 
 				ImportStateVerifyIgnore: []string{
-					"instance_type",
 					"root_password",
 					"security_group",
-					"image_id",
 					"duration",
-					"data_disk_type",
-					"boot_disk_type",
 				},
 			},
 		},

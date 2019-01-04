@@ -2,6 +2,7 @@ package ucloud
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -320,6 +321,8 @@ func resourceUCloudEIPRead(d *schema.ResourceData, meta interface{}) error {
 			"ip":            item.IP,
 			"internet_type": item.OperatorName,
 		})
+
+		d.Set("internet_type", strings.ToLower(item.OperatorName))
 	}
 
 	if err := d.Set("ip_set", eipAddr); err != nil {

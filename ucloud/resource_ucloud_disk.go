@@ -197,6 +197,7 @@ func resourceUCloudDiskRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("create_time", timestampToString(diskSet.CreateTime))
 	d.Set("expire_time", timestampToString(diskSet.ExpiredTime))
 	d.Set("status", diskSet.Status)
+	d.Set("disk_type", diskTypeCvt.convert(diskSet.DiskType))
 
 	return nil
 }

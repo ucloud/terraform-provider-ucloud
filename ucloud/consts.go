@@ -101,6 +101,11 @@ var boolValueCvt = newBoolConverter(map[bool]string{
 	false: "False",
 })
 
+var diskTypeCvt = newStringConverter(map[string]string{
+	"DataDisk":    "data_disk",
+	"SSDDataDisk": "ssd_data_disk",
+})
+
 // upperCvt is used to transform uppercase with underscore to lowercase with underscore. eg. LOCAL_SSD -> local_ssd
 var upperCvt = newUpperConverter(nil)
 

@@ -591,7 +591,7 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 	memory := instance.Memory
 	cpu := instance.CPU
 	d.Set("security_group", d.Get("security_group"))
-	d.Set("image_id", d.Get("image_id"))
+	d.Set("image_id", instance.BasicImageId)
 	d.Set("root_password", d.Get("root_password"))
 	d.Set("name", instance.Name)
 	d.Set("charge_type", upperCamelCvt.convert(instance.ChargeType))
