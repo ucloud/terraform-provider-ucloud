@@ -2,6 +2,7 @@ package ucloud
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -10,11 +11,22 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 )
 
+const (
+	eipResourceTypeULB   = "ulb"
+	eipResourceTypeUHost = "uhost"
+)
+
 func resourceUCloudEIPAssociation() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceUCloudEIPAssociationCreate,
 		Read:   resourceUCloudEIPAssociationRead,
 		Delete: resourceUCloudEIPAssociationDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
+
+		SchemaVersion: 1,
+		MigrateState:  resourceUCloudEIPAssociationMigrateState,
 
 		Schema: map[string]*schema.Schema{
 			"eip_id": &schema.Schema{
@@ -25,8 +37,10 @@ func resourceUCloudEIPAssociation() *schema.Resource {
 
 			"resource_type": &schema.Schema{
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
 				ForceNew:     true,
+				Computed:     true,
+				Deprecated:   "attribute `resource_type` is deprecated for optimizing parameters",
 				ValidateFunc: validation.StringInSlice([]string{"instance", "lb"}, false),
 			},
 
@@ -44,8 +58,11 @@ func resourceUCloudEIPAssociationCreate(d *schema.ResourceData, meta interface{}
 	conn := client.unetconn
 
 	eipId := d.Get("eip_id").(string)
-	resourceType := lowerCaseProdCvt.convert(d.Get("resource_type").(string))
 	resourceId := d.Get("resource_id").(string)
+	resourceType := eipResourceTypeUHost
+	if strings.HasPrefix(resourceId, "ulb-") {
+		resourceType = eipResourceTypeULB
+	}
 
 	req := conn.NewBindEIPRequest()
 	req.EIPId = ucloud.String(eipId)
@@ -57,7 +74,7 @@ func resourceUCloudEIPAssociationCreate(d *schema.ResourceData, meta interface{}
 		return fmt.Errorf("error on creating eip association, %s", err)
 	}
 
-	d.SetId(fmt.Sprintf("eip#%s:%s#%s", eipId, resourceType, resourceId))
+	d.SetId(fmt.Sprintf("%s:%s", eipId, resourceId))
 
 	// after bind eip we need to wait it completed
 	stateConf := &resource.StateChangeConf{
@@ -91,12 +108,8 @@ func resourceUCloudEIPAssociationCreate(d *schema.ResourceData, meta interface{}
 func resourceUCloudEIPAssociationRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
 
-	assoc, err := parseAssociationInfo(d.Id())
-	if err != nil {
-		return fmt.Errorf("error on parsing eip association %s, %s", d.Id(), err)
-	}
-
-	resource, err := client.describeEIPResourceById(assoc.PrimaryId, assoc.ResourceType, assoc.ResourceId)
+	p := strings.Split(d.Id(), ":")
+	resource, err := client.describeEIPResourceById(p[0], p[1])
 	if err != nil {
 		if isNotFoundError(err) {
 			d.SetId("")
@@ -117,22 +130,22 @@ func resourceUCloudEIPAssociationDelete(d *schema.ResourceData, meta interface{}
 	client := meta.(*UCloudClient)
 	conn := client.unetconn
 
-	assoc, err := parseAssociationInfo(d.Id())
-	if err != nil {
-		return fmt.Errorf("error on parsing eip association %s, %s", d.Id(), err)
-	}
-
+	p := strings.Split(d.Id(), ":")
 	req := conn.NewUnBindEIPRequest()
-	req.EIPId = ucloud.String(assoc.PrimaryId)
-	req.ResourceId = ucloud.String(assoc.ResourceId)
-	req.ResourceType = ucloud.String(assoc.ResourceType)
+	req.EIPId = ucloud.String(p[0])
+	req.ResourceId = ucloud.String(p[1])
+	resourceType := eipResourceTypeUHost
+	if strings.HasPrefix(p[1], "ulb-") {
+		resourceType = eipResourceTypeULB
+	}
+	req.ResourceType = ucloud.String(resourceType)
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		if _, err := conn.UnBindEIP(req); err != nil {
 			return resource.NonRetryableError(fmt.Errorf("error on deleting eip association %s, %s", d.Id(), err))
 		}
 
-		_, err := client.describeEIPResourceById(assoc.PrimaryId, assoc.ResourceType, assoc.ResourceId)
+		_, err := client.describeEIPResourceById(p[0], p[1])
 		if err != nil {
 			if isNotFoundError(err) {
 				return nil
