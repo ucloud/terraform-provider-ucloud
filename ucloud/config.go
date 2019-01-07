@@ -49,6 +49,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 	// enable auto retry with http/connection error
 	config.MaxRetries = c.MaxRetries
 	config.LogLevel = log.DebugLevel
+	config.UserAgent = "Terraform/1"
 
 	// set endpoint with insecure https connection
 	if c.Insecure {
