@@ -29,7 +29,7 @@ func resourceUCloudSecurityGroup() *schema.Resource {
 			"name": &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      resource.PrefixedUniqueId("tf-security-group-"),
+				Computed:     true,
 				ValidateFunc: validateName,
 			},
 
@@ -121,8 +121,13 @@ func resourceUCloudSecurityGroupCreate(d *schema.ResourceData, meta interface{})
 	conn := client.unetconn
 
 	req := conn.NewCreateFirewallRequest()
-	req.Name = ucloud.String(d.Get("name").(string))
 	req.Rule = buildRuleParameter(d.Get("rules"))
+
+	if v, ok := d.GetOk("name"); ok {
+		req.Name = ucloud.String(v.(string))
+	} else {
+		req.Name = ucloud.String(resource.PrefixedUniqueId("tf-security-group-"))
+	}
 
 	// if tag is empty string, use default tag
 	if v, ok := d.GetOk("tag"); ok {

@@ -57,7 +57,7 @@ func resourceUCloudInstance() *schema.Resource {
 			"name": &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      resource.PrefixedUniqueId("tf-instance-"),
+				Computed:     true,
 				ValidateFunc: validateName,
 			},
 
@@ -235,7 +235,12 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 	req.ImageId = ucloud.String(imageId)
 	req.Password = ucloud.String(d.Get("root_password").(string))
 	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
-	req.Name = ucloud.String(d.Get("name").(string))
+
+	if v, ok := d.GetOk("name"); ok {
+		req.Name = ucloud.String(v.(string))
+	} else {
+		req.Name = ucloud.String(resource.PrefixedUniqueId("tf-instance-"))
+	}
 
 	// skip error because it has been validated by schema
 	t, _ := parseInstanceType(d.Get("instance_type").(string))

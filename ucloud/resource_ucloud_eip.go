@@ -73,7 +73,7 @@ func resourceUCloudEIP() *schema.Resource {
 			"name": &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      resource.PrefixedUniqueId("tf-eip-"),
+				Computed:     true,
 				ValidateFunc: validateName,
 			},
 
@@ -159,6 +159,8 @@ func resourceUCloudEIPCreate(d *schema.ResourceData, meta interface{}) error {
 
 	if v, ok := d.GetOk("name"); ok {
 		req.Name = ucloud.String(v.(string))
+	} else {
+		req.Name = ucloud.String(resource.PrefixedUniqueId("tf-eip-"))
 	}
 
 	// if tag is empty string, use default tag

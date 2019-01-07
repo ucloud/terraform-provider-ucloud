@@ -31,7 +31,7 @@ func resourceUCloudDisk() *schema.Resource {
 			"name": &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      resource.PrefixedUniqueId("tf-disk-"),
+				Computed:     true,
 				ValidateFunc: validateDiskName,
 			},
 
@@ -97,12 +97,17 @@ func resourceUCloudDiskCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := client.udiskconn
 
 	req := conn.NewCreateUDiskRequest()
-	req.Name = ucloud.String(d.Get("name").(string))
 	req.Zone = ucloud.String(d.Get("availability_zone").(string))
 	req.Size = ucloud.Int(d.Get("disk_size").(int))
 	req.DiskType = ucloud.String(upperCamelCvt.unconvert(d.Get("disk_type").(string)))
 	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
 	req.Quantity = ucloud.Int(d.Get("duration").(int))
+
+	if v, ok := d.GetOk("name"); ok {
+		req.Name = ucloud.String(v.(string))
+	} else {
+		req.Name = ucloud.String(resource.PrefixedUniqueId("tf-disk-"))
+	}
 
 	// if tag is empty string, use default tag
 	if v, ok := d.GetOk("tag"); ok {
