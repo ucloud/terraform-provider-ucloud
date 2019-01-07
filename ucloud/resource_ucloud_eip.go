@@ -96,6 +96,11 @@ func resourceUCloudEIP() *schema.Resource {
 				Computed: true,
 			},
 
+			"public_ip": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
 			"ip_set": &schema.Schema{
 				Type:     schema.TypeList,
 				Computed: true,
@@ -324,6 +329,7 @@ func resourceUCloudEIPRead(d *schema.ResourceData, meta interface{}) error {
 			"internet_type": item.OperatorName,
 		})
 
+		d.Set("public_ip", item.IP)
 		d.Set("internet_type", strings.ToLower(item.OperatorName))
 	}
 
