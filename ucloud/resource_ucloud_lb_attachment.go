@@ -11,6 +11,10 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 )
 
+const (
+	lbResourceTypeUHost = "UHost"
+)
+
 func resourceUCloudLBAttachment() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceUCloudLBAttachmentCreate,
@@ -36,8 +40,10 @@ func resourceUCloudLBAttachment() *schema.Resource {
 
 			"resource_type": &schema.Schema{
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
 				ForceNew:     true,
+				Computed:     true,
+				Deprecated:   "attribute `resource_type` is deprecated for optimizing parameters",
 				ValidateFunc: validation.StringInSlice([]string{"instance"}, false),
 			},
 
@@ -77,7 +83,7 @@ func resourceUCloudLBAttachmentCreate(d *schema.ResourceData, meta interface{}) 
 	req := conn.NewAllocateBackendRequest()
 	req.ULBId = ucloud.String(lbId)
 	req.VServerId = ucloud.String(listenerId)
-	req.ResourceType = ucloud.String(titleCaseProdCvt.convert(d.Get("resource_type").(string)))
+	req.ResourceType = ucloud.String(lbResourceTypeUHost)
 	req.ResourceId = ucloud.String(d.Get("resource_id").(string))
 	req.Port = ucloud.Int(d.Get("port").(int))
 

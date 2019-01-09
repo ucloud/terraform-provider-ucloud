@@ -2,6 +2,7 @@ package ucloud
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -72,7 +73,7 @@ func resourceUCloudEIP() *schema.Resource {
 			"name": &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      resource.PrefixedUniqueId("tf-eip-"),
+				Computed:     true,
 				ValidateFunc: validateName,
 			},
 
@@ -91,6 +92,11 @@ func resourceUCloudEIP() *schema.Resource {
 			},
 
 			"status": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"public_ip": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -158,6 +164,8 @@ func resourceUCloudEIPCreate(d *schema.ResourceData, meta interface{}) error {
 
 	if v, ok := d.GetOk("name"); ok {
 		req.Name = ucloud.String(v.(string))
+	} else {
+		req.Name = ucloud.String(resource.PrefixedUniqueId("tf-eip-"))
 	}
 
 	// if tag is empty string, use default tag
@@ -320,6 +328,9 @@ func resourceUCloudEIPRead(d *schema.ResourceData, meta interface{}) error {
 			"ip":            item.IP,
 			"internet_type": item.OperatorName,
 		})
+
+		d.Set("public_ip", item.IP)
+		d.Set("internet_type", strings.ToLower(item.OperatorName))
 	}
 
 	if err := d.Set("ip_set", eipAddr); err != nil {

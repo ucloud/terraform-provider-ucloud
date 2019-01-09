@@ -55,7 +55,7 @@ func resourceUCloudLB() *schema.Resource {
 			"name": &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      resource.PrefixedUniqueId("tf-lb-"),
+				Computed:     true,
 				ValidateFunc: validateName,
 			},
 
@@ -115,7 +115,12 @@ func resourceUCloudLBCreate(d *schema.ResourceData, meta interface{}) error {
 
 	req := conn.NewCreateULBRequest()
 	req.ChargeType = ucloud.String(upperCamelCvt.convert(d.Get("charge_type").(string)))
-	req.ULBName = ucloud.String(d.Get("name").(string))
+
+	if v, ok := d.GetOk("name"); ok {
+		req.ULBName = ucloud.String(v.(string))
+	} else {
+		req.ULBName = ucloud.String(resource.PrefixedUniqueId("tf-lb-"))
+	}
 
 	// if tag is empty string, use default tag
 	if v, ok := d.GetOk("tag"); ok {

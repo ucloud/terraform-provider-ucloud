@@ -49,12 +49,13 @@ func (c *Config) Client() (*UCloudClient, error) {
 	// enable auto retry with http/connection error
 	config.MaxRetries = c.MaxRetries
 	config.LogLevel = log.DebugLevel
+	config.UserAgent = "Terraform/1.11.x"
 
 	// set endpoint with insecure https connection
 	if c.Insecure {
-		config.BaseUrl = GetEndpointURL(c.Region)
-	} else {
 		config.BaseUrl = GetInsecureEndpointURL(c.Region)
+	} else {
+		config.BaseUrl = GetEndpointURL(c.Region)
 	}
 
 	// credential with publicKey/privateKey

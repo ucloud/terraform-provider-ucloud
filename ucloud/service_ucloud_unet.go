@@ -24,7 +24,7 @@ func (c *UCloudClient) describeEIPById(eipId string) (*unet.UnetEIPSet, error) {
 	return &resp.EIPSet[0], nil
 }
 
-func (c *UCloudClient) describeEIPResourceById(eipId, resourceType, resourceId string) (*unet.UnetEIPResourceSet, error) {
+func (c *UCloudClient) describeEIPResourceById(eipId, resourceId string) (*unet.UnetEIPResourceSet, error) {
 	conn := c.unetconn
 
 	req := conn.NewDescribeEIPRequest()
@@ -41,7 +41,7 @@ func (c *UCloudClient) describeEIPResourceById(eipId, resourceType, resourceId s
 
 	for i := 0; i < len(resp.EIPSet); i++ {
 		eip := resp.EIPSet[i]
-		if eip.Resource.ResourceId == resourceId && eip.Resource.ResourceType == resourceType {
+		if eip.Resource.ResourceId == resourceId {
 			return &eip.Resource, nil
 		}
 	}

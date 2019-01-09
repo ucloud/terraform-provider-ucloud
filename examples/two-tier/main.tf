@@ -70,7 +70,6 @@ resource "ucloud_lb_listener" "default" {
 resource "ucloud_lb_attachment" "default" {
   load_balancer_id = "${ucloud_lb.default.id}"
   listener_id      = "${ucloud_lb_listener.default.id}"
-  resource_type    = "instance"
   resource_id      = "${element(ucloud_instance.web.*.id, count.index)}"
   port             = 80
   count            = "${var.count}"
@@ -115,7 +114,6 @@ resource "ucloud_instance" "web" {
 }
 
 resource "ucloud_eip_association" "default" {
-  resource_type = "lb"
-  resource_id   = "${ucloud_lb.default.id}"
-  eip_id        = "${ucloud_eip.default.id}"
+  resource_id = "${ucloud_lb.default.id}"
+  eip_id      = "${ucloud_eip.default.id}"
 }

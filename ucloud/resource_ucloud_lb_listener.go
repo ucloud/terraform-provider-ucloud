@@ -42,7 +42,7 @@ func resourceUCloudLBListener() *schema.Resource {
 			"name": &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      resource.PrefixedUniqueId("tf-listener-"),
+				Computed:     true,
 				ValidateFunc: validateName,
 			},
 
@@ -145,7 +145,12 @@ func resourceUCloudLBListenerCreate(d *schema.ResourceData, meta interface{}) er
 	req.ListenType = ucloud.String(upperCamelCvt.unconvert(d.Get("listen_type").(string)))
 	req.FrontendPort = ucloud.Int(d.Get("port").(int))
 	req.Method = ucloud.String(upperCamelCvt.unconvert(d.Get("method").(string)))
-	req.VServerName = ucloud.String(d.Get("name").(string))
+
+	if v, ok := d.GetOk("name"); ok {
+		req.VServerName = ucloud.String(v.(string))
+	} else {
+		req.VServerName = ucloud.String(resource.PrefixedUniqueId("tf-listener-"))
+	}
 
 	if v, ok := d.GetOk("idle_timeout"); ok {
 		req.ClientTimeout = ucloud.Int(v.(int))

@@ -23,7 +23,7 @@ func resourceUCloudVPC() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				Default:      resource.PrefixedUniqueId("tf-vpc-"),
+				Computed:     true,
 				ValidateFunc: validateName,
 			},
 
@@ -85,8 +85,13 @@ func resourceUCloudVPCCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := client.vpcconn
 
 	req := conn.NewCreateVPCRequest()
-	req.Name = ucloud.String(d.Get("name").(string))
 	req.Network = schemaSetToStringSlice(d.Get("cidr_blocks"))
+
+	if v, ok := d.GetOk("name"); ok {
+		req.Name = ucloud.String(v.(string))
+	} else {
+		req.Name = ucloud.String(resource.PrefixedUniqueId("tf-vpc-"))
+	}
 
 	// if tag is empty string, use default tag
 	if v, ok := d.GetOk("tag"); ok {

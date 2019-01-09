@@ -151,7 +151,6 @@ resource "ucloud_instance" "foo"{
 resource "ucloud_lb_attachment" "foo" {
 	load_balancer_id = "${ucloud_lb.foo.id}"
 	listener_id      = "${ucloud_lb_listener.foo.id}"
-	resource_type    = "instance"
 	resource_id      = "${ucloud_instance.foo.id}"
 	port             = 80
 }
@@ -190,7 +189,6 @@ resource "ucloud_instance" "foo"{
 resource "ucloud_lb_attachment" "foo" {
 	load_balancer_id = "${ucloud_lb.foo.id}"
 	listener_id      = "${ucloud_lb_listener.foo.id}"
-	resource_type    = "instance"
 	resource_id      = "${ucloud_instance.foo.id}"
 	port             = 1080
 }

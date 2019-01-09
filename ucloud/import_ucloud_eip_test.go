@@ -22,7 +22,7 @@ func TestAccUCloudEIP_import(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"duration", "internet_type"},
+				ImportStateVerifyIgnore: []string{"duration"},
 			},
 		},
 	})

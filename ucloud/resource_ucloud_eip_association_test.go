@@ -55,10 +55,9 @@ func testAccCheckEIPAssociationExists(n string, eip *unet.UnetEIPSet, instance *
 
 		eipId := rs.Primary.Attributes["eip_id"]
 		resourceId := rs.Primary.Attributes["resource_id"]
-		resourceType := lowerCaseProdCvt.convert(rs.Primary.Attributes["resource_type"])
 
 		return resource.Retry(3*time.Minute, func() *resource.RetryError {
-			d, err := client.describeEIPResourceById(eipId, resourceType, resourceId)
+			d, err := client.describeEIPResourceById(eipId, resourceId)
 
 			if err != nil {
 				return resource.NonRetryableError(err)
@@ -129,6 +128,5 @@ resource "ucloud_instance" "foo" {
 resource "ucloud_eip_association" "foo" {
 	eip_id        = "${ucloud_eip.foo.id}"
 	resource_id   = "${ucloud_instance.foo.id}"
-	resource_type = "instance"
 }
 `

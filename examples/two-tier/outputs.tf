@@ -5,3 +5,7 @@ output "instance_id_list" {
 output "load_balancer_id" {
   value = "${ucloud_lb.default.id}"
 }
+
+output "public_ip" {
+  value = "${ucloud_eip.default.public_ip}"
+}

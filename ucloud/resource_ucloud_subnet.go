@@ -36,7 +36,7 @@ func resourceUCloudSubnet() *schema.Resource {
 			"name": &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      resource.PrefixedUniqueId("tf-subnet-"),
+				Computed:     true,
 				ValidateFunc: validateName,
 			},
 
@@ -77,6 +77,8 @@ func resourceUCloudSubnetCreate(d *schema.ResourceData, meta interface{}) error 
 
 	if v, ok := d.GetOk("name"); ok {
 		req.SubnetName = ucloud.String(v.(string))
+	} else {
+		req.SubnetName = ucloud.String(resource.PrefixedUniqueId("tf-subnet-"))
 	}
 
 	// if tag is empty string, use default tag
