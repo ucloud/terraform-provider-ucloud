@@ -29,6 +29,7 @@ func TestAccUCloudInstance_import(t *testing.T) {
 					"root_password",
 					"security_group",
 					"duration",
+					"image_id",
 				},
 			},
 		},
