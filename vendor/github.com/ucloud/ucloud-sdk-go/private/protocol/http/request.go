@@ -11,8 +11,9 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/private/utils"
 )
 
-var avaliableHTTPMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTION", "HEAD", "PATCH"}
+var availableHTTPMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTION", "HEAD", "PATCH"}
 
+// HttpRequest is the internal http request of sdk, don't use it at your code
 type HttpRequest struct {
 	url         string
 	method      string
@@ -50,7 +51,7 @@ func (h *HttpRequest) SetURL(val string) error {
 		return err
 	}
 
-	h.url = val
+	h.url = fmt.Sprintf("%s://%s%s", uri.Scheme, uri.Host, uri.Path)
 	return nil
 }
 
@@ -61,7 +62,7 @@ func (h *HttpRequest) GetURL() string {
 
 // SetMethod will set method of current request
 func (h *HttpRequest) SetMethod(val string) error {
-	err := utils.CheckStringIn(val, avaliableHTTPMethods)
+	err := utils.CheckStringIn(val, availableHTTPMethods)
 	if err != nil {
 		return errors.Errorf("method is invalid, %s", err)
 	}
@@ -104,7 +105,7 @@ func (h *HttpRequest) BuildQueryString() (string, error) {
 	}
 
 	// if query string is not set by user,
-	// otherwise needn't keep them ordered, encode immediatly.
+	// otherwise needn't keep them ordered, encode immediately.
 	if h.queryString == "" {
 		return values.Encode(), nil
 	}
@@ -132,6 +133,14 @@ func (h *HttpRequest) SetQuery(k, v string) error {
 	}
 	h.queryMap[k] = v
 	return nil
+}
+
+// GetQuery will get value by key from map
+func (h *HttpRequest) GetQuery(k string) string {
+	if v, ok := h.queryMap[k]; ok {
+		return v
+	}
+	return ""
 }
 
 // GetQueryMap will get all of query as a map

@@ -1,10 +1,10 @@
 package unet
 
 /*
-	FirewallRuleSet - DescribeFirewall
+FirewallRuleSet - DescribeFirewall
 
-	this model is auto created by ucloud code generater for open api,
-	you can also see https://docs.ucloud.cn for detail.
+this model is auto created by ucloud code generater for open api,
+you can also see https://docs.ucloud.cn for detail.
 */
 type FirewallRuleSet struct {
 
@@ -22,4 +22,7 @@ type FirewallRuleSet struct {
 
 	// 防火墙动作
 	RuleAction string
+
+	// 防火墙规则备注
+	Remark string
 }
