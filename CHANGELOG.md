@@ -1,4 +1,25 @@
-## 1.0.1 (Unreleased)
+## 1.1.0 (Unreleased)
+
+ENHANCEMENTS:
+
+* resource/ucloud_eip_association: Update schema version for eip association `ID` [GH-2]
+* resource/ucloud_eip_association: Deprecated `resource_type` [GH-2]
+* resource/ucloud_lb_attachment: Deprecated `resource_type` [GH-2]
+* resource/ucloud_eip: Add `public_ip` attribute [GH-2]
+* resource/ucloud_instance: Update `instance_type` about customized [GH-2]
+* provider: Add `UserAgent` to external API [GH-2]
+
+BUG FIXES:
+
+* resource/ucloud_disk: Fix default of `name` argument [GH-2]
+* resource/ucloud_eip: Fix default of `name` argument [GH-2]
+* resource/ucloud_instance: Fix default of `name` argument [GH-2]
+* resource/ucloud_lb_listener: Fix default of `name` argument [GH-2]
+* resource/ucloud_lb: Fix default of `name` argument [GH-2]
+* resource/ucloud_security_group: Fix default of `name` argument [GH-2]
+* resource/ucloud_subnet: Fix default of `name` argument [GH-2]
+* resource/ucloud_vpc: Fix default of `name` argument [GH-2]
+
 ## 1.0.0 (December 19, 2018)
 
 FEATURES:

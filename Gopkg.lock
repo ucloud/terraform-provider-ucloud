@@ -423,7 +423,7 @@
   version = "v1.1.2"
 
 [[projects]]
-  digest = "1:f82119a2541974dd1f906ce29297383e28d2a30e6f26df14806cf92957ebcb76"
+  digest = "1:b2578a6888f41262fd5cf63d564806fbd9ebb139ee071c62113b4c643df706bd"
   name = "github.com/ucloud/ucloud-sdk-go"
   packages = [
     "private/protocol/http",
@@ -443,8 +443,8 @@
     "ucloud/version",
   ]
   pruneopts = "UT"
-  revision = "4fa00b359dfdb735f8ac72e90d24c19134772c07"
-  version = "v0.5.8"
+  revision = "1acb6fcbdc22f3929e68638c7f5232987b7b869f"
+  version = "v0.6.9"
 
 [[projects]]
   digest = "1:4aeb3860275fa1fd60cccfb5a6ef85da438bf17402e1e84412ade4d4b55066a0"
