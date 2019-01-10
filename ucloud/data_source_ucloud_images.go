@@ -15,7 +15,7 @@ func dataSourceUCloudImages() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceUCloudImagesRead,
 		Schema: map[string]*schema.Schema{
-			"availability_zone": &schema.Schema{
+			"availability_zone": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -26,19 +26,19 @@ func dataSourceUCloudImages() *schema.Resource {
 				ValidateFunc: validation.ValidateRegexp,
 			},
 
-			"image_type": &schema.Schema{
+			"image_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"base", "business", "custom"}, false),
 			},
 
-			"os_type": &schema.Schema{
+			"os_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"linux", "windows"}, false),
 			},
 
-			"image_id": &schema.Schema{
+			"image_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -48,7 +48,7 @@ func dataSourceUCloudImages() *schema.Resource {
 				Optional: true,
 			},
 
-			"total_count": &schema.Schema{
+			"total_count": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
@@ -58,42 +58,42 @@ func dataSourceUCloudImages() *schema.Resource {
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"id": &schema.Schema{
+						"id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"name": &schema.Schema{
+						"name": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"type": &schema.Schema{
+						"type": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"size": &schema.Schema{
+						"size": {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
 
-						"availability_zone": &schema.Schema{
+						"availability_zone": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"os_type": &schema.Schema{
+						"os_type": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"os_name": &schema.Schema{
+						"os_name": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"features": &schema.Schema{
+						"features": {
 							Type: schema.TypeList,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
@@ -101,17 +101,17 @@ func dataSourceUCloudImages() *schema.Resource {
 							Computed: true,
 						},
 
-						"create_time": &schema.Schema{
+						"create_time": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"description": &schema.Schema{
+						"description": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"status": &schema.Schema{
+						"status": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},

@@ -26,7 +26,7 @@ func TestAccUCloudSecurityGroup_basic(t *testing.T) {
 		CheckDestroy:  testAccCheckSecurityGroupDestroy,
 
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccSecurityGroupConfig(rInt),
 
 				Check: resource.ComposeTestCheckFunc(
@@ -40,7 +40,7 @@ func TestAccUCloudSecurityGroup_basic(t *testing.T) {
 				),
 			},
 
-			resource.TestStep{
+			{
 				Config: testAccSecurityGroupConfigTwo(rInt),
 
 				Check: resource.ComposeTestCheckFunc(

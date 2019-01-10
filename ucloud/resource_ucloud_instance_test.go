@@ -26,7 +26,7 @@ func TestAccUCloudInstance_basic(t *testing.T) {
 		CheckDestroy:  testAccCheckInstanceDestroy,
 
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccInstanceConfigBasic(rInt),
 
 				Check: resource.ComposeTestCheckFunc(
@@ -38,7 +38,7 @@ func TestAccUCloudInstance_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "memory", "1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccInstanceConfigBasicUpdate(rInt),
 
 				Check: resource.ComposeTestCheckFunc(
@@ -68,7 +68,7 @@ func TestAccUCloudInstance_vpc(t *testing.T) {
 		CheckDestroy:  testAccCheckInstanceDestroy,
 
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccInstanceConfigVPC(rInt),
 
 				Check: resource.ComposeTestCheckFunc(
@@ -94,7 +94,7 @@ func TestAccUCloudInstance_size(t *testing.T) {
 		CheckDestroy:  testAccCheckInstanceDestroy,
 
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccInstancesConfigSize(rInt),
 
 				Check: resource.ComposeTestCheckFunc(
@@ -103,7 +103,7 @@ func TestAccUCloudInstance_size(t *testing.T) {
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "data_disk_size", "50"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccInstancesConfigSizeUpdate(rInt),
 
 				Check: resource.ComposeTestCheckFunc(

@@ -23,7 +23,7 @@ func TestAccUCloudSubnet_basic(t *testing.T) {
 		CheckDestroy:  testAccCheckSubnetDestroy,
 
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccSubnetConfig,
 
 				Check: resource.ComposeTestCheckFunc(
@@ -35,7 +35,7 @@ func TestAccUCloudSubnet_basic(t *testing.T) {
 				),
 			},
 
-			resource.TestStep{
+			{
 				Config: testAccSubnetConfigTwo,
 
 				Check: resource.ComposeTestCheckFunc(

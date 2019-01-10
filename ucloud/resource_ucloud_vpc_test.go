@@ -23,7 +23,7 @@ func TestAccUCloudVPC_basic(t *testing.T) {
 		CheckDestroy:  testAccCheckVPCDestroy,
 
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccVPCConfig,
 
 				Check: resource.ComposeTestCheckFunc(

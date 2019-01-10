@@ -26,7 +26,7 @@ func TestAccUCloudDiskAttachment_basic(t *testing.T) {
 		CheckDestroy:  testAccCheckDiskAttachmentDestroy,
 
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDiskAttachmentConfig,
 
 				Check: resource.ComposeTestCheckFunc(

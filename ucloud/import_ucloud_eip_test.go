@@ -14,11 +14,11 @@ func TestAccUCloudEIP_import(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckEIPDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccEIPConfig,
 			},
 
-			resource.TestStep{
+			{
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,

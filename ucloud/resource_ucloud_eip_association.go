@@ -29,13 +29,13 @@ func resourceUCloudEIPAssociation() *schema.Resource {
 		MigrateState:  resourceUCloudEIPAssociationMigrateState,
 
 		Schema: map[string]*schema.Schema{
-			"eip_id": &schema.Schema{
+			"eip_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"resource_type": &schema.Schema{
+			"resource_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
@@ -44,7 +44,7 @@ func resourceUCloudEIPAssociation() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"instance", "lb"}, false),
 			},
 
-			"resource_id": &schema.Schema{
+			"resource_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,

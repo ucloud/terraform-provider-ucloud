@@ -19,7 +19,7 @@ func resourceUCloudVPC() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
@@ -27,7 +27,7 @@ func resourceUCloudVPC() *schema.Resource {
 				ValidateFunc: validateName,
 			},
 
-			"cidr_blocks": &schema.Schema{
+			"cidr_blocks": {
 				Type:     schema.TypeSet,
 				Required: true,
 				ForceNew: true,
@@ -38,7 +38,7 @@ func resourceUCloudVPC() *schema.Resource {
 				Set: hashCIDR,
 			},
 
-			"tag": &schema.Schema{
+			"tag": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
@@ -47,19 +47,19 @@ func resourceUCloudVPC() *schema.Resource {
 				StateFunc:    stateFuncTag,
 			},
 
-			"remark": &schema.Schema{
+			"remark": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"network_info": &schema.Schema{
+			"network_info": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"cidr_block": &schema.Schema{
+						"cidr_block": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -67,12 +67,12 @@ func resourceUCloudVPC() *schema.Resource {
 				},
 			},
 
-			"update_time": &schema.Schema{
+			"update_time": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"create_time": &schema.Schema{
+			"create_time": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},

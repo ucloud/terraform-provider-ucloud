@@ -26,7 +26,7 @@ func TestAccUCloudLBAttachment_basic(t *testing.T) {
 		CheckDestroy:  testAccCheckLBAttachmentDestroy,
 
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccLBAttachmentConfig,
 
 				Check: resource.ComposeTestCheckFunc(
@@ -39,7 +39,7 @@ func TestAccUCloudLBAttachment_basic(t *testing.T) {
 				),
 			},
 
-			resource.TestStep{
+			{
 				Config: testAccLBAttachmentConfigTwo,
 
 				Check: resource.ComposeTestCheckFunc(

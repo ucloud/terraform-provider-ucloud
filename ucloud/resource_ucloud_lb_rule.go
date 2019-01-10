@@ -20,19 +20,19 @@ func resourceUCloudLBRule() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"load_balancer_id": &schema.Schema{
+			"load_balancer_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"listener_id": &schema.Schema{
+			"listener_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"backend_ids": &schema.Schema{
+			"backend_ids": {
 				Type: schema.TypeSet,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -42,13 +42,13 @@ func resourceUCloudLBRule() *schema.Resource {
 				Set:      schema.HashString,
 			},
 
-			"domain": &schema.Schema{
+			"domain": {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ConflictsWith: []string{"path"},
 			},
 
-			"path": &schema.Schema{
+			"path": {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ConflictsWith: []string{"domain"},

@@ -14,11 +14,11 @@ func TestAccUCloudDisk_import(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDiskDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDiskConfig,
 			},
 
-			resource.TestStep{
+			{
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,

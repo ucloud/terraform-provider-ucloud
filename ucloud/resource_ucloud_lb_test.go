@@ -23,7 +23,7 @@ func TestAccUCloudLB_basic(t *testing.T) {
 		CheckDestroy:  testAccCheckLBDestroy,
 
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccLBConfig,
 
 				Check: resource.ComposeTestCheckFunc(
@@ -34,7 +34,7 @@ func TestAccUCloudLB_basic(t *testing.T) {
 				),
 			},
 
-			resource.TestStep{
+			{
 				Config: testAccLBConfigTwo,
 
 				Check: resource.ComposeTestCheckFunc(

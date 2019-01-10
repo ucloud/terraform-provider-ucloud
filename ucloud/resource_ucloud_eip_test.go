@@ -23,7 +23,7 @@ func TestAccUCloudEIP_basic(t *testing.T) {
 		CheckDestroy:  testAccCheckEIPDestroy,
 
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccEIPConfig,
 
 				Check: resource.ComposeTestCheckFunc(
@@ -36,7 +36,7 @@ func TestAccUCloudEIP_basic(t *testing.T) {
 				),
 			},
 
-			resource.TestStep{
+			{
 				Config: testAccEIPConfigTwo,
 
 				Check: resource.ComposeTestCheckFunc(
@@ -49,7 +49,7 @@ func TestAccUCloudEIP_basic(t *testing.T) {
 				),
 			},
 
-			resource.TestStep{
+			{
 				Config: testAccEIPConfigThree,
 
 				Check: resource.ComposeTestCheckFunc(

@@ -23,7 +23,7 @@ func TestAccUCloudDisk_basic(t *testing.T) {
 		CheckDestroy:  testAccCheckDiskDestroy,
 
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDiskConfig,
 
 				Check: resource.ComposeTestCheckFunc(
@@ -34,7 +34,7 @@ func TestAccUCloudDisk_basic(t *testing.T) {
 				),
 			},
 
-			resource.TestStep{
+			{
 				Config: testAccDiskConfigUpdate,
 
 				Check: resource.ComposeTestCheckFunc(
@@ -61,7 +61,7 @@ func TestAccUCloudDisk_tag(t *testing.T) {
 		CheckDestroy:  testAccCheckDiskDestroy,
 
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDiskDefaultTag,
 
 				Check: resource.ComposeTestCheckFunc(
