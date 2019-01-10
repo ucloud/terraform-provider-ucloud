@@ -14,11 +14,11 @@ func TestAccUCloudLB_import(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckLBDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccLBConfig,
 			},
 
-			resource.TestStep{
+			{
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,

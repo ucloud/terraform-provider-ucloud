@@ -14,7 +14,7 @@ func dataSourceUCloudEips() *schema.Resource {
 		Read: dataSourceUCloudEipsRead,
 
 		Schema: map[string]*schema.Schema{
-			"ids": &schema.Schema{
+			"ids": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
@@ -28,27 +28,27 @@ func dataSourceUCloudEips() *schema.Resource {
 				Optional: true,
 			},
 
-			"total_count": &schema.Schema{
+			"total_count": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
 
-			"eips": &schema.Schema{
+			"eips": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"ip_set": &schema.Schema{
+						"ip_set": {
 							Type:     schema.TypeList,
 							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"ip": &schema.Schema{
+									"ip": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
 
-									"internet_type": &schema.Schema{
+									"internet_type": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
@@ -56,47 +56,47 @@ func dataSourceUCloudEips() *schema.Resource {
 							},
 						},
 
-						"bandwidth": &schema.Schema{
+						"bandwidth": {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
 
-						"charge_type": &schema.Schema{
+						"charge_type": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"charge_mode": &schema.Schema{
+						"charge_mode": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"name": &schema.Schema{
+						"name": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"remark": &schema.Schema{
+						"remark": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"tag": &schema.Schema{
+						"tag": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"status": &schema.Schema{
+						"status": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"create_time": &schema.Schema{
+						"create_time": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"expire_time": &schema.Schema{
+						"expire_time": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},

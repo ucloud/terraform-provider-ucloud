@@ -20,27 +20,27 @@ func resourceUCloudSubnet() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"cidr_block": &schema.Schema{
+			"cidr_block": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validateUCloudCidrBlock,
 			},
 
-			"vpc_id": &schema.Schema{
+			"vpc_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validateName,
 			},
 
-			"tag": &schema.Schema{
+			"tag": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      defaultTag,
@@ -48,13 +48,13 @@ func resourceUCloudSubnet() *schema.Resource {
 				StateFunc:    stateFuncTag,
 			},
 
-			"remark": &schema.Schema{
+			"remark": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"create_time": &schema.Schema{
+			"create_time": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},

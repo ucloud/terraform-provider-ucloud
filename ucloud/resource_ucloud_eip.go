@@ -23,14 +23,14 @@ func resourceUCloudEIP() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"bandwidth": &schema.Schema{
+			"bandwidth": {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Default:      1,
 				ValidateFunc: validation.IntBetween(1, 800),
 			},
 
-			"internet_type": &schema.Schema{
+			"internet_type": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -40,7 +40,7 @@ func resourceUCloudEIP() *schema.Resource {
 				}, false),
 			},
 
-			"charge_type": &schema.Schema{
+			"charge_type": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "month",
@@ -52,7 +52,7 @@ func resourceUCloudEIP() *schema.Resource {
 				}, false),
 			},
 
-			"charge_mode": &schema.Schema{
+			"charge_mode": {
 				Type:     schema.TypeString,
 				Default:  "bandwidth",
 				Optional: true,
@@ -62,7 +62,7 @@ func resourceUCloudEIP() *schema.Resource {
 				}, false),
 			},
 
-			"duration": &schema.Schema{
+			"duration": {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				ForceNew:     true,
@@ -70,20 +70,20 @@ func resourceUCloudEIP() *schema.Resource {
 				ValidateFunc: validation.IntBetween(1, 9),
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validateName,
 			},
 
-			"remark": &schema.Schema{
+			"remark": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"tag": &schema.Schema{
+			"tag": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      defaultTag,
@@ -91,28 +91,28 @@ func resourceUCloudEIP() *schema.Resource {
 				StateFunc:    stateFuncTag,
 			},
 
-			"status": &schema.Schema{
+			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"public_ip": &schema.Schema{
+			"public_ip": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"ip_set": &schema.Schema{
+			"ip_set": {
 				Type:     schema.TypeList,
 				Computed: true,
 				MaxItems: 2,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"ip": &schema.Schema{
+						"ip": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"internet_type": &schema.Schema{
+						"internet_type": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -125,12 +125,12 @@ func resourceUCloudEIP() *schema.Resource {
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"type": &schema.Schema{
+						"type": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"id": &schema.Schema{
+						"id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -138,12 +138,12 @@ func resourceUCloudEIP() *schema.Resource {
 				},
 			},
 
-			"create_time": &schema.Schema{
+			"create_time": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"expire_time": &schema.Schema{
+			"expire_time": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},

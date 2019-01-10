@@ -22,7 +22,7 @@ func dataSourceUCloudProjects() *schema.Resource {
 				Optional: true,
 			},
 
-			"total_count": &schema.Schema{
+			"total_count": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
@@ -32,37 +32,37 @@ func dataSourceUCloudProjects() *schema.Resource {
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"id": &schema.Schema{
+						"id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"name": &schema.Schema{
+						"name": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"parent_id": &schema.Schema{
+						"parent_id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"parent_name": &schema.Schema{
+						"parent_name": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"resource_count": &schema.Schema{
+						"resource_count": {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
 
-						"member_count": &schema.Schema{
+						"member_count": {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
 
-						"create_time": &schema.Schema{
+						"create_time": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},

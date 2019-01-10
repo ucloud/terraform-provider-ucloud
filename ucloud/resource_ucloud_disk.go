@@ -22,26 +22,26 @@ func resourceUCloudDisk() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"availability_zone": &schema.Schema{
+			"availability_zone": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validateDiskName,
 			},
 
-			"disk_size": &schema.Schema{
+			"disk_size": {
 				Type:         schema.TypeInt,
 				Required:     true,
 				ValidateFunc: validation.IntBetween(1, 4000),
 			},
 
-			"disk_type": &schema.Schema{
+			"disk_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
@@ -49,7 +49,7 @@ func resourceUCloudDisk() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"data_disk", "ssd_data_disk"}, false),
 			},
 
-			"charge_type": &schema.Schema{
+			"charge_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
@@ -57,7 +57,7 @@ func resourceUCloudDisk() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"year", "month", "dynamic"}, false),
 			},
 
-			"duration": &schema.Schema{
+			"duration": {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				ForceNew:     true,
@@ -65,7 +65,7 @@ func resourceUCloudDisk() *schema.Resource {
 				ValidateFunc: validateDuration,
 			},
 
-			"tag": &schema.Schema{
+			"tag": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
@@ -74,17 +74,17 @@ func resourceUCloudDisk() *schema.Resource {
 				StateFunc:    stateFuncTag,
 			},
 
-			"create_time": &schema.Schema{
+			"create_time": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"expire_time": &schema.Schema{
+			"expire_time": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"status": &schema.Schema{
+			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},

@@ -21,13 +21,13 @@ func resourceUCloudLBListener() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"load_balancer_id": &schema.Schema{
+			"load_balancer_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"protocol": &schema.Schema{
+			"protocol": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -39,14 +39,14 @@ func resourceUCloudLBListener() *schema.Resource {
 				}, false),
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validateName,
 			},
 
-			"listen_type": &schema.Schema{
+			"listen_type": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -57,21 +57,21 @@ func resourceUCloudLBListener() *schema.Resource {
 				}, false),
 			},
 
-			"port": &schema.Schema{
+			"port": {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Default:      80,
 				ValidateFunc: validation.IntBetween(1, 65535),
 			},
 
-			"idle_timeout": &schema.Schema{
+			"idle_timeout": {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validation.IntBetween(0, 86400),
 			},
 
-			"method": &schema.Schema{
+			"method": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "roundrobin",
@@ -86,7 +86,7 @@ func resourceUCloudLBListener() *schema.Resource {
 				}, false),
 			},
 
-			"persistence_type": &schema.Schema{
+			"persistence_type": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "none",
@@ -97,13 +97,13 @@ func resourceUCloudLBListener() *schema.Resource {
 				}, false),
 			},
 
-			"persistence": &schema.Schema{
+			"persistence": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"health_check_type": &schema.Schema{
+			"health_check_type": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
@@ -113,19 +113,19 @@ func resourceUCloudLBListener() *schema.Resource {
 				}, false),
 			},
 
-			"domain": &schema.Schema{
+			"domain": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"path": &schema.Schema{
+			"path": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"status": &schema.Schema{
+			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},

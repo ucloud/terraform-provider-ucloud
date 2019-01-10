@@ -26,7 +26,7 @@ func resourceUCloudSecurityGroup() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
@@ -38,7 +38,7 @@ func resourceUCloudSecurityGroup() *schema.Resource {
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"port_range": &schema.Schema{
+						"port_range": {
 							Type:         schema.TypeString,
 							Required:     true,
 							ValidateFunc: validateSecurityGroupPort,
@@ -50,7 +50,7 @@ func resourceUCloudSecurityGroup() *schema.Resource {
 							},
 						},
 
-						"protocol": &schema.Schema{
+						"protocol": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Default:  "tcp",
@@ -62,14 +62,14 @@ func resourceUCloudSecurityGroup() *schema.Resource {
 							}, false),
 						},
 
-						"cidr_block": &schema.Schema{
+						"cidr_block": {
 							Type:         schema.TypeString,
 							Optional:     true,
 							Default:      "0.0.0.0/0",
 							ValidateFunc: validation.CIDRNetwork(0, 32),
 						},
 
-						"policy": &schema.Schema{
+						"policy": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Default:  "accept",
@@ -79,7 +79,7 @@ func resourceUCloudSecurityGroup() *schema.Resource {
 							}, false),
 						},
 
-						"priority": &schema.Schema{
+						"priority": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Default:  "high",
@@ -94,7 +94,7 @@ func resourceUCloudSecurityGroup() *schema.Resource {
 				Set: resourceucloudSecurityGroupRuleHash,
 			},
 
-			"tag": &schema.Schema{
+			"tag": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      defaultTag,
@@ -102,13 +102,13 @@ func resourceUCloudSecurityGroup() *schema.Resource {
 				StateFunc:    stateFuncTag,
 			},
 
-			"remark": &schema.Schema{
+			"remark": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"create_time": &schema.Schema{
+			"create_time": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},

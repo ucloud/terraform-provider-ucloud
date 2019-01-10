@@ -14,11 +14,11 @@ func TestAccUCloudVPC_import(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckVPCDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccVPCConfig,
 			},
 
-			resource.TestStep{
+			{
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,

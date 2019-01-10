@@ -26,7 +26,7 @@ func TestAccUCloudEIPAssociation_basic(t *testing.T) {
 		CheckDestroy:  testAccCheckEIPAssociationDestroy,
 
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccEIPAssociationConfig,
 
 				Check: resource.ComposeTestCheckFunc(

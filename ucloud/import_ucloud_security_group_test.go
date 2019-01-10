@@ -16,11 +16,11 @@ func TestAccUCloudSecurityGroup_import(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSecurityGroupDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccSecurityGroupConfig(rInt),
 			},
 
-			resource.TestStep{
+			{
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,

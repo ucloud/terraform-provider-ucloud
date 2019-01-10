@@ -25,7 +25,7 @@ func TestAccUCloudVPCPeeringConnection_basic(t *testing.T) {
 		CheckDestroy:  testAccCheckVPCPeeringConnectionDestroy,
 
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccVPCPeeringConnectionConfig,
 
 				Check: resource.ComposeTestCheckFunc(

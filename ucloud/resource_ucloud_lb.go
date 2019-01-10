@@ -21,26 +21,26 @@ func resourceUCloudLB() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"internal": &schema.Schema{
+			"internal": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 				ForceNew: true,
 			},
 
-			"vpc_id": &schema.Schema{
+			"vpc_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"subnet_id": &schema.Schema{
+			"subnet_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"charge_type": &schema.Schema{
+			"charge_type": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -52,14 +52,14 @@ func resourceUCloudLB() *schema.Resource {
 				}, false),
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validateName,
 			},
 
-			"tag": &schema.Schema{
+			"tag": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      defaultTag,
@@ -67,23 +67,23 @@ func resourceUCloudLB() *schema.Resource {
 				StateFunc:    stateFuncTag,
 			},
 
-			"remark": &schema.Schema{
+			"remark": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"ip_set": &schema.Schema{
+			"ip_set": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"internet_type": &schema.Schema{
+						"internet_type": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"ip": &schema.Schema{
+						"ip": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -91,17 +91,17 @@ func resourceUCloudLB() *schema.Resource {
 				},
 			},
 
-			"private_ip": &schema.Schema{
+			"private_ip": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"create_time": &schema.Schema{
+			"create_time": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"expire_time": &schema.Schema{
+			"expire_time": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},

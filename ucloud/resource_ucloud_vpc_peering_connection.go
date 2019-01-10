@@ -17,19 +17,19 @@ func resourceUCloudVPCPeeringConnection() *schema.Resource {
 		Delete: resourceUCloudVPCPeeringConnectionDelete,
 
 		Schema: map[string]*schema.Schema{
-			"vpc_id": &schema.Schema{
+			"vpc_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"peer_vpc_id": &schema.Schema{
+			"peer_vpc_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"peer_project_id": &schema.Schema{
+			"peer_project_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,

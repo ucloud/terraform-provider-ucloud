@@ -30,38 +30,38 @@ func resourceUCloudInstance() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"availability_zone": &schema.Schema{
+			"availability_zone": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"image_id": &schema.Schema{
+			"image_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 
-			"root_password": &schema.Schema{
+			"root_password": {
 				Type:         schema.TypeString,
 				Required:     true,
 				Sensitive:    true,
 				ValidateFunc: validateInstancePassword,
 			},
 
-			"instance_type": &schema.Schema{
+			"instance_type": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validateInstanceType,
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validateName,
 			},
 
-			"charge_type": &schema.Schema{
+			"charge_type": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "month",
@@ -72,21 +72,21 @@ func resourceUCloudInstance() *schema.Resource {
 				}, false),
 			},
 
-			"duration": &schema.Schema{
+			"duration": {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: validateDuration,
 			},
 
-			"boot_disk_size": &schema.Schema{
+			"boot_disk_size": {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validation.IntBetween(20, 100),
 			},
 
-			"boot_disk_type": &schema.Schema{
+			"boot_disk_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
@@ -94,14 +94,14 @@ func resourceUCloudInstance() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"local_normal", "local_ssd", "cloud_normal", "cloud_ssd"}, false),
 			},
 
-			"data_disk_size": &schema.Schema{
+			"data_disk_size": {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validation.IntBetween(0, 2000),
 			},
 
-			"data_disk_type": &schema.Schema{
+			"data_disk_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
@@ -109,13 +109,13 @@ func resourceUCloudInstance() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"local_normal", "local_ssd"}, false),
 			},
 
-			"remark": &schema.Schema{
+			"remark": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"tag": &schema.Schema{
+			"tag": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      defaultTag,
@@ -123,62 +123,62 @@ func resourceUCloudInstance() *schema.Resource {
 				StateFunc:    stateFuncTag,
 			},
 
-			"security_group": &schema.Schema{
+			"security_group": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"vpc_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
-
-			"subnet_id": &schema.Schema{
+			"vpc_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"cpu": &schema.Schema{
+			"subnet_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+
+			"cpu": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
 
-			"memory": &schema.Schema{
+			"memory": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
 
-			"status": &schema.Schema{
+			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"disk_set": &schema.Schema{
+			"disk_set": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"type": &schema.Schema{
+						"type": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"size": &schema.Schema{
+						"size": {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
 
-						"id": &schema.Schema{
+						"id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"is_boot": &schema.Schema{
+						"is_boot": {
 							Type:     schema.TypeBool,
 							Computed: true,
 						},
@@ -186,17 +186,17 @@ func resourceUCloudInstance() *schema.Resource {
 				},
 			},
 
-			"ip_set": &schema.Schema{
+			"ip_set": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"ip": &schema.Schema{
+						"ip": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 
-						"internet_type": &schema.Schema{
+						"internet_type": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -204,17 +204,17 @@ func resourceUCloudInstance() *schema.Resource {
 				},
 			},
 
-			"create_time": &schema.Schema{
+			"create_time": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"expire_time": &schema.Schema{
+			"expire_time": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"auto_renew": &schema.Schema{
+			"auto_renew": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},

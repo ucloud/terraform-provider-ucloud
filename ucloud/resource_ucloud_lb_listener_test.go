@@ -23,7 +23,7 @@ func TestAccUCloudLBListener_basic(t *testing.T) {
 		CheckDestroy:  testAccCheckLBListenerDestroy,
 
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccLBListenerConfig,
 
 				Check: resource.ComposeTestCheckFunc(
@@ -40,7 +40,7 @@ func TestAccUCloudLBListener_basic(t *testing.T) {
 				),
 			},
 
-			resource.TestStep{
+			{
 				Config: testAccLBListenerConfigTwo,
 
 				Check: resource.ComposeTestCheckFunc(
