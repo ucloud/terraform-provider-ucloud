@@ -36,9 +36,12 @@ func resourceUCloudDisk() *schema.Resource {
 			},
 
 			"disk_size": {
-				Type:         schema.TypeInt,
-				Required:     true,
-				ValidateFunc: validation.IntBetween(1, 4000),
+				Type:     schema.TypeInt,
+				Required: true,
+				ValidateFunc: validateAll(
+					validation.IntBetween(1, 4000),
+					validateMod(10),
+				),
 			},
 
 			"disk_type": {

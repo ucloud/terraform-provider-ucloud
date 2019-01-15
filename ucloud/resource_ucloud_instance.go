@@ -65,6 +65,7 @@ func resourceUCloudInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "month",
+				ForceNew: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"year",
 					"month",
@@ -80,10 +81,13 @@ func resourceUCloudInstance() *schema.Resource {
 			},
 
 			"boot_disk_size": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.IntBetween(20, 100),
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validateAll(
+					validation.IntBetween(20, 100),
+					validateMod(10),
+				),
 			},
 
 			"boot_disk_type": {
@@ -95,10 +99,13 @@ func resourceUCloudInstance() *schema.Resource {
 			},
 
 			"data_disk_size": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.IntBetween(0, 2000),
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validateAll(
+					validation.IntBetween(0, 2000),
+					validateMod(10),
+				),
 			},
 
 			"data_disk_type": {
