@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 )
 
@@ -120,3 +121,31 @@ var validateTag = validation.StringMatch(
 	regexp.MustCompile(`^[A-Za-z0-9\p{Han}-_.]{0,63}$`),
 	"expected value to be 0 - 63 characters and only support chinese, english, numbers, '-', '_', '.'",
 )
+
+func validateMod(num int) schema.SchemaValidateFunc {
+	return func(v interface{}, k string) (ws []string, errors []error) {
+		value := v.(int)
+
+		if value%num != 0 {
+			errors = append(errors, fmt.Errorf("expected %s to be multiple of 10, got %d", k, value))
+		}
+
+		return
+	}
+}
+
+// validateAll returns a SchemaValidateFunc which tests if the provided value
+// passes all provided SchemaValidateFunc
+// use (github.com/hashicorp/terraform/helper/validation).All at terraform v0.12.0
+func validateAll(validators ...schema.SchemaValidateFunc) schema.SchemaValidateFunc {
+	return func(i interface{}, k string) ([]string, []error) {
+		var allErrors []error
+		var allWarnings []string
+		for _, validator := range validators {
+			validatorWarnings, validatorErrors := validator(i, k)
+			allWarnings = append(allWarnings, validatorWarnings...)
+			allErrors = append(allErrors, validatorErrors...)
+		}
+		return allWarnings, allErrors
+	}
+}
