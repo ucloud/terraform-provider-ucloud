@@ -59,7 +59,7 @@ func TestAccUCloudUDPNConnection_basic(t *testing.T) {
 		CheckDestroy:  testAccCheckUDPNConnectionDestroy,
 
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccUDPNConnectionConfig,
 
 				Check: resource.ComposeTestCheckFunc(
@@ -71,7 +71,7 @@ func TestAccUCloudUDPNConnection_basic(t *testing.T) {
 				),
 			},
 
-			resource.TestStep{
+			{
 				Config: testAccUDPNConnectionConfigTwo,
 
 				Check: resource.ComposeTestCheckFunc(

@@ -26,7 +26,7 @@ func resourceUCloudUDPNConnection() *schema.Resource {
 		// ),
 
 		Schema: map[string]*schema.Schema{
-			"bandwidth": &schema.Schema{
+			"bandwidth": {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Default:      1,
@@ -44,25 +44,25 @@ func resourceUCloudUDPNConnection() *schema.Resource {
 				}, false),
 			},
 
-			"duration": &schema.Schema{
+			"duration": {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Default:      1,
 				ValidateFunc: validateDuration,
 			},
 
-			"peer_region": &schema.Schema{
+			"peer_region": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"create_time": &schema.Schema{
+			"create_time": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"expire_time": &schema.Schema{
+			"expire_time": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
