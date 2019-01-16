@@ -262,7 +262,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:b8b7d649612662c195ce4426e12645edee2b2d12333287538d1a69b6b6661a6c"
+  digest = "1:3f02632169c5ef0e81e4351b40065b3b1f5373563a79bd34d88834b7d4f8722a"
   name = "github.com/hashicorp/terraform"
   packages = [
     "config",
@@ -273,6 +273,7 @@
     "flatmap",
     "helper/acctest",
     "helper/config",
+    "helper/customdiff",
     "helper/hashcode",
     "helper/hilmapstructure",
     "helper/logging",
@@ -296,8 +297,8 @@
     "version",
   ]
   pruneopts = "UT"
-  revision = "17850e9a55d33c43d7c31fd6ac122ba97a51d899"
-  version = "v0.11.10"
+  revision = "ac4fff416318bf0915a0ab80e062a99ef3724334"
+  version = "v0.11.11"
 
 [[projects]]
   branch = "master"
@@ -603,6 +604,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/hashicorp/terraform/helper/acctest",
+    "github.com/hashicorp/terraform/helper/customdiff",
     "github.com/hashicorp/terraform/helper/hashcode",
     "github.com/hashicorp/terraform/helper/mutexkv",
     "github.com/hashicorp/terraform/helper/resource",

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform/helper/customdiff"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
@@ -21,16 +22,16 @@ func resourceUCloudUDPNConnection() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 
-		// CustomizeDiff: customdiff.All(
-		// 	customdiff.ValidateChange("peer_region", validateDiffUDPNPeerRegion),
-		// ),
+		CustomizeDiff: customdiff.All(
+			customdiff.ValidateChange("peer_region", validateDiffUDPNPeerRegion),
+		),
 
 		Schema: map[string]*schema.Schema{
 			"bandwidth": {
 				Type:         schema.TypeInt,
 				Optional:     true,
-				Default:      1,
-				ValidateFunc: validation.IntBetween(1, 800),
+				Default:      2,
+				ValidateFunc: validation.IntBetween(2, 1000),
 			},
 
 			"charge_type": {
@@ -74,21 +75,16 @@ func resourceUCloudUDPNConnectionCreate(d *schema.ResourceData, meta interface{}
 	client := meta.(*UCloudClient)
 	conn := client.udpnconn
 
-	peerRegion := d.Get("peer_region").(string)
-	if peerRegion == client.region {
-		return fmt.Errorf("error in create udpn connection, cannot connect to current region")
-	}
-
 	req := conn.NewAllocateUDPNRequest()
 	req.Bandwidth = ucloud.Int(d.Get("bandwidth").(int))
 	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
 	req.Quantity = ucloud.Int(d.Get("duration").(int))
 	req.Peer1 = ucloud.String(client.region)
-	req.Peer2 = ucloud.String(peerRegion)
+	req.Peer2 = ucloud.String(d.Get("peer_region").(string))
 
 	resp, err := conn.AllocateUDPN(req)
 	if err != nil {
-		return fmt.Errorf("error in create udpn, %s", err)
+		return fmt.Errorf("error on creating udpn connection, %s", err)
 	}
 
 	d.SetId(resp.UDPNId)
@@ -98,11 +94,6 @@ func resourceUCloudUDPNConnectionCreate(d *schema.ResourceData, meta interface{}
 func resourceUCloudUDPNConnectionUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
 	conn := client.udpnconn
-
-	peerRegion := d.Get("peer_region").(string)
-	if peerRegion == client.region {
-		return fmt.Errorf("error in update udpn connection, cannot connect to current region")
-	}
 
 	d.Partial(true)
 
@@ -114,7 +105,7 @@ func resourceUCloudUDPNConnectionUpdate(d *schema.ResourceData, meta interface{}
 
 		_, err := conn.ModifyUDPNBandwidth(req)
 		if err != nil {
-			return fmt.Errorf("do %s failed in update dpn %s, %s", "ModifyUDPNBandwidth", d.Id(), err)
+			return fmt.Errorf("error on %s to eip %s, %s", "ModifyUDPNBandwidth", d.Id(), err)
 		}
 
 		d.SetPartial("bandwidth")
@@ -134,7 +125,7 @@ func resourceUCloudUDPNConnectionRead(d *schema.ResourceData, meta interface{}) 
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("do %s failed in update dpn %s, %s", "ModifyUDPNBandwidth", d.Id(), err)
+		return fmt.Errorf("error on reading udpn connection %s, %s", d.Id(), err)
 	}
 
 	d.Set("bandwidth", inst.Bandwidth)
@@ -165,12 +156,12 @@ func resourceUCloudUDPNConnectionDelete(d *schema.ResourceData, meta interface{}
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(fmt.Errorf("error in delete dpn %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on reading udpn connection when deleting %s, %s", d.Id(), err))
 		}
 
 		_, err = conn.ReleaseUDPN(req)
 		if err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error in delete dpn %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on deleting udpn connection %s, %s", d.Id(), err))
 		}
 
 		_, err = client.describeDPNById(d.Id())
@@ -178,10 +169,10 @@ func resourceUCloudUDPNConnectionDelete(d *schema.ResourceData, meta interface{}
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(fmt.Errorf("error in delete dpn %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on reading udpn connection when deleting %s, %s", d.Id(), err))
 		}
 
-		return resource.RetryableError(fmt.Errorf("delete dpn but it still exists"))
+		return resource.RetryableError(fmt.Errorf("the specified udpn connection %s has not been deleted due to unknown error", d.Id()))
 	})
 }
 
