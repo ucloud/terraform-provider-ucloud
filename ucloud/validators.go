@@ -122,6 +122,18 @@ var validateTag = validation.StringMatch(
 	"expected value to be 0 - 63 characters and only support chinese, english, numbers, '-', '_', '.'",
 )
 
+func validateMod(num int) schema.SchemaValidateFunc {
+	return func(v interface{}, k string) (ws []string, errors []error) {
+		value := v.(int)
+
+		if value%num != 0 {
+			errors = append(errors, fmt.Errorf("expected %s to be multiple of 10, got %d", k, value))
+		}
+
+		return
+	}
+}
+
 // validateAll returns a SchemaValidateFunc which tests if the provided value
 // passes all provided SchemaValidateFunc
 // use (github.com/hashicorp/terraform/helper/validation).All at terraform v0.12.0
