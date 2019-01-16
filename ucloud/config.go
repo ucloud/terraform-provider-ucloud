@@ -1,17 +1,20 @@
 package ucloud
 
 import (
+	"github.com/ucloud/ucloud-sdk-go/ucloud"
+	"github.com/ucloud/ucloud-sdk-go/ucloud/auth"
+	"github.com/ucloud/ucloud-sdk-go/ucloud/log"
+
 	"github.com/ucloud/ucloud-sdk-go/services/uaccount"
 	"github.com/ucloud/ucloud-sdk-go/services/udisk"
+	"github.com/ucloud/ucloud-sdk-go/services/udpn"
 	"github.com/ucloud/ucloud-sdk-go/services/uhost"
 	"github.com/ucloud/ucloud-sdk-go/services/ulb"
 	"github.com/ucloud/ucloud-sdk-go/services/unet"
 	"github.com/ucloud/ucloud-sdk-go/services/vpc"
-	"github.com/ucloud/ucloud-sdk-go/ucloud"
-	"github.com/ucloud/ucloud-sdk-go/ucloud/auth"
-	"github.com/ucloud/ucloud-sdk-go/ucloud/log"
 )
 
+// Config is the configuration of ucloud meta data
 type Config struct {
 	PublicKey  string
 	PrivateKey string
@@ -19,10 +22,10 @@ type Config struct {
 	ProjectId  string
 
 	MaxRetries int
-
-	Insecure bool
+	Insecure   bool
 }
 
+// UCloudClient is the ucloud openapi client
 type UCloudClient struct {
 	region    string
 	projectId string
@@ -33,6 +36,7 @@ type UCloudClient struct {
 	vpcconn      *vpc.VPCClient
 	uaccountconn *uaccount.UAccountClient
 	udiskconn    *udisk.UDiskClient
+	udpnconn     *udpn.UDPNClient
 }
 
 // Client will returns a client with connections for all product
@@ -70,6 +74,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 	client.vpcconn = vpc.NewClient(&config, &credential)
 	client.uaccountconn = uaccount.NewClient(&config, &credential)
 	client.udiskconn = udisk.NewClient(&config, &credential)
+	client.udpnconn = udpn.NewClient(&config, &credential)
 
 	return &client, nil
 }

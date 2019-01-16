@@ -59,6 +59,7 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_zones":    dataSourceUCloudZones(),
 			"ucloud_eips":     dataSourceUCloudEips(),
 		},
+
 		ResourcesMap: map[string]*schema.Resource{
 			"ucloud_instance":               resourceUCloudInstance(),
 			"ucloud_eip":                    resourceUCloudEIP(),
@@ -66,6 +67,7 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_vpc":                    resourceUCloudVPC(),
 			"ucloud_subnet":                 resourceUCloudSubnet(),
 			"ucloud_vpc_peering_connection": resourceUCloudVPCPeeringConnection(),
+			"ucloud_udpn_connection":        resourceUCloudUDPNConnection(),
 			"ucloud_lb":                     resourceUCloudLB(),
 			"ucloud_lb_listener":            resourceUCloudLBListener(),
 			"ucloud_lb_attachment":          resourceUCloudLBAttachment(),

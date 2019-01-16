@@ -423,13 +423,14 @@
   version = "v1.1.2"
 
 [[projects]]
-  digest = "1:b2578a6888f41262fd5cf63d564806fbd9ebb139ee071c62113b4c643df706bd"
+  digest = "1:70120fce0bf290b82c211b4c2981d26f28a5870f92fc0ebf4b149cc04387e0cc"
   name = "github.com/ucloud/ucloud-sdk-go"
   packages = [
     "private/protocol/http",
     "private/utils",
     "services/uaccount",
     "services/udisk",
+    "services/udpn",
     "services/uhost",
     "services/ulb",
     "services/unet",
@@ -443,8 +444,8 @@
     "ucloud/version",
   ]
   pruneopts = "UT"
-  revision = "1acb6fcbdc22f3929e68638c7f5232987b7b869f"
-  version = "v0.6.9"
+  revision = "f18d177e21cdc1d76d94938584e33a5ff75aac89"
+  version = "v0.6.10"
 
 [[projects]]
   digest = "1:4aeb3860275fa1fd60cccfb5a6ef85da438bf17402e1e84412ade4d4b55066a0"
@@ -611,6 +612,7 @@
     "github.com/hashicorp/terraform/terraform",
     "github.com/ucloud/ucloud-sdk-go/services/uaccount",
     "github.com/ucloud/ucloud-sdk-go/services/udisk",
+    "github.com/ucloud/ucloud-sdk-go/services/udpn",
     "github.com/ucloud/ucloud-sdk-go/services/uhost",
     "github.com/ucloud/ucloud-sdk-go/services/ulb",
     "github.com/ucloud/ucloud-sdk-go/services/unet",

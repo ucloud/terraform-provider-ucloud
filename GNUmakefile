@@ -1,4 +1,4 @@
-SWEEP?=ch-bj2
+SWEEP?=cn-bj2,cn-sh2
 TEST?=./...
 GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
 PKG_NAME=ucloud
