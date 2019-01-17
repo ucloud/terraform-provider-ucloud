@@ -48,7 +48,6 @@ func resourceUCloudUDPNConnection() *schema.Resource {
 			"duration": {
 				Type:         schema.TypeInt,
 				Optional:     true,
-				Default:      1,
 				ValidateFunc: validateDuration,
 			},
 
@@ -78,7 +77,13 @@ func resourceUCloudUDPNConnectionCreate(d *schema.ResourceData, meta interface{}
 	req := conn.NewAllocateUDPNRequest()
 	req.Bandwidth = ucloud.Int(d.Get("bandwidth").(int))
 	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
-	req.Quantity = ucloud.Int(d.Get("duration").(int))
+
+	if v, ok := d.GetOk("duration"); ok {
+		req.Quantity = ucloud.Int(v.(int))
+	} else {
+		req.Quantity = ucloud.Int(1)
+	}
+
 	req.Peer1 = ucloud.String(client.region)
 	req.Peer2 = ucloud.String(d.Get("peer_region").(string))
 
