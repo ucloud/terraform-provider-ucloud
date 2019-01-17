@@ -44,6 +44,7 @@ In addition to all arguments above, the following attributes are exported:
 * `ip_set` - It is a nested type which documented below.
 * `resource` - It is a nested type which documented below.
 * `status` - EIP status. Possible values are: `used` as in use, `free` as available and `freeze` as associating.
+* `public_ip` - Public IP address of Elastic IP.
 
 The attribute (`ip_set`) support the following:
 

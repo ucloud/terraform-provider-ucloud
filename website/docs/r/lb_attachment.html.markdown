@@ -50,7 +50,6 @@ resource "ucloud_instance" "web" {
 resource "ucloud_lb_attachment" "example" {
     load_balancer_id = "${ucloud_lb.web.id}"
     listener_id      = "${ucloud_lb_listener.default.id}"
-    resource_type    = "instance"
     resource_id      = "${ucloud_instance.web.id}"
     port             = 80
 }
@@ -62,7 +61,7 @@ The following arguments are supported:
 
 * `load_balancer_id` - (Required) The ID of load balancer instance.
 * `listener_id` - (Required) The ID of listener servers.
-* `resource_type` - (Required) The types of backend servers. The current possible values are: `instance` as Elastic computing host.
+* `resource_type` - (Required) **Deprecated**, attribute `resource_type` is deprecated for optimizing parameters.
 * `resource_id` - (Required) The ID of backend servers.
 * `port` - (Optional) Port opened on the backend server to receive requests, range: 1-65535, (Default: `80`).
 
