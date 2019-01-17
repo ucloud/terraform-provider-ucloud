@@ -61,7 +61,6 @@ resource "ucloud_instance" "web" {
 
 # Bind eip to instance
 resource "ucloud_eip_association" "default" {
-  resource_type = "instance"
   resource_id   = "${ucloud_instance.web.id}"
   eip_id        = "${ucloud_eip.default.id}"
 }
@@ -73,4 +72,4 @@ The following arguments are supported:
 
 * `eip_id` - (Required) The ID of EIP.
 * `resource_id` - (Required) The ID of resource with EIP attached.
-* `resource_type` - (Required) The type of resource with EIP attached. The current possible values are `instance` as instance, `lb` as load balancer.
+* `resource_type` - (Required) **Deprecated**, attribute `resource_type` is deprecated for optimizing parameters.
