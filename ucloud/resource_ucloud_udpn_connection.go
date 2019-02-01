@@ -23,7 +23,7 @@ func resourceUCloudUDPNConnection() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
-			customdiff.ValidateChange("peer_region", validateDiffUDPNPeerRegion),
+			customdiff.ValidateChange("peer_region", diffValidateUDPNPeerRegion),
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -179,17 +179,4 @@ func resourceUCloudUDPNConnectionDelete(d *schema.ResourceData, meta interface{}
 
 		return resource.RetryableError(fmt.Errorf("the specified udpn connection %s has not been deleted due to unknown error", d.Id()))
 	})
-}
-
-func validateDiffUDPNPeerRegion(old, new, meta interface{}) error {
-	client := meta.(*UCloudClient)
-
-	if new.(string) == client.region {
-		return fmt.Errorf(
-			"expected the peering region %s to be different with provider's region %s",
-			new.(string), client.region,
-		)
-	}
-
-	return nil
 }

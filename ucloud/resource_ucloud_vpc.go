@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform/helper/customdiff"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
@@ -12,11 +13,17 @@ import (
 func resourceUCloudVPC() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceUCloudVPCCreate,
+		Update: resourceUCloudVPCUpdate,
 		Read:   resourceUCloudVPCRead,
 		Delete: resourceUCloudVPCDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
+
+		CustomizeDiff: customdiff.All(
+			// network can only be created or deleted once, can not done both of them
+			customdiff.ValidateChange("cidr_blocks", diffSupressVPCNetworkUpdate),
+		),
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -30,10 +37,12 @@ func resourceUCloudVPC() *schema.Resource {
 			"cidr_blocks": {
 				Type:     schema.TypeSet,
 				Required: true,
-				ForceNew: true,
 				Elem: &schema.Schema{
-					Type:         schema.TypeString,
-					ValidateFunc: validateUCloudCidrBlock,
+					Type: schema.TypeString,
+					ValidateFunc: validateAll(
+						validateCIDRNetwork,
+						validateCIDRPrivate,
+					),
 				},
 				Set: hashCIDR,
 			},
@@ -154,6 +163,47 @@ func resourceUCloudVPCRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	return nil
+}
+
+func resourceUCloudVPCUpdate(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*UCloudClient)
+	conn := client.vpcconn
+
+	d.Partial(true)
+
+	if d.HasChange("cidr_blocks") && !d.IsNewResource() {
+		o, n := d.GetChange("cidr_blocks")
+		os, ns := o.(*schema.Set), n.(*schema.Set)
+
+		if new := ns.Difference(os); new.Len() > 0 {
+			req := conn.NewAddVPCNetworkRequest()
+			req.VPCId = ucloud.String(d.Id())
+			req.Network = schemaSetToStringSlice(new)
+
+			_, err := conn.AddVPCNetwork(req)
+			if err != nil {
+				return fmt.Errorf("error on %s to vpc %s, %s", "AddVPCNetwork", d.Id(), err)
+			}
+		}
+
+		if remove := os.Difference(ns); remove.Len() > 0 {
+			// use new set overwrite the full list of network to delete old network
+			req := conn.NewUpdateVPCNetworkRequest()
+			req.VPCId = ucloud.String(d.Id())
+			req.Network = schemaSetToStringSlice(ns)
+
+			_, err := conn.UpdateVPCNetwork(req)
+			if err != nil {
+				return fmt.Errorf("error on %s to vpc %s, %s", "UpdateVPCNetwork", d.Id(), err)
+			}
+		}
+
+		d.SetPartial("cidr_blocks")
+	}
+
+	d.Partial(false)
+
+	return resourceUCloudVPCRead(d, meta)
 }
 
 func resourceUCloudVPCDelete(d *schema.ResourceData, meta interface{}) error {

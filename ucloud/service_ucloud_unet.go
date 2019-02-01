@@ -36,7 +36,7 @@ func (c *UCloudClient) describeEIPResourceById(eipId, resourceId string) (*unet.
 	}
 
 	if resp == nil || len(resp.EIPSet) < 1 {
-		return nil, newNotFoundError(getNotFoundMessage("eip_association", eipId))
+		return nil, newNotFoundError(getNotFoundMessage("eip association", eipId))
 	}
 
 	for i := 0; i < len(resp.EIPSet); i++ {
@@ -46,7 +46,24 @@ func (c *UCloudClient) describeEIPResourceById(eipId, resourceId string) (*unet.
 		}
 	}
 
-	return nil, newNotFoundError(getNotFoundMessage("eip_association", eipId))
+	return nil, newNotFoundError(getNotFoundMessage("eip association", eipId))
+}
+
+func (c *UCloudClient) checkDefaultFirewall() error {
+	conn := c.unetconn
+
+	req := conn.NewDescribeFirewallRequest()
+
+	resp, err := conn.DescribeFirewall(req)
+	if err != nil {
+		return err
+	}
+
+	if resp == nil || len(resp.DataSet) < 2 {
+		return newNotFoundError(getNotFoundMessage("security group", "default"))
+	}
+
+	return nil
 }
 
 func (c *UCloudClient) describeFirewallById(sgId string) (*unet.FirewallDataSet, error) {
