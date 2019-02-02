@@ -6,6 +6,8 @@ import (
 	"path"
 	"reflect"
 	"testing"
+
+	"github.com/hashicorp/terraform/helper/hashcode"
 )
 
 func Test_writeToFile(t *testing.T) {
@@ -103,7 +105,7 @@ func Test_hashCIDR(t *testing.T) {
 		args args
 		want int
 	}{
-		{"ok", args{"192.168.0.0/16"}, 494140204},
+		{"ok", args{"192.168.0.0/16"}, hashcode.String("192.168.0.0/16")},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

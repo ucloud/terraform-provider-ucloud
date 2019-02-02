@@ -142,10 +142,12 @@ func buildReversedStringMap(input map[string]string) map[string]string {
 }
 
 func hashCIDR(v interface{}) int {
-	_, network, err := net.ParseCIDR(v.(string))
+	cidr := v.(string)
+
+	_, _, err := net.ParseCIDR(cidr)
 	if err != nil {
 		return 0
 	}
 
-	return hashcode.String(network.Network())
+	return hashcode.String(cidr)
 }

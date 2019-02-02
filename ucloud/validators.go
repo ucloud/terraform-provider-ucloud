@@ -94,17 +94,6 @@ func validateSecurityGroupPort(v interface{}, k string) (ws []string, errors []e
 	return
 }
 
-func validateUCloudCidrBlock(v interface{}, k string) (ws []string, errors []error) {
-	cidr := v.(string)
-
-	_, err := parseUCloudCidrBlock(cidr)
-	if err != nil {
-		errors = append(errors, fmt.Errorf("%q is invalid, should like 0.0.0.0/0, got error %s", k, err))
-	}
-
-	return
-}
-
 var validateDuration = validation.IntBetween(1, 9)
 
 var validateDiskName = validation.StringMatch(
@@ -148,4 +137,24 @@ func validateAll(validators ...schema.SchemaValidateFunc) schema.SchemaValidateF
 		}
 		return allWarnings, allErrors
 	}
+}
+
+var validateCIDRNetwork = validation.CIDRNetwork(16, 29)
+
+func validateCIDRPrivate(v interface{}, k string) (ws []string, errors []error) {
+	cidr := v.(string)
+
+	found := false
+	for _, prefix := range []string{"192.168.", "172.16.", "10."} {
+		if strings.HasPrefix(cidr, prefix) {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		errors = append(errors, fmt.Errorf("excepted cidr network in one of 192.168.x.x, 172.16.x.x, 10.x.x.x"))
+	}
+
+	return
 }

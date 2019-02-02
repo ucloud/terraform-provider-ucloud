@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform/helper/customdiff"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
@@ -28,6 +29,11 @@ func resourceUCloudInstance() *schema.Resource {
 			Update: schema.DefaultTimeout(20 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
+
+		CustomizeDiff: customdiff.All(
+			// if no default security group under this account, check it to trigger creating event
+			customdiff.ValidateChange("security_group", diffValidateDefaultSecurityGroup),
+		),
 
 		Schema: map[string]*schema.Schema{
 			"availability_zone": {
@@ -91,11 +97,16 @@ func resourceUCloudInstance() *schema.Resource {
 			},
 
 			"boot_disk_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Default:      "local_normal",
-				ValidateFunc: validation.StringInSlice([]string{"local_normal", "local_ssd", "cloud_normal", "cloud_ssd"}, false),
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Default:  "local_normal",
+				ValidateFunc: validation.StringInSlice([]string{
+					"local_normal",
+					"local_ssd",
+					"cloud_normal",
+					"cloud_ssd",
+				}, false),
 			},
 
 			"data_disk_size": {

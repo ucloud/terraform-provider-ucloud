@@ -32,53 +32,6 @@ func parseCidrBlock(s string) (*cidrBlock, error) {
 	return &cidr, nil
 }
 
-/*
-parseUCloudCidrBlock will parse cidr with specific range constraints
-cidr must contained by subnet as followed
-	- 192.168.*.[8, 16, 24 ...]
-	- 172.[16-32].*.[8, 16, 24 ...]
-	- 10.*.*.[8, 16, 24 ...]
-*/
-func parseUCloudCidrBlock(s string) (*cidrBlock, error) {
-	cidr, err := parseCidrBlock(s)
-	if err != nil {
-		return nil, err
-	}
-
-	n := strings.Split(s, "/")
-	network, _ := n[0], n[1]
-
-	// if user input "192.168.1.1/24", it should be "192.168.1.0/24" with net mask
-	if network != cidr.Network {
-		return nil, fmt.Errorf("should use network ip matched with net mask")
-	}
-
-	n = strings.Split(network, ".")
-
-	// skip error, because has been validated by parseCidrBlock
-	a, _ := strconv.Atoi(n[0])
-	b, _ := strconv.Atoi(n[1])
-	c, _ := strconv.Atoi(n[2])
-	d, _ := strconv.Atoi(n[3])
-
-	// check 192.168.--------.-----000
-	if a == 192 && b == 168 && c&0x0 == 0 && d&0x7 == 0 && 16 <= cidr.Mask && cidr.Mask <= 29 {
-		return cidr, nil
-	}
-
-	// check 172.0001----.--------.-----000
-	if a == 172 && b&0xf0 == 16 && c&0x0 == 0 && d&0x7 == 0 && 16 <= cidr.Mask && cidr.Mask <= 29 {
-		return cidr, nil
-	}
-
-	// check 10.--------.--------.-----000
-	if a == 10 && b&0x0 == 0 && c&0x0 == 0 && d&0x7 == 0 && 16 <= cidr.Mask && cidr.Mask <= 29 {
-		return cidr, nil
-	}
-
-	return nil, fmt.Errorf("invalid network, you can use network include by 192.168, 172.[16-32] and 10 subnet")
-}
-
 func (c *cidrBlock) String() string {
 	return fmt.Sprintf("%s/%v", c.Network, c.Mask)
 }

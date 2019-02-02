@@ -53,48 +53,6 @@ func Test_parseInstanceType(t *testing.T) {
 	}
 }
 
-func Test_parseUCloudCidrBlock(t *testing.T) {
-	type args struct {
-		s string
-	}
-
-	tests := []struct {
-		name    string
-		args    args
-		want    *cidrBlock
-		wantErr bool
-	}{
-		{"ok", args{"192.168.1.0/24"}, &cidrBlock{"192.168.1.0", 24}, false},
-
-		{"err_ip", args{"1.0.0.0/24"}, nil, true},
-		{"err_ip_conflict_with_mask", args{"192.168.1.1/24"}, nil, true},
-
-		{"err_ip_range_192_network", args{"192.167.1.0/24"}, nil, true},
-		{"err_ip_range_192_mask_too_small", args{"192.168.1.0/15"}, nil, true},
-		{"err_ip_range_192_mask_too_large", args{"192.168.1.0/30"}, nil, true},
-
-		{"err_ip_range_172_network_too_small", args{"172.15.1.0/24"}, nil, true},
-		{"err_ip_range_172_network_too_large", args{"172.32.1.0/24"}, nil, true},
-		{"err_ip_range_172_mask_too_small", args{"172.16.1.0/11"}, nil, true},
-		{"err_ip_range_172_mask_too_large", args{"172.16.1.0/30"}, nil, true},
-
-		{"err_ip_range_10_mask_too_small", args{"10.0.1.0/7"}, nil, true},
-		{"err_ip_range_10_mask_too_large", args{"10.0.1.0/30"}, nil, true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseUCloudCidrBlock(tt.args.s)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("parseUClounillock() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("parseUCloudCidrBlock() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func Test_parseAssociationInfo(t *testing.T) {
 	type args struct {
 		assocId string
