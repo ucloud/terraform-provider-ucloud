@@ -31,7 +31,7 @@ func TestAccUCloudVPC_basic(t *testing.T) {
 					testAccCheckVPCAttributes(&val),
 					resource.TestCheckResourceAttr("ucloud_vpc.foo", "name", "tf-acc-vpc"),
 					resource.TestCheckResourceAttr("ucloud_vpc.foo", "tag", defaultTag),
-					resource.TestCheckResourceAttr("ucloud_vpc.foo", "cidr_blocks.494140204", "192.168.0.0/16"),
+					resource.TestCheckResourceAttr("ucloud_vpc.foo", "cidr_blocks.3901788224", "192.168.0.0/16"),
 					resource.TestCheckResourceAttr("ucloud_vpc.foo", "cidr_blocks.#", "1"),
 				),
 			},

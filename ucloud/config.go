@@ -1,6 +1,9 @@
 package ucloud
 
 import (
+	"fmt"
+
+	"github.com/ucloud/ucloud-sdk-go/external"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 	"github.com/ucloud/ucloud-sdk-go/ucloud/auth"
 	"github.com/ucloud/ucloud-sdk-go/ucloud/log"
@@ -16,19 +19,25 @@ import (
 
 // Config is the configuration of ucloud meta data
 type Config struct {
-	PublicKey  string
-	PrivateKey string
+	PublicKey             string
+	PrivateKey            string
+	Profile               string
+	SharedCredentialsFile string
+
 	Region     string
 	ProjectId  string
-
-	MaxRetries int
 	Insecure   bool
+	BaseURL    string
+	MaxRetries int
 }
 
 // UCloudClient is the ucloud openapi client
 type UCloudClient struct {
 	region    string
 	projectId string
+
+	config     *ucloud.Config
+	credential *auth.Credential
 
 	uhostconn    *uhost.UHostClient
 	unetconn     *unet.UNetClient
@@ -41,40 +50,60 @@ type UCloudClient struct {
 
 // Client will returns a client with connections for all product
 func (c *Config) Client() (*UCloudClient, error) {
+	var err error
 	var client UCloudClient
+	var cfg *ucloud.Config
+	var cred *auth.Credential
+
 	client.region = c.Region
 	client.projectId = c.ProjectId
 
+	cfgV := ucloud.NewConfig()
+	cfg = &cfgV
+
 	// set common attributes (region, project id, etc ...)
-	config := ucloud.NewConfig()
-	config.Region = c.Region
-	config.ProjectId = c.ProjectId
+	cfg.Region = c.Region
+	cfg.ProjectId = c.ProjectId
 
 	// enable auto retry with http/connection error
-	config.MaxRetries = c.MaxRetries
-	config.LogLevel = log.DebugLevel
-	config.UserAgent = "Terraform/1.11.x"
+	cfg.MaxRetries = c.MaxRetries
+	cfg.LogLevel = log.DebugLevel
+	cfg.UserAgent = "Terraform/1.11.x"
 
-	// set endpoint with insecure https connection
-	if c.Insecure {
-		config.BaseUrl = GetInsecureEndpointURL(c.Region)
+	// if no base url be set, get insecure http or secure https default url
+	// uf base url is set, use it
+	if len(c.BaseURL) == 0 && c.Insecure {
+		cfg.BaseUrl = GetInsecureEndpointURL(c.Region)
+	} else if len(c.BaseURL) == 0 && !c.Insecure {
+		cfg.BaseUrl = GetEndpointURL(c.Region)
 	} else {
-		config.BaseUrl = GetEndpointURL(c.Region)
+		cfg.BaseUrl = c.BaseURL
 	}
 
-	// credential with publicKey/privateKey
-	credential := auth.NewCredential()
-	credential.PublicKey = c.PublicKey
-	credential.PrivateKey = c.PrivateKey
+	if len(c.SharedCredentialsFile) != 0 {
+		// load public/private key from shared credential file
+		cred, err = external.LoadUCloudCredentialFile(c.SharedCredentialsFile, c.Profile)
+		if err != nil {
+			return nil, fmt.Errorf("cannot load shared credential file, %s", err)
+		}
+	} else {
+		// load public/private key from shared credential file
+		credV := auth.NewCredential()
+		cred = &credV
+		cred.PublicKey = c.PublicKey
+		cred.PrivateKey = c.PrivateKey
+	}
 
 	// initialize client connections
-	client.uhostconn = uhost.NewClient(&config, &credential)
-	client.unetconn = unet.NewClient(&config, &credential)
-	client.ulbconn = ulb.NewClient(&config, &credential)
-	client.vpcconn = vpc.NewClient(&config, &credential)
-	client.uaccountconn = uaccount.NewClient(&config, &credential)
-	client.udiskconn = udisk.NewClient(&config, &credential)
-	client.udpnconn = udpn.NewClient(&config, &credential)
+	client.uhostconn = uhost.NewClient(cfg, cred)
+	client.unetconn = unet.NewClient(cfg, cred)
+	client.ulbconn = ulb.NewClient(cfg, cred)
+	client.vpcconn = vpc.NewClient(cfg, cred)
+	client.uaccountconn = uaccount.NewClient(cfg, cred)
+	client.udiskconn = udisk.NewClient(cfg, cred)
+	client.udpnconn = udpn.NewClient(cfg, cred)
 
+	client.config = cfg
+	client.credential = cred
 	return &client, nil
 }
