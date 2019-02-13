@@ -20,6 +20,9 @@ const (
 	// defaultWaitIgnoreError is if it will ignore error during wait for state changed after resource is created
 	defaultWaitIgnoreError = false
 
+	// defaultBaseURL is the api endpoint for advanced usage
+	defaultBaseURL = "https://api.ucloud.cn"
+
 	// defaultTag is the default tag for all of resources
 	defaultTag = "Default"
 )

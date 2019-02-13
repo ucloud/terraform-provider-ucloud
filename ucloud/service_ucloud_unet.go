@@ -1,6 +1,8 @@
 package ucloud
 
 import (
+	"fmt"
+
 	"github.com/ucloud/ucloud-sdk-go/services/unet"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 	uerr "github.com/ucloud/ucloud-sdk-go/ucloud/error"
@@ -60,7 +62,7 @@ func (c *UCloudClient) checkDefaultFirewall() error {
 	}
 
 	if resp == nil || len(resp.DataSet) < 2 {
-		return newNotFoundError(getNotFoundMessage("security group", "default"))
+		return fmt.Errorf("the default firewall is not found for this project/region, it will be initializing automiticly, please try again later")
 	}
 
 	return nil

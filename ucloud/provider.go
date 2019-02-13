@@ -12,16 +12,30 @@ func Provider() terraform.ResourceProvider {
 		Schema: map[string]*schema.Schema{
 			"public_key": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("UCLOUD_PUBLIC_KEY", nil),
 				Description: descriptions["public_key"],
 			},
 
 			"private_key": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("UCLOUD_PRIVATE_KEY", nil),
 				Description: descriptions["private_key"],
+			},
+
+			"profile": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("UCLOUD_PROFILE", nil),
+				Description: descriptions["profile"],
+			},
+
+			"shared_credentials_file": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("UCLOUD_SHARED_CREDENTIAL_FILE", nil),
+				Description: descriptions["shared_credentials_file"],
 			},
 
 			"region": {
@@ -46,10 +60,19 @@ func Provider() terraform.ResourceProvider {
 			},
 
 			"insecure": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     defaultInSecure,
-				Description: descriptions["insecure"],
+				Type:          schema.TypeBool,
+				Optional:      true,
+				Default:       defaultInSecure,
+				Description:   descriptions["insecure"],
+				ConflictsWith: []string{"base_url"},
+			},
+
+			"base_url": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       defaultBaseURL,
+				Description:   descriptions["base_url"],
+				ConflictsWith: []string{"insecure"},
 			},
 		},
 
@@ -82,11 +105,14 @@ func Provider() terraform.ResourceProvider {
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config := Config{
-		PublicKey:  d.Get("public_key").(string),
-		PrivateKey: d.Get("private_key").(string),
-		Region:     d.Get("region").(string),
-		MaxRetries: d.Get("max_retries").(int),
-		Insecure:   d.Get("insecure").(bool),
+		PublicKey:             d.Get("public_key").(string),
+		PrivateKey:            d.Get("private_key").(string),
+		Region:                d.Get("region").(string),
+		MaxRetries:            d.Get("max_retries").(int),
+		Insecure:              d.Get("insecure").(bool),
+		BaseURL:               d.Get("base_url").(string),
+		Profile:               d.Get("profile").(string),
+		SharedCredentialsFile: d.Get("shared_credentials_file").(string),
 	}
 
 	if projectId, ok := d.GetOk("project_id"); ok && projectId.(string) != "" {
@@ -103,11 +129,14 @@ var descriptions map[string]string
 
 func init() {
 	descriptions = map[string]string{
-		"public_key":  "...",
-		"private_key": "...",
-		"region":      "...",
-		"project_id":  "...",
-		"max_retries": "...",
-		"insecure":    "...",
+		"public_key":              "...",
+		"private_key":             "...",
+		"region":                  "...",
+		"project_id":              "...",
+		"max_retries":             "...",
+		"insecure":                "...",
+		"base_url":                "...",
+		"profile":                 "...",
+		"shared_credentials_file": "...",
 	}
 }
