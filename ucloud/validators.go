@@ -111,6 +111,27 @@ var validateTag = validation.StringMatch(
 	"expected value to be 0 - 63 characters and only support chinese, english, numbers, '-', '_', '.'",
 )
 
+var validateDBInstanceName = validation.StringMatch(
+	regexp.MustCompile(`^[A-Za-z0-9\p{Han}-_.,\[\]:]{6,63}$`),
+	"expected value to be 6 - 63 characters and only support chinese, english, numbers, '-', '_', '.', ',', '[', ']', ':'",
+)
+
+var validateDBInstanceBlackList = validation.StringMatch(
+	regexp.MustCompile(`^[^.%]+\.([^.%]+|%)$`),
+	fmt.Sprintf("expected element of %q should like %q or %q", "backup_black_list", "db.%", "dbname.tablename"),
+)
+
+func validateDBInstanceType(v interface{}, k string) (ws []string, errors []error) {
+	dbInstanceType := v.(string)
+
+	_, err := parseDBInstanceType(dbInstanceType)
+	if err != nil {
+		errors = append(errors, err)
+	}
+
+	return
+}
+
 func validateMod(num int) schema.SchemaValidateFunc {
 	return func(v interface{}, k string) (ws []string, errors []error) {
 		value := v.(int)

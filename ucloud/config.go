@@ -9,6 +9,7 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/ucloud/log"
 
 	"github.com/ucloud/ucloud-sdk-go/services/uaccount"
+	"github.com/ucloud/ucloud-sdk-go/services/udb"
 	"github.com/ucloud/ucloud-sdk-go/services/udisk"
 	"github.com/ucloud/ucloud-sdk-go/services/udpn"
 	"github.com/ucloud/ucloud-sdk-go/services/uhost"
@@ -46,6 +47,7 @@ type UCloudClient struct {
 	uaccountconn *uaccount.UAccountClient
 	udiskconn    *udisk.UDiskClient
 	udpnconn     *udpn.UDPNClient
+	udbconn      *udb.UDBClient
 }
 
 // Client will returns a client with connections for all product
@@ -102,6 +104,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 	client.uaccountconn = uaccount.NewClient(cfg, cred)
 	client.udiskconn = udisk.NewClient(cfg, cred)
 	client.udpnconn = udpn.NewClient(cfg, cred)
+	client.udbconn = udb.NewClient(cfg, cred)
 
 	client.config = cfg
 	client.credential = cred

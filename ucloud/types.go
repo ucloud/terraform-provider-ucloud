@@ -182,3 +182,70 @@ func parseAssociationInfo(assocId string) (*associationInfo, error) {
 		ResourceId:   matched[4],
 	}, nil
 }
+
+type attachmentInfo struct {
+	PrimaryId string
+	SecondId  string
+	ThirdId   string
+}
+
+var attachmentPattern = regexp.MustCompile("^([^:]+):(.+):(.+)$")
+
+// parseAttachmentInfo to decode attachment identify as some useful information,
+// such as "ssl#xxx:lb#xxx:listener#xxx" is owned by three related resource in this attachment,
+// other representation is invalid.
+func parseAttachmentInfo(attachId string) (*attachmentInfo, error) {
+	matched := attachmentPattern.FindStringSubmatch(attachId)
+
+	if len(matched) < 4 {
+		return nil, fmt.Errorf("invalid identity of attachment")
+	}
+
+	return &attachmentInfo{
+		PrimaryId: matched[1],
+		SecondId:  matched[2],
+		ThirdId:   matched[3],
+	}, nil
+}
+
+type dbInstanceType struct {
+	Engine string
+	Type   string
+	Memory int
+}
+
+var availableDBEngine = []string{"mysql", "percona"}
+var availableDBTypes = []string{"ha"}
+var availableDBMemory = []int{1, 2, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128}
+
+func parseDBInstanceType(s string) (*dbInstanceType, error) {
+	splited := strings.Split(s, "-")
+	if len(splited) != 3 {
+		return nil, fmt.Errorf("db instance type is invalid, got %s", s)
+	}
+	engine := splited[0]
+	if err := checkStringIn(engine, availableDBEngine); err != nil {
+		return nil, err
+	}
+
+	dbType := splited[1]
+	if err := checkStringIn(dbType, availableDBTypes); err != nil {
+		return nil, err
+	}
+
+	memory, err := strconv.Atoi(splited[2])
+	if err != nil {
+		return nil, err
+	}
+
+	if err := checkIntIn(memory, availableDBMemory); err != nil {
+		return nil, err
+	}
+
+	t := &dbInstanceType{}
+	t.Engine = engine
+	t.Type = dbType
+	t.Memory = memory
+
+	return t, nil
+}
