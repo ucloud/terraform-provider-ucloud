@@ -10,6 +10,7 @@ description: |-
 
 Provides a VPC resource.
 
+~> **Note**  The network segment can only be created or deleted, can not perform both of them at the same time.
 ## Example Usage
 
 ```hcl

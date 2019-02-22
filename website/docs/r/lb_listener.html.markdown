@@ -36,7 +36,7 @@ The following arguments are supported:
 * `idle_timeout` - (Optional) Amount of time in seconds to wait for the response for in between two sessions if `listen_type` is `request_proxy`, range: 0-86400. (Default: `60`). Amount of time in seconds to wait for one session if `listen_type` is `packets_transmit`, range: 60-900. The session will be closed as soon as no response if it is `0`.
 * `method` - (Optional) The load balance method in which the listener is. Possible values are: `roundrobin`, `source`, `consistent_hash`, `source_port` , `consistent_hash_port`, `weight_roundrobin` and `leastconn`. (Default: `roundrobin`).
     - The `consistent_hash`, `source_port` , `consistent_hash_port`, `roundrobin`, `source` and `weight_roundrobin` are valid if `listen_type` is `packets_transmit`.
-    - The `Roundrobin`, `Source` and `WeightRoundrobin` and `Leastconn` are vaild if `listen_type` is `request_proxy`.
+    - The `rundrobin`, `source` and `weight_roundrobin` and `leastconn` are vaild if `listen_type` is `request_proxy`.
 * `persistence` - (Optional) Indicate whether the persistence session is enabled, it is invaild if `PersistenceType` is `none`, an auto-generated string will be exported if `persistence_type` is `server_insert`, a custom string will be exported if `persistence_type` is `user_defined`.
 * `persistence_type` - (Optional) The type of session persistence of listener. Possible values are: `none` as disabled, `server_insert` as auto-generated string and `user_defined` as cutom string. (Default: `none`).
 * `health_check_type` - (Optional) Health check method. Possible values are `port` as port checking and `path` as http checking.
