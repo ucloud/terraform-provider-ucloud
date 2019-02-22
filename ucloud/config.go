@@ -82,7 +82,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 		cfg.BaseUrl = c.BaseURL
 	}
 
-	if len(c.SharedCredentialsFile) != 0 {
+	if len(c.Profile) != 0 {
 		// load public/private key from shared credential file
 		cred, err = external.LoadUCloudCredentialFile(c.SharedCredentialsFile, c.Profile)
 		if err != nil {
