@@ -68,7 +68,7 @@ func resourceUCloudLBSSLAttachmentRead(d *schema.ResourceData, meta interface{})
 
 	attach, err := parseAttachmentInfo(d.Id())
 	if err != nil {
-		return fmt.Errorf("error on parsing lb ssl attachment %s, %s", d.Id(), err)
+		return fmt.Errorf("error on parsing lb ssl attachment %q, %s", d.Id(), err)
 	}
 
 	sslAtSet, err := client.describeLBSSLAttachmentById(attach.PrimaryId, attach.SecondId, attach.ThirdId)
@@ -77,7 +77,7 @@ func resourceUCloudLBSSLAttachmentRead(d *schema.ResourceData, meta interface{})
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error on reading lb ssl attachment %s, %s", d.Id(), err)
+		return fmt.Errorf("error on reading lb ssl attachment %q, %s", d.Id(), err)
 	}
 
 	d.Set("load_balancer_id", sslAtSet.ULBId)
@@ -92,7 +92,7 @@ func resourceUCloudLBSSLAttachmentDelete(d *schema.ResourceData, meta interface{
 
 	attach, err := parseAttachmentInfo(d.Id())
 	if err != nil {
-		return fmt.Errorf("error on parsing lb ssl attachment %s, %s", d.Id(), err)
+		return fmt.Errorf("error on parsing lb ssl attachment %q, %s", d.Id(), err)
 	}
 
 	req := conn.NewUnbindSSLRequest()
@@ -102,7 +102,7 @@ func resourceUCloudLBSSLAttachmentDelete(d *schema.ResourceData, meta interface{
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		if _, err := conn.UnbindSSL(req); err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error on deleting lb ssl attachment %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on deleting lb ssl attachment %q, %s", d.Id(), err))
 		}
 
 		_, err := client.describeLBSSLAttachmentById(attach.PrimaryId, attach.SecondId, attach.ThirdId)
@@ -110,9 +110,9 @@ func resourceUCloudLBSSLAttachmentDelete(d *schema.ResourceData, meta interface{
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(fmt.Errorf("error on reading lb ssl attachment when deleting %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on reading lb ssl attachment when deleting %q, %s", d.Id(), err))
 		}
 
-		return resource.RetryableError(fmt.Errorf("the specified lb ssl attachment %s has not been deleted due to unknown error", d.Id()))
+		return resource.RetryableError(fmt.Errorf("the specified lb ssl attachment %q has not been deleted due to unknown error", d.Id()))
 	})
 }

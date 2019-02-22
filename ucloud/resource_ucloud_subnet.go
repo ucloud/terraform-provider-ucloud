@@ -107,7 +107,7 @@ func resourceUCloudSubnetCreate(d *schema.ResourceData, meta interface{}) error 
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error on waiting for subnet %s complete creating, %s", d.Id(), err)
+		return fmt.Errorf("error on waiting for subnet %q complete creating, %s", d.Id(), err)
 	}
 
 	return resourceUCloudSubnetRead(d, meta)
@@ -142,7 +142,7 @@ func resourceUCloudSubnetUpdate(d *schema.ResourceData, meta interface{}) error 
 	if isChanged {
 		_, err := conn.UpdateSubnetAttribute(req)
 		if err != nil {
-			return fmt.Errorf("error on %s to subnet %s, %s", "UpdateSubnetAttribute", d.Id(), err)
+			return fmt.Errorf("error on %s to subnet %q, %s", "UpdateSubnetAttribute", d.Id(), err)
 		}
 
 		d.SetPartial("name")
@@ -152,7 +152,7 @@ func resourceUCloudSubnetUpdate(d *schema.ResourceData, meta interface{}) error 
 		stateConf := subnetWaitForState(client, d.Id())
 		_, err = stateConf.WaitForState()
 		if err != nil {
-			return fmt.Errorf("error on waiting for %s complete to subnet %s, %s", "UpdateSubnetAttribute", d.Id(), err)
+			return fmt.Errorf("error on waiting for %s complete to subnet %q, %s", "UpdateSubnetAttribute", d.Id(), err)
 		}
 	}
 
@@ -170,7 +170,7 @@ func resourceUCloudSubnetRead(d *schema.ResourceData, meta interface{}) error {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error on reading subnet %s, %s", d.Id(), err)
+		return fmt.Errorf("error on reading subnet %q, %s", d.Id(), err)
 	}
 
 	d.Set("name", subnetSet.SubnetName)
@@ -192,7 +192,7 @@ func resourceUCloudSubnetDelete(d *schema.ResourceData, meta interface{}) error 
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		if _, err := conn.DeleteSubnet(req); err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error on deleting subnet %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on deleting subnet %q, %s", d.Id(), err))
 		}
 
 		_, err := client.describeSubnetById(d.Id())
@@ -200,10 +200,10 @@ func resourceUCloudSubnetDelete(d *schema.ResourceData, meta interface{}) error 
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(fmt.Errorf("error on reading subnet when deleting %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on reading subnet when deleting %q, %s", d.Id(), err))
 		}
 
-		return resource.RetryableError(fmt.Errorf("the specified subnet %s has not been deleted due to unknown error", d.Id()))
+		return resource.RetryableError(fmt.Errorf("the specified subnet %q has not been deleted due to unknown error", d.Id()))
 	})
 }
 

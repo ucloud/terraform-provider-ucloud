@@ -152,7 +152,7 @@ func resourceUCloudSecurityGroupCreate(d *schema.ResourceData, meta interface{})
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error on waiting for security group %s complete creating, %s", d.Id(), err)
+		return fmt.Errorf("error on waiting for security group %q complete creating, %s", d.Id(), err)
 	}
 
 	return resourceUCloudSecurityGroupRead(d, meta)
@@ -171,7 +171,7 @@ func resourceUCloudSecurityGroupUpdate(d *schema.ResourceData, meta interface{})
 		_, err := conn.UpdateFirewall(req)
 
 		if err != nil {
-			return fmt.Errorf("error on %s to security group %s, %s", "UpdateFirewall", d.Id(), err)
+			return fmt.Errorf("error on %s to security group %q, %s", "UpdateFirewall", d.Id(), err)
 		}
 
 		d.SetPartial("rules")
@@ -181,7 +181,7 @@ func resourceUCloudSecurityGroupUpdate(d *schema.ResourceData, meta interface{})
 
 		_, err = stateConf.WaitForState()
 		if err != nil {
-			return fmt.Errorf("error on waiting for %s complete to security group %s, %s", "UpdateFirewall", d.Id(), err)
+			return fmt.Errorf("error on waiting for %s complete to security group %q, %s", "UpdateFirewall", d.Id(), err)
 		}
 	}
 
@@ -213,7 +213,7 @@ func resourceUCloudSecurityGroupUpdate(d *schema.ResourceData, meta interface{})
 	if isChanged {
 		_, err := conn.UpdateFirewallAttribute(req)
 		if err != nil {
-			return fmt.Errorf("error on %s to security group %s, %s", "UpdateFirewallAttribute", d.Id(), err)
+			return fmt.Errorf("error on %s to security group %q, %s", "UpdateFirewallAttribute", d.Id(), err)
 		}
 
 		d.SetPartial("name")
@@ -224,7 +224,7 @@ func resourceUCloudSecurityGroupUpdate(d *schema.ResourceData, meta interface{})
 		stateConf := securityWaitForState(client, d.Id())
 		_, err = stateConf.WaitForState()
 		if err != nil {
-			return fmt.Errorf("error on waiting for %s complete to security group %s, %s", "UpdateFirewallAttribute", d.Id(), err)
+			return fmt.Errorf("error on waiting for %s complete to security group %q, %s", "UpdateFirewallAttribute", d.Id(), err)
 		}
 	}
 
@@ -242,7 +242,7 @@ func resourceUCloudSecurityGroupRead(d *schema.ResourceData, meta interface{}) e
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error on reading security group %s, %s", d.Id(), err)
+		return fmt.Errorf("error on reading security group %q, %s", d.Id(), err)
 	}
 
 	d.Set("name", sgSet.Name)
@@ -277,7 +277,7 @@ func resourceUCloudSecurityGroupDelete(d *schema.ResourceData, meta interface{})
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		if _, err := conn.DeleteFirewall(req); err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error on deleting security group %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on deleting security group %q, %s", d.Id(), err))
 		}
 
 		_, err := client.describeFirewallById(d.Id())
@@ -285,10 +285,10 @@ func resourceUCloudSecurityGroupDelete(d *schema.ResourceData, meta interface{})
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(fmt.Errorf("error on reading security group when deleting %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on reading security group when deleting %q, %s", d.Id(), err))
 		}
 
-		return resource.RetryableError(fmt.Errorf("the specified security group %s has not been deleted due to unknown error", d.Id()))
+		return resource.RetryableError(fmt.Errorf("the specified security group %q has not been deleted due to unknown error", d.Id()))
 	})
 }
 

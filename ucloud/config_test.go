@@ -29,6 +29,6 @@ func TestConfigLoadCredential(t *testing.T) {
 
 func assertString(t *testing.T, expected string, value string) {
 	if expected != value {
-		t.Errorf("expected %s, but got %s", expected, value)
+		t.Errorf("expected %q, but got %q", expected, value)
 	}
 }

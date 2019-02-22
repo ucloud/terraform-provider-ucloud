@@ -94,7 +94,7 @@ func checkStringIn(val string, availables []string) error {
 		}
 	}
 
-	return fmt.Errorf("should be one of %s, got %s", strings.Join(availables, ","), val)
+	return fmt.Errorf("should be one of %q, got %q", strings.Join(availables, ","), val)
 }
 
 func isStringIn(val string, availables []string) bool {

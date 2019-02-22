@@ -35,7 +35,7 @@ func (client *UCloudClient) describeDBParameterGroupByIdAndZone(paramGroupId, zo
 	req.Zone = ucloud.String(zone)
 	pgId, err := strconv.Atoi(paramGroupId)
 	if err != nil {
-		return nil, fmt.Errorf("transform param group id %s to int failed, %s", paramGroupId, err)
+		return nil, fmt.Errorf("transform param group id %q to int failed, %s", paramGroupId, err)
 	}
 	req.GroupId = ucloud.Int(pgId)
 
@@ -59,7 +59,7 @@ func (client *UCloudClient) describeDBBackupByIdAndZone(backupId, zone string) (
 	req.Zone = ucloud.String(zone)
 	buId, err := strconv.Atoi(backupId)
 	if err != nil {
-		return nil, fmt.Errorf("transform backup id %s to int failed, %s", backupId, err)
+		return nil, fmt.Errorf("transform backup id %q to int failed, %s", backupId, err)
 	}
 	req.BackupId = ucloud.Int(buId)
 

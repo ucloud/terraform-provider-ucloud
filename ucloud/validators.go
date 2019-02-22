@@ -137,7 +137,7 @@ func validateMod(num int) schema.SchemaValidateFunc {
 		value := v.(int)
 
 		if value%num != 0 {
-			errors = append(errors, fmt.Errorf("expected %s to be multiple of 10, got %d", k, value))
+			errors = append(errors, fmt.Errorf("expected %q to be multiple of 10, got %d", k, value))
 		}
 
 		return

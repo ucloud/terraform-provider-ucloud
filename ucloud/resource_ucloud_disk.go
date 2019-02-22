@@ -132,7 +132,7 @@ func resourceUCloudDiskCreate(d *schema.ResourceData, meta interface{}) error {
 	stateConf := diskWaitForState(client, d.Id())
 
 	if _, err = stateConf.WaitForState(); err != nil {
-		return fmt.Errorf("error on waiting for disk %s complete creating, %s", d.Id(), err)
+		return fmt.Errorf("error on waiting for disk %q complete creating, %s", d.Id(), err)
 	}
 
 	return resourceUCloudDiskRead(d, meta)
@@ -152,7 +152,7 @@ func resourceUCloudDiskUpdate(d *schema.ResourceData, meta interface{}) error {
 
 		_, err := conn.RenameUDisk(req)
 		if err != nil {
-			return fmt.Errorf("error on %s to disk %s, %s", "RenameUDisk", d.Id(), err)
+			return fmt.Errorf("error on %s to disk %q, %s", "RenameUDisk", d.Id(), err)
 		}
 
 		d.SetPartial("name")
@@ -166,7 +166,7 @@ func resourceUCloudDiskUpdate(d *schema.ResourceData, meta interface{}) error {
 
 		_, err := conn.ResizeUDisk(req)
 		if err != nil {
-			return fmt.Errorf("error on %s to disk %s, %s", "ResizeUDisk", d.Id(), err)
+			return fmt.Errorf("error on %s to disk %q, %s", "ResizeUDisk", d.Id(), err)
 		}
 
 		d.SetPartial("disk_size")
@@ -175,7 +175,7 @@ func resourceUCloudDiskUpdate(d *schema.ResourceData, meta interface{}) error {
 		stateConf := diskWaitForState(client, d.Id())
 
 		if _, err = stateConf.WaitForState(); err != nil {
-			return fmt.Errorf("error on waiting for %s complete to disk %s, %s", "ResizeUDisk", d.Id(), err)
+			return fmt.Errorf("error on waiting for %s complete to disk %q, %s", "ResizeUDisk", d.Id(), err)
 		}
 	}
 
@@ -194,7 +194,7 @@ func resourceUCloudDiskRead(d *schema.ResourceData, meta interface{}) error {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error on reading disk %s, %s", d.Id(), err)
+		return fmt.Errorf("error on reading disk %q, %s", d.Id(), err)
 	}
 
 	d.Set("availability_zone", diskSet.Zone)
@@ -220,7 +220,7 @@ func resourceUCloudDiskDelete(d *schema.ResourceData, meta interface{}) error {
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		if _, err := conn.DeleteUDisk(req); err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error on deleting disk %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on deleting disk %q, %s", d.Id(), err))
 		}
 
 		_, err := client.describeDiskById(d.Id())
@@ -228,10 +228,10 @@ func resourceUCloudDiskDelete(d *schema.ResourceData, meta interface{}) error {
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(fmt.Errorf("error on reading disk when deleting %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on reading disk when deleting %q, %s", d.Id(), err))
 		}
 
-		return resource.RetryableError(fmt.Errorf("the specified disk %s has not been deleted due to unknown error", d.Id()))
+		return resource.RetryableError(fmt.Errorf("the specified disk %q has not been deleted due to unknown error", d.Id()))
 	})
 }
 

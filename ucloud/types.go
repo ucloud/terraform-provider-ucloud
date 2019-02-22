@@ -46,7 +46,7 @@ type instanceType struct {
 func parseInstanceType(s string) (*instanceType, error) {
 	splited := strings.Split(s, "-")
 	if len(splited) < 3 {
-		return nil, fmt.Errorf("instance type is invalid, got %s", s)
+		return nil, fmt.Errorf("instance type is invalid, got %q", s)
 	}
 
 	if splited[1] == "customized" {
@@ -109,7 +109,7 @@ func parseInstanceTypeByCustomize(splited ...string) (*instanceType, error) {
 	}
 
 	if memory/cpu == 1 || memory/cpu == 2 || memory/cpu == 4 || memory/cpu == 8 {
-		return nil, fmt.Errorf("instance type is invalid, expected %s like %s,"+
+		return nil, fmt.Errorf("instance type is invalid, expected %q like %q,"+
 			"the Type can be highcpu, basic, standard, highmem when the ratio of cpu to memory is 1:1, 1:2, 1:4, 1:8", "n-Type-CPU", "n-standard-1")
 	}
 
@@ -221,7 +221,7 @@ var availableDBMemory = []int{1, 2, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128}
 func parseDBInstanceType(s string) (*dbInstanceType, error) {
 	splited := strings.Split(s, "-")
 	if len(splited) != 3 {
-		return nil, fmt.Errorf("db instance type is invalid, got %s", s)
+		return nil, fmt.Errorf("db instance type is invalid, got %q", s)
 	}
 	engine := splited[0]
 	if err := checkStringIn(engine, availableDBEngine); err != nil {

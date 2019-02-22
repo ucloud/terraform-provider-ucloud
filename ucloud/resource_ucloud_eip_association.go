@@ -99,7 +99,7 @@ func resourceUCloudEIPAssociationCreate(d *schema.ResourceData, meta interface{}
 	}
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error on waiting for eip association is completed when creating %s, %s", d.Id(), err)
+		return fmt.Errorf("error on waiting for eip association is completed when creating %q, %s", d.Id(), err)
 	}
 
 	return resourceUCloudEIPAssociationRead(d, meta)
@@ -115,7 +115,7 @@ func resourceUCloudEIPAssociationRead(d *schema.ResourceData, meta interface{}) 
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error on reading eip association when creating %s, %s", d.Id(), err)
+		return fmt.Errorf("error on reading eip association when creating %q, %s", d.Id(), err)
 	}
 
 	// remote api has not returned eip
@@ -142,7 +142,7 @@ func resourceUCloudEIPAssociationDelete(d *schema.ResourceData, meta interface{}
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		if _, err := conn.UnBindEIP(req); err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error on deleting eip association %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on deleting eip association %q, %s", d.Id(), err))
 		}
 
 		_, err := client.describeEIPResourceById(p[0], p[1])
@@ -151,9 +151,9 @@ func resourceUCloudEIPAssociationDelete(d *schema.ResourceData, meta interface{}
 				return nil
 			}
 
-			return resource.NonRetryableError(fmt.Errorf("error on reading eip association when deleting %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on reading eip association when deleting %q, %s", d.Id(), err))
 		}
 
-		return resource.RetryableError(fmt.Errorf("the specified eip association %s has not been deleted due to unknown error", d.Id()))
+		return resource.RetryableError(fmt.Errorf("the specified eip association %q has not been deleted due to unknown error", d.Id()))
 	})
 }

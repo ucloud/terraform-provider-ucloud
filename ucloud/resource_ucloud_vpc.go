@@ -21,7 +21,7 @@ func resourceUCloudVPC() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
-			// network can only be created or deleted once, can not done both of them
+			// network segment can only be created or deleted, can not perform both of them at the same time.
 			customdiff.ValidateChange("cidr_blocks", diffSupressVPCNetworkUpdate),
 		),
 
@@ -123,7 +123,7 @@ func resourceUCloudVPCCreate(d *schema.ResourceData, meta interface{}) error {
 	// after create vpc, we need to wait it initialized
 	_, err = vpcWaitForState(client, d.Id()).WaitForState()
 	if err != nil {
-		return fmt.Errorf("error on waiting for vpc %s complete creating, %s", d.Id(), err)
+		return fmt.Errorf("error on waiting for vpc %q complete creating, %s", d.Id(), err)
 	}
 
 	return resourceUCloudVPCRead(d, meta)
@@ -138,7 +138,7 @@ func resourceUCloudVPCRead(d *schema.ResourceData, meta interface{}) error {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error on reading vpc %s, %s", d.Id(), err)
+		return fmt.Errorf("error on reading vpc %q, %s", d.Id(), err)
 	}
 
 	d.Set("name", vpcSet.Name)
@@ -182,7 +182,7 @@ func resourceUCloudVPCUpdate(d *schema.ResourceData, meta interface{}) error {
 
 			_, err := conn.AddVPCNetwork(req)
 			if err != nil {
-				return fmt.Errorf("error on %s to vpc %s, %s", "AddVPCNetwork", d.Id(), err)
+				return fmt.Errorf("error on %s to vpc %q, %s", "AddVPCNetwork", d.Id(), err)
 			}
 		}
 
@@ -194,7 +194,7 @@ func resourceUCloudVPCUpdate(d *schema.ResourceData, meta interface{}) error {
 
 			_, err := conn.UpdateVPCNetwork(req)
 			if err != nil {
-				return fmt.Errorf("error on %s to vpc %s, %s", "UpdateVPCNetwork", d.Id(), err)
+				return fmt.Errorf("error on %s to vpc %q, %s", "UpdateVPCNetwork", d.Id(), err)
 			}
 		}
 
@@ -215,7 +215,7 @@ func resourceUCloudVPCDelete(d *schema.ResourceData, meta interface{}) error {
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		if _, err := conn.DeleteVPC(req); err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error on deleting vpc %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on deleting vpc %q, %s", d.Id(), err))
 		}
 
 		_, err := client.describeVPCById(d.Id())
@@ -224,10 +224,10 @@ func resourceUCloudVPCDelete(d *schema.ResourceData, meta interface{}) error {
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(fmt.Errorf("error on reading vpc when deleting %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on reading vpc when deleting %q, %s", d.Id(), err))
 		}
 
-		return resource.RetryableError(fmt.Errorf("the specified vpc %s has not been deleted due to unknown error", d.Id()))
+		return resource.RetryableError(fmt.Errorf("the specified vpc %q has not been deleted due to unknown error", d.Id()))
 	})
 }
 
@@ -250,4 +250,15 @@ func vpcWaitForState(client *UCloudClient, id string) *resource.StateChangeConf 
 			return v, statusInitialized, nil
 		},
 	}
+}
+
+func diffSupressVPCNetworkUpdate(old, new, meta interface{}) error {
+	_ = meta.(*UCloudClient)
+
+	o, n := old.(*schema.Set), new.(*schema.Set)
+	if o.Difference(n).Len() > 0 && n.Difference(o).Len() > 0 {
+		return fmt.Errorf("excepted only create or delete operation for network, could not apply both them, please apply delete first, and then apply create")
+	}
+
+	return nil
 }

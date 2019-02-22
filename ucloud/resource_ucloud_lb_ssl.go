@@ -85,7 +85,7 @@ func resourceUCloudLBSSLRead(d *schema.ResourceData, meta interface{}) error {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error on reading lb %s, %s", d.Id(), err)
+		return fmt.Errorf("error on reading lb %q, %s", d.Id(), err)
 	}
 
 	d.Set("name", sslSet.SSLName)
@@ -103,7 +103,7 @@ func resourceUCloudLBSSLDelete(d *schema.ResourceData, meta interface{}) error {
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		if _, err := conn.DeleteSSL(req); err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error on deleting lb ssl %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on deleting lb ssl %q, %s", d.Id(), err))
 		}
 
 		_, err := client.describeLBSSLById(d.Id())
@@ -111,9 +111,9 @@ func resourceUCloudLBSSLDelete(d *schema.ResourceData, meta interface{}) error {
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(fmt.Errorf("error on reading lb ssl when deleting %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on reading lb ssl when deleting %q, %s", d.Id(), err))
 		}
 
-		return resource.RetryableError(fmt.Errorf("the specified lb ssl %s has not been deleted due to unknown error", d.Id()))
+		return resource.RetryableError(fmt.Errorf("the specified lb ssl %q has not been deleted due to unknown error", d.Id()))
 	})
 }
