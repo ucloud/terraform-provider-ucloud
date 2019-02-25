@@ -41,17 +41,18 @@ resource "ucloud_lb_listener" "default" {
   load_balancer_id = "${ucloud_lb.default.id}"
   protocol         = "https"
 }
+
 resource "ucloud_lb_ssl" "default" {
-    name = "tf-example-lb-ssl-attachment"
-    private_key = "${file("private.key")}"
-    user_cert = "${file("user.crt")}"
-    ca_cert = "${file("ca.crt")}"
+  name        = "tf-example-lb-ssl-attachment"
+  private_key = "${file("private.key")}"
+  user_cert   = "${file("user.crt")}"
+  ca_cert     = "${file("ca.crt")}"
 }
 
 resource "ucloud_lb_ssl_attachment" "default" {
-    load_balancer_id = "${ucloud_lb.default.id}"
-    listener_id      = "${ucloud_lb_listener.default.id}"
-    ssl_id      = "${ucloud_lb_ssl.default.id}"
+  load_balancer_id = "${ucloud_lb.default.id}"
+  listener_id      = "${ucloud_lb_listener.default.id}"
+  ssl_id           = "${ucloud_lb_ssl.default.id}"
 }
 
 resource "ucloud_instance" "web" {
