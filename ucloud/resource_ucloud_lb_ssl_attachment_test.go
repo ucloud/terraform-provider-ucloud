@@ -54,7 +54,8 @@ func testAccCheckLBSSLAttachmentExists(n string, sslSet *ulb.ULBSSLSet, lbSet *u
 		client := testAccProvider.Meta().(*UCloudClient)
 
 		return resource.Retry(3*time.Minute, func() *resource.RetryError {
-			d, err := client.describeLBSSLAttachmentById(rs.Primary.Attributes["ssl_id"],
+			d, err := client.describeLBSSLAttachmentById(
+				rs.Primary.Attributes["ssl_id"],
 				rs.Primary.Attributes["load_balancer_id"],
 				rs.Primary.Attributes["listener_id"])
 
@@ -111,15 +112,15 @@ resource "ucloud_lb_listener" "foo" {
 }
 
 resource "ucloud_lb_ssl" "foo" {
-	name = "tf-acc-lb-ssl-attachment"
+	name 		= "tf-acc-lb-ssl-attachment"
 	private_key = "${file("test-fixtures/private.key")}"
-	user_cert = "${file("test-fixtures/user.crt")}"
-	ca_cert = "${file("test-fixtures/ca.crt")}"
+	user_cert 	= "${file("test-fixtures/user.crt")}"
+	ca_cert 	= "${file("test-fixtures/ca.crt")}"
 }
 
 resource "ucloud_lb_ssl_attachment" "foo" {
 	load_balancer_id = "${ucloud_lb.foo.id}"
 	listener_id      = "${ucloud_lb_listener.foo.id}"
-	ssl_id      = "${ucloud_lb_ssl.foo.id}"
+	ssl_id      	 = "${ucloud_lb_ssl.foo.id}"
 }
 `

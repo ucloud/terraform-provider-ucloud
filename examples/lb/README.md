@@ -1,6 +1,6 @@
-# Load Balance Example
+# Load Balancer Example
 
-The lb example launches load balance and  attach Host instances. It also create rule for the load balance and bind SSL certificate to the load balance.
+The lb example launches load balancer and  attach Host instances. It also create rule for the load balancer and bind SSL certificate to the load balancer.
 
 To run, configure your UCloud provider as described in https://www.terraform.io/docs/providers/ucloud/index.html
 

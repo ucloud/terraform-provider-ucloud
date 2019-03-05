@@ -39,7 +39,7 @@ resource "ucloud_instance" "foo" {
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
 	image_id      = "${data.ucloud_images.default.images.0.id}"
 	root_password = "wA1234567"
-	name = "tf-acc-instances"
+	name 		  = "tf-acc-instances"
 	instance_type = "n-highcpu-1"
 }
 

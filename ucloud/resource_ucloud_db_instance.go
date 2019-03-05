@@ -562,3 +562,33 @@ func diffValidateDBStandbyZone(diff *schema.ResourceDiff, v interface{}) error {
 
 	return nil
 }
+
+func (client *UCloudClient) dbWaitForState(dbId string, target []string) *resource.StateChangeConf {
+	return &resource.StateChangeConf{
+		Pending:    []string{statusPending},
+		Target:     target,
+		Timeout:    5 * time.Minute,
+		Delay:      5 * time.Second,
+		MinTimeout: 3 * time.Second,
+		Refresh: func() (interface{}, string, error) {
+			db, err := client.describeDBInstanceById(dbId)
+			if err != nil {
+				if isNotFoundError(err) {
+					return nil, statusPending, nil
+				}
+				return nil, "", err
+			}
+
+			state := db.State
+			if state == "RecoverFail" {
+				return nil, "", fmt.Errorf("db instance recover failed, please make sure your %q is correct and matched with the other parameters", "backup_id")
+			}
+
+			if !isStringIn(state, target) {
+				state = statusPending
+			}
+
+			return db, state, nil
+		},
+	}
+}

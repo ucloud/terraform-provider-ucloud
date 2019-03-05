@@ -2,6 +2,7 @@ package ucloud
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -66,12 +67,9 @@ func resourceUCloudLBSSLAttachmentCreate(d *schema.ResourceData, meta interface{
 func resourceUCloudLBSSLAttachmentRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
 
-	attach, err := parseAttachmentInfo(d.Id())
-	if err != nil {
-		return fmt.Errorf("error on parsing lb ssl attachment %q, %s", d.Id(), err)
-	}
+	p := strings.Split(d.Id(), ":")
 
-	sslAtSet, err := client.describeLBSSLAttachmentById(attach.PrimaryId, attach.SecondId, attach.ThirdId)
+	sslAtSet, err := client.describeLBSSLAttachmentById(p[0], p[1], p[2])
 	if err != nil {
 		if isNotFoundError(err) {
 			d.SetId("")
@@ -90,22 +88,19 @@ func resourceUCloudLBSSLAttachmentDelete(d *schema.ResourceData, meta interface{
 	client := meta.(*UCloudClient)
 	conn := client.ulbconn
 
-	attach, err := parseAttachmentInfo(d.Id())
-	if err != nil {
-		return fmt.Errorf("error on parsing lb ssl attachment %q, %s", d.Id(), err)
-	}
+	p := strings.Split(d.Id(), ":")
 
 	req := conn.NewUnbindSSLRequest()
-	req.SSLId = ucloud.String(attach.PrimaryId)
-	req.ULBId = ucloud.String(attach.SecondId)
-	req.VServerId = ucloud.String(attach.ThirdId)
+	req.SSLId = ucloud.String(p[0])
+	req.ULBId = ucloud.String(p[1])
+	req.VServerId = ucloud.String(p[2])
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		if _, err := conn.UnbindSSL(req); err != nil {
 			return resource.NonRetryableError(fmt.Errorf("error on deleting lb ssl attachment %q, %s", d.Id(), err))
 		}
 
-		_, err := client.describeLBSSLAttachmentById(attach.PrimaryId, attach.SecondId, attach.ThirdId)
+		_, err := client.describeLBSSLAttachmentById(p[0], p[1], p[2])
 		if err != nil {
 			if isNotFoundError(err) {
 				return nil

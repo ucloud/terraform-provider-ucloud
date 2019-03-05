@@ -145,15 +145,13 @@ func resourceUCloudLBListenerCreate(d *schema.ResourceData, meta interface{}) er
 	req.ULBId = ucloud.String(lbId)
 	req.Protocol = ucloud.String(upperCvt.unconvert(d.Get("protocol").(string)))
 	req.FrontendPort = ucloud.Int(d.Get("port").(int))
-	listenType := d.Get("listen_type").(string)
-	method := d.Get("method").(string)
-	req.ListenType = ucloud.String(upperCamelCvt.unconvert(listenType))
-	req.Method = ucloud.String(upperCamelCvt.unconvert(method))
+	req.ListenType = ucloud.String(upperCamelCvt.unconvert(d.Get("listen_type").(string)))
+	req.Method = ucloud.String(upperCamelCvt.unconvert(d.Get("method").(string)))
 
 	if v, ok := d.GetOk("name"); ok {
 		req.VServerName = ucloud.String(v.(string))
 	} else {
-		req.VServerName = ucloud.String(resource.PrefixedUniqueId("tf-listener-"))
+		req.VServerName = ucloud.String(resource.PrefixedUniqueId("tf-lb-listener-"))
 	}
 
 	if v, ok := d.GetOk("idle_timeout"); ok {

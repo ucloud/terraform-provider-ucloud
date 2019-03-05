@@ -100,9 +100,9 @@ func testAccCheckLBSSLDestroy(s *terraform.State) error {
 
 const testAccLBSSLConfig = `
 resource "ucloud_lb_ssl" "foo" {
-	name = "tf-acc-lb-ssl"
+	name 		= "tf-acc-lb-ssl"
 	private_key = "${file("test-fixtures/private.key")}"
-	user_cert = "${file("test-fixtures/user.crt")}"
-	ca_cert = "${file("test-fixtures/ca.crt")}"
+	user_cert 	= "${file("test-fixtures/user.crt")}"
+	ca_cert 	= "${file("test-fixtures/ca.crt")}"
 }
 `

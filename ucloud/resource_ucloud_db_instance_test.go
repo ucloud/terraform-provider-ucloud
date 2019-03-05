@@ -31,7 +31,7 @@ func TestAccUCloudDBInstance_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDBInstanceExists("ucloud_db_instance.foo", &db),
 					testAccCheckDBInstanceAttributes(&db),
-					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "name", "tf-testDBInstance-basic"),
+					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "name", "tf-acc-db-instance-basic"),
 					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "instance_storage", "20"),
 					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "instance_type", "mysql-ha-1"),
 					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "engine", "mysql"),
@@ -45,7 +45,7 @@ func TestAccUCloudDBInstance_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDBInstanceExists("ucloud_db_instance.foo", &db),
 					testAccCheckDBInstanceAttributes(&db),
-					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "name", "tf-testDBInstance-basicUpdate"),
+					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "name", "tf-acc-db-instance-basic-update"),
 					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "instance_storage", "30"),
 					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "instance_type", "mysql-ha-2"),
 					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "engine", "mysql"),
@@ -75,7 +75,7 @@ func TestAccUCloudDBInstance_backup(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDBInstanceExists("ucloud_db_instance.foo", &db),
 					testAccCheckDBInstanceAttributes(&db),
-					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "name", "tf-testDBInstance-backup"),
+					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "name", "tf-acc-db-instance-backup"),
 					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "instance_storage", "20"),
 					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "instance_type", "mysql-ha-1"),
 					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "engine", "mysql"),
@@ -94,7 +94,7 @@ func TestAccUCloudDBInstance_backup(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDBInstanceExists("ucloud_db_instance.foo", &db),
 					testAccCheckDBInstanceAttributes(&db),
-					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "name", "tf-testDBInstance-backupUpdate"),
+					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "name", "tf-acc-db-instance-backup-update"),
 					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "instance_storage", "20"),
 					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "instance_type", "mysql-ha-1"),
 					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "engine", "mysql"),
@@ -178,12 +178,12 @@ data "ucloud_zones" "default" {
 
 resource "ucloud_db_instance" "foo" {
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	name = "tf-testDBInstance-basic"
-	instance_storage = 20
-	instance_type = "mysql-ha-1"
-	engine = "mysql"
-	engine_version = "5.7"
-	password = "2018_UClou"
+	name 			  = "tf-acc-db-instance-basic"
+	instance_storage  = 20
+	instance_type	  = "mysql-ha-1"
+	engine			  = "mysql"
+	engine_version 	  = "5.7"
+	password 		  = "2018_UClou"
 }
 `
 
@@ -193,12 +193,12 @@ data "ucloud_zones" "default" {
 
 resource "ucloud_db_instance" "foo" {
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	name = "tf-testDBInstance-basicUpdate"
-	instance_storage = 30
-	instance_type = "mysql-ha-2"
-	engine = "mysql"
-	engine_version = "5.7"
-	password = "2018_UClou"
+	name 			  = "tf-acc-db-instance-basic-update"
+	instance_storage  = 30
+	instance_type     = "mysql-ha-2"
+	engine 			  = "mysql"
+	engine_version    = "5.7"
+	password		  = "2018_UClou"
 }
 `
 const testAccDBInstanceConfigBackup = `
@@ -207,16 +207,16 @@ data "ucloud_zones" "default" {
 
 resource "ucloud_db_instance" "foo" {
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	name = "tf-testDBInstance-backup"
-	instance_storage = 20
-	instance_type = "mysql-ha-1"
-	engine = "mysql"
-	engine_version = "5.7"
-	password = "2018_UClou"
+	name 			  = "tf-acc-db-instance-backup"
+	instance_storage  = 20
+	instance_type 	  = "mysql-ha-1"
+	engine 			  = "mysql"
+	engine_version	  = "5.7"
+	password 		  = "2018_UClou"
 	backup_begin_time = 4
-	backup_count = 6
+	backup_count	  = 6
 	backup_black_list = ["test.%"]
-	backup_date = "1111001"
+	backup_date 	  = "1111001"
 }
 `
 const testAccDBInstanceConfigBackupTwo = `
@@ -225,15 +225,15 @@ data "ucloud_zones" "default" {
 
 resource "ucloud_db_instance" "foo" {
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	name = "tf-testDBInstance-backupUpdate"
-	instance_storage = 20
-	instance_type = "mysql-ha-1"
-	engine = "mysql"
-	engine_version = "5.7"
-	password = "2018_UClou"
+	name 			  = "tf-acc-db-instance-backup-update"
+	instance_storage  = 20
+	instance_type 	  = "mysql-ha-1"
+	engine 			  = "mysql"
+	engine_version    = "5.7"
+	password 		  = "2018_UClou"
 	backup_begin_time = 5
-	backup_count = 6
+	backup_count	  = 6
 	backup_black_list = ["test.%", "city.address"]
-	backup_date = "0001111"
+	backup_date		  = "0001111"
 }
 `

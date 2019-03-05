@@ -183,31 +183,6 @@ func parseAssociationInfo(assocId string) (*associationInfo, error) {
 	}, nil
 }
 
-type attachmentInfo struct {
-	PrimaryId string
-	SecondId  string
-	ThirdId   string
-}
-
-var attachmentPattern = regexp.MustCompile("^([^:]+):(.+):(.+)$")
-
-// parseAttachmentInfo to decode attachment identify as some useful information,
-// such as "ssl#xxx:lb#xxx:listener#xxx" is owned by three related resource in this attachment,
-// other representation is invalid.
-func parseAttachmentInfo(attachId string) (*attachmentInfo, error) {
-	matched := attachmentPattern.FindStringSubmatch(attachId)
-
-	if len(matched) < 4 {
-		return nil, fmt.Errorf("invalid identity of attachment")
-	}
-
-	return &attachmentInfo{
-		PrimaryId: matched[1],
-		SecondId:  matched[2],
-		ThirdId:   matched[3],
-	}, nil
-}
-
 type dbInstanceType struct {
 	Engine string
 	Type   string

@@ -22,8 +22,8 @@ func resourceUCloudLBSSL() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      resource.PrefixedUniqueId("tf-lb-ssl"),
 				ForceNew:     true,
+				Computed:     true,
 				ValidateFunc: validateName,
 			},
 
@@ -59,10 +59,14 @@ func resourceUCloudLBSSLCreate(d *schema.ResourceData, meta interface{}) error {
 
 	req := conn.NewCreateSSLRequest()
 	req.SSLType = ucloud.String("Pem")
-	req.SSLName = ucloud.String(d.Get("name").(string))
 	req.PrivateKey = ucloud.String(d.Get("private_key").(string))
 	req.UserCert = ucloud.String(d.Get("user_cert").(string))
 
+	if v, ok := d.GetOk("name"); ok {
+		req.SSLName = ucloud.String(v.(string))
+	} else {
+		req.SSLName = ucloud.String(resource.PrefixedUniqueId("tf-lb-ssl-"))
+	}
 	if val, ok := d.GetOk("ca_cert"); ok {
 		req.CaCert = ucloud.String(val.(string))
 	}
@@ -76,6 +80,7 @@ func resourceUCloudLBSSLCreate(d *schema.ResourceData, meta interface{}) error {
 
 	return resourceUCloudLBSSLRead(d, meta)
 }
+
 func resourceUCloudLBSSLRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
 
