@@ -116,12 +116,14 @@ func resourceUCloudDBInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Computed: true,
 			},
 
 			"subnet_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Computed: true,
 			},
 
 			"backup_count": {
@@ -407,6 +409,8 @@ func resourceUCloudDBInstanceRead(d *schema.ResourceData, meta interface{}) erro
 	d.Set("backup_begin_time", db.BackupBeginTime)
 	d.Set("backup_date", db.BackupDate)
 	d.Set("tag", db.Tag)
+	d.Set("vpc_id", db.VPCId)
+	d.Set("subnet_id", db.SubnetId)
 	d.Set("create_time", timestampToString(db.CreateTime))
 	d.Set("expire_time", timestampToString(db.ExpiredTime))
 	d.Set("modify_time", timestampToString(db.ModifyTime))

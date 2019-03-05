@@ -100,7 +100,7 @@ func TestAccUCloudInstance_size(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckInstanceExists("ucloud_instance.foo", &instance),
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "name", "tf-acc-instance-size"),
-					resource.TestCheckResourceAttr("ucloud_instance.foo", "data_disk_size", "50"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "data_disk_size", "20"),
 				),
 			},
 			{
@@ -109,7 +109,7 @@ func TestAccUCloudInstance_size(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckInstanceExists("ucloud_instance.foo", &instance),
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "name", "tf-acc-instance-size-update"),
-					resource.TestCheckResourceAttr("ucloud_instance.foo", "data_disk_size", "100"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "data_disk_size", "30"),
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "boot_disk_size", "30"),
 				),
 			},
@@ -329,7 +329,7 @@ resource "ucloud_instance" "foo" {
   root_password     = "wA1234567"
   name              = "tf-acc-instance-size"
   tag               = "tf-acc"
-  data_disk_size    = 50
+  data_disk_size    = 20
   vpc_id            = "${ucloud_vpc.default.id}"
   subnet_id         = "${ucloud_subnet.default.id}"
 }`, rInt)
@@ -346,13 +346,13 @@ data "ucloud_images" "default" {
 }
 
 resource "ucloud_vpc" "default" {
-  name        = "tf-acc-instance-size-update"
+  name        = "tf-acc-instance-size"
   tag         = "tf-acc"
   cidr_blocks = ["192.168.0.0/16"]
 }
 
 resource "ucloud_subnet" "default" {
-  name       = "tf-acc-instance-size-update"
+  name       = "tf-acc-instance-size"
   tag        = "tf-acc"
   cidr_block = "192.168.1.0/24"
   vpc_id     = "${ucloud_vpc.default.id}"
@@ -379,7 +379,7 @@ resource "ucloud_instance" "foo" {
   name              = "tf-acc-instance-size-update"
   tag               = "tf-acc"
   boot_disk_size    = 30
-  data_disk_size    = 100
+  data_disk_size    = 30
   vpc_id            = "${ucloud_vpc.default.id}"
   subnet_id         = "${ucloud_subnet.default.id}"
 }
