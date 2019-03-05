@@ -1,25 +1,25 @@
-## 1.2.0 (Unreleased)
+## 1.2.0 (March 05, 2019)
 
 FEATURES:
 
-* **New Resource:** `ucloud_db_instance` [GH-12]
-* **New Resource:** `ucloud_lb_ssl` [GH-12]
-* **New Resource:** `ucloud_lb_ssl_attachment` [GH-12]
-* **New Datasource:** `ucloud_instances` [GH-12]
-* **New Resource:** `ucloud_udpn_connection` [GH-7]
+* **New Resource:** `ucloud_db_instance` ([#12](https://github.com/ucloud/terraform-provider-ucloud/issues/12))
+* **New Resource:** `ucloud_lb_ssl` ([#12](https://github.com/ucloud/terraform-provider-ucloud/issues/12))
+* **New Resource:** `ucloud_lb_ssl_attachment` ([#12](https://github.com/ucloud/terraform-provider-ucloud/issues/12))
+* **New Datasource:** `ucloud_instances` ([#12](https://github.com/ucloud/terraform-provider-ucloud/issues/12))
+* **New Resource:** `ucloud_udpn_connection` ([#7](https://github.com/ucloud/terraform-provider-ucloud/issues/7))
 
 ENHANCEMENTS:
 
-* resource/ucloud_disk_attachment: Update schema version for disk attachment ID [GH-12]
-* resource/ucloud_vpc: Add update logic to `cidr_blocks` [GH-9]
-* provider: Support shared credential file and named profile [GH-11]
-* provider: Support customize endpoint url [GH-11]
+* resource/ucloud_disk_attachment: Update schema version for disk attachment ID ([#12](https://github.com/ucloud/terraform-provider-ucloud/issues/12))
+* resource/ucloud_vpc: Add update logic to `cidr_blocks` ([#9](https://github.com/ucloud/terraform-provider-ucloud/issues/9))
+* provider: Support shared credential file and named profile ([#11](https://github.com/ucloud/terraform-provider-ucloud/issues/11))
+* provider: Support customize endpoint url ([#11](https://github.com/ucloud/terraform-provider-ucloud/issues/11))
 
 BUG FIXES:
 
-* resource/ucloud_instance: Fix read of `image_id` and `instance_type` [GH-12]
-* resource/ucloud_instance: Check and create default firewall for new account [GH-9]
-* resource/ucloud_vpc: Fix cannot add multi value to `cidr_blocks` [GH-9]
+* resource/ucloud_instance: Fix read of `image_id` and `instance_type` ([#12](https://github.com/ucloud/terraform-provider-ucloud/issues/12))
+* resource/ucloud_instance: Check and create default firewall for new account ([#9](https://github.com/ucloud/terraform-provider-ucloud/issues/9))
+* resource/ucloud_vpc: Fix cannot add multi value to `cidr_blocks` ([#9](https://github.com/ucloud/terraform-provider-ucloud/issues/9))
 
 ## 1.1.0 (January 09, 2019)
 
