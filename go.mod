@@ -38,7 +38,7 @@ require (
 	github.com/posener/complete v1.1.2 // indirect
 	github.com/smartystreets/assertions v0.0.0-20190116191733-b6c0e53d7304 // indirect
 	github.com/smartystreets/goconvey v0.0.0-20181108003508-044398e4856c // indirect
-	github.com/ucloud/ucloud-sdk-go v0.7.2
+	github.com/ucloud/ucloud-sdk-go v0.7.3
 	github.com/ulikunitz/xz v0.5.4 // indirect
 	github.com/zclconf/go-cty v0.0.0-20180302160414-49fa5e03c418 // indirect
 	golang.org/x/crypto v0.0.0-20181009213950-7c1a557ab941 // indirect
