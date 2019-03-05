@@ -1,4 +1,26 @@
 ## 1.2.0 (Unreleased)
+
+FEATURES:
+
+* **New Resource:** `ucloud_db_instance` [GH-12]
+* **New Resource:** `ucloud_lb_ssl` [GH-12]
+* **New Resource:** `ucloud_lb_ssl_attachment` [GH-12]
+* **New Datasource:** `ucloud_instances` [GH-12]
+* **New Resource:** `ucloud_udpn_connection` [GH-7]
+
+ENHANCEMENTS:
+
+* resource/ucloud_disk_attachment: Update schema version for disk attachment ID [GH-12]
+* resource/ucloud_vpc: Add update logic to `cidr_blocks` [GH-9]
+* provider: support shared credential file and named profile [GH-11]
+* provider: support customize endpoint url [GH-11]
+
+BUG FIXES:
+
+* resource/ucloud_instance: Fix read of `image_id` and `instance_type`
+* resource/ucloud_instance: Check and create default firewall for new account [GH-9]
+* resource/ucloud_vpc: Fix cannot add multi value to `cidr_blocks` [GH-9]
+
 ## 1.1.0 (January 09, 2019)
 
 ENHANCEMENTS:
