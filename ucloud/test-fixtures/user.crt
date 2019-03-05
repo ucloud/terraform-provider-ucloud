@@ -1,0 +1,86 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 1 (0x1)
+    Signature Algorithm: sha256WithRSAEncryption
+        Issuer: C=CN, ST=Shanghai, L=Shanghai, O=UCloud, OU=ca, CN=ca/emailAddress=ca@ucloud.cn
+        Validity
+            Not Before: Dec 25 03:05:02 2018 GMT
+            Not After : Dec 25 03:05:02 2019 GMT
+        Subject: C=CN, ST=Shanghai, O=UCloud, OU=test, CN=test/emailAddress=test@ucloud.cn
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+                Modulus:
+                    00:aa:d4:2c:22:ca:3d:a3:d9:5b:b1:96:8b:a0:a8:
+                    aa:10:e7:96:d5:0c:e2:1b:45:a1:e7:69:3c:37:67:
+                    c8:11:8c:bc:5c:ad:4b:cc:8d:8a:a2:9a:e0:7e:a7:
+                    bf:0c:c2:68:c0:22:15:d7:08:85:66:bc:e9:29:40:
+                    3d:0c:c2:b5:6d:82:bb:c6:04:7f:d1:a1:0e:28:77:
+                    c5:1e:c2:36:5c:1c:b3:6d:b7:19:4f:86:15:f5:c6:
+                    d1:b5:bd:1b:40:9b:7c:bf:bc:6c:4e:d4:c8:0a:1a:
+                    6d:0f:cf:fa:64:74:01:fa:c2:ea:68:74:5e:6f:39:
+                    5e:56:4d:fc:e9:c5:2e:29:bc:e5:bb:f0:94:3c:15:
+                    85:7a:d8:c8:13:0a:c1:55:e2:8c:eb:36:42:1a:e8:
+                    bb:a4:ca:42:a9:02:17:f1:f1:f2:c9:77:cf:b9:e5:
+                    44:19:dc:1d:84:69:ee:34:8b:57:06:82:f2:8e:bd:
+                    81:3b:d4:bc:91:bd:c1:1f:6c:28:30:4f:25:36:5e:
+                    67:a0:24:46:14:fe:41:00:57:5c:aa:50:7c:21:19:
+                    11:67:94:6a:2e:76:31:e7:73:e2:75:14:f9:fd:fd:
+                    57:cd:ca:19:94:55:9b:a9:aa:52:51:46:f4:ae:2c:
+                    69:a2:bc:3c:b1:60:e2:42:1b:a2:75:36:df:ea:8d:
+                    eb:5b
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            Netscape Comment: 
+                OpenSSL Generated Certificate
+            X509v3 Subject Key Identifier: 
+                C4:55:5E:72:53:E5:78:62:88:30:3F:C6:C1:5C:22:33:EC:2F:F1:F0
+            X509v3 Authority Key Identifier: 
+                DirName:/C=CN/ST=Shanghai/L=Shanghai/O=UCloud/OU=ca/CN=ca/emailAddress=ca@ucloud.cn
+                serial:C3:F0:24:83:19:9C:06:F3
+
+    Signature Algorithm: sha256WithRSAEncryption
+         54:10:a8:40:f6:cb:f4:f7:c5:b3:7a:8d:d6:7e:a8:d5:35:3c:
+         90:2d:ad:ac:be:f0:90:59:c8:84:ae:78:57:5f:b4:18:b5:b0:
+         96:bf:a2:0f:e1:4b:53:c8:dd:e7:35:ff:cd:20:8b:25:06:d9:
+         0b:40:c8:ae:ac:00:97:d7:75:f4:9f:ef:5f:11:53:0e:c7:e2:
+         49:4f:a9:7e:4e:c2:5b:28:f6:fd:3c:73:c5:93:1b:22:3a:f9:
+         4b:0d:8f:06:c2:7f:22:9b:5e:2c:61:5c:fe:f8:47:de:cc:ca:
+         c0:0f:f4:ee:b5:bf:38:db:e0:d5:ee:58:87:2f:85:e2:ff:bb:
+         94:41:da:12:ba:bd:db:be:e4:91:c7:2a:aa:50:2c:5e:f6:fe:
+         4a:d1:31:81:ee:e3:73:a9:d3:03:43:4c:6c:db:fe:b6:30:d9:
+         64:c0:b5:4e:69:6e:fc:8c:71:2e:8e:b8:86:96:65:2e:7a:27:
+         c4:1d:70:dd:3e:45:fd:49:7f:06:54:dd:f4:6e:cb:07:74:20:
+         a5:7d:de:47:b8:dc:fb:8c:d0:6f:f8:a1:88:e7:a5:37:5c:49:
+         c2:f2:4f:93:46:9f:19:a4:2d:61:72:e5:28:ec:6a:6e:f2:15:
+         6c:5e:b4:e4:65:b0:01:e9:73:bf:cd:00:56:89:79:a6:73:57:
+         de:84:fd:5e
+-----BEGIN CERTIFICATE-----
+MIIEWjCCA0KgAwIBAgIBATANBgkqhkiG9w0BAQsFADB7MQswCQYDVQQGEwJDTjER
+MA8GA1UECAwIU2hhbmdoYWkxETAPBgNVBAcMCFNoYW5naGFpMQ8wDQYDVQQKDAZV
+Q2xvdWQxCzAJBgNVBAsMAmNhMQswCQYDVQQDDAJjYTEbMBkGCSqGSIb3DQEJARYM
+Y2FAdWNsb3VkLmNuMB4XDTE4MTIyNTAzMDUwMloXDTE5MTIyNTAzMDUwMlowbjEL
+MAkGA1UEBhMCQ04xETAPBgNVBAgMCFNoYW5naGFpMQ8wDQYDVQQKDAZVQ2xvdWQx
+DTALBgNVBAsMBHRlc3QxDTALBgNVBAMMBHRlc3QxHTAbBgkqhkiG9w0BCQEWDnRl
+c3RAdWNsb3VkLmNuMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqtQs
+Iso9o9lbsZaLoKiqEOeW1QziG0Wh52k8N2fIEYy8XK1LzI2Koprgfqe/DMJowCIV
+1wiFZrzpKUA9DMK1bYK7xgR/0aEOKHfFHsI2XByzbbcZT4YV9cbRtb0bQJt8v7xs
+TtTIChptD8/6ZHQB+sLqaHRebzleVk386cUuKbzlu/CUPBWFetjIEwrBVeKM6zZC
+Gui7pMpCqQIX8fHyyXfPueVEGdwdhGnuNItXBoLyjr2BO9S8kb3BH2woME8lNl5n
+oCRGFP5BAFdcqlB8IRkRZ5RqLnYx53PidRT5/f1XzcoZlFWbqapSUUb0rixporw8
+sWDiQhuidTbf6o3rWwIDAQABo4H1MIHyMAkGA1UdEwQCMAAwLAYJYIZIAYb4QgEN
+BB8WHU9wZW5TU0wgR2VuZXJhdGVkIENlcnRpZmljYXRlMB0GA1UdDgQWBBTEVV5y
+U+V4YogwP8bBXCIz7C/x8DCBlwYDVR0jBIGPMIGMoX+kfTB7MQswCQYDVQQGEwJD
+TjERMA8GA1UECAwIU2hhbmdoYWkxETAPBgNVBAcMCFNoYW5naGFpMQ8wDQYDVQQK
+DAZVQ2xvdWQxCzAJBgNVBAsMAmNhMQswCQYDVQQDDAJjYTEbMBkGCSqGSIb3DQEJ
+ARYMY2FAdWNsb3VkLmNuggkAw/AkgxmcBvMwDQYJKoZIhvcNAQELBQADggEBAFQQ
+qED2y/T3xbN6jdZ+qNU1PJAtray+8JBZyISueFdftBi1sJa/og/hS1PI3ec1/80g
+iyUG2QtAyK6sAJfXdfSf718RUw7H4klPqX5Owlso9v08c8WTGyI6+UsNjwbCfyKb
+XixhXP74R97MysAP9O61vzjb4NXuWIcvheL/u5RB2hK6vdu+5JHHKqpQLF72/krR
+MYHu43Op0wNDTGzb/rYw2WTAtU5pbvyMcS6OuIaWZS56J8QdcN0+Rf1JfwZU3fRu
+ywd0IKV93ke43PuM0G/4oYjnpTdcScLyT5NGnxmkLWFy5Sjsam7yFWxetORlsAHp
+c7/NAFaJeaZzV96E/V4=
+-----END CERTIFICATE-----

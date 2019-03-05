@@ -104,8 +104,8 @@ github.com/smartystreets/goconvey v0.0.0-20181108003508-044398e4856c h1:Ho+uVpke
 github.com/smartystreets/goconvey v0.0.0-20181108003508-044398e4856c/go.mod h1:XDJAKZRPZ1CvBcN2aX5YOUTYGHki24fSF0Iv48Ibg0s=
 github.com/stretchr/testify v1.2.2 h1:bSDNvY7ZPG5RlJ8otE/7V6gMiyenm9RtJ7IUVIAoJ1w=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
-github.com/ucloud/ucloud-sdk-go v0.7.0 h1:meSnzbiBoH1omt8YUIXdBc6SF5lMSuIwboBweXkpcdw=
-github.com/ucloud/ucloud-sdk-go v0.7.0/go.mod h1:7eWnUE3Or5bPhV4reH+e+ZCch18V7qdnZbM2gnmNMFI=
+github.com/ucloud/ucloud-sdk-go v0.7.2 h1:O1A1C1NOBexhGCZS2odbdGQ5FYNnIRFCXtYNv6YZ1Jg=
+github.com/ucloud/ucloud-sdk-go v0.7.2/go.mod h1:7eWnUE3Or5bPhV4reH+e+ZCch18V7qdnZbM2gnmNMFI=
 github.com/ulikunitz/xz v0.5.4 h1:zATC2OoZ8H1TZll3FpbX+ikwmadbO699PE06cIkm9oU=
 github.com/ulikunitz/xz v0.5.4/go.mod h1:2bypXElzHzzJZwzH67Y6wb67pO62Rzfn7BSiF4ABRW8=
 github.com/zclconf/go-cty v0.0.0-20180302160414-49fa5e03c418 h1:uZKhc0PzQtIg+6+BqQU1m0zzcIgY2hHJk/Xwf00QUNw=

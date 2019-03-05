@@ -162,9 +162,10 @@ github.com/posener/complete/cmd
 github.com/posener/complete/match
 # github.com/sirupsen/logrus v0.8.7
 github.com/sirupsen/logrus
-# github.com/ucloud/ucloud-sdk-go v0.7.0
+# github.com/ucloud/ucloud-sdk-go v0.7.2
 github.com/ucloud/ucloud-sdk-go/external
 github.com/ucloud/ucloud-sdk-go/services/uaccount
+github.com/ucloud/ucloud-sdk-go/services/udb
 github.com/ucloud/ucloud-sdk-go/services/udisk
 github.com/ucloud/ucloud-sdk-go/services/udpn
 github.com/ucloud/ucloud-sdk-go/services/uhost

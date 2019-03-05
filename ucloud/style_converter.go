@@ -23,7 +23,7 @@ func newUpperConverter(specials map[string]string) *upperConverter {
 // convert is an utils used for converting upper case name with underscore into lower case with underscore.
 func (cvt *upperConverter) convertWithErr(input string) (string, error) {
 	if input != strings.ToUpper(input) {
-		return "", fmt.Errorf("excepted input string is uppercase with underscore, got %s", input)
+		return "", fmt.Errorf("excepted input string is uppercase with underscore, got %q", input)
 	}
 	return cvt.convert(input), nil
 }
@@ -35,7 +35,7 @@ func (cvt *upperConverter) convert(input string) string {
 // unconvert is an utils used for converting lower case with underscore into upper case name with underscore.
 func (cvt *upperConverter) unconvertWithErr(input string) (string, error) {
 	if input != strings.ToLower(input) {
-		return "", fmt.Errorf("excepted input string is lowercase with underscore, got %s", input)
+		return "", fmt.Errorf("excepted input string is lowercase with underscore, got %q", input)
 	}
 	return strings.ToUpper(input), nil
 }
@@ -56,7 +56,7 @@ func (cvt *lowerCamelConverter) convertWithErr(input string) (string, error) {
 	}
 
 	if 'A' <= input[0] && input[0] <= 'Z' {
-		return "", fmt.Errorf("excepted lower camel should not be leading by uppercase character, got %s", input)
+		return "", fmt.Errorf("excepted lower camel should not be leading by uppercase character, got %q", input)
 	}
 
 	return lowerCamelToLower(input), nil
@@ -73,7 +73,7 @@ func (cvt *lowerCamelConverter) unconvertWithErr(input string) (string, error) {
 	}
 
 	if input != strings.ToLower(input) {
-		return "", fmt.Errorf("excepted input string is lowercase with underscore, got %s", input)
+		return "", fmt.Errorf("excepted input string is lowercase with underscore, got %q", input)
 	}
 
 	return cvt.unconvert(input), nil
@@ -95,7 +95,7 @@ func (cvt *upperCamelConverter) convertWithErr(input string) (string, error) {
 	}
 
 	if 'a' <= input[0] && input[0] <= 'z' {
-		return "", fmt.Errorf("excepted upper camel should not be leading by lowercase character, got %s", input)
+		return "", fmt.Errorf("excepted upper camel should not be leading by lowercase character, got %q", input)
 	}
 
 	return lowerCamelToLower(strings.ToLower(input[:1]) + input[1:]), nil
@@ -112,7 +112,7 @@ func (cvt *upperCamelConverter) unconvertWithErr(input string) (string, error) {
 	}
 
 	if input != strings.ToLower(input) {
-		return "", fmt.Errorf("excepted input string is lowercase with underscore, got %s", input)
+		return "", fmt.Errorf("excepted input string is lowercase with underscore, got %q", input)
 	}
 
 	output := lowerToLowerCamel(input)

@@ -110,7 +110,7 @@ func resourceUCloudUDPNConnectionUpdate(d *schema.ResourceData, meta interface{}
 
 		_, err := conn.ModifyUDPNBandwidth(req)
 		if err != nil {
-			return fmt.Errorf("error on %s to eip %s, %s", "ModifyUDPNBandwidth", d.Id(), err)
+			return fmt.Errorf("error on %s to eip %q, %s", "ModifyUDPNBandwidth", d.Id(), err)
 		}
 
 		d.SetPartial("bandwidth")
@@ -130,7 +130,7 @@ func resourceUCloudUDPNConnectionRead(d *schema.ResourceData, meta interface{}) 
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error on reading udpn connection %s, %s", d.Id(), err)
+		return fmt.Errorf("error on reading udpn connection %q, %s", d.Id(), err)
 	}
 
 	d.Set("bandwidth", inst.Bandwidth)
@@ -161,12 +161,12 @@ func resourceUCloudUDPNConnectionDelete(d *schema.ResourceData, meta interface{}
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(fmt.Errorf("error on reading udpn connection when deleting %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on reading udpn connection when deleting %q, %s", d.Id(), err))
 		}
 
 		_, err = conn.ReleaseUDPN(req)
 		if err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error on deleting udpn connection %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on deleting udpn connection %q, %s", d.Id(), err))
 		}
 
 		_, err = client.describeDPNById(d.Id())
@@ -174,9 +174,22 @@ func resourceUCloudUDPNConnectionDelete(d *schema.ResourceData, meta interface{}
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(fmt.Errorf("error on reading udpn connection when deleting %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on reading udpn connection when deleting %q, %s", d.Id(), err))
 		}
 
-		return resource.RetryableError(fmt.Errorf("the specified udpn connection %s has not been deleted due to unknown error", d.Id()))
+		return resource.RetryableError(fmt.Errorf("the specified udpn connection %q has not been deleted due to unknown error", d.Id()))
 	})
+}
+
+func diffValidateUDPNPeerRegion(old, new, meta interface{}) error {
+	client := meta.(*UCloudClient)
+
+	if new.(string) == client.region {
+		return fmt.Errorf(
+			"expected the peering region %q to be different with provider's region %q",
+			new.(string), client.region,
+		)
+	}
+
+	return nil
 }

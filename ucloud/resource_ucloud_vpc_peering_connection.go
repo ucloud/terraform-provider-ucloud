@@ -73,7 +73,7 @@ func resourceUCloudVPCPeeringConnectionCreate(d *schema.ResourceData, meta inter
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error on waiting for vpc peering connection %s complete creating, %s", d.Id(), err)
+		return fmt.Errorf("error on waiting for vpc peering connection %q complete creating, %s", d.Id(), err)
 	}
 
 	return resourceUCloudVPCPeeringConnectionRead(d, meta)
@@ -84,12 +84,12 @@ func resourceUCloudVPCPeeringConnectionRead(d *schema.ResourceData, meta interfa
 
 	assoc, err := parseAssociationInfo(d.Id())
 	if err != nil {
-		return fmt.Errorf("error on parsing vpc peering connection %s, %s", d.Id(), err)
+		return fmt.Errorf("error on parsing vpc peering connection %q, %s", d.Id(), err)
 	}
 
 	peerRegion, peerProjectId, err := parseVPCPeerDstType(assoc.ResourceType)
 	if err != nil {
-		return fmt.Errorf("error on parsing vpc peering connection %s, %s", d.Id(), err)
+		return fmt.Errorf("error on parsing vpc peering connection %q, %s", d.Id(), err)
 	}
 
 	vpcPCSet, err := client.describeVPCIntercomById(assoc.PrimaryId, assoc.ResourceId, peerRegion, peerProjectId)
@@ -98,7 +98,7 @@ func resourceUCloudVPCPeeringConnectionRead(d *schema.ResourceData, meta interfa
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error on reading vpc peering connection %s, %s", d.Id(), err)
+		return fmt.Errorf("error on reading vpc peering connection %q, %s", d.Id(), err)
 	}
 
 	d.Set("vpc_id", d.Get("vpc_id").(string))
@@ -114,12 +114,12 @@ func resourceUCloudVPCPeeringConnectionDelete(d *schema.ResourceData, meta inter
 
 	assoc, err := parseAssociationInfo(d.Id())
 	if err != nil {
-		return fmt.Errorf("error on parsing vpc peering connection %s, %s", d.Id(), err)
+		return fmt.Errorf("error on parsing vpc peering connection %q, %s", d.Id(), err)
 	}
 
 	peerRegion, peerProjectId, err := parseVPCPeerDstType(assoc.ResourceType)
 	if err != nil {
-		return fmt.Errorf("error on parsing vpc peering connection %s, %s", d.Id(), err)
+		return fmt.Errorf("error on parsing vpc peering connection %q, %s", d.Id(), err)
 	}
 
 	req := conn.NewDeleteVPCIntercomRequest()
@@ -130,7 +130,7 @@ func resourceUCloudVPCPeeringConnectionDelete(d *schema.ResourceData, meta inter
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		if _, err := conn.DeleteVPCIntercom(req); err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error on deleting vpc peering connection %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on deleting vpc peering connection %q, %s", d.Id(), err))
 		}
 
 		_, err = client.describeVPCIntercomById(assoc.PrimaryId, assoc.ResourceId, peerRegion, peerProjectId)
@@ -138,10 +138,10 @@ func resourceUCloudVPCPeeringConnectionDelete(d *schema.ResourceData, meta inter
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(fmt.Errorf("error on reading vpc peering connection when deleting %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on reading vpc peering connection when deleting %q, %s", d.Id(), err))
 		}
 
-		return resource.RetryableError(fmt.Errorf("the specified vpc peering connection %s has not been deleted due to unknown error", d.Id()))
+		return resource.RetryableError(fmt.Errorf("the specified vpc peering connection %q has not been deleted due to unknown error", d.Id()))
 	})
 }
 
@@ -149,7 +149,7 @@ func parseVPCPeerDstType(dstType string) (string, string, error) {
 	splited := strings.Split(dstType, "@")
 
 	if len(splited) < 2 {
-		return "", "", fmt.Errorf(`excepted "region@project_id", got %s`, dstType)
+		return "", "", fmt.Errorf(`excepted "region@project_id", got %q`, dstType)
 	}
 
 	return splited[0], splited[1], nil

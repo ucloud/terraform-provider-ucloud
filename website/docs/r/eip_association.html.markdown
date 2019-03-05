@@ -72,4 +72,4 @@ The following arguments are supported:
 
 * `eip_id` - (Required) The ID of EIP.
 * `resource_id` - (Required) The ID of resource with EIP attached.
-* `resource_type` - (Required) **Deprecated**, attribute `resource_type` is deprecated for optimizing parameters.
+* `resource_type` - **Deprecated**, attribute `resource_type` is deprecated for optimizing parameters.

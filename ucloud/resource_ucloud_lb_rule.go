@@ -92,7 +92,7 @@ func resourceUCloudLBRuleCreate(d *schema.ResourceData, meta interface{}) error 
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error on waiting for lb rule %s complete creating, %s", d.Id(), err)
+		return fmt.Errorf("error on waiting for lb rule %q complete creating, %s", d.Id(), err)
 	}
 
 	return resourceUCloudLBRuleRead(d, meta)
@@ -130,7 +130,7 @@ func resourceUCloudLBRuleUpdate(d *schema.ResourceData, meta interface{}) error 
 		_, err := conn.UpdatePolicy(req)
 
 		if err != nil {
-			return fmt.Errorf("error on %s to lb rule %s, %s", "UpdatePolicy", d.Id(), err)
+			return fmt.Errorf("error on %s to lb rule %q, %s", "UpdatePolicy", d.Id(), err)
 		}
 
 		d.SetPartial("domain")
@@ -141,7 +141,7 @@ func resourceUCloudLBRuleUpdate(d *schema.ResourceData, meta interface{}) error 
 
 		_, err = stateConf.WaitForState()
 		if err != nil {
-			return fmt.Errorf("error on waiting for %s complete to lb rule %s, %s", "UpdatePolicy", d.Id(), err)
+			return fmt.Errorf("error on waiting for %s complete to lb rule %q, %s", "UpdatePolicy", d.Id(), err)
 		}
 	}
 
@@ -162,7 +162,7 @@ func resourceUCloudLBRuleRead(d *schema.ResourceData, meta interface{}) error {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error on reading lb rule %s, %s", d.Id(), err)
+		return fmt.Errorf("error on reading lb rule %q, %s", d.Id(), err)
 	}
 
 	if policySet.Type == "Path" {
@@ -189,7 +189,7 @@ func resourceUCloudLBRuleDelete(d *schema.ResourceData, meta interface{}) error 
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		if _, err := conn.DeletePolicy(req); err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error on deleting lb rule %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on deleting lb rule %q, %s", d.Id(), err))
 		}
 
 		_, err := client.describePolicyById(lbId, listenerId, d.Id())
@@ -197,10 +197,10 @@ func resourceUCloudLBRuleDelete(d *schema.ResourceData, meta interface{}) error 
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(fmt.Errorf("error on reading lb rule when deleting %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on reading lb rule when deleting %q, %s", d.Id(), err))
 		}
 
-		return resource.RetryableError(fmt.Errorf("the specified lb rule %s has not been deleted due to unknown error", d.Id()))
+		return resource.RetryableError(fmt.Errorf("the specified lb rule %q has not been deleted due to unknown error", d.Id()))
 	})
 }
 

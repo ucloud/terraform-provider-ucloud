@@ -159,7 +159,7 @@ func resourceUCloudLBCreate(d *schema.ResourceData, meta interface{}) error {
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error on waiting for lb %s complete creating, %s", d.Id(), err)
+		return fmt.Errorf("error on waiting for lb %q complete creating, %s", d.Id(), err)
 	}
 
 	return resourceUCloudLBRead(d, meta)
@@ -198,7 +198,7 @@ func resourceUCloudLBUpdate(d *schema.ResourceData, meta interface{}) error {
 	if isChanged {
 		_, err := conn.UpdateULBAttribute(req)
 		if err != nil {
-			return fmt.Errorf("error on %s to lb %s, %s", "UpdateULBAttribute", d.Id(), err)
+			return fmt.Errorf("error on %s to lb %q, %s", "UpdateULBAttribute", d.Id(), err)
 		}
 
 		d.SetPartial("name")
@@ -220,7 +220,7 @@ func resourceUCloudLBRead(d *schema.ResourceData, meta interface{}) error {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error on reading lb %s, %s", d.Id(), err)
+		return fmt.Errorf("error on reading lb %q, %s", d.Id(), err)
 	}
 
 	d.Set("name", lbSet.Name)
@@ -259,7 +259,7 @@ func resourceUCloudLBDelete(d *schema.ResourceData, meta interface{}) error {
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		if _, err := conn.DeleteULB(req); err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error on deleting lb %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on deleting lb %q, %s", d.Id(), err))
 		}
 
 		_, err := client.describeLBById(d.Id())
@@ -267,10 +267,10 @@ func resourceUCloudLBDelete(d *schema.ResourceData, meta interface{}) error {
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(fmt.Errorf("error on reading lb when deleting %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on reading lb when deleting %q, %s", d.Id(), err))
 		}
 
-		return resource.RetryableError(fmt.Errorf("the specified lb %s has not been deleted due to unknown error", d.Id()))
+		return resource.RetryableError(fmt.Errorf("the specified lb %q has not been deleted due to unknown error", d.Id()))
 	})
 }
 

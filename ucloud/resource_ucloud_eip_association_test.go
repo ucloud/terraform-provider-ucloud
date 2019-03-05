@@ -33,7 +33,6 @@ func TestAccUCloudEIPAssociation_basic(t *testing.T) {
 					testAccCheckEIPExists("ucloud_eip.foo", &eip),
 					testAccCheckInstanceExists("ucloud_instance.foo", &instance),
 					testAccCheckEIPAssociationExists("ucloud_eip_association.foo", &eip, &instance),
-					resource.TestCheckResourceAttr("ucloud_eip_association.foo", "resource_type", "instance"),
 				),
 			},
 		},

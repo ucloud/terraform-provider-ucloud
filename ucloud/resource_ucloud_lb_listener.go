@@ -130,6 +130,8 @@ func resourceUCloudLBListener() *schema.Resource {
 				Computed: true,
 			},
 		},
+
+		CustomizeDiff: customizeDiffLBMethodToListenType,
 	}
 }
 
@@ -142,14 +144,14 @@ func resourceUCloudLBListenerCreate(d *schema.ResourceData, meta interface{}) er
 	req := conn.NewCreateVServerRequest()
 	req.ULBId = ucloud.String(lbId)
 	req.Protocol = ucloud.String(upperCvt.unconvert(d.Get("protocol").(string)))
-	req.ListenType = ucloud.String(upperCamelCvt.unconvert(d.Get("listen_type").(string)))
 	req.FrontendPort = ucloud.Int(d.Get("port").(int))
+	req.ListenType = ucloud.String(upperCamelCvt.unconvert(d.Get("listen_type").(string)))
 	req.Method = ucloud.String(upperCamelCvt.unconvert(d.Get("method").(string)))
 
 	if v, ok := d.GetOk("name"); ok {
 		req.VServerName = ucloud.String(v.(string))
 	} else {
-		req.VServerName = ucloud.String(resource.PrefixedUniqueId("tf-listener-"))
+		req.VServerName = ucloud.String(resource.PrefixedUniqueId("tf-lb-listener-"))
 	}
 
 	if v, ok := d.GetOk("idle_timeout"); ok {
@@ -190,7 +192,7 @@ func resourceUCloudLBListenerCreate(d *schema.ResourceData, meta interface{}) er
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error on waiting for lb listener %s complete creating, %s", d.Id(), err)
+		return fmt.Errorf("error on waiting for lb listener %q complete creating, %s", d.Id(), err)
 	}
 
 	return resourceUCloudLBListenerRead(d, meta)
@@ -254,7 +256,7 @@ func resourceUCloudLBListenerUpdate(d *schema.ResourceData, meta interface{}) er
 	if isChanged {
 		_, err := conn.UpdateVServerAttribute(req)
 		if err != nil {
-			return fmt.Errorf("error on %s to lb listener %s, %s", "UpdateVServerAttribute", d.Id(), err)
+			return fmt.Errorf("error on %s to lb listener %q, %s", "UpdateVServerAttribute", d.Id(), err)
 		}
 
 		d.SetPartial("name")
@@ -284,7 +286,7 @@ func resourceUCloudLBListenerRead(d *schema.ResourceData, meta interface{}) erro
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error on reading lb listener %s, %s", d.Id(), err)
+		return fmt.Errorf("error on reading lb listener %q, %s", d.Id(), err)
 	}
 
 	d.Set("name", vserverSet.VServerName)
@@ -314,7 +316,7 @@ func resourceUCloudLBListenerDelete(d *schema.ResourceData, meta interface{}) er
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		if _, err := conn.DeleteVServer(req); err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error on deleting lb listener %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on deleting lb listener %q, %s", d.Id(), err))
 		}
 
 		_, err := client.describeVServerById(lbId, d.Id())
@@ -322,10 +324,10 @@ func resourceUCloudLBListenerDelete(d *schema.ResourceData, meta interface{}) er
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(fmt.Errorf("error on reading lb listener when deleting %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on reading lb listener when deleting %q, %s", d.Id(), err))
 		}
 
-		return resource.RetryableError(fmt.Errorf("the specified eip %s has not been deleted due to unknown error", d.Id()))
+		return resource.RetryableError(fmt.Errorf("the specified eip %q has not been deleted due to unknown error", d.Id()))
 	})
 }
 
@@ -355,4 +357,18 @@ func lbListenerWaitForState(client *UCloudClient, lbId, id string) *resource.Sta
 			return vserverSet, state, nil
 		},
 	}
+}
+
+func customizeDiffLBMethodToListenType(diff *schema.ResourceDiff, v interface{}) error {
+	listenType := diff.Get("listen_type").(string)
+	method := diff.Get("method").(string)
+	if listenType == "request_proxy" && (method == "source_port" || method == "consistent_hash" || method == "consistent_hash_port") {
+		return fmt.Errorf("the method can only be one of %q, %q, %q or %q when listen_type is %q", "roundrobin", "source", "weight_roundrobin", "leastconn", "request_proxy")
+	}
+
+	if listenType == "packets_transmit" && (method == "roundrobin" || method == "weight_roundrobin" || method == "leastconn" || method == "source") {
+		return fmt.Errorf("the method can only be one of %q, %q or %q when listen_type is %q", "source_port", "consistent_hash", "consistent_hash_port", "request_proxy")
+	}
+
+	return nil
 }

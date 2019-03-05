@@ -64,7 +64,7 @@ func testAccCheckIDExists(n string) resource.TestCheckFunc {
 func testAccCheckFileExists(filePath string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if _, err := os.Stat(filePath); os.IsNotExist(err) {
-			return fmt.Errorf("file %s is not exists", filePath)
+			return fmt.Errorf("file %q is not exists", filePath)
 		} else if err != nil {
 			return err
 		}

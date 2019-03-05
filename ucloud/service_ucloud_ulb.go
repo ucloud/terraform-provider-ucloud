@@ -86,3 +86,48 @@ func (client *UCloudClient) describePolicyById(lbId, listenerId, policyId string
 
 	return nil, newNotFoundError(getNotFoundMessage("policy", policyId))
 }
+
+func (client *UCloudClient) describeLBSSLById(sslId string) (*ulb.ULBSSLSet, error) {
+	conn := client.ulbconn
+	req := conn.NewDescribeSSLRequest()
+	req.SSLId = ucloud.String(sslId)
+
+	resp, err := conn.DescribeSSL(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(resp.DataSet) < 1 {
+		return nil, newNotFoundError(getNotFoundMessage("lb_ssl", sslId))
+	}
+
+	return &resp.DataSet[0], nil
+}
+
+func (c *UCloudClient) describeLBSSLAttachmentById(sslId, ulbId, vserverId string) (*ulb.SSLBindedTargetSet, error) {
+	conn := c.ulbconn
+
+	req := conn.NewDescribeSSLRequest()
+	req.SSLId = ucloud.String(sslId)
+
+	resp, err := conn.DescribeSSL(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp == nil || len(resp.DataSet) < 1 {
+		return nil, newNotFoundError(getNotFoundMessage("lb_ssl_attachment", sslId))
+	}
+
+	for i := 0; i < len(resp.DataSet); i++ {
+		ssl := resp.DataSet[i]
+		for m := 0; m < len(ssl.BindedTargetSet); m++ {
+			if ssl.BindedTargetSet[m].ULBId == ulbId && ssl.BindedTargetSet[m].VServerId == vserverId {
+				return &ssl.BindedTargetSet[m], nil
+			}
+		}
+
+	}
+
+	return nil, newNotFoundError(getNotFoundMessage("lb_ssl_attachment", sslId))
+}

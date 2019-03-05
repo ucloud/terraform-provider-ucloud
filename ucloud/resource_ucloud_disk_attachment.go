@@ -17,6 +17,9 @@ func resourceUCloudDiskAttachment() *schema.Resource {
 		Read:   resourceUCloudDiskAttachmentRead,
 		Delete: resourceUCloudDiskAttachmentDelete,
 
+		SchemaVersion: 1,
+		MigrateState:  resourceUCloudDiskAttachmentMigrateState,
+
 		Schema: map[string]*schema.Schema{
 			"availability_zone": {
 				Type:     schema.TypeString,
@@ -56,7 +59,7 @@ func resourceUCloudDiskAttachmentCreate(d *schema.ResourceData, meta interface{}
 		return fmt.Errorf("error on creating disk attachment, %s", err)
 	}
 
-	d.SetId(fmt.Sprintf("disk#%s:uhost#%s", diskId, instanceId))
+	d.SetId(fmt.Sprintf("%s:%s", diskId, instanceId))
 
 	// after create disk attachment, we need to wait it initialized
 	stateConf := &resource.StateChangeConf{
@@ -69,7 +72,7 @@ func resourceUCloudDiskAttachmentCreate(d *schema.ResourceData, meta interface{}
 	}
 
 	if _, err = stateConf.WaitForState(); err != nil {
-		return fmt.Errorf("error on waiting for disk attachment %s complete creating, %s", d.Id(), err)
+		return fmt.Errorf("error on waiting for disk attachment %q complete creating, %s", d.Id(), err)
 	}
 
 	return resourceUCloudDiskAttachmentRead(d, meta)
@@ -78,19 +81,15 @@ func resourceUCloudDiskAttachmentCreate(d *schema.ResourceData, meta interface{}
 func resourceUCloudDiskAttachmentRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
 
-	attach, err := parseAssociationInfo(d.Id())
-	if err != nil {
-		return fmt.Errorf("error on parsing disk attachment %s, %s", d.Id(), err)
-	}
-
-	resourceSet, err := client.describeDiskResource(attach.PrimaryId, attach.ResourceId)
+	p := strings.Split(d.Id(), ":")
+	resourceSet, err := client.describeDiskResource(p[0], p[1])
 
 	if err != nil {
 		if isNotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error on reading disk attachment %s, %s", d.Id(), err)
+		return fmt.Errorf("error on reading disk attachment %q, %s", d.Id(), err)
 	}
 
 	d.Set("availability_zone", d.Get("availability_zone").(string))
@@ -104,20 +103,16 @@ func resourceUCloudDiskAttachmentDelete(d *schema.ResourceData, meta interface{}
 	client := meta.(*UCloudClient)
 	conn := client.udiskconn
 
-	attach, err := parseAssociationInfo(d.Id())
-	if err != nil {
-		return fmt.Errorf("error on parsing disk attachment %s, %s", d.Id(), err)
-	}
-
+	p := strings.Split(d.Id(), ":")
 	req := conn.NewDetachUDiskRequest()
 	req.Zone = ucloud.String(d.Get("availability_zone").(string))
-	req.UDiskId = ucloud.String(attach.PrimaryId)
-	req.UHostId = ucloud.String(attach.ResourceId)
+	req.UDiskId = ucloud.String(p[0])
+	req.UHostId = ucloud.String(p[1])
 
 	return resource.Retry(15*time.Minute, func() *resource.RetryError {
 		if _, err := conn.DetachUDisk(req); err != nil {
 			if uErr, ok := err.(uerr.Error); ok && uErr.Code() != 17060 {
-				return resource.NonRetryableError(fmt.Errorf("error on deleting disk attachment %s, %s", d.Id(), err))
+				return resource.NonRetryableError(fmt.Errorf("error on deleting disk attachment %q, %s", d.Id(), err))
 			}
 		}
 
@@ -125,17 +120,17 @@ func resourceUCloudDiskAttachmentDelete(d *schema.ResourceData, meta interface{}
 		stateConf := &resource.StateChangeConf{
 			Pending:    []string{"detaching"},
 			Target:     []string{"available"},
-			Refresh:    diskAttachmentStateRefreshFunc(client, attach.PrimaryId),
+			Refresh:    diskAttachmentStateRefreshFunc(client, p[0]),
 			Timeout:    10 * time.Minute,
 			Delay:      5 * time.Second,
 			MinTimeout: 3 * time.Second,
 		}
 
-		if _, err = stateConf.WaitForState(); err != nil {
+		if _, err := stateConf.WaitForState(); err != nil {
 			if _, ok := err.(*resource.TimeoutError); ok {
-				return resource.RetryableError(fmt.Errorf("error on waiting for deleting disk attachment %s, %s", d.Id(), err))
+				return resource.RetryableError(fmt.Errorf("error on waiting for deleting disk attachment %q, %s", d.Id(), err))
 			}
-			return resource.NonRetryableError(fmt.Errorf("error on waiting for deleting disk attachment %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on waiting for deleting disk attachment %q, %s", d.Id(), err))
 		}
 
 		return nil

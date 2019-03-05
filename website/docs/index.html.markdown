@@ -132,6 +132,12 @@ In addition to [generic `provider` arguments](https://www.terraform.io/docs/conf
 
 * `insecure` - (Optional) This is a switch to disable/enable https. (Default: `false`, means enable https).
 
+* `profile` - (Optional) This is the UCloud profile name as set in the shared credentials file, it can also be sourced from the `UCLOUD_PROFILE` environment variables.
+
+* `shared_credentials_file` - (Optional) This is the path to the shared credentials file, it can also be sourced from the `UCLOUD_SHARED_CREDENTIAL_FILE` environment variables. If this is not set and a profile is specified, `~/.ucloud/credential.json` will be used.
+
+* `base_url` - (Optional) This is the ***.(Default: `https://api.ucloud.cn`)
+
 ## Testing
 
 Credentials must be provided via the `UCLOUD_PUBLIC_KEY`, `UCLOUD_PRIVATE_KEY`, `UCLOUD_PROJECT_ID` environment variables in order to run acceptance tests.

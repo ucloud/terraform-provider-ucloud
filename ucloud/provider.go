@@ -34,7 +34,7 @@ func Provider() terraform.ResourceProvider {
 			"shared_credentials_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("UCLOUD_SHARED_CREDENTIAL_FILE", nil),
+				DefaultFunc: schema.EnvDefaultFunc("UCLOUD_SHARED_CREDENTIAL_FILE", defaultSharedCredentialsFile),
 				Description: descriptions["shared_credentials_file"],
 			},
 
@@ -77,10 +77,11 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"ucloud_projects": dataSourceUCloudProjects(),
-			"ucloud_images":   dataSourceUCloudImages(),
-			"ucloud_zones":    dataSourceUCloudZones(),
-			"ucloud_eips":     dataSourceUCloudEips(),
+			"ucloud_projects":  dataSourceUCloudProjects(),
+			"ucloud_images":    dataSourceUCloudImages(),
+			"ucloud_zones":     dataSourceUCloudZones(),
+			"ucloud_eips":      dataSourceUCloudEips(),
+			"ucloud_instances": dataSourceUCloudInstances(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -98,6 +99,9 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_disk":                   resourceUCloudDisk(),
 			"ucloud_disk_attachment":        resourceUCloudDiskAttachment(),
 			"ucloud_security_group":         resourceUCloudSecurityGroup(),
+			"ucloud_lb_ssl":                 resourceUCloudLBSSL(),
+			"ucloud_lb_ssl_attachment":      resourceUCloudLBSSLAttachment(),
+			"ucloud_db_instance":            resourceUCloudDBInstance(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

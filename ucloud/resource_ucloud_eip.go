@@ -188,15 +188,14 @@ func resourceUCloudEIPCreate(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("error on creating eip, expected exactly one eip, got %v", len(resp.EIPSet))
 	}
 
-	eip := resp.EIPSet[0]
-	d.SetId(eip.EIPId)
+	d.SetId(resp.EIPSet[0].EIPId)
 
 	// after create eip, we need to wait it initialized
 	stateConf := eipWaitForState(client, d.Id())
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error on waiting for eip %s complete creating, %s", d.Id(), err)
+		return fmt.Errorf("error on waiting for eip %q complete creating, %s", d.Id(), err)
 	}
 
 	return resourceUCloudEIPRead(d, meta)
@@ -215,7 +214,7 @@ func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
 
 		_, err := conn.ModifyEIPBandwidth(reqBand)
 		if err != nil {
-			return fmt.Errorf("error on %s to eip %s, %s", "ModifyEIPBandwidth", d.Id(), err)
+			return fmt.Errorf("error on %s to eip %q, %s", "ModifyEIPBandwidth", d.Id(), err)
 		}
 
 		d.SetPartial("bandwidth")
@@ -225,7 +224,7 @@ func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
 
 		_, err = stateConf.WaitForState()
 		if err != nil {
-			return fmt.Errorf("error on waiting for %s complete to eip %s, %s", "ModifyEIPBandwidth", d.Id(), err)
+			return fmt.Errorf("error on waiting for %s complete to eip %q, %s", "ModifyEIPBandwidth", d.Id(), err)
 		}
 	}
 
@@ -237,7 +236,7 @@ func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
 
 		_, err := conn.SetEIPPayMode(reqCharge)
 		if err != nil {
-			return fmt.Errorf("error on %s to eip %s, %s", "SetEIPPayMode", d.Id(), err)
+			return fmt.Errorf("error on %s to eip %q, %s", "SetEIPPayMode", d.Id(), err)
 		}
 
 		d.SetPartial("charge_mode")
@@ -247,7 +246,7 @@ func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
 
 		_, err = stateConf.WaitForState()
 		if err != nil {
-			return fmt.Errorf("error on waiting for %s complete to eip %s, %s", "SetEIPPayMode", d.Id(), err)
+			return fmt.Errorf("error on waiting for %s complete to eip %q, %s", "SetEIPPayMode", d.Id(), err)
 		}
 	}
 
@@ -279,7 +278,7 @@ func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
 	if isChanged {
 		_, err := conn.UpdateEIPAttribute(reqAttribute)
 		if err != nil {
-			return fmt.Errorf("error on %s to eip %s, %s", "UpdateEIPAttribute", d.Id(), err)
+			return fmt.Errorf("error on %s to eip %q, %s", "UpdateEIPAttribute", d.Id(), err)
 		}
 
 		d.SetPartial("name")
@@ -291,7 +290,7 @@ func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
 
 		_, err = stateConf.WaitForState()
 		if err != nil {
-			return fmt.Errorf("error on waiting for %s complete to eip %s, %s", "UpdateEIPAttribute", d.Id(), err)
+			return fmt.Errorf("error on waiting for %s complete to eip %q, %s", "UpdateEIPAttribute", d.Id(), err)
 		}
 	}
 
@@ -309,7 +308,7 @@ func resourceUCloudEIPRead(d *schema.ResourceData, meta interface{}) error {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error on reading eip %s, %s", d.Id(), err)
+		return fmt.Errorf("error on reading eip %q, %s", d.Id(), err)
 	}
 
 	d.Set("bandwidth", eip.Bandwidth)
@@ -356,7 +355,7 @@ func resourceUCloudEIPDelete(d *schema.ResourceData, meta interface{}) error {
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		if _, err := conn.ReleaseEIP(req); err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error on deleting eip %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on deleting eip %q, %s", d.Id(), err))
 		}
 
 		_, err := client.describeEIPById(d.Id())
@@ -364,10 +363,10 @@ func resourceUCloudEIPDelete(d *schema.ResourceData, meta interface{}) error {
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(fmt.Errorf("error on reading eip when deleting %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on reading eip when deleting %q, %s", d.Id(), err))
 		}
 
-		return resource.RetryableError(fmt.Errorf("the specified eip %s has not been deleted due to unknown error", d.Id()))
+		return resource.RetryableError(fmt.Errorf("the specified eip %q has not been deleted due to unknown error", d.Id()))
 	})
 }
 

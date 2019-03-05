@@ -99,7 +99,7 @@ func resourceUCloudLBAttachmentCreate(d *schema.ResourceData, meta interface{}) 
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error on waiting for lb attachment %s complete creating, %s", d.Id(), err)
+		return fmt.Errorf("error on waiting for lb attachment %q complete creating, %s", d.Id(), err)
 	}
 
 	return resourceUCloudLBAttachmentRead(d, meta)
@@ -124,7 +124,7 @@ func resourceUCloudLBAttachmentUpdate(d *schema.ResourceData, meta interface{}) 
 	if isChanged {
 		_, err := conn.UpdateBackendAttribute(req)
 		if err != nil {
-			return fmt.Errorf("error on %s to lb attachment %s, %s", "UpdateBackendAttribute", d.Id(), err)
+			return fmt.Errorf("error on %s to lb attachment %q, %s", "UpdateBackendAttribute", d.Id(), err)
 		}
 
 		d.SetPartial("port")
@@ -147,7 +147,7 @@ func resourceUCloudLBAttachmentRead(d *schema.ResourceData, meta interface{}) er
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error on reading lb attachment %s, %s", d.Id(), err)
+		return fmt.Errorf("error on reading lb attachment %q, %s", d.Id(), err)
 	}
 
 	d.Set("resource_id", backendSet.ResourceId)
@@ -172,7 +172,7 @@ func resourceUCloudLBAttachmentDelete(d *schema.ResourceData, meta interface{}) 
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		if _, err := conn.ReleaseBackend(req); err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error on deleting lb attachment %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on deleting lb attachment %q, %s", d.Id(), err))
 		}
 
 		_, err := client.describeBackendById(lbId, listenerId, d.Id())
@@ -180,10 +180,10 @@ func resourceUCloudLBAttachmentDelete(d *schema.ResourceData, meta interface{}) 
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(fmt.Errorf("error on reading lb attachment when deleting %s, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on reading lb attachment when deleting %q, %s", d.Id(), err))
 		}
 
-		return resource.RetryableError(fmt.Errorf("the specified lb attachment %s has not been deleted due to unknown error", d.Id()))
+		return resource.RetryableError(fmt.Errorf("the specified lb attachment %q has not been deleted due to unknown error", d.Id()))
 	})
 }
 
