@@ -12,12 +12,12 @@ ENHANCEMENTS:
 
 * resource/ucloud_disk_attachment: Update schema version for disk attachment ID [GH-12]
 * resource/ucloud_vpc: Add update logic to `cidr_blocks` [GH-9]
-* provider: support shared credential file and named profile [GH-11]
-* provider: support customize endpoint url [GH-11]
+* provider: Support shared credential file and named profile [GH-11]
+* provider: Support customize endpoint url [GH-11]
 
 BUG FIXES:
 
-* resource/ucloud_instance: Fix read of `image_id` and `instance_type`
+* resource/ucloud_instance: Fix read of `image_id` and `instance_type` [GH-12]
 * resource/ucloud_instance: Check and create default firewall for new account [GH-9]
 * resource/ucloud_vpc: Fix cannot add multi value to `cidr_blocks` [GH-9]
 
