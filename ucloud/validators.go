@@ -50,6 +50,36 @@ func validateInstancePassword(v interface{}, k string) (ws []string, errors []er
 		categoryCount++
 	}
 
+	if categoryCount < 2 {
+		errors = append(errors, fmt.Errorf("%q is invalid, should have least 2 items of capital letters, lower case letters, numbers and special characters, got %q", k, value))
+	}
+
+	return
+}
+
+func validateDBInstancePassword(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	if !instancePasswordPattern.MatchString(value) {
+		errors = append(errors, fmt.Errorf("%q is invalid, should have between 8-30 characters and any characters must be legal, got %q", k, value))
+	}
+
+	categoryCount := 0
+	if instancePasswordUpperPattern.MatchString(value) {
+		categoryCount++
+	}
+
+	if instancePasswordLowerPattern.MatchString(value) {
+		categoryCount++
+	}
+
+	if instancePasswordNumPattern.MatchString(value) {
+		categoryCount++
+	}
+
+	if instancePasswordSpecialPattern.MatchString(value) {
+		categoryCount++
+	}
+
 	if categoryCount < 3 {
 		errors = append(errors, fmt.Errorf("%q is invalid, should have least 3 items of capital letters, lower case letters, numbers and special characters, got %q", k, value))
 	}

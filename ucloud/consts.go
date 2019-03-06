@@ -44,6 +44,12 @@ const (
 	statusStopped = "stopped"
 )
 
+const (
+	// defaultPasswordStr and defaultPasswordNum are used to general default value of root password of instance
+	defaultPasswordNum = "012346789"
+	defaultPasswordStr = "abcdefghijklmnopqrstuvwxyz"
+)
+
 // listenerStatusCvt is used to covert int to string for status after read lb listener
 var listenerStatusCvt = newIntConverter(map[int]string{
 	0: "allNormal",

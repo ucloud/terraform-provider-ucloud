@@ -47,7 +47,7 @@ func resourceUCloudDBInstance() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				Sensitive:    true,
-				ValidateFunc: validateInstancePassword,
+				ValidateFunc: validateDBInstancePassword,
 			},
 
 			"engine": {
