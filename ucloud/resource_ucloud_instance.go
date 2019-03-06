@@ -102,7 +102,7 @@ func resourceUCloudInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Default:  "local_normal",
+				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"local_normal",
 					"local_ssd",
@@ -247,13 +247,20 @@ func resourceUCloudInstance() *schema.Resource {
 
 func diffValidateBootDiskTypeWithDataDiskType(diff *schema.ResourceDiff, v interface{}) error {
 	var dataDiskType string
-	bootDiskType := diff.Get("boot_disk_type").(string)
-	if val, ok := diff.GetOk("data_disk_type"); ok {
-		dataDiskType = val.(string)
+	var bootDiskType string
+	if v, ok := diff.GetOk("boot_disk_type"); ok {
+		bootDiskType = v.(string)
 	} else {
-		dataDiskType = "local_normal"
+		bootDiskType = "local_normal"
 	}
 
+	if _, ok := diff.GetOk("data_disk_size"); ok {
+		if v, ok := diff.GetOk("data_disk_type"); ok {
+			dataDiskType = v.(string)
+		} else {
+			dataDiskType = "local_normal"
+		}
+	}
 	if checkStringIn(bootDiskType, []string{"cloud_normal", "cloud_ssd"}) == nil && checkStringIn(dataDiskType, []string{"local_normal", "local_ssd"}) == nil {
 		return fmt.Errorf("the instance cannot have local data disk, When the %q is %q", "boot_disk_type", bootDiskType)
 	}
@@ -265,7 +272,12 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 	conn := client.uhostconn
 
 	imageId := d.Get("image_id").(string)
-	bootDiskType := d.Get("boot_disk_type").(string)
+	var bootDiskType string
+	if v, ok := d.GetOk("boot_disk_type"); ok {
+		bootDiskType = v.(string)
+	} else {
+		bootDiskType = "local_normal"
+	}
 	// skip error because it has been validated by schema
 	t, _ := parseInstanceType(d.Get("instance_type").(string))
 
