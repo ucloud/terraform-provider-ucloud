@@ -1,12 +1,12 @@
-## 1.2.1 (Unreleased)
+## 1.2.1 (March 06, 2019)
 
 ENHANCEMENTS:
 
-* resource/ucloud_instance: Add default root password [GH-15]
+* resource/ucloud_instance: Add default root password ([#15](https://github.com/ucloud/terraform-provider-ucloud/issues/15))
 
 BUG FIXES:
 
-* resource/ucloud_instance: Fix validate cloud disk import [GH-15]
+* resource/ucloud_instance: Fix validate cloud disk import ([#15](https://github.com/ucloud/terraform-provider-ucloud/issues/15))
 
 ## 1.2.0 (March 05, 2019)
 
