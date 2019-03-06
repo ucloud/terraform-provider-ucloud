@@ -1,4 +1,13 @@
-## 1.3.0 (Unreleased)
+## 1.2.1 (Unreleased)
+
+ENHANCEMENTS:
+
+* resource/ucloud_instance: Add default root password [GH-15]
+
+BUG FIXES:
+
+* resource/ucloud_instance: Fix validate cloud disk import [GH-15]
+
 ## 1.2.0 (March 05, 2019)
 
 FEATURES:

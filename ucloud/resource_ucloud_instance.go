@@ -5,6 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform/helper/acctest"
+
 	"github.com/hashicorp/terraform/helper/customdiff"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -24,7 +26,7 @@ func resourceUCloudInstance() *schema.Resource {
 		},
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(10 * time.Minute),
+			Create: schema.DefaultTimeout(30 * time.Minute),
 			Update: schema.DefaultTimeout(20 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
@@ -51,8 +53,9 @@ func resourceUCloudInstance() *schema.Resource {
 
 			"root_password": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
 				Sensitive:    true,
+				Computed:     true,
 				ValidateFunc: validateInstancePassword,
 			},
 
@@ -102,7 +105,7 @@ func resourceUCloudInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Default:  "local_normal",
+				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"local_normal",
 					"local_ssd",
@@ -245,27 +248,17 @@ func resourceUCloudInstance() *schema.Resource {
 	}
 }
 
-func diffValidateBootDiskTypeWithDataDiskType(diff *schema.ResourceDiff, v interface{}) error {
-	var dataDiskType string
-	bootDiskType := diff.Get("boot_disk_type").(string)
-	if val, ok := diff.GetOk("data_disk_type"); ok {
-		dataDiskType = val.(string)
-	} else {
-		dataDiskType = "local_normal"
-	}
-
-	if checkStringIn(bootDiskType, []string{"cloud_normal", "cloud_ssd"}) == nil && checkStringIn(dataDiskType, []string{"local_normal", "local_ssd"}) == nil {
-		return fmt.Errorf("the instance cannot have local data disk, When the %q is %q", "boot_disk_type", bootDiskType)
-	}
-	return nil
-}
-
 func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
 	conn := client.uhostconn
 
 	imageId := d.Get("image_id").(string)
-	bootDiskType := d.Get("boot_disk_type").(string)
+	var bootDiskType string
+	if v, ok := d.GetOk("boot_disk_type"); ok {
+		bootDiskType = v.(string)
+	} else {
+		bootDiskType = "local_normal"
+	}
 	// skip error because it has been validated by schema
 	t, _ := parseInstanceType(d.Get("instance_type").(string))
 
@@ -273,10 +266,15 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 	req.LoginMode = ucloud.String("Password")
 	req.Zone = ucloud.String(d.Get("availability_zone").(string))
 	req.ImageId = ucloud.String(imageId)
-	req.Password = ucloud.String(d.Get("root_password").(string))
 	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
 	req.CPU = ucloud.Int(t.CPU)
 	req.Memory = ucloud.Int(t.Memory)
+	passWord := fmt.Sprintf("%s%s", acctest.RandStringFromCharSet(5, defaultPasswordStr), acctest.RandStringFromCharSet(5, defaultPasswordNum))
+	if v, ok := d.GetOk("root_password"); ok {
+		req.Password = ucloud.String(v.(string))
+	} else {
+		req.Password = ucloud.String(passWord)
+	}
 
 	if v, ok := d.GetOk("name"); ok {
 		req.Name = ucloud.String(v.(string))
@@ -359,6 +357,9 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 
 	d.SetId(resp.UHostIds[0])
 
+	if _, ok := d.GetOk("root_password"); !ok {
+		d.Set("root_password", passWord)
+	}
 	// after create instance, we need to wait it initialized
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{statusPending},
@@ -832,6 +833,29 @@ func diffValidateInstanceBootDiskSize(old, new, meta interface{}) error {
 	if new.(int) < old.(int) {
 		return fmt.Errorf("reduce boot disk size is not supported, "+
 			"new value %d by user set should be larger than the old value %d allocated by the system", new.(int), old.(int))
+	}
+	return nil
+}
+
+func diffValidateBootDiskTypeWithDataDiskType(diff *schema.ResourceDiff, v interface{}) error {
+	var dataDiskType string
+	var bootDiskType string
+
+	if v, ok := diff.GetOk("boot_disk_type"); ok {
+		bootDiskType = v.(string)
+	} else {
+		bootDiskType = "local_normal"
+	}
+
+	if _, ok := diff.GetOk("data_disk_size"); ok {
+		if v, ok := diff.GetOk("data_disk_type"); ok {
+			dataDiskType = v.(string)
+		} else {
+			dataDiskType = "local_normal"
+		}
+	}
+	if checkStringIn(bootDiskType, []string{"cloud_normal", "cloud_ssd"}) == nil && checkStringIn(dataDiskType, []string{"local_normal", "local_ssd"}) == nil {
+		return fmt.Errorf("the instance cannot have local data disk, When the %q is %q", "boot_disk_type", bootDiskType)
 	}
 	return nil
 }
