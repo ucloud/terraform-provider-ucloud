@@ -19,10 +19,9 @@ func TestAccUCloudLB_import(t *testing.T) {
 			},
 
 			{
-				ResourceName:            resourceName,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"charge_type", "internal"},
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
