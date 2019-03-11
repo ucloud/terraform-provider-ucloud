@@ -1,4 +1,14 @@
 ## 1.2.2 (Unreleased)
+
+ENHANCEMENTS:
+
+* resource/ucloud_db_instance: Add default password [GH-18]
+* resource/ucloud_lb: Deprecated `charge_type` [GH-18]
+
+BUG FIXES:
+
+* resource/ucloud_lb: Fix lb import about `charge_type` and `internal` [GH-18]
+
 ## 1.2.1 (March 06, 2019)
 
 ENHANCEMENTS:
