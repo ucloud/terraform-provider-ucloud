@@ -50,7 +50,7 @@ The following arguments are supported:
 
 * `availability_zone` - (Required) Availability zone where database instance is located. Such as: "cn-bj2-02". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
 * `standby_zone` - (Optional) Availability zone where the standby database instance is located for the high availability database instance with multiple zone; The disaster recovery of data center can be activated by switching to the standby database instance for the high availability database instance.
-* `password` - (Required) The password for the database instance which should have 8-30 characters. It must contain at least 3 items of Capital letters, small letter, numbers and special characters. The special characters include <code>`()~!@#$%^&*-+=_|{}\[]:;'<>,.?/</code>.
+* `password` - (Optional) The password for the database instance which should have 8-30 characters. It must contain at least 3 items of Capital letters, small letter, numbers and special characters. The special characters include <code>`()~!@#$%^&*-+=_|{}\[]:;'<>,.?/</code>. If not specified, terraform will autogenerate a password.
 * `engine` - (Required) The type of database engine, possible values are: "mysql", "percona".
 * `engine_version` - (Required) The database engine version, possible values are: "5.5", "5.6", "5.7".
     - 5.5/5.6/5.7 for mysql and percona engine.

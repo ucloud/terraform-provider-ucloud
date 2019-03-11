@@ -24,7 +24,6 @@ func resourceUCloudLB() *schema.Resource {
 			"internal": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
 				ForceNew: true,
 			},
 
@@ -41,10 +40,10 @@ func resourceUCloudLB() *schema.Resource {
 			},
 
 			"charge_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Default:  "month",
+				Type:       schema.TypeString,
+				Optional:   true,
+				ForceNew:   true,
+				Deprecated: "attribute `charge_type` is deprecated for optimizing parameters",
 				ValidateFunc: validation.StringInSlice([]string{
 					"month",
 					"year",
@@ -114,7 +113,6 @@ func resourceUCloudLBCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := client.ulbconn
 
 	req := conn.NewCreateULBRequest()
-	req.ChargeType = ucloud.String(upperCamelCvt.convert(d.Get("charge_type").(string)))
 
 	if v, ok := d.GetOk("name"); ok {
 		req.ULBName = ucloud.String(v.(string))
@@ -141,8 +139,12 @@ func resourceUCloudLBCreate(d *schema.ResourceData, meta interface{}) error {
 		req.SubnetId = ucloud.String(val.(string))
 	}
 
-	if d.Get("internal").(bool) {
-		req.InnerMode = ucloud.String("Yes")
+	if val, ok := d.GetOk("internal"); ok {
+		if val.(bool) {
+			req.InnerMode = ucloud.String("Yes")
+		} else {
+			req.OuterMode = ucloud.String("Yes")
+		}
 	} else {
 		req.OuterMode = ucloud.String("Yes")
 	}
@@ -230,9 +232,6 @@ func resourceUCloudLBRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("expire_time", timestampToString(lbSet.ExpireTime))
 	d.Set("vpc_id", lbSet.VPCId)
 	d.Set("subnet_id", lbSet.SubnetId)
-
-	// TODO: [API-BLUE-PRINT] need ulbSet.ChargeType for importer
-	d.Set("charge_type", d.Get("charge_type").(string))
 	d.Set("private_ip", lbSet.PrivateIP)
 
 	ipSet := []map[string]interface{}{}

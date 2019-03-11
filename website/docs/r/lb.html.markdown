@@ -24,8 +24,8 @@ resource "ucloud_lb" "web" {
 The following arguments are supported:
 
 * `internal` - (Optional) Indicate whether the load balancer is intranet.
-* `charge_type` - (Optional) Charge type of load balancer. Possible values are: `year` as pay by year, `month` as pay by month, `dynamic` as pay by hour (specific permission required). (Default: `month`).
 * `name` - (Optional) The name of the load balancer. If not specified, terraform will autogenerate a name beginning with `tf-lb`.
+* `charge_type` - **Deprecated**, attribute `charge_type` is deprecated for optimizing parameters.
 * `vpc_id` - (Optional) The ID of the VPC linked to the Load Balancers, This argumnet is not required if default VPC.
 * `subnet_id` - (Optional) The ID of subnet that intrant load balancer belongs to. This argumnet is not required if default subnet.
 * `tag` - (Optional) A mapping of tags to assign to VPC, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).

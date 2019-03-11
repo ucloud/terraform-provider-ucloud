@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/customdiff"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -45,8 +46,9 @@ func resourceUCloudDBInstance() *schema.Resource {
 
 			"password": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
 				Sensitive:    true,
+				Computed:     true,
 				ValidateFunc: validateDBInstancePassword,
 			},
 
@@ -199,7 +201,6 @@ func resourceUCloudDBInstanceCreate(d *schema.ResourceData, meta interface{}) er
 	dbTypeId := strings.Join([]string{engine, engineVersion}, "-")
 
 	req := conn.NewCreateUDBInstanceRequest()
-	req.AdminPassword = ucloud.String(d.Get("password").(string))
 	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
 	req.Zone = ucloud.String(zone)
 	req.DiskSpace = ucloud.Int(d.Get("instance_storage").(int))
@@ -209,6 +210,15 @@ func resourceUCloudDBInstanceCreate(d *schema.ResourceData, meta interface{}) er
 	req.InstanceMode = ucloud.String(dbModeCvt.convert(dbType.Type))
 	req.DBTypeId = ucloud.String(dbTypeId)
 	req.BackupCount = ucloud.Int(d.Get("backup_count").(int))
+	passWord := fmt.Sprintf("%s%s%s",
+		acctest.RandStringFromCharSet(5, defaultPasswordStr),
+		acctest.RandStringFromCharSet(1, defaultPasswordSpe),
+		acctest.RandStringFromCharSet(5, defaultPasswordNum))
+	if v, ok := d.GetOk("password"); ok {
+		req.AdminPassword = ucloud.String(v.(string))
+	} else {
+		req.AdminPassword = ucloud.String(passWord)
+	}
 
 	if v, ok := d.GetOk("name"); ok {
 		req.Name = ucloud.String(v.(string))
@@ -263,6 +273,9 @@ func resourceUCloudDBInstanceCreate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	d.SetId(resp.DBId)
+	if _, ok := d.GetOk("password"); !ok {
+		d.Set("password", passWord)
+	}
 
 	// after create db, we need to wait it initialized
 	stateConf := client.dbWaitForState(d.Id(), []string{"Running"})
@@ -401,6 +414,7 @@ func resourceUCloudDBInstanceRead(d *schema.ResourceData, meta interface{}) erro
 	d.Set("engine_version", arr[1])
 	d.Set("port", db.Port)
 	d.Set("status", db.State)
+	d.Set("password", d.Get("password"))
 	d.Set("charge_type", upperCamelCvt.convert(db.ChargeType))
 	d.Set("instance_storage", db.DiskSpace)
 	d.Set("standby_zone", db.BackupZone)
