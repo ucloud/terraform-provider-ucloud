@@ -24,6 +24,7 @@ func resourceUCloudLB() *schema.Resource {
 			"internal": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 
@@ -233,6 +234,12 @@ func resourceUCloudLBRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("vpc_id", lbSet.VPCId)
 	d.Set("subnet_id", lbSet.SubnetId)
 	d.Set("private_ip", lbSet.PrivateIP)
+
+	if lbSet.ULBType == "OuterMode" {
+		d.Set("internal", false)
+	} else if lbSet.ULBType == "InnerMode" {
+		d.Set("internal", true)
+	}
 
 	ipSet := []map[string]interface{}{}
 	for _, item := range lbSet.IPSet {

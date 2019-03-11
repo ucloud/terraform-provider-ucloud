@@ -210,14 +210,14 @@ func resourceUCloudDBInstanceCreate(d *schema.ResourceData, meta interface{}) er
 	req.InstanceMode = ucloud.String(dbModeCvt.convert(dbType.Type))
 	req.DBTypeId = ucloud.String(dbTypeId)
 	req.BackupCount = ucloud.Int(d.Get("backup_count").(int))
-	passWord := fmt.Sprintf("%s%s%s",
+	password := fmt.Sprintf("%s%s%s",
 		acctest.RandStringFromCharSet(5, defaultPasswordStr),
 		acctest.RandStringFromCharSet(1, defaultPasswordSpe),
 		acctest.RandStringFromCharSet(5, defaultPasswordNum))
 	if v, ok := d.GetOk("password"); ok {
 		req.AdminPassword = ucloud.String(v.(string))
 	} else {
-		req.AdminPassword = ucloud.String(passWord)
+		req.AdminPassword = ucloud.String(password)
 	}
 
 	if v, ok := d.GetOk("name"); ok {
@@ -274,7 +274,7 @@ func resourceUCloudDBInstanceCreate(d *schema.ResourceData, meta interface{}) er
 
 	d.SetId(resp.DBId)
 	if _, ok := d.GetOk("password"); !ok {
-		d.Set("password", passWord)
+		d.Set("password", password)
 	}
 
 	// after create db, we need to wait it initialized

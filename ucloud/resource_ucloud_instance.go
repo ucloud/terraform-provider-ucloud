@@ -269,11 +269,11 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
 	req.CPU = ucloud.Int(t.CPU)
 	req.Memory = ucloud.Int(t.Memory)
-	passWord := fmt.Sprintf("%s%s", acctest.RandStringFromCharSet(5, defaultPasswordStr), acctest.RandStringFromCharSet(5, defaultPasswordNum))
+	password := fmt.Sprintf("%s%s", acctest.RandStringFromCharSet(5, defaultPasswordStr), acctest.RandStringFromCharSet(5, defaultPasswordNum))
 	if v, ok := d.GetOk("root_password"); ok {
 		req.Password = ucloud.String(v.(string))
 	} else {
-		req.Password = ucloud.String(passWord)
+		req.Password = ucloud.String(password)
 	}
 
 	if v, ok := d.GetOk("name"); ok {
@@ -358,7 +358,7 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 	d.SetId(resp.UHostIds[0])
 
 	if _, ok := d.GetOk("root_password"); !ok {
-		d.Set("root_password", passWord)
+		d.Set("root_password", password)
 	}
 	// after create instance, we need to wait it initialized
 	stateConf := &resource.StateChangeConf{
