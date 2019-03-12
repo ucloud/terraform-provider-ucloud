@@ -1,4 +1,4 @@
-## 1.2.2 (Unreleased)
+## 1.3.0 (Unreleased)
 
 ENHANCEMENTS:
 
