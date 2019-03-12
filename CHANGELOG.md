@@ -1,13 +1,13 @@
-## 1.3.0 (Unreleased)
+## 1.3.0 (March 12, 2019)
 
 ENHANCEMENTS:
 
-* resource/ucloud_db_instance: Add default password [GH-18]
-* resource/ucloud_lb: Deprecated `charge_type` [GH-18]
+* resource/ucloud_db_instance: Add default password ([#18](https://github.com/ucloud/terraform-provider-ucloud/issues/18))
+* resource/ucloud_lb: Deprecated `charge_type` ([#18](https://github.com/ucloud/terraform-provider-ucloud/issues/18))
 
 BUG FIXES:
 
-* resource/ucloud_lb: Fix lb import about `charge_type` and `internal` [GH-18]
+* resource/ucloud_lb: Fix lb import about `charge_type` and `internal` ([#18](https://github.com/ucloud/terraform-provider-ucloud/issues/18))
 
 ## 1.2.1 (March 06, 2019)
 
