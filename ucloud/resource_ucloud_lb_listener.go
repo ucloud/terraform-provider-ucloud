@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
+	"github.com/ucloud/ucloud-sdk-go/services/ulb"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 )
 
@@ -277,16 +278,32 @@ func resourceUCloudLBListenerUpdate(d *schema.ResourceData, meta interface{}) er
 
 func resourceUCloudLBListenerRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
+	var err error
+	var lbId string
+	var vserverSet *ulb.ULBVServerSet
 
-	lbId := d.Get("load_balancer_id").(string)
-
-	vserverSet, err := client.describeVServerById(lbId, d.Id())
-	if err != nil {
-		if isNotFoundError(err) {
-			d.SetId("")
-			return nil
+	if v, ok := d.GetOk("load_balancer_id"); ok {
+		vserverSet, err = client.describeVServerById(v.(string), d.Id())
+		if err != nil {
+			if isNotFoundError(err) {
+				d.SetId("")
+				return nil
+			}
+			return fmt.Errorf("error on reading lb listener %q, %s", d.Id(), err)
 		}
-		return fmt.Errorf("error on reading lb listener %q, %s", d.Id(), err)
+
+		d.Set("load_balancer_id", v)
+	} else {
+		vserverSet, lbId, err = client.describeVServerByOneId(d.Id())
+		if err != nil {
+			if isNotFoundError(err) {
+				d.SetId("")
+				return nil
+			}
+			return fmt.Errorf("error on reading lb listener %q, %s", d.Id(), err)
+		}
+
+		d.Set("load_balancer_id", lbId)
 	}
 
 	d.Set("name", vserverSet.VServerName)

@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/ucloud/ucloud-sdk-go/services/ulb"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 )
 
@@ -153,16 +154,35 @@ func resourceUCloudLBRuleUpdate(d *schema.ResourceData, meta interface{}) error 
 func resourceUCloudLBRuleRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
 
-	lbId := d.Get("load_balancer_id").(string)
-	listenerId := d.Get("listener_id").(string)
-
-	policySet, err := client.describePolicyById(lbId, listenerId, d.Id())
-	if err != nil {
-		if isNotFoundError(err) {
-			d.SetId("")
-			return nil
+	var err error
+	var lbId string
+	var listenerId string
+	var policySet *ulb.ULBPolicySet
+	if v, ok := d.GetOk("load_balancer_id"); ok {
+		listenerId = d.Get("listener_id").(string)
+		policySet, err = client.describePolicyById(v.(string), listenerId, d.Id())
+		if err != nil {
+			if isNotFoundError(err) {
+				d.SetId("")
+				return nil
+			}
+			return fmt.Errorf("error on reading lb rule %q, %s", d.Id(), err)
 		}
-		return fmt.Errorf("error on reading lb rule %q, %s", d.Id(), err)
+
+		d.Set("load_balancer_id", v)
+		d.Set("listener_id", listenerId)
+	} else {
+		policySet, lbId, listenerId, err = client.describePolicyByOneId(d.Id())
+		if err != nil {
+			if isNotFoundError(err) {
+				d.SetId("")
+				return nil
+			}
+			return fmt.Errorf("error on reading lb rule %q, %s", d.Id(), err)
+		}
+
+		d.Set("load_balancer_id", lbId)
+		d.Set("listener_id", listenerId)
 	}
 
 	if policySet.Type == "Path" {
@@ -172,6 +192,13 @@ func resourceUCloudLBRuleRead(d *schema.ResourceData, meta interface{}) error {
 	if policySet.Type == "Domain" {
 		d.Set("domain", policySet.Match)
 	}
+
+	backendIds := []string{}
+	for _, item := range policySet.BackendSet {
+		backendIds = append(backendIds, item.BackendId)
+	}
+
+	d.Set("backend_ids", backendIds)
 
 	return nil
 }
