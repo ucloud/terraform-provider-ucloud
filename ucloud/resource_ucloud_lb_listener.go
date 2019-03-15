@@ -348,9 +348,9 @@ func lbListenerWaitForState(client *UCloudClient, lbId, id string) *resource.Sta
 	return &resource.StateChangeConf{
 		Pending:    []string{statusPending},
 		Target:     []string{statusInitialized},
-		Timeout:    10 * time.Minute,
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Timeout:    3 * time.Minute,
+		Delay:      2 * time.Second,
+		MinTimeout: 1 * time.Second,
 		Refresh: func() (interface{}, string, error) {
 			vserverSet, err := client.describeVServerById(lbId, id)
 			if err != nil {
@@ -360,14 +360,7 @@ func lbListenerWaitForState(client *UCloudClient, lbId, id string) *resource.Sta
 				return nil, "", err
 			}
 
-			state := listenerStatusCvt.convert(vserverSet.Status)
-			if state != "allNormal" {
-				state = statusPending
-			} else {
-				state = statusInitialized
-			}
-
-			return vserverSet, state, nil
+			return vserverSet, statusInitialized, nil
 		},
 	}
 }

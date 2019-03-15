@@ -1,4 +1,14 @@
 ## 1.4.0 (Unreleased)
+
+ENHANCEMENTS:
+
+* resource/ucloud_db_instance: Shorten the waiting time and update states [GH-22]
+* resource/ucloud_disk: Shorten the waiting time and update states [GH-22]
+* resource/ucloud_disk_attachment: Shorten the waiting time and update states [GH-22]
+* resource/ucloud_eip: Shorten the waiting time and update states [GH-22]
+* resource/ucloud_lb_listener: Shorten the waiting time and update states [GH-22]
+* resource/ucloud_lb_attachment: Shorten the waiting time and update states [GH-22]
+
 ## 1.3.1 (March 15, 2019)
 
 BUG FIXES:

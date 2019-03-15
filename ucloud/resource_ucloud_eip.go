@@ -373,8 +373,8 @@ func resourceUCloudEIPDelete(d *schema.ResourceData, meta interface{}) error {
 func eipWaitForState(client *UCloudClient, eipId string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending:    []string{statusPending},
-		Target:     []string{"free"},
-		Timeout:    5 * time.Minute,
+		Target:     []string{"free", "used"},
+		Timeout:    2 * time.Minute,
 		Delay:      2 * time.Second,
 		MinTimeout: 1 * time.Second,
 		Refresh: func() (interface{}, string, error) {
@@ -387,7 +387,7 @@ func eipWaitForState(client *UCloudClient, eipId string) *resource.StateChangeCo
 			}
 
 			state := eip.Status
-			if state != "free" {
+			if !isStringIn(state, []string{"free", "used"}) {
 				state = statusPending
 			}
 

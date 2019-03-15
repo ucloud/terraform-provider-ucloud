@@ -582,8 +582,8 @@ func (client *UCloudClient) dbWaitForState(dbId string, target []string) *resour
 		Pending:    []string{statusPending},
 		Target:     target,
 		Timeout:    5 * time.Minute,
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Delay:      3 * time.Second,
+		MinTimeout: 2 * time.Second,
 		Refresh: func() (interface{}, string, error) {
 			db, err := client.describeDBInstanceById(dbId)
 			if err != nil {

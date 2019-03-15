@@ -238,7 +238,7 @@ func resourceUCloudDiskDelete(d *schema.ResourceData, meta interface{}) error {
 func diskWaitForState(client *UCloudClient, diskId string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending:    []string{statusPending},
-		Target:     []string{"available"},
+		Target:     []string{"available", "inuse"},
 		Timeout:    10 * time.Minute,
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -252,7 +252,7 @@ func diskWaitForState(client *UCloudClient, diskId string) *resource.StateChange
 			}
 
 			state := strings.ToLower(diskSet.Status)
-			if state != "available" {
+			if !isStringIn(state, []string{"available", "inuse"}) {
 				state = statusPending
 			}
 

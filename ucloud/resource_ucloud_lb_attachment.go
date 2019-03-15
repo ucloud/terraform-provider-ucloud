@@ -206,9 +206,9 @@ func lbAttachmentWaitForState(client *UCloudClient, lbId, listenerId, id string)
 	return &resource.StateChangeConf{
 		Pending:    []string{statusPending},
 		Target:     []string{statusInitialized},
-		Timeout:    10 * time.Minute,
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Timeout:    3 * time.Minute,
+		Delay:      2 * time.Second,
+		MinTimeout: 1 * time.Second,
 		Refresh: func() (interface{}, string, error) {
 			backendSet, err := client.describeBackendById(lbId, listenerId, id)
 			if err != nil {
@@ -218,14 +218,7 @@ func lbAttachmentWaitForState(client *UCloudClient, lbId, listenerId, id string)
 				return nil, "", err
 			}
 
-			state := lbAttachmentStatusCvt.convert(backendSet.Status)
-			if state != "normalRunning" {
-				state = statusPending
-			} else {
-				state = statusInitialized
-			}
-
-			return backendSet, state, nil
+			return backendSet, statusInitialized, nil
 		},
 	}
 }
