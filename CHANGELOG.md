@@ -1,4 +1,11 @@
-## 1.4.0 (Unreleased)
+## 1.3.1 (Unreleased)
+
+BUG FIXES:
+
+* resource/ucloud_lb_listener: Fix lb listener import [GH-21]
+* resource/ucloud_lb_attachment: Fix lb attachment import [GH-21]
+* resource/ucloud_lb_rule: Fix lb rule import [GH-21]
+
 ## 1.3.0 (March 12, 2019)
 
 ENHANCEMENTS:
