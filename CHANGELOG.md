@@ -1,10 +1,10 @@
-## 1.3.1 (Unreleased)
+## 1.3.1 (March 15, 2019)
 
 BUG FIXES:
 
-* resource/ucloud_lb_listener: Fix lb listener import [GH-21]
-* resource/ucloud_lb_attachment: Fix lb attachment import [GH-21]
-* resource/ucloud_lb_rule: Fix lb rule import [GH-21]
+* resource/ucloud_lb_listener: Fix lb listener import ([#21](https://github.com/terraform-providers/terraform-provider-ucloud/issues/21))
+* resource/ucloud_lb_attachment: Fix lb attachment import ([#21](https://github.com/terraform-providers/terraform-provider-ucloud/issues/21))
+* resource/ucloud_lb_rule: Fix lb rule import ([#21](https://github.com/terraform-providers/terraform-provider-ucloud/issues/21))
 
 ## 1.3.0 (March 12, 2019)
 
