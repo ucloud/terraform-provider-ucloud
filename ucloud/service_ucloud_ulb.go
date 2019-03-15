@@ -140,7 +140,7 @@ func (client *UCloudClient) describeVServerByOneId(listenerId string) (*ulb.ULBV
 
 	lbId, err := client.getLBIdFromVServerId(listenerId)
 	if err != nil {
-		return nil, "", newNotFoundError(getNotFoundMessage("listener", listenerId))
+		return nil, "", err
 	}
 	req.ULBId = ucloud.String(lbId)
 	req.VServerId = ucloud.String(listenerId)
@@ -206,7 +206,7 @@ func (client *UCloudClient) describeBackendByOneId(backendId string) (*ulb.ULBBa
 	var err error
 	lbId, listenerId, err := client.getLBIdAndVServerIdFromBackendId(backendId)
 	if err != nil {
-		return nil, "", "", newNotFoundError(getNotFoundMessage("listener", backendId))
+		return nil, "", "", err
 	}
 
 	vserverSet, err := client.describeVServerById(lbId, listenerId)
@@ -269,7 +269,7 @@ func (client *UCloudClient) describePolicyByOneId(policyId string) (*ulb.ULBPoli
 	var err error
 	lbId, listenerId, err := client.getLBIdAndVServerIdFromPolicyId(policyId)
 	if err != nil {
-		return nil, "", "", newNotFoundError(getNotFoundMessage("policy", policyId))
+		return nil, "", "", err
 	}
 
 	vserverSet, err := client.describeVServerById(lbId, listenerId)
