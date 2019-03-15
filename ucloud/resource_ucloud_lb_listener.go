@@ -296,11 +296,7 @@ func resourceUCloudLBListenerRead(d *schema.ResourceData, meta interface{}) erro
 	} else {
 		vserverSet, lbId, err = client.describeVServerByOneId(d.Id())
 		if err != nil {
-			if isNotFoundError(err) {
-				d.SetId("")
-				return nil
-			}
-			return fmt.Errorf("error on reading lb listener %q, %s", d.Id(), err)
+			return fmt.Errorf("error on parsing lb listener %q, %s", d.Id(), err)
 		}
 
 		d.Set("load_balancer_id", lbId)

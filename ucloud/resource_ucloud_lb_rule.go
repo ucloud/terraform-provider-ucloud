@@ -174,11 +174,7 @@ func resourceUCloudLBRuleRead(d *schema.ResourceData, meta interface{}) error {
 	} else {
 		policySet, lbId, listenerId, err = client.describePolicyByOneId(d.Id())
 		if err != nil {
-			if isNotFoundError(err) {
-				d.SetId("")
-				return nil
-			}
-			return fmt.Errorf("error on reading lb rule %q, %s", d.Id(), err)
+			return fmt.Errorf("error on parsing lb rule %q, %s", d.Id(), err)
 		}
 
 		d.Set("load_balancer_id", lbId)

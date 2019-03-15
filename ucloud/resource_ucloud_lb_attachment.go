@@ -158,11 +158,7 @@ func resourceUCloudLBAttachmentRead(d *schema.ResourceData, meta interface{}) er
 	} else {
 		backendSet, lbId, listenerId, err = client.describeBackendByOneId(d.Id())
 		if err != nil {
-			if isNotFoundError(err) {
-				d.SetId("")
-				return nil
-			}
-			return fmt.Errorf("error on reading lb attachment %q, %s", d.Id(), err)
+			return fmt.Errorf("error on parsing lb attachment %q, %s", d.Id(), err)
 		}
 
 		d.Set("load_balancer_id", lbId)
