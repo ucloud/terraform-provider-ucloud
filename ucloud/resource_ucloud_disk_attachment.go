@@ -66,9 +66,9 @@ func resourceUCloudDiskAttachmentCreate(d *schema.ResourceData, meta interface{}
 		Pending:    []string{"attaching"},
 		Target:     []string{"inuse"},
 		Refresh:    diskAttachmentStateRefreshFunc(client, diskId),
-		Timeout:    10 * time.Minute,
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Timeout:    5 * time.Minute,
+		Delay:      3 * time.Second,
+		MinTimeout: 2 * time.Second,
 	}
 
 	if _, err = stateConf.WaitForState(); err != nil {
@@ -121,9 +121,9 @@ func resourceUCloudDiskAttachmentDelete(d *schema.ResourceData, meta interface{}
 			Pending:    []string{"detaching"},
 			Target:     []string{"available"},
 			Refresh:    diskAttachmentStateRefreshFunc(client, p[0]),
-			Timeout:    10 * time.Minute,
-			Delay:      5 * time.Second,
-			MinTimeout: 3 * time.Second,
+			Timeout:    5 * time.Minute,
+			Delay:      3 * time.Second,
+			MinTimeout: 2 * time.Second,
 		}
 
 		if _, err := stateConf.WaitForState(); err != nil {
