@@ -1,13 +1,13 @@
-## 1.4.0 (Unreleased)
+## 1.4.0 (March 18, 2019)
 
 ENHANCEMENTS:
 
-* resource/ucloud_db_instance: Shorten the waiting time [GH-22]
-* resource/ucloud_disk: Shorten the waiting time and update states [GH-22]
-* resource/ucloud_disk_attachment: Shorten the waiting time [GH-22]
-* resource/ucloud_eip: Shorten the waiting time and update states [GH-22]
-* resource/ucloud_lb_listener: Shorten the waiting time and update states [GH-22]
-* resource/ucloud_lb_attachment: Shorten the waiting time and update states [GH-22]
+* resource/ucloud_db_instance: Shorten the waiting time ([#22](https://github.com/terraform-providers/terraform-provider-ucloud/issues/22))
+* resource/ucloud_disk: Shorten the waiting time and update states ([#22](https://github.com/terraform-providers/terraform-provider-ucloud/issues/22))
+* resource/ucloud_disk_attachment: Shorten the waiting time ([#22](https://github.com/terraform-providers/terraform-provider-ucloud/issues/22))
+* resource/ucloud_eip: Shorten the waiting time and update states ([#22](https://github.com/terraform-providers/terraform-provider-ucloud/issues/22))
+* resource/ucloud_lb_listener: Shorten the waiting time and update states ([#22](https://github.com/terraform-providers/terraform-provider-ucloud/issues/22))
+* resource/ucloud_lb_attachment: Shorten the waiting time and update states ([#22](https://github.com/terraform-providers/terraform-provider-ucloud/issues/22))
 
 ## 1.3.1 (March 15, 2019)
 
