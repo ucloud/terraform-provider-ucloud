@@ -32,24 +32,6 @@ type Config struct {
 	MaxRetries int
 }
 
-// UCloudClient is the ucloud openapi client
-type UCloudClient struct {
-	region    string
-	projectId string
-
-	config     *ucloud.Config
-	credential *auth.Credential
-
-	uhostconn    *uhost.UHostClient
-	unetconn     *unet.UNetClient
-	ulbconn      *ulb.ULBClient
-	vpcconn      *vpc.VPCClient
-	uaccountconn *uaccount.UAccountClient
-	udiskconn    *udisk.UDiskClient
-	udpnconn     *udpn.UDPNClient
-	udbconn      *udb.UDBClient
-}
-
 // Client will returns a client with connections for all product
 func (c *Config) Client() (*UCloudClient, error) {
 	var err error

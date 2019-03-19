@@ -77,11 +77,13 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"ucloud_projects":  dataSourceUCloudProjects(),
-			"ucloud_images":    dataSourceUCloudImages(),
-			"ucloud_zones":     dataSourceUCloudZones(),
-			"ucloud_eips":      dataSourceUCloudEips(),
-			"ucloud_instances": dataSourceUCloudInstances(),
+			"ucloud_projects":     dataSourceUCloudProjects(),
+			"ucloud_images":       dataSourceUCloudImages(),
+			"ucloud_zones":        dataSourceUCloudZones(),
+			"ucloud_eips":         dataSourceUCloudEips(),
+			"ucloud_instances":    dataSourceUCloudInstances(),
+			"ucloud_lbs":          dataSourceUCloudLBs(),
+			"ucloud_lb_listeners": dataSourceUCloudLBListeners(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
