@@ -140,6 +140,14 @@ func dataSourceUCloudLBsRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	} else {
 		req := conn.NewDescribeULBRequest()
+		if v, ok := d.GetOk("vpc_id"); ok {
+			req.VPCId = ucloud.String(v.(string))
+		}
+
+		if v, ok := d.GetOk("subnet_id"); ok {
+			req.SubnetId = ucloud.String(v.(string))
+		}
+
 		for {
 			req.Limit = ucloud.Int(limit)
 			req.Offset = ucloud.Int(offset)
