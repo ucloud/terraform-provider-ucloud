@@ -11,11 +11,6 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 )
 
-const (
-	eipResourceTypeULB   = "ulb"
-	eipResourceTypeUHost = "uhost"
-)
-
 func resourceUCloudEIPAssociation() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceUCloudEIPAssociationCreate,

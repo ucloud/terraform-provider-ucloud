@@ -12,10 +12,6 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 )
 
-const (
-	lbResourceTypeUHost = "UHost"
-)
-
 func resourceUCloudLBAttachment() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceUCloudLBAttachmentCreate,

@@ -45,6 +45,14 @@ const (
 )
 
 const (
+	lbResourceTypeUHost  = "UHost"
+	lbPath               = "Path"
+	lbDomain             = "Domain"
+	eipResourceTypeULB   = "ulb"
+	eipResourceTypeUHost = "uhost"
+)
+
+const (
 	// defaultPasswordStr and defaultPasswordNum are used to general default value of root password of instance
 	defaultPasswordNum = "012346789"
 	defaultPasswordStr = "abcdefghijklmnopqrstuvwxyz"
