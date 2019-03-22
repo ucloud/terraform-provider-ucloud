@@ -38,11 +38,18 @@ variable "count_format" {
 	default = "%02d"
 }
 
+variable "port_range" {
+	default = {
+	  "0" = 80
+	  "1" = 88
+	}
+  }
+
 resource "ucloud_lb_listener" "foo" {
 	count = "${var.count}"
 	load_balancer_id  = "${ucloud_lb.foo.id}"
 	protocol          = "https"
-	port			  = 80+"${count.index+1}"
+	port			  = "${var.port_range[count.index]}"
 	method            = "source"
 	name              = "tf-acc-lb-listeners-${format(var.count_format, count.index+1)}"
 	path              = "/foo"

@@ -12,7 +12,6 @@ import (
 func dataSourceUCloudLBListeners() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceUCloudLBListenersRead,
-
 		Schema: map[string]*schema.Schema{
 			"ids": {
 				Type:     schema.TypeSet,
@@ -26,7 +25,6 @@ func dataSourceUCloudLBListeners() *schema.Resource {
 			"load_balancer_id": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 
 			"output_file": {
@@ -65,12 +63,12 @@ func dataSourceUCloudLBListeners() *schema.Resource {
 						},
 
 						"port": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeInt,
 							Computed: true,
 						},
 
 						"idle_timeout": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeInt,
 							Computed: true,
 						},
 
@@ -122,10 +120,13 @@ func dataSourceUCloudLBListenersRead(d *schema.ResourceData, meta interface{}) e
 	var limit int = 100
 	var totalCount int
 	var offset int
+
+	lbId := d.Get("load_balancer_id").(string)
 	if ids, ok := d.GetOk("ids"); ok {
 		idSet := schemaSetToStringSlice(ids)
+
 		for _, v := range idSet {
-			vserverSet, _, err := client.describeVServerByOneId(v)
+			vserverSet, err := client.describeVServerById(lbId, v)
 			if err != nil {
 				return fmt.Errorf("error on reading lb listener list, %s", err)
 			}
@@ -135,7 +136,7 @@ func dataSourceUCloudLBListenersRead(d *schema.ResourceData, meta interface{}) e
 		}
 	} else {
 		req := conn.NewDescribeVServerRequest()
-		req.ULBId = ucloud.String(d.Get("load_balancer_id").(string))
+		req.ULBId = ucloud.String(lbId)
 		for {
 			req.Limit = ucloud.Int(limit)
 			req.Offset = ucloud.Int(offset)
@@ -174,22 +175,37 @@ func dataSourceUCloudLBListenersSave(d *schema.ResourceData, lbListeners []ulb.U
 
 	for _, item := range lbListeners {
 		ids = append(ids, string(item.VServerId))
-
-		data = append(data, map[string]interface{}{
-			"id":                item.VServerId,
-			"name":              item.VServerName,
-			"protocol":          upperCvt.convert(item.Protocol),
-			"listen_type":       upperCamelCvt.convert(item.ListenType),
-			"port":              item.FrontendPort,
-			"idle_timeout":      item.ClientTimeout,
-			"method":            upperCamelCvt.convert(item.Method),
-			"persistence_type":  upperCamelCvt.convert(item.PersistenceType),
-			"persistence":       item.PersistenceInfo,
-			"health_check_type": upperCamelCvt.convert(item.MonitorType),
-			"domain":            item.Domain,
-			"path":              item.Path,
-			"status":            listenerStatusCvt.convert(item.Status),
-		})
+		if item.MonitorType == lbPath {
+			data = append(data, map[string]interface{}{
+				"id":                item.VServerId,
+				"name":              item.VServerName,
+				"protocol":          upperCvt.convert(item.Protocol),
+				"listen_type":       upperCamelCvt.convert(item.ListenType),
+				"port":              item.FrontendPort,
+				"idle_timeout":      item.ClientTimeout,
+				"method":            upperCamelCvt.convert(item.Method),
+				"persistence_type":  upperCamelCvt.convert(item.PersistenceType),
+				"persistence":       item.PersistenceInfo,
+				"health_check_type": upperCamelCvt.convert(item.MonitorType),
+				"status":            listenerStatusCvt.convert(item.Status),
+				"domain":            item.Domain,
+				"path":              item.Path,
+			})
+		} else {
+			data = append(data, map[string]interface{}{
+				"id":                item.VServerId,
+				"name":              item.VServerName,
+				"protocol":          upperCvt.convert(item.Protocol),
+				"listen_type":       upperCamelCvt.convert(item.ListenType),
+				"port":              item.FrontendPort,
+				"idle_timeout":      item.ClientTimeout,
+				"method":            upperCamelCvt.convert(item.Method),
+				"persistence_type":  upperCamelCvt.convert(item.PersistenceType),
+				"persistence":       item.PersistenceInfo,
+				"health_check_type": upperCamelCvt.convert(item.MonitorType),
+				"status":            listenerStatusCvt.convert(item.Status),
+			})
+		}
 	}
 
 	d.SetId(hashStringArray(ids))
