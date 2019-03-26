@@ -123,9 +123,7 @@ func dataSourceUCloudLBListenersRead(d *schema.ResourceData, meta interface{}) e
 
 	lbId := d.Get("load_balancer_id").(string)
 	if ids, ok := d.GetOk("ids"); ok {
-		idSet := schemaSetToStringSlice(ids)
-
-		for _, v := range idSet {
+		for _, v := range schemaSetToStringSlice(ids) {
 			vserverSet, err := client.describeVServerById(lbId, v)
 			if err != nil {
 				return fmt.Errorf("error on reading lb listener list, %s", err)

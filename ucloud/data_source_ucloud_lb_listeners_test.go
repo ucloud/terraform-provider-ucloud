@@ -46,7 +46,7 @@ variable "port_range" {
   }
 
 resource "ucloud_lb_listener" "foo" {
-	count = "${var.count}"
+	count 			  = "${var.count}"
 	load_balancer_id  = "${ucloud_lb.foo.id}"
 	protocol          = "https"
 	port			  = "${var.port_range[count.index]}"

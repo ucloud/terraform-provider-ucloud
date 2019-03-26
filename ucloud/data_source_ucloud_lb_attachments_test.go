@@ -71,7 +71,7 @@ resource "ucloud_lb_attachment" "foo" {
 }
 
 data "ucloud_lb_attachments" "foo" {
-	ids = ["${ucloud_lb_attachment.foo.*.id}"]
+	ids 			 = ["${ucloud_lb_attachment.foo.*.id}"]
 	listener_id      = "${ucloud_lb_listener.foo.id}"
 	load_balancer_id = "${ucloud_lb.foo.id}"
 }

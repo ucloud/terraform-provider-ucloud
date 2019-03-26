@@ -107,11 +107,6 @@ func dataSourceUCloudLBs() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-
-						"expire_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 					},
 				},
 			},
@@ -126,8 +121,7 @@ func dataSourceUCloudLBsRead(d *schema.ResourceData, meta interface{}) error {
 	var totalCount int
 	var offset int
 	if ids, ok := d.GetOk("ids"); ok {
-		idSet := schemaSetToStringSlice(ids)
-		for _, v := range idSet {
+		for _, v := range schemaSetToStringSlice(ids) {
 			req := conn.NewDescribeULBRequest()
 			req.ULBId = ucloud.String(v)
 			resp, err := conn.DescribeULB(req)
@@ -204,7 +198,6 @@ func dataSourceUCloudLBsSave(d *schema.ResourceData, lbs []ulb.ULBSet) error {
 			"subnet_id":   item.SubnetId,
 			"private_ip":  item.PrivateIP,
 			"create_time": timestampToString(item.CreateTime),
-			"expire_time": timestampToString(item.ExpireTime),
 			"ip_set":      lbAddr,
 		})
 	}

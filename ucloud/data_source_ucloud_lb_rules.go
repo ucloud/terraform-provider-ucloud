@@ -82,9 +82,8 @@ func dataSourceUCloudLBRulesRead(d *schema.ResourceData, meta interface{}) error
 	totalCount = len(vserverSet.PolicySet)
 
 	if ids, ok := d.GetOk("ids"); ok {
-		idSet := schemaSetToStringSlice(ids)
 		for _, v := range vserverSet.PolicySet {
-			if !isStringIn(v.PolicyId, idSet) {
+			if !isStringIn(v.PolicyId, schemaSetToStringSlice(ids)) {
 				totalCount--
 				continue
 			}

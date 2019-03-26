@@ -102,8 +102,9 @@ func resourceUCloudLB() *schema.Resource {
 			},
 
 			"expire_time": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:       schema.TypeString,
+				Deprecated: "attribute `expire_time` is deprecated for optimizing outputs",
+				Computed:   true,
 			},
 		},
 	}
@@ -230,7 +231,6 @@ func resourceUCloudLBRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("tag", lbSet.Tag)
 	d.Set("remark", lbSet.Remark)
 	d.Set("create_time", timestampToString(lbSet.CreateTime))
-	d.Set("expire_time", timestampToString(lbSet.ExpireTime))
 	d.Set("vpc_id", lbSet.VPCId)
 	d.Set("subnet_id", lbSet.SubnetId)
 	d.Set("private_ip", lbSet.PrivateIP)

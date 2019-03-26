@@ -92,9 +92,8 @@ func dataSourceUCloudLBAttachmentsRead(d *schema.ResourceData, meta interface{})
 	totalCount = len(vserverSet.BackendSet)
 
 	if ids, ok := d.GetOk("ids"); ok {
-		idSet := schemaSetToStringSlice(ids)
 		for _, v := range vserverSet.BackendSet {
-			if !isStringIn(v.BackendId, idSet) {
+			if !isStringIn(v.BackendId, schemaSetToStringSlice(ids)) {
 				totalCount--
 				continue
 			}

@@ -71,7 +71,7 @@ resource "ucloud_lb_attachment" "foo" {
 }
 
 resource "ucloud_lb_rule" "foo" {
-	count = "${var.count}"
+	count 			 = "${var.count}"
 	load_balancer_id = "${ucloud_lb.foo.id}"
 	listener_id      = "${ucloud_lb_listener.foo.id}"
 	backend_ids      = ["${element(ucloud_lb_attachment.foo.*.id, count.index)}"]
@@ -79,7 +79,7 @@ resource "ucloud_lb_rule" "foo" {
 }
 
 data "ucloud_lb_rules" "foo" {
-	ids = ["${ucloud_lb_rule.foo.*.id}"]
+	ids 			 = ["${ucloud_lb_rule.foo.*.id}"]
 	listener_id      = "${ucloud_lb_listener.foo.id}"
 	load_balancer_id = "${ucloud_lb.foo.id}"
 }

@@ -47,7 +47,6 @@ The attribute (`lbs`) support the following:
 * `subnet_id` - (Optional) The ID of subnet that intrant load balancer belongs to. 
 * `private_ip` - The IP address of intranet IP.
 * `create_time` - The creation time of Load Balancer, formatted in RFC3339 time string.
-* `expire_time` - The expiration time of Load Balancer, formatted in RFC3339 time string.
 
 The attribute (`ip_set`) support the following:
 

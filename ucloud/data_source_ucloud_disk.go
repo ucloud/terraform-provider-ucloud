@@ -111,7 +111,6 @@ func dataSourceUCloudDisksRead(d *schema.ResourceData, meta interface{}) error {
 	var limit int = 100
 	var totalCount int
 	var offset int
-	req := conn.NewDescribeUDiskRequest()
 
 	if ids, ok := d.GetOk("ids"); ok {
 		for _, id := range schemaSetToStringSlice(ids) {
@@ -126,6 +125,7 @@ func dataSourceUCloudDisksRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	} else {
 		for {
+			req := conn.NewDescribeUDiskRequest()
 			req.Limit = ucloud.Int(limit)
 			req.Offset = ucloud.Int(offset)
 			req.DiskType = ucloud.String(diskTypeCvt.unconvert(d.Get("disk_type").(string)))

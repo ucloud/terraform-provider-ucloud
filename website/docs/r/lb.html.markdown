@@ -25,7 +25,7 @@ The following arguments are supported:
 
 * `internal` - (Optional) Indicate whether the load balancer is intranet.
 * `name` - (Optional) The name of the load balancer. If not specified, terraform will autogenerate a name beginning with `tf-lb`.
-* `charge_type` - **Deprecated**, attribute `charge_type` is deprecated for optimizing parameters.
+* `charge_type` - **Deprecated**, argument `charge_type` is deprecated for optimizing parameters.
 * `vpc_id` - (Optional) The ID of the VPC linked to the Load Balancers, This argumnet is not required if default VPC.
 * `subnet_id` - (Optional) The ID of subnet that intrant load balancer belongs to. This argumnet is not required if default subnet.
 * `tag` - (Optional) A mapping of tags to assign to VPC, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
@@ -36,7 +36,7 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `create_time` - The time of creation for load balancer, formatted in RFC3339 time string.
-* `expire_time` - The expiration time for load balancer, formatted in RFC3339 time string.
+* `expire_time` - **Deprecated** attribute `expire_time` is deprecated for optimizing outputs.
 * `ip_set` - It is a nested type which documented below.
 * `private_ip` - The IP address of intranet IP. It is `""` if `internal` is `false`.
 
