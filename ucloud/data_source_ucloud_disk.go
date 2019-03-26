@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 
 	"github.com/ucloud/ucloud-sdk-go/services/udisk"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
@@ -26,6 +27,12 @@ func dataSourceUCloudDisks() *schema.Resource {
 			"disk_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"data_disk",
+					"ssd_data_disk",
+					"system_disk",
+					"ssd_system_disk",
+				}, false),
 			},
 
 			"output_file": {
@@ -121,6 +128,7 @@ func dataSourceUCloudDisksRead(d *schema.ResourceData, meta interface{}) error {
 		for {
 			req.Limit = ucloud.Int(limit)
 			req.Offset = ucloud.Int(offset)
+			req.DiskType = ucloud.String(diskTypeCvt.unconvert(d.Get("disk_type").(string)))
 			resp, err := conn.DescribeUDisk(req)
 			if err != nil {
 				return fmt.Errorf("error on reading disk list, %s", err)
@@ -162,6 +170,7 @@ func dataSourceUCloudDisksSave(d *schema.ResourceData, disks []udisk.UDiskDataSe
 			"id":                item.UDiskId,
 			"availability_zone": item.Zone,
 			"disk_size":         item.Size,
+			"disk_type":         diskTypeCvt.convert(item.DiskType),
 			"charge_type":       upperCamelCvt.convert(item.ChargeType),
 			"name":              item.Name,
 			"tag":               item.Tag,

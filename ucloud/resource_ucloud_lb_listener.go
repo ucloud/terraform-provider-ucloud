@@ -313,7 +313,7 @@ func resourceUCloudLBListenerRead(d *schema.ResourceData, meta interface{}) erro
 	d.Set("health_check_type", upperCamelCvt.convert(vserverSet.MonitorType))
 	d.Set("status", listenerStatusCvt.convert(vserverSet.Status))
 
-	if vserverSet.MonitorType == lbPath {
+	if vserverSet.MonitorType == lbMatchTypePath {
 		d.Set("domain", vserverSet.Domain)
 		d.Set("path", vserverSet.Path)
 	}

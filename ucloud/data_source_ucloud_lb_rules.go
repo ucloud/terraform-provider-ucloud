@@ -52,11 +52,6 @@ func dataSourceUCloudLBRules() *schema.Resource {
 							Computed: true,
 						},
 
-						"type": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-
 						"domain": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -113,16 +108,14 @@ func dataSourceUCloudLBRulesSave(d *schema.ResourceData, lbRules []ulb.ULBPolicy
 
 	for _, item := range lbRules {
 		ids = append(ids, string(item.PolicyId))
-		if item.Type == lbPath {
+		if item.Type == lbMatchTypePath {
 			data = append(data, map[string]interface{}{
 				"id":   item.PolicyId,
-				"type": item.PolicyType,
 				"path": item.Match,
 			})
-		} else if item.Type == lbDomain {
+		} else if item.Type == lbMatchTypeDomain {
 			data = append(data, map[string]interface{}{
 				"id":     item.PolicyId,
-				"type":   item.PolicyType,
 				"domain": item.Match,
 			})
 		}

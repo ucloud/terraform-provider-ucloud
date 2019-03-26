@@ -67,8 +67,8 @@ resource "ucloud_lb_rule" "example" {
 
 The following arguments are supported:
 
-* `load_balancer_id` - (Required) The ID of the load balancer which requires the rule.
-* `listener_id` - (Required) The ID of the listener which requires the rule.
-* `backend_ids` - (Required) The IDs of the backend servers where rule applies, this argument is populated base on the `backend_id` responed from `lb_attachment create`.
+* `load_balancer_id` - (Required) The ID of a load balancer.
+* `listener_id` - (Required) The ID of a listener server.
+* `backend_ids` - (Required) The IDs of the backend servers where rule applies, this argument is populated base on the `backend_id` responed from `lb_attachment` create.
 * `path` - (Optional) The path of Content forward matching fields. `path` and `domain` cannot coexist. `path` and `domain` must be filled in one.
 * `domain` - (Optional) The domain of content forward matching fields. `path` and `domain` cannot coexist. `path` and `domain` must be filled in one.

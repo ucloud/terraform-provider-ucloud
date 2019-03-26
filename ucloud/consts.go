@@ -46,8 +46,8 @@ const (
 
 const (
 	lbResourceTypeUHost  = "UHost"
-	lbPath               = "Path"
-	lbDomain             = "Domain"
+	lbMatchTypePath      = "Path"
+	lbMatchTypeDomain    = "Domain"
 	eipResourceTypeULB   = "ulb"
 	eipResourceTypeUHost = "uhost"
 )
@@ -123,8 +123,10 @@ var boolValueCvt = newBoolConverter(map[bool]string{
 })
 
 var diskTypeCvt = newStringConverter(map[string]string{
-	"DataDisk":    "data_disk",
-	"SSDDataDisk": "ssd_data_disk",
+	"DataDisk":      "data_disk",
+	"SSDDataDisk":   "ssd_data_disk",
+	"SystemDisk":    "system_disk",
+	"SSDSystemDisk": "ssd_system_disk",
 })
 
 // upperCvt is used to transform uppercase with underscore to lowercase with underscore. eg. LOCAL_SSD -> local_ssd

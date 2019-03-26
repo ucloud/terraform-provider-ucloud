@@ -175,7 +175,7 @@ func dataSourceUCloudLBListenersSave(d *schema.ResourceData, lbListeners []ulb.U
 
 	for _, item := range lbListeners {
 		ids = append(ids, string(item.VServerId))
-		if item.MonitorType == lbPath {
+		if item.MonitorType == lbMatchTypePath {
 			data = append(data, map[string]interface{}{
 				"id":                item.VServerId,
 				"name":              item.VServerName,

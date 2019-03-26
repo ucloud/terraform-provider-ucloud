@@ -30,7 +30,7 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `zones` - Zones is a nested type which documented below.
+* `zones` - It is a nested type which documented below.
 
 The attribute (`zones`) support the following:
 

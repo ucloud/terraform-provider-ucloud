@@ -25,7 +25,7 @@ resource "ucloud_disk" "example" {
 The following arguments are supported:
 
 * `availability_zone` - (Required)  Availability zone where cloud disk is located. Such as: "cn-bj2-02". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist).
-* `disk_size` - (Required) Purchase the size of disk in GB. 1-8000 for a cloud disk, 1-4000 for SSD cloud disk.
+* `disk_size` - (Required) The size of disk. Purchase the size of disk in GB. 1-8000 for a cloud disk, 1-4000 for SSD cloud disk.
 * `name` - (Optional)  The name of disk, should have 6-63 characters and only support Chinese, English, numbers, '-', '_'. If not specified, terraform will autogenerate a name beginning with `tf-disk`.
 * `disk_type` - (Optional) The type of disk. Possible values are: `data_disk`as cloud disk, `ssd_data_disk` as ssd cloud disk. (Default: `data_disk`).
 * `charge_type` - (Optional) Charge type of disk. Possible values are: `year` as pay by year, `month` as pay by month, `dynamic` as pay by hour. (Default: `month`).

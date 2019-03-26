@@ -59,9 +59,9 @@ resource "ucloud_lb_attachment" "example" {
 
 The following arguments are supported:
 
-* `load_balancer_id` - (Required) The ID of load balancer instance.
-* `listener_id` - (Required) The ID of listener servers.
-* `resource_id` - (Required) The ID of backend servers.
+* `load_balancer_id` - (Required) The ID of a load balancer.
+* `listener_id` - (Required) The ID of a listener server.
+* `resource_id` - (Required) The ID of a backend server.
 * `resource_type` - **Deprecated**, attribute `resource_type` is deprecated for optimizing parameters.
 * `port` - (Optional) Port opened on the backend server to receive requests, range: 1-65535, (Default: `80`).
 

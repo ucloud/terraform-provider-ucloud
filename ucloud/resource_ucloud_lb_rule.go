@@ -181,11 +181,11 @@ func resourceUCloudLBRuleRead(d *schema.ResourceData, meta interface{}) error {
 		d.Set("listener_id", listenerId)
 	}
 
-	if policySet.Type == lbPath {
+	if policySet.Type == lbMatchTypePath {
 		d.Set("path", policySet.Match)
 	}
 
-	if policySet.Type == lbDomain {
+	if policySet.Type == lbMatchTypeDomain {
 		d.Set("domain", policySet.Match)
 	}
 
