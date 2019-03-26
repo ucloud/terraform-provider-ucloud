@@ -19,12 +19,12 @@ echo "Compiling ..."
 if [ $OS_TYPE == "Linux" ]; then
 	GOOS=linux GOARCH=amd64 go build -o bin/terraform-provider-ucloud
 	chmod +x bin/terraform-provider-ucloud
-    mkdir $HOME/.terraform.d/plugins
+    mkdir -p $HOME/.terraform.d/plugins
     mv bin/terraform-provider-ucloud $HOME/.terraform.d/plugins
 elif [ $OS_TYPE == "Mac" ]; then
 	GOOS=darwin GOARCH=amd64 go build -o bin/terraform-provider-ucloud
 	chmod +x bin/terraform-provider-ucloud
-    mkdir $HOME/.terraform.d/plugins
+    mkdir -p $HOME/.terraform.d/plugins
     mv bin/terraform-provider-ucloud $HOME/.terraform.d/plugins
 elif [ $OS_TYPE == "Windows" ]; then
 	GOOS=windows GOARCH=amd64 go build -o bin/terraform-provider-ucloud.exe
