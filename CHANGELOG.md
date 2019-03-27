@@ -10,7 +10,7 @@ FEATURES:
 
 ENHANCEMENTS:
 
-* resource/ucloud_lb: Deprecated attribute `expire_time` for optimizing outputs
+* resource/ucloud_lb: Deprecated attribute `expire_time` for optimizing outputs [GH-23]
 
 ## 1.4.0 (March 18, 2019)
 
