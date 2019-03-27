@@ -102,6 +102,7 @@ func dataSourceUCloudLBAttachmentsRead(d *schema.ResourceData, meta interface{})
 	} else {
 		filteredLbAttachments = vserverSet.BackendSet
 	}
+
 	d.Set("total_count", totalCount)
 	err = dataSourceUCloudLBAttachmentsSave(d, filteredLbAttachments)
 	if err != nil {

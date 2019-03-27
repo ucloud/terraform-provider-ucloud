@@ -92,6 +92,7 @@ func dataSourceUCloudLBRulesRead(d *schema.ResourceData, meta interface{}) error
 	} else {
 		lbRules = vserverSet.PolicySet
 	}
+
 	d.Set("total_count", totalCount)
 	err = dataSourceUCloudLBRulesSave(d, lbRules)
 	if err != nil {
