@@ -71,7 +71,7 @@ func TestAccUCloudLBsDataSource_subnet(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataLBsConfigVPC,
+				Config: testAccDataLBsConfigSubnet,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIDExists("data.ucloud_lbs.foo"),
 					resource.TestCheckResourceAttr("data.ucloud_lbs.foo", "lbs.#", "1"),
@@ -104,37 +104,38 @@ data "ucloud_lbs" "foo" {
 	ids = ["${ucloud_lb.foo.*.id}"]
 }
 `
-const testAccDataLBsConfigVPC = `
 
+const testAccDataLBsConfigVPC = `
 variable "name" {
 	default = "tf-acc-lbs-dataSource-vpc"
 }
 
 resource "ucloud_vpc" "default" {
-	name        = "${var.name}"
+	name    = "${var.name}"
 	tag         = "tf-acc"
 	cidr_blocks = ["192.168.0.0/16"]
 }
   
 resource "ucloud_subnet" "default" {
-	name       = "${var.name}"
+	name    = "${var.name}"
 	tag        = "tf-acc"
 	cidr_block = "192.168.1.0/24"
 	vpc_id     = "${ucloud_vpc.default.id}"
 }
 
 resource "ucloud_lb" "foo" {
-	name    = "${var.name}"
-	tag  	= "tf-acc
-	vpc_id  = "${ucloud_vpc.default.id}"
-	subnet 	= "${ucloud_subnet.default.id}"
+	name       = "${var.name}"
+	tag  	   = "tf-acc"
+	vpc_id     = "${ucloud_vpc.default.id}"
+	subnet_id  = "${ucloud_subnet.default.id}"
 }
 
 data "ucloud_lbs" "foo" {
-	vpc_id  = "${ucloud_vpc.default.id}"
+	vpc_id 	    = "${ucloud_vpc.default.id}"
 	name_regex  = "${ucloud_lb.foo.name}"
 }
 `
+
 const testAccDataLBsConfigSubnet = `
 
 variable "name" {
@@ -155,14 +156,15 @@ resource "ucloud_subnet" "default" {
 }
 
 resource "ucloud_lb" "foo" {
-	name    = "${var.name}"
-	tag  	= "tf-acc
-	vpc_id  = "${ucloud_vpc.default.id}"
-	subnet 	= "${ucloud_subnet.default.id}"
+	name    	= "${var.name}"
+	tag  	 	= "tf-acc"
+	vpc_id   	= "${ucloud_vpc.default.id}"
+	subnet_id	= "${ucloud_subnet.default.id}"
+	internal 	= "true"
 }
 
 data "ucloud_lbs" "foo" {
-	subnet 	= "${ucloud_subnet.default.id}"
+	subnet_id 	= "${ucloud_subnet.default.id}"
 	name_regex  = "${ucloud_lb.foo.name}"
 }
 `
