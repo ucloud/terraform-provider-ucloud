@@ -37,8 +37,6 @@ func TestAccUCloudLBListenersDataSource_ids(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIDExists("data.ucloud_lb_listeners.foo"),
 					resource.TestCheckResourceAttr("data.ucloud_lb_listeners.foo", "lb_listeners.#", "2"),
-					resource.TestCheckResourceAttr("data.ucloud_lb_listeners.foo", "lb_listeners.0.port", "80"),
-					resource.TestCheckResourceAttr("data.ucloud_lb_listeners.foo", "lb_listeners.1.port", "88"),
 				),
 			},
 		},

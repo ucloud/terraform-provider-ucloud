@@ -18,8 +18,6 @@ func TestAccUCloudLBRulesDataSource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIDExists("data.ucloud_lb_rules.foo"),
 					resource.TestCheckResourceAttr("data.ucloud_lb_rules.foo", "lb_rules.#", "2"),
-					resource.TestCheckResourceAttr("data.ucloud_lb_rules.foo", "lb_rules.0.domain", "www.ucloud.cn"),
-					resource.TestCheckResourceAttr("data.ucloud_lb_rules.foo", "lb_rules.1.path", "/foo"),
 				),
 			},
 		},
