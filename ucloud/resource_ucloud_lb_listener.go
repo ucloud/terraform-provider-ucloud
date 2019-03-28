@@ -311,9 +311,12 @@ func resourceUCloudLBListenerRead(d *schema.ResourceData, meta interface{}) erro
 	d.Set("persistence_type", upperCamelCvt.convert(vserverSet.PersistenceType))
 	d.Set("persistence", vserverSet.PersistenceInfo)
 	d.Set("health_check_type", upperCamelCvt.convert(vserverSet.MonitorType))
-	d.Set("domain", vserverSet.Domain)
-	d.Set("path", vserverSet.Path)
 	d.Set("status", listenerStatusCvt.convert(vserverSet.Status))
+
+	if vserverSet.MonitorType == lbMatchTypePath {
+		d.Set("domain", vserverSet.Domain)
+		d.Set("path", vserverSet.Path)
+	}
 
 	return nil
 }

@@ -1,4 +1,17 @@
 ## 1.5.0 (Unreleased)
+
+FEATURES:
+
+* **New Datasource:** `ucloud_disks`[GH-23]
+* **New Datasource:** `ucloud_lbs`[GH-23]
+* **New Datasource:** `ucloud_lb_listeners`[GH-23]
+* **New Datasource:** `ucloud_lb_rules`[GH-23]
+* **New Datasource:** `ucloud_lb_attachments`[GH-23]
+
+ENHANCEMENTS:
+
+* resource/ucloud_lb: Deprecated attribute `expire_time` for optimizing outputs [GH-23]
+
 ## 1.4.0 (March 18, 2019)
 
 ENHANCEMENTS:

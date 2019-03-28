@@ -45,6 +45,14 @@ const (
 )
 
 const (
+	lbResourceTypeUHost  = "UHost"
+	lbMatchTypePath      = "Path"
+	lbMatchTypeDomain    = "Domain"
+	eipResourceTypeULB   = "ulb"
+	eipResourceTypeUHost = "uhost"
+)
+
+const (
 	// defaultPasswordStr and defaultPasswordNum are used to general default value of root password of instance
 	defaultPasswordNum = "012346789"
 	defaultPasswordStr = "abcdefghijklmnopqrstuvwxyz"
@@ -115,8 +123,10 @@ var boolValueCvt = newBoolConverter(map[bool]string{
 })
 
 var diskTypeCvt = newStringConverter(map[string]string{
-	"DataDisk":    "data_disk",
-	"SSDDataDisk": "ssd_data_disk",
+	"DataDisk":      "data_disk",
+	"SSDDataDisk":   "ssd_data_disk",
+	"SystemDisk":    "system_disk",
+	"SSDSystemDisk": "ssd_system_disk",
 })
 
 // upperCvt is used to transform uppercase with underscore to lowercase with underscore. eg. LOCAL_SSD -> local_ssd

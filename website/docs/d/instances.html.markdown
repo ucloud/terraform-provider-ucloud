@@ -27,7 +27,7 @@ output "first" {
 The following arguments are supported:
 
 * `availability_zone` - (Optional) Availability zone where instances are located. Such as: "cn-bj2-02". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
-* `ids` - (Optional) The group of IDs of instances that require to be retrieved, all the instances belongs to the defined region will be retrieved if this argument is "".
+* `ids` - (Optional) A list of instance IDs, all the instances belongs to the defined region will be retrieved if this argument is "".
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 * `tag` - (Optional) A mapping of tags to assign to instance.
 
@@ -35,7 +35,7 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `instances` - instances is a nested type. instances documented below.
+* `instances` - It is a nested type. instances documented below.
 * `total_count` - Total number of instance that satisfy the condition.
 
 The attribute (`instances`) support the following:
@@ -43,8 +43,8 @@ The attribute (`instances`) support the following:
 * `auto_renew` - To identify if the auto renewal is on, possible values are : "Yes" and “No”.
 * `cpu` - The number of cores of virtual CPU, measured in "core".
 * `memory` - The size of memory, measured in MB.
-* `create_time` - The time of creation for EIP.
-* `expire_time` - The expiration time for instance.
+* `create_time` - The creation time of instance.
+* `expire_time` - The expiration time of instance.
 * `id` - The ID of instance.
 * `instance_charge_type` - The charge type of instance, possible values are: "Year", "Month" and "Dynamic" as pay by hour.
 * `name` - The name of the instance.

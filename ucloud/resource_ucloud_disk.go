@@ -102,7 +102,7 @@ func resourceUCloudDiskCreate(d *schema.ResourceData, meta interface{}) error {
 	req := conn.NewCreateUDiskRequest()
 	req.Zone = ucloud.String(d.Get("availability_zone").(string))
 	req.Size = ucloud.Int(d.Get("disk_size").(int))
-	req.DiskType = ucloud.String(upperCamelCvt.unconvert(d.Get("disk_type").(string)))
+	req.DiskType = ucloud.String(diskTypeCvt.unconvert(d.Get("disk_type").(string)))
 	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
 	req.Quantity = ucloud.Int(d.Get("duration").(int))
 
