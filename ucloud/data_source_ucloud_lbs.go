@@ -2,8 +2,10 @@ package ucloud
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 
 	"github.com/ucloud/ucloud-sdk-go/services/ulb"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
@@ -21,6 +23,12 @@ func dataSourceUCloudLBs() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Set: schema.HashString,
+			},
+
+			"name_regex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.ValidateRegexp,
 			},
 
 			"vpc_id": {
@@ -116,23 +124,12 @@ func dataSourceUCloudLBs() *schema.Resource {
 
 func dataSourceUCloudLBsRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*UCloudClient).ulbconn
+	var allLbs []ulb.ULBSet
 	var lbs []ulb.ULBSet
 	var limit int = 100
-	var totalCount int
 	var offset int
-	if ids, ok := d.GetOk("ids"); ok {
-		for _, v := range schemaSetToStringSlice(ids) {
-			req := conn.NewDescribeULBRequest()
-			req.ULBId = ucloud.String(v)
-			resp, err := conn.DescribeULB(req)
-			if err != nil {
-				return fmt.Errorf("error on reading ulb list, %s", err)
-			}
 
-			lbs = append(lbs, resp.DataSet[0])
-			totalCount++
-		}
-	} else {
+	for {
 		req := conn.NewDescribeULBRequest()
 		if v, ok := d.GetOk("vpc_id"); ok {
 			req.VPCId = ucloud.String(v.(string))
@@ -142,30 +139,47 @@ func dataSourceUCloudLBsRead(d *schema.ResourceData, meta interface{}) error {
 			req.SubnetId = ucloud.String(v.(string))
 		}
 
-		for {
-			req.Limit = ucloud.Int(limit)
-			req.Offset = ucloud.Int(offset)
-			resp, err := conn.DescribeULB(req)
-			if err != nil {
-				return fmt.Errorf("error on reading ulb list, %s", err)
-			}
-
-			if resp == nil || len(resp.DataSet) < 1 {
-				break
-			}
-
-			lbs = append(lbs, resp.DataSet...)
-			totalCount = totalCount + resp.TotalCount
-
-			if len(resp.DataSet) < limit {
-				break
-			}
-
-			offset = offset + limit
+		req.Limit = ucloud.Int(limit)
+		req.Offset = ucloud.Int(offset)
+		resp, err := conn.DescribeULB(req)
+		if err != nil {
+			return fmt.Errorf("error on reading ulb list, %s", err)
 		}
+
+		if resp == nil || len(resp.DataSet) < 1 {
+			break
+		}
+
+		allLbs = append(allLbs, resp.DataSet...)
+
+		if len(resp.DataSet) < limit {
+			break
+		}
+
+		offset = offset + limit
 	}
 
-	d.Set("total_count", totalCount)
+	ids, idsOk := d.GetOk("ids")
+	nameRegex, nameRegexOk := d.GetOk("name_regex")
+	if idsOk || nameRegexOk {
+		var r *regexp.Regexp
+		if nameRegex != "" {
+			r = regexp.MustCompile(nameRegex.(string))
+		}
+		for _, v := range allLbs {
+			if r != nil && !r.MatchString(v.Name) {
+				continue
+			}
+
+			if idsOk && !isStringIn(v.ULBId, schemaSetToStringSlice(ids)) {
+				continue
+			}
+			lbs = append(lbs, v)
+		}
+	} else {
+		lbs = allLbs
+	}
+
 	err := dataSourceUCloudLBsSave(d, lbs)
 	if err != nil {
 		return fmt.Errorf("error on reading ulb list, %s", err)
@@ -203,6 +217,7 @@ func dataSourceUCloudLBsSave(d *schema.ResourceData, lbs []ulb.ULBSet) error {
 	}
 
 	d.SetId(hashStringArray(ids))
+	d.Set("total_count", len(data))
 	if err := d.Set("lbs", data); err != nil {
 		return err
 	}

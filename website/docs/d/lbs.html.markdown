@@ -26,6 +26,7 @@ output "first" {
 The following arguments are supported:
 
 * `ids` - (Optional) A list of Load Balancer IDs, all the LBs belong to this region will be retrieved if the ID is `""`.
+* `name_regex` - (Optional) A regex string to filter resulting lbs by name.
 * `vpc_id` - (Optional) The ID of the VPC linked to the Load Balancers.
 * `subnet_id` - (Optional) The ID of subnet that intrant load balancer belongs to.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
@@ -35,7 +36,7 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `lbs` - It is a nested type which documented below.
-* `total_count` - Total number of Load Balancer that satisfy the condition.
+* `total_count` - Total number of Load Balancers that satisfy the condition.
 
 The attribute (`lbs`) support the following:
 

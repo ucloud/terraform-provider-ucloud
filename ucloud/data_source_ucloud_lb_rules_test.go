@@ -18,6 +18,8 @@ func TestAccUCloudLBRulesDataSource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIDExists("data.ucloud_lb_rules.foo"),
 					resource.TestCheckResourceAttr("data.ucloud_lb_rules.foo", "lb_rules.#", "2"),
+					resource.TestCheckResourceAttr("data.ucloud_lb_rules.foo", "lb_rules.0.domain", "www.ucloud.cn"),
+					resource.TestCheckResourceAttr("data.ucloud_lb_rules.foo", "lb_rules.1.path", "/foo"),
 				),
 			},
 		},
@@ -27,6 +29,10 @@ func TestAccUCloudLBRulesDataSource_basic(t *testing.T) {
 const testAccDataLBRulesConfig = `
 variable "count" {
 	default = 2
+}
+
+variable "name" {
+	default = "tf-acc-lb-rules-dataSource-basic"
 }
 
 variable "count_format" {
@@ -43,7 +49,7 @@ data "ucloud_images" "default" {
 }
 
 resource "ucloud_lb" "foo" {
-	name = "tf-acc-lb-rules"
+	name = "${var.name}"
 	tag  = "tf-acc"
 }
 
@@ -53,7 +59,7 @@ resource "ucloud_lb_listener" "foo" {
 }
 
 resource "ucloud_instance" "foo"{
-	name              = "tf-acc-lb-rules-${format(var.count_format, count.index+1)}"
+	name              = "${var.name}-${format(var.count_format, count.index+1)}"
 	tag               = "tf-acc"
 	instance_type     = "n-highcpu-1"
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
@@ -70,16 +76,23 @@ resource "ucloud_lb_attachment" "foo" {
 	port             = 80
 }
 
-resource "ucloud_lb_rule" "foo" {
-	count 			 = "${var.count}"
+resource "ucloud_lb_rule" "test_domain" {
 	load_balancer_id = "${ucloud_lb.foo.id}"
 	listener_id      = "${ucloud_lb_listener.foo.id}"
 	backend_ids      = ["${element(ucloud_lb_attachment.foo.*.id, count.index)}"]
 	domain           = "www.ucloud.cn"
 }
 
+resource "ucloud_lb_rule" "test_path" {
+	load_balancer_id = "${ucloud_lb.foo.id}"
+	listener_id      = "${ucloud_lb_listener.foo.id}"
+	backend_ids      = ["${element(ucloud_lb_attachment.foo.*.id, count.index)}"]
+	path             = "/foo"
+}
+
+
 data "ucloud_lb_rules" "foo" {
-	ids 			 = ["${ucloud_lb_rule.foo.*.id}"]
+	ids 			 = ["${ucloud_lb_rule.test_domain.id}", "${ucloud_lb_rule.test_path.id}"]
 	listener_id      = "${ucloud_lb_listener.foo.id}"
 	load_balancer_id = "${ucloud_lb.foo.id}"
 }

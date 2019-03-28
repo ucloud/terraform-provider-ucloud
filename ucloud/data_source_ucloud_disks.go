@@ -2,6 +2,7 @@ package ucloud
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
@@ -22,6 +23,12 @@ func dataSourceUCloudDisks() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Set: schema.HashString,
+			},
+
+			"name_regex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.ValidateRegexp,
 			},
 
 			"disk_type": {
@@ -107,50 +114,58 @@ func dataSourceUCloudDisks() *schema.Resource {
 
 func dataSourceUCloudDisksRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*UCloudClient).udiskconn
+	var allDisks []udisk.UDiskDataSet
 	var disks []udisk.UDiskDataSet
 	var limit int = 100
-	var totalCount int
 	var offset int
 
-	if ids, ok := d.GetOk("ids"); ok {
-		for _, id := range schemaSetToStringSlice(ids) {
-			req := conn.NewDescribeUDiskRequest()
-			req.UDiskId = ucloud.String(id)
-			resp, err := conn.DescribeUDisk(req)
-			if err != nil {
-				return fmt.Errorf("error on reading disk list, %s", err)
-			}
-			disks = append(disks, resp.DataSet...)
-			totalCount++
+	for {
+		req := conn.NewDescribeUDiskRequest()
+		req.Limit = ucloud.Int(limit)
+		req.Offset = ucloud.Int(offset)
+		if v, ok := d.GetOk("disk_type"); ok {
+			req.DiskType = ucloud.String(diskTypeCvt.unconvert(v.(string)))
 		}
-	} else {
-		for {
-			req := conn.NewDescribeUDiskRequest()
-			req.Limit = ucloud.Int(limit)
-			req.Offset = ucloud.Int(offset)
-			req.DiskType = ucloud.String(diskTypeCvt.unconvert(d.Get("disk_type").(string)))
-			resp, err := conn.DescribeUDisk(req)
-			if err != nil {
-				return fmt.Errorf("error on reading disk list, %s", err)
-			}
 
-			if resp == nil || len(resp.DataSet) < 1 {
-				break
-			}
-
-			disks = append(disks, resp.DataSet...)
-
-			totalCount = totalCount + resp.TotalCount
-
-			if len(resp.DataSet) < limit {
-				break
-			}
-
-			offset = offset + limit
+		resp, err := conn.DescribeUDisk(req)
+		if err != nil {
+			return fmt.Errorf("error on reading disk list, %s", err)
 		}
+
+		if resp == nil || len(resp.DataSet) < 1 {
+			break
+		}
+
+		allDisks = append(allDisks, resp.DataSet...)
+
+		if len(resp.DataSet) < limit {
+			break
+		}
+
+		offset = offset + limit
 	}
 
-	d.Set("total_count", totalCount)
+	ids, idsOk := d.GetOk("ids")
+	nameRegex, nameRegexOk := d.GetOk("name_regex")
+	if idsOk || nameRegexOk {
+		var r *regexp.Regexp
+		if nameRegex != "" {
+			r = regexp.MustCompile(nameRegex.(string))
+		}
+		for _, v := range allDisks {
+			if r != nil && !r.MatchString(v.Name) {
+				continue
+			}
+
+			if idsOk && !isStringIn(v.UDiskId, schemaSetToStringSlice(ids)) {
+				continue
+			}
+			disks = append(disks, v)
+		}
+	} else {
+		disks = allDisks
+	}
+
 	err := dataSourceUCloudDisksSave(d, disks)
 	if err != nil {
 		return fmt.Errorf("error on reading disk list, %s", err)
@@ -181,6 +196,7 @@ func dataSourceUCloudDisksSave(d *schema.ResourceData, disks []udisk.UDiskDataSe
 	}
 
 	d.SetId(hashStringArray(ids))
+	d.Set("total_count", len(data))
 	if err := d.Set("disks", data); err != nil {
 		return err
 	}

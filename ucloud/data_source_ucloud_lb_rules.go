@@ -72,19 +72,16 @@ func dataSourceUCloudLBRulesRead(d *schema.ResourceData, meta interface{}) error
 	client := meta.(*UCloudClient)
 
 	var lbRules []ulb.ULBPolicySet
-	var totalCount int
 	lbId := d.Get("load_balancer_id").(string)
 	listenerId := d.Get("listener_id").(string)
 	vserverSet, err := client.describeVServerById(lbId, listenerId)
 	if err != nil {
 		return fmt.Errorf("error on reading lb rule list, %s", err)
 	}
-	totalCount = len(vserverSet.PolicySet)
 
 	if ids, ok := d.GetOk("ids"); ok {
 		for _, v := range vserverSet.PolicySet {
 			if !isStringIn(v.PolicyId, schemaSetToStringSlice(ids)) {
-				totalCount--
 				continue
 			}
 			lbRules = append(lbRules, v)
@@ -93,7 +90,6 @@ func dataSourceUCloudLBRulesRead(d *schema.ResourceData, meta interface{}) error
 		lbRules = vserverSet.PolicySet
 	}
 
-	d.Set("total_count", totalCount)
 	err = dataSourceUCloudLBRulesSave(d, lbRules)
 	if err != nil {
 		return fmt.Errorf("error on reading lb rule list, %s", err)
@@ -122,6 +118,7 @@ func dataSourceUCloudLBRulesSave(d *schema.ResourceData, lbRules []ulb.ULBPolicy
 	}
 
 	d.SetId(hashStringArray(ids))
+	d.Set("total_count", len(data))
 	if err := d.Set("lb_rules", data); err != nil {
 		return err
 	}

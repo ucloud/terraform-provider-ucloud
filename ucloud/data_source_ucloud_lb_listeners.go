@@ -2,8 +2,10 @@ package ucloud
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 
 	"github.com/ucloud/ucloud-sdk-go/services/ulb"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
@@ -25,6 +27,12 @@ func dataSourceUCloudLBListeners() *schema.Resource {
 			"load_balancer_id": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+
+			"name_regex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.ValidateRegexp,
 			},
 
 			"output_file": {
@@ -116,49 +124,56 @@ func dataSourceUCloudLBListenersRead(d *schema.ResourceData, meta interface{}) e
 	client := meta.(*UCloudClient)
 	conn := client.ulbconn
 
+	var allLbListeners []ulb.ULBVServerSet
 	var lbListeners []ulb.ULBVServerSet
 	var limit int = 100
-	var totalCount int
 	var offset int
 
 	lbId := d.Get("load_balancer_id").(string)
-	if ids, ok := d.GetOk("ids"); ok {
-		for _, v := range schemaSetToStringSlice(ids) {
-			vserverSet, err := client.describeVServerById(lbId, v)
-			if err != nil {
-				return fmt.Errorf("error on reading lb listener list, %s", err)
-			}
-
-			lbListeners = append(lbListeners, *vserverSet)
-			totalCount++
-		}
-	} else {
+	for {
 		req := conn.NewDescribeVServerRequest()
 		req.ULBId = ucloud.String(lbId)
-		for {
-			req.Limit = ucloud.Int(limit)
-			req.Offset = ucloud.Int(offset)
-			resp, err := conn.DescribeVServer(req)
-			if err != nil {
-				return fmt.Errorf("error on reading lb listener list, %s", err)
-			}
-
-			if resp == nil || len(resp.DataSet) < 1 {
-				break
-			}
-
-			lbListeners = append(lbListeners, resp.DataSet...)
-			totalCount = totalCount + resp.TotalCount
-
-			if len(resp.DataSet) < limit {
-				break
-			}
-
-			offset = offset + limit
+		req.Limit = ucloud.Int(limit)
+		req.Offset = ucloud.Int(offset)
+		resp, err := conn.DescribeVServer(req)
+		if err != nil {
+			return fmt.Errorf("error on reading lb listener list, %s", err)
 		}
+
+		if resp == nil || len(resp.DataSet) < 1 {
+			break
+		}
+
+		allLbListeners = append(allLbListeners, resp.DataSet...)
+
+		if len(resp.DataSet) < limit {
+			break
+		}
+
+		offset = offset + limit
 	}
 
-	d.Set("total_count", totalCount)
+	ids, idsOk := d.GetOk("ids")
+	nameRegex, nameRegexOk := d.GetOk("name_regex")
+	if idsOk || nameRegexOk {
+		var r *regexp.Regexp
+		if nameRegex != "" {
+			r = regexp.MustCompile(nameRegex.(string))
+		}
+		for _, v := range allLbListeners {
+			if r != nil && !r.MatchString(v.VServerName) {
+				continue
+			}
+
+			if idsOk && !isStringIn(v.VServerId, schemaSetToStringSlice(ids)) {
+				continue
+			}
+			lbListeners = append(lbListeners, v)
+		}
+	} else {
+		lbListeners = allLbListeners
+	}
+
 	err := dataSourceUCloudLBListenersSave(d, lbListeners)
 	if err != nil {
 		return fmt.Errorf("error on reading lb listener list, %s", err)
@@ -207,6 +222,7 @@ func dataSourceUCloudLBListenersSave(d *schema.ResourceData, lbListeners []ulb.U
 	}
 
 	d.SetId(hashStringArray(ids))
+	d.Set("total_count", len(data))
 	if err := d.Set("lb_listeners", data); err != nil {
 		return err
 	}

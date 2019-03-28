@@ -37,7 +37,7 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `lb_rules` - It is a nested type which documented below.
-* `total_count` - Total number of LB Rule that satisfy the condition.
+* `total_count` - Total number of LB Rules that satisfy the condition.
 
 The attribute (`lb_rules`) support the following:
 

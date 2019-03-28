@@ -26,6 +26,7 @@ The following arguments are supported:
 
 * `ids` - (Optional) A list of Disk IDs, all the Disks belong to this region will be retrieved if the ID is `""`.
 * `disk_type` - (Optional) The type of disk. Possible values are: `data_disk`as cloud disk, `ssd_data_disk` as ssd cloud disk, `system_disk`as system disk, `ssd_system_disk` as ssd system disk. 
+* `name_regex` - (Optional) A regex string to filter resulting disks by name.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
@@ -33,7 +34,7 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `disks` - It is a nested type which documented below.
-* `total_count` - Total number of Disk that satisfy the condition.
+* `total_count` - Total number of Disks that satisfy the condition.
 
 The attribute (`disks`) support the following:
 

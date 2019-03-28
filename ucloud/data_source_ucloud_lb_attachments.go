@@ -81,30 +81,26 @@ func dataSourceUCloudLBAttachments() *schema.Resource {
 func dataSourceUCloudLBAttachmentsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
 
-	var filteredLbAttachments []ulb.ULBBackendSet
-	var totalCount int
+	var lbAttachments []ulb.ULBBackendSet
 	lbId := d.Get("load_balancer_id").(string)
 	listenerId := d.Get("listener_id").(string)
 	vserverSet, err := client.describeVServerById(lbId, listenerId)
 	if err != nil {
 		return fmt.Errorf("error on reading lb attachment list, %s", err)
 	}
-	totalCount = len(vserverSet.BackendSet)
 
 	if ids, ok := d.GetOk("ids"); ok {
 		for _, v := range vserverSet.BackendSet {
 			if !isStringIn(v.BackendId, schemaSetToStringSlice(ids)) {
-				totalCount--
 				continue
 			}
-			filteredLbAttachments = append(filteredLbAttachments, v)
+			lbAttachments = append(lbAttachments, v)
 		}
 	} else {
-		filteredLbAttachments = vserverSet.BackendSet
+		lbAttachments = vserverSet.BackendSet
 	}
 
-	d.Set("total_count", totalCount)
-	err = dataSourceUCloudLBAttachmentsSave(d, filteredLbAttachments)
+	err = dataSourceUCloudLBAttachmentsSave(d, lbAttachments)
 	if err != nil {
 		return fmt.Errorf("error on reading lb attachment list, %s", err)
 	}
@@ -128,6 +124,7 @@ func dataSourceUCloudLBAttachmentsSave(d *schema.ResourceData, lbAttachments []u
 	}
 
 	d.SetId(hashStringArray(ids))
+	d.Set("total_count", len(data))
 	if err := d.Set("lb_attachments", data); err != nil {
 		return err
 	}

@@ -18,6 +18,7 @@ func TestAccUCloudLBAttachmentsDataSource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIDExists("data.ucloud_lb_attachments.foo"),
 					resource.TestCheckResourceAttr("data.ucloud_lb_attachments.foo", "lb_attachments.#", "2"),
+					resource.TestCheckResourceAttr("data.ucloud_lb_attachments.foo", "lb_attachments.0.port", "80"),
 				),
 			},
 		},
@@ -25,6 +26,11 @@ func TestAccUCloudLBAttachmentsDataSource_basic(t *testing.T) {
 }
 
 const testAccDataLBAttachmentsConfig = `
+
+variable "name" {
+	default = "tf-acc-lb-attachments-dataSource-basic"
+}
+
 variable "count" {
 	default = 2
 }
@@ -43,7 +49,7 @@ data "ucloud_images" "default" {
 }
 
 resource "ucloud_lb" "foo" {
-	name = "tf-acc-lb-attachments"
+	name = "${var.name}"
 	tag  = "tf-acc"
 }
 
@@ -53,7 +59,7 @@ resource "ucloud_lb_listener" "foo" {
 }
 
 resource "ucloud_instance" "foo"{
-	name              = "tf-acc-lb-attachments-${format(var.count_format, count.index+1)}"
+	name              = "${var.name}-${format(var.count_format, count.index+1)}"
 	tag               = "tf-acc"
 	instance_type     = "n-highcpu-1"
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
