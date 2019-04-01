@@ -1,16 +1,16 @@
-## 1.5.0 (Unreleased)
+## 1.5.0 (April 01, 2019)
 
 FEATURES:
 
-* **New Datasource:** `ucloud_disks`[GH-23]
-* **New Datasource:** `ucloud_lbs`[GH-23]
-* **New Datasource:** `ucloud_lb_listeners`[GH-23]
-* **New Datasource:** `ucloud_lb_rules`[GH-23]
-* **New Datasource:** `ucloud_lb_attachments`[GH-23]
+* **New Datasource:** `ucloud_disks`([#23](https://github.com/terraform-providers/terraform-provider-ucloud/issues/23))
+* **New Datasource:** `ucloud_lbs`([#23](https://github.com/terraform-providers/terraform-provider-ucloud/issues/23))
+* **New Datasource:** `ucloud_lb_listeners`([#23](https://github.com/terraform-providers/terraform-provider-ucloud/issues/23))
+* **New Datasource:** `ucloud_lb_rules`([#23](https://github.com/terraform-providers/terraform-provider-ucloud/issues/23))
+* **New Datasource:** `ucloud_lb_attachments`([#23](https://github.com/terraform-providers/terraform-provider-ucloud/issues/23))
 
 ENHANCEMENTS:
 
-* resource/ucloud_lb: Deprecated attribute `expire_time` for optimizing outputs [GH-23]
+* resource/ucloud_lb: Deprecated attribute `expire_time` for optimizing outputs ([#23](https://github.com/terraform-providers/terraform-provider-ucloud/issues/23))
 
 ## 1.4.0 (March 18, 2019)
 
