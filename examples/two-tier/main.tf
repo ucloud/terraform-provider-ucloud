@@ -70,7 +70,7 @@ resource "ucloud_lb_listener" "default" {
 resource "ucloud_lb_attachment" "default" {
   load_balancer_id = "${ucloud_lb.default.id}"
   listener_id      = "${ucloud_lb_listener.default.id}"
-  resource_id      = "${element(ucloud_instance.web.*.id, count.index)}"
+  resource_id      = "${ucloud_instance.web.*.id[count.index]}"
   port             = 80
   count            = "${var.count}"
 }

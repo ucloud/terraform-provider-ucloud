@@ -55,7 +55,7 @@ resource "ucloud_instance" "web" {
 
 # Bind eip to instance
 resource "ucloud_eip_association" "default" {
-  resource_id = "${element(ucloud_instance.web.*.id, count.index)}"
-  eip_id      = "${element(ucloud_eip.default.*.id, count.index)}"
+  resource_id = "${ucloud_instance.web.*.id[count.index]}"
+  eip_id      = "${ucloud_eip.default.*.id[count.index]}"
   count       = "${var.count}"
 }
