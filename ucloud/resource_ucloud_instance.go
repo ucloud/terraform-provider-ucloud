@@ -659,6 +659,7 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 
 func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
+	conn := client.unetconn
 
 	instance, err := client.describeInstanceById(d.Id())
 
@@ -672,7 +673,6 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 
 	memory := instance.Memory
 	cpu := instance.CPU
-	d.Set("security_group", d.Get("security_group"))
 	d.Set("image_id", instance.BasicImageId)
 	d.Set("root_password", d.Get("root_password"))
 	d.Set("name", instance.Name)
@@ -681,7 +681,7 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 	d.Set("tag", instance.Tag)
 	d.Set("cpu", cpu)
 	d.Set("memory", memory/1024)
-	d.Set("status", strings.Replace(instance.State, " ", "", -1))
+	d.Set("status", instance.State)
 	d.Set("create_time", timestampToString(instance.CreateTime))
 	d.Set("expire_time", timestampToString(instance.ExpireTime))
 	d.Set("auto_renew", boolCamelCvt.unconvert(instance.AutoRenew))
@@ -730,6 +730,16 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 	if err := d.Set("disk_set", diskSet); err != nil {
 		return err
 	}
+
+	req := conn.NewDescribeFirewallRequest()
+	req.ResourceId = ucloud.String(d.Id())
+	req.ResourceType = ucloud.String(eipResourceTypeUHost)
+	resp, err := conn.DescribeFirewall(req)
+
+	if err != nil {
+		return fmt.Errorf("error on reading security group when reading instance %q, %s", d.Id(), err)
+	}
+	d.Set("security_group", resp.DataSet[0].FWId)
 
 	return nil
 }
