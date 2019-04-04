@@ -14,9 +14,6 @@ func resourceUCloudLBSSL() *schema.Resource {
 		Create: resourceUCloudLBSSLCreate,
 		Read:   resourceUCloudLBSSLRead,
 		Delete: resourceUCloudLBSSLDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
 
 		Schema: map[string]*schema.Schema{
 			"name": {

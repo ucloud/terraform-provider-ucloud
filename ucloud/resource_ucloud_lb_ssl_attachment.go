@@ -16,9 +16,6 @@ func resourceUCloudLBSSLAttachment() *schema.Resource {
 		Create: resourceUCloudLBSSLAttachmentCreate,
 		Read:   resourceUCloudLBSSLAttachmentRead,
 		Delete: resourceUCloudLBSSLAttachmentDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
 
 		Schema: map[string]*schema.Schema{
 			"ssl_id": {
