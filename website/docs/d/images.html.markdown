@@ -40,7 +40,7 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `images` - It is a nested type which documented below.
-* `total_count` - Total number of image that satisfy the condition.
+* `total_count` - Total number of images that satisfy the condition.
 
 The attribute (`images`) support the following:
 

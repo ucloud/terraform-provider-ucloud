@@ -31,6 +31,7 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `zones` - It is a nested type which documented below.
+* `total_count` - Total number of zones that satisfy the condition.
 
 The attribute (`zones`) support the following:
 

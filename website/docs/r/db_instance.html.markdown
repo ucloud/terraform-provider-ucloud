@@ -60,7 +60,6 @@ The following arguments are supported:
     - 1000GB if the memory chosen is from 12 to 24GB;
     - 2000GB if the memory chosen is 32GB;
     - 3000GB if the memory chosen is equal or more than 48GB.
-* `parameter_group_id` - (Required) The ID of database parameter group. Note: The "parameter_group_id" of the multiple zone database instance should be included in the request for the high availability database instance with multiple zone. When it is changed, it doesn't automatically take effect until rebooting database instance.
 * `instance_type` - (Required) Specifies the type of database instance with format "engine-type-memory", Possible values are:
     - "mysql" and "percona"for engine;
     - "ha" as high availability version for type of database, high availability version use the dual main hot standby structure which can thoroughly solved the issue of unavailable database caused by the system downtime or hardware failure, the "ha" version only supports "mysql" and "percona" engine.
@@ -74,13 +73,13 @@ The following arguments are supported:
 * `backup_begin_time` - (Optional) Specifies when the backup starts, measured in hour, it starts at one o'clock of 1, 2, 3, 4 in the morning by default.
 * `backup_date` - (Optional) Specifies whether the backup took place from Sunday to Saturday by displaying 7 digits. 0 stands for backup disbaled and 1 stands for backup enabled. The rightmost digit specifies whether the backup took place on Sunday, and the digits from right to left specify whether the backup took place from Monday to Saturday, it's mandatory required to backup twice per week at least. such as: digits "1100000" stands for the backup took place on Saturday and Friday.
 * `backup_black_list` - (Optional) The backup for database such as "test.%" or table such as "city.address" specified in the black lists are not supprted.
-* `tag` - (Optional) A mapping of tags to assign to VPC, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
+* `tag` - (Optional) A tag assigned to database instance, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-* `status` - Specifies the status of database, possible values are: "Init","Fail", "Starting", "Running", "Shutdown", "shutoff", "Delete", "Upgrading", "Promoting", "Recovering" and "Recover fail".
+* `status` - Specifies the status of database, possible values are: `Init`, `Fail`, `Starting`, `Running`, `Shutdown`, `Shutoff`, `Delete`, `Upgrading`, `Promoting`, `Recovering` and `Recover fail`.
 * `create_time` - The creation time of database, formatted by RFC3339 time string.
 * `expire_time` - The expiration time of database, formatted by RFC3339 time string.
 * `modify_time` - The modification time of database, formatted by RFC3339 time string.

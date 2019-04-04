@@ -1,4 +1,13 @@
 ## 1.6.0 (Unreleased)
+
+FEATURES:
+
+* **New Datasource:** `ucloud_db_instances`[GH-24]
+* **New Datasource:** `ucloud_lb_ssls`[GH-24]
+* **New Datasource:** `ucloud_lb_security_groups`[GH-24]
+* **New Datasource:** `ucloud_lb_vpcs`([GH-24]
+* **New Datasource:** `ucloud_lb_subnets`[GH-24]
+
 ## 1.5.0 (April 01, 2019)
 
 FEATURES:

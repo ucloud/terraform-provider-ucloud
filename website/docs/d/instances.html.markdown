@@ -28,40 +28,43 @@ The following arguments are supported:
 
 * `availability_zone` - (Optional) Availability zone where instances are located. Such as: "cn-bj2-02". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
 * `ids` - (Optional) A list of instance IDs, all the instances belongs to the defined region will be retrieved if this argument is "".
+* `name_regex` - (Optional) A regex string to filter resulting instances by name.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
-* `tag` - (Optional) A mapping of tags to assign to instance.
+* `tag` - (Optional) A tag assigned to instance, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
 * `instances` - It is a nested type. instances documented below.
-* `total_count` - Total number of instance that satisfy the condition.
+* `total_count` - Total number of instances that satisfy the condition.
 
 The attribute (`instances`) support the following:
 
-* `auto_renew` - To identify if the auto renewal is on, possible values are : "Yes" and “No”.
-* `cpu` - The number of cores of virtual CPU, measured in "core".
-* `memory` - The size of memory, measured in MB.
-* `create_time` - The creation time of instance.
-* `expire_time` - The expiration time of instance.
+* `availability_zone` - Availability zone where instances are located.
+* `auto_renew` - Whether to renew an instance automatically or not.
+* `cpu` - The number of cores of virtual CPU, measureed in core.
+* `memory` - The size of memory, measured in MB (Megabyte).
+* `instance_type` - The type of instance. 
+* `create_time` - The time of creation for instance, formatted in RFC3339 time string.
+* `expire_time` - The expiration time for instance, formatted in RFC3339 time string.
 * `id` - The ID of instance.
-* `instance_charge_type` - The charge type of instance, possible values are: "Year", "Month" and "Dynamic" as pay by hour.
+* `charge_type` - The charge type of instance, possible values are: `year`, `month` and `dynamic` as pay by hour.
 * `name` - The name of the instance.
 * `remark` - The remarks of instance.
-* `status` - Instance current status. Possible values are "Initializing", "starting", "Running", "Stopping", "Stopped", "Install Fail" and "Rebooting".
-* `tag` - A mapping of tags to assign to the instance.
-* `ip_set` - ip_set is a nested type. ip_set documented below.
-* `disk_set` - disk_set is a nested type. disk_set documented below.
+* `status` - Instance current status. Possible values are `Initializing`, `Starting`, `Running`, `Stopping`, `Stopped`, `Install Fail` and `Rebooting`.
+* `tag` - A tag assigned to the instance.
+* `ip_set` - It is a nested type which documented below.
+* `disk_set` - It is a nested type which documented below.
 
-The attribute (`disk_set`) support the following:
+The attribute (`disk_set`) supports the following:
 
-* `disk_id` - The ID of disk.
-* `size` - The size of disk，measured in GB (Gigabyte).
-* `disk_type` - The type of disk.
-* `is_boot` - whether or not boot disk.
+* `id` - The ID of disk.
+* `size` - The size of disk, measured in GB (Gigabyte).
+* `type` - The type of disk.
+* `is_boot` - Specifies whether boot disk or not.
 
-The attribute (`ip_set`) support the following:
+The attribute (`ip_set`) supports the following:
 
-* `type` - IP type.
-* `ip` - IP address.
+* `internet_type` - Type of Elastic IP routes. Possible values are: `International` as internaltional BGP IP, `BGP` as china BGP IP and `Private` as private IP.
+* `ip` - Elastic IP address.

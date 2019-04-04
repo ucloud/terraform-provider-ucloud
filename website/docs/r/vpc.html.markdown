@@ -29,7 +29,7 @@ The following arguments are supported:
 
 * `cidr_blocks` - (Required) The CIDR blocks of VPC.
 * `name` - (Optional) The name of VPC. If not specified, terraform will autogenerate a name beginning with `tf-vpc`.
-* `tag` - (Optional) A mapping of tags to assign to VPC, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
+* `tag` - (Optional) A tag assigned to VPC, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
 * `remark` - (Optional) The remarks of the VPC. (Default: `""`).
 
 ## Attributes Reference
@@ -43,3 +43,4 @@ In addition to all arguments above, the following attributes are exported:
 The attribute (`network_info`) support the following:
 
 * `cidr_block` - The CIDR block of the VPC.
+* `subnet_count` - The count of the subnet of the current CIDR block.

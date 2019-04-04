@@ -27,6 +27,7 @@ output "first" {
 The following arguments are supported:
 
 * `is_finance` - (Optional) To identify if the current account is granted with financial permission.
+* `name_regex` - (Optional) A regex string to filter resulting projects by name.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
@@ -34,7 +35,7 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `projects` - It is a nested type which documented below.
-* `total_count` - Total number of project that satisfy the condition.
+* `total_count` - Total number of projects that satisfy the condition.
 
 The attribute (`projects`) support the following:
 

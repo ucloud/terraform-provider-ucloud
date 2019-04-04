@@ -44,7 +44,7 @@ The attribute (`disks`) support the following:
 * `disk_size` - The size of disk. Purchase the size of disk in GB.
 * `disk_type` - The type of disk.
 * `charge_type` - The charge type of disk. Possible values are: `year` as pay by year, `month` as pay by month, `dynamic` as pay by hour.
-* `tag` - A mapping of tags to assign to Disk.
+* `tag` - A tag assigned to Disk.
 * `create_time` - The creation time of Disk, formatted in RFC3339 time string.
 * `expire_time` - The expiration time of disk, formatted in RFC3339 time string.
 * `status` - The status of disk. Possible values are: `Available`, `InUse`, `Detaching`, `Initializating`, `Failed`, `Cloning`, `Restoring`, `RestoreFailed`.

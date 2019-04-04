@@ -95,7 +95,7 @@ The following arguments are supported:
 * `remark` - (Optional) The remarks of instance. (Default: `""`).
 * `security_group` - (Optional) The ID of the associated security group.
 * `subnet_id` - (Optional) The ID of subnet.
-* `tag` - (Optional) A mapping of tags to assign to VPC, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
+* `tag` - (Optional) A tag assigned to instance, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
 * `vpc_id` - (Optional) The ID of VPC linked to the instance.
 
 ## Attributes Reference
@@ -107,7 +107,7 @@ In addition to all arguments above, the following attributes are exported:
 * `memory` - The size of memory, measured in MB (Megabyte).
 * `create_time` - The time of creation for instance, formatted in RFC3339 time string.
 * `expire_time` - The expiration time for instance, formatted in RFC3339 time string.
-* `status` - Instance current status. Possible values are `Initializing`, `Starting`, `Running`, `Stopping`, `Stopped`, `InstallFail`, `ResizeFail` and `Rebooting`.
+* `status` - Instance current status. Possible values are `Initializing`, `Starting`, `Running`, `Stopping`, `Stopped`, `Install Fail`, `ResizeFail` and `Rebooting`.
 * `ip_set` - It is a nested type which documented below.
 * `disk_set` - It is a nested type which documented below.
 
