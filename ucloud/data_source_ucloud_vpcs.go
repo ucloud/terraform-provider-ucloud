@@ -63,18 +63,10 @@ func dataSourceUCloudVPCs() *schema.Resource {
 						"cidr_blocks": {
 							Type:     schema.TypeList,
 							Computed: true,
-							Elem: &schema.Schema{
-								Type:     schema.TypeString,
-								Computed: true,
-							},
+							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 
 						"tag": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-
-						"remark": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -189,7 +181,6 @@ func dataSourceUCloudVPCsSave(d *schema.ResourceData, vpcs []vpc.VPCInfo) error 
 		data = append(data, map[string]interface{}{
 			"id":           vpc.VPCId,
 			"name":         vpc.Name,
-			"vpc_id":       vpc.VPCId,
 			"create_time":  timestampToString(vpc.CreateTime),
 			"network_info": networkInfo,
 			"tag":          vpc.Tag,

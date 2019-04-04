@@ -54,12 +54,12 @@ variable "name" {
 
 resource "ucloud_vpc" "foo" {
 	name        = "${var.name}"
-	tag         = ""
+	tag         = "tf-acc"
 	cidr_blocks = ["192.168.0.0/16"]
-
+}
 
 data "ucloud_vpcs" "foo" {
-	name_regex  = "${ucloud_subnet.foo.name}"
+	name_regex  = "${ucloud_vpc.foo.name}"
 }
 `
 
@@ -76,6 +76,6 @@ resource "ucloud_vpc" "foo" {
 }
 
 data "ucloud_vpcs" "foo" {
-	ids = ["${ucloud_subnet.foo.*.id}"]
+	ids = ["${ucloud_vpc.foo.*.id}"]
 }
 `

@@ -91,6 +91,7 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_security_groups": dataSourceUCloudSecurityGroups(),
 			"ucloud_subnets":         dataSourceUCloudSubnets(),
 			"ucloud_lb_ssls":         dataSourceUCloudLBSSLs(),
+			"ucloud_vpcs":            dataSourceUCloudVPCs(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
