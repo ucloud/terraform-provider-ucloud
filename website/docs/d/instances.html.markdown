@@ -42,18 +42,18 @@ In addition to all arguments above, the following attributes are exported:
 The attribute (`instances`) support the following:
 
 * `availability_zone` - Availability zone where instances are located.
-* `auto_renew` - Whether to renew an instance automatically or not.
+* `id` - The ID of instance.
+* `name` - The name of the instance.
 * `cpu` - The number of cores of virtual CPU, measureed in core.
 * `memory` - The size of memory, measured in MB (Megabyte).
-* `instance_type` - The type of instance. 
+* `instance_type` - The type of instance.
+* `charge_type` - The charge type of instance, possible values are: `year`, `month` and `dynamic` as pay by hour.
+* `auto_renew` - Whether to renew an instance automatically or not.
+* `remark` - The remarks of instance.
+* `tag` - A tag assigned to the instance.
+* `status` - Instance current status. Possible values are `Initializing`, `Starting`, `Running`, `Stopping`, `Stopped`, `Install Fail` and `Rebooting`.
 * `create_time` - The time of creation for instance, formatted in RFC3339 time string.
 * `expire_time` - The expiration time for instance, formatted in RFC3339 time string.
-* `id` - The ID of instance.
-* `charge_type` - The charge type of instance, possible values are: `year`, `month` and `dynamic` as pay by hour.
-* `name` - The name of the instance.
-* `remark` - The remarks of instance.
-* `status` - Instance current status. Possible values are `Initializing`, `Starting`, `Running`, `Stopping`, `Stopped`, `Install Fail` and `Rebooting`.
-* `tag` - A tag assigned to the instance.
 * `ip_set` - It is a nested type which documented below.
 * `disk_set` - It is a nested type which documented below.
 

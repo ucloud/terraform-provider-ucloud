@@ -43,4 +43,3 @@ In addition to all arguments above, the following attributes are exported:
 The attribute (`network_info`) support the following:
 
 * `cidr_block` - The CIDR block of the VPC.
-* `subnet_count` - The count of the subnet of the current CIDR block.

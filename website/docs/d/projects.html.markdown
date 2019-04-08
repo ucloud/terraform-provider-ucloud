@@ -8,7 +8,7 @@ description: |-
 
 # ucloud_projects
 
-This data source providers a list of projects owned by user with finance permission.
+This data source providers a list of projects owned by user according to finance permission and name.
 
 ## Example Usage
 
@@ -39,10 +39,11 @@ In addition to all arguments above, the following attributes are exported:
 
 The attribute (`projects`) support the following:
 
-* `create_time` - The time of creation for instance, formatted in RFC3339 time string.
+
 * `id` - The ID of project defined.
-* `member_count` - The number of members belongs to the defined project.
 * `name` - The name of the defined project.
 * `parent_id` - The ID of the parent project where the sub project belongs to.
 * `parent_name` - The name of the parent project where the sub project belongs to.
+* `member_count` - The number of members belongs to the defined project.
 * `resource_count` - The number of the resounce instance belong/s to the defined project.
+* `create_time` - The time of creation for instance, formatted in RFC3339 time string.

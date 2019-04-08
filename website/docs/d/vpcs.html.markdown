@@ -38,11 +38,9 @@ In addition to all arguments above, the following attributes are exported:
 
 The attribute (`vpcs`) support the following:
 
-<!-- * `id` - The ID of VPC.
+* `id` - The ID of VPC.
 * `name` - The name of VPC.
-* `cidr_block` - The cidr block of the desired VPC.
-* `type` - The type of VPC.
-* `vpc_id` - The id of the VPC that the desired VPC belongs to.
-* `create_time` - The time of creation of VPC, formatted in RFC3339 time string.
-* `remark` - The remark of the VPC.
-* `tag` - A tag assigned to VPC. -->
+* `cidr_blocks` - The CIDR blocks of VPC.
+* `tag` - A tag assigned to VPC.
+* `create_time` - The time of creation for VPC, formatted in RFC3339 time string.
+* `update_time` - The time whenever there is a change made to VPC, formatted in RFC3339 time string.
