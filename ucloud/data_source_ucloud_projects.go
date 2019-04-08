@@ -2,6 +2,7 @@ package ucloud
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
@@ -95,11 +96,18 @@ func dataSourceUCloudProjectsRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	var projects []uaccount.ProjectListInfo
-	for _, item := range resp.ProjectSet {
-		// filter projects by query at here
-		// ...
 
-		projects = append(projects, item)
+	if nameRegex, ok := d.GetOk("name_regex"); ok {
+		r := regexp.MustCompile(nameRegex.(string))
+		for _, v := range resp.ProjectSet {
+			if r != nil && !r.MatchString(v.ProjectName) {
+				continue
+			}
+
+			projects = append(projects, v)
+		}
+	} else {
+		projects = resp.ProjectSet
 	}
 
 	err = dataSourceUCloudProjectsSave(d, projects)

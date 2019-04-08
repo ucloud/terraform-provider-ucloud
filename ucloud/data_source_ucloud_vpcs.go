@@ -71,24 +71,6 @@ func dataSourceUCloudVPCs() *schema.Resource {
 							Computed: true,
 						},
 
-						"network_info": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"cidr_block": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-
-									"subnet_count": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-								},
-							},
-						},
-
 						"update_time": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -170,21 +152,13 @@ func dataSourceUCloudVPCsSave(d *schema.ResourceData, vpcs []vpc.VPCInfo) error 
 	for _, vpc := range vpcs {
 		ids = append(ids, string(vpc.VPCId))
 
-		networkInfo := []map[string]interface{}{}
-		for _, item := range vpc.NetworkInfo {
-			networkInfo = append(networkInfo, map[string]interface{}{
-				"cidr_block":   item.Network,
-				"subnet_count": item.SubnetCount,
-			})
-		}
-
 		data = append(data, map[string]interface{}{
-			"id":           vpc.VPCId,
-			"name":         vpc.Name,
-			"create_time":  timestampToString(vpc.CreateTime),
-			"network_info": networkInfo,
-			"tag":          vpc.Tag,
-			"cidr_blocks":  vpc.Network,
+			"id":          vpc.VPCId,
+			"name":        vpc.Name,
+			"create_time": timestampToString(vpc.CreateTime),
+			"update_time": timestampToString(vpc.UpdateTime),
+			"tag":         vpc.Tag,
+			"cidr_blocks": vpc.Network,
 		})
 	}
 

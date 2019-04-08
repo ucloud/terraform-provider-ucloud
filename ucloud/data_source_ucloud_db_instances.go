@@ -113,9 +113,7 @@ func dataSourceUCloudDBInstances() *schema.Resource {
 
 						"backup_count": {
 							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  7,
-							ForceNew: true,
+							Computed: true,
 						},
 
 						"backup_date": {
