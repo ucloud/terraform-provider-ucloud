@@ -366,8 +366,8 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 		Target:     []string{statusRunning},
 		Refresh:    instanceStateRefreshFunc(client, d.Id(), statusRunning),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Delay:      3 * time.Second,
+		MinTimeout: 2 * time.Second,
 	}
 
 	_, err = stateConf.WaitForState()
@@ -544,8 +544,8 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 				Target:     []string{statusStopped},
 				Refresh:    instanceStateRefreshFunc(client, d.Id(), statusStopped),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
-				Delay:      5 * time.Second,
-				MinTimeout: 3 * time.Second,
+				Delay:      3 * time.Second,
+				MinTimeout: 2 * time.Second,
 			}
 
 			if _, err = stateConf.WaitForState(); err != nil {
@@ -620,8 +620,8 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 			Target:     []string{statusStopped},
 			Refresh:    instanceStateRefreshFunc(client, d.Id(), statusStopped),
 			Timeout:    d.Timeout(schema.TimeoutUpdate),
-			Delay:      5 * time.Second,
-			MinTimeout: 3 * time.Second,
+			Delay:      3 * time.Second,
+			MinTimeout: 2 * time.Second,
 		}
 
 		if _, err = stateConf.WaitForState(); err != nil {
@@ -642,8 +642,8 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 				Target:     []string{statusRunning},
 				Refresh:    instanceStateRefreshFunc(client, d.Id(), statusRunning),
 				Timeout:    d.Timeout(schema.TimeoutUpdate),
-				Delay:      5 * time.Second,
-				MinTimeout: 3 * time.Second,
+				Delay:      3 * time.Second,
+				MinTimeout: 2 * time.Second,
 			}
 
 			if _, err = stateConf.WaitForState(); err != nil {
