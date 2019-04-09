@@ -52,7 +52,7 @@ resource "ucloud_instance" "web" {
   image_id          = "${data.ucloud_images.default.images.0.id}"
 
   data_disk_size = 50
-  root_password  = "${var.instance_password}"
+  root_password  = "wA1234567"
   security_group = "${ucloud_security_group.default.id}"
 
   name = "tf-example-eip"

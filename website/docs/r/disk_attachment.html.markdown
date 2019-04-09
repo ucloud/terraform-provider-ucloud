@@ -50,7 +50,7 @@ resource "ucloud_instance" "web" {
   instance_type     = "n-standard-1"
 
   image_id      = "${data.ucloud_images.default.images.0.id}"
-  root_password = "${var.instance_password}"
+  root_password = "wA1234567"
 
   # this security group allows all access from WAN
   security_group = "${ucloud_security_group.default.id}"
