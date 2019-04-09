@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform/helper/customdiff"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
@@ -20,6 +21,11 @@ func resourceUCloudLBListener() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
+
+		CustomizeDiff: customdiff.All(
+			customizeDiffLBMethodToListenType,
+			customizeDiffLBProtocolToListenType,
+		),
 
 		Schema: map[string]*schema.Schema{
 			"load_balancer_id": {
@@ -131,8 +137,6 @@ func resourceUCloudLBListener() *schema.Resource {
 				Computed: true,
 			},
 		},
-
-		CustomizeDiff: customizeDiffLBMethodToListenType,
 	}
 }
 
@@ -371,12 +375,28 @@ func lbListenerWaitForState(client *UCloudClient, lbId, id string) *resource.Sta
 func customizeDiffLBMethodToListenType(diff *schema.ResourceDiff, v interface{}) error {
 	listenType := diff.Get("listen_type").(string)
 	method := diff.Get("method").(string)
-	if listenType == "request_proxy" && (method == "source_port" || method == "consistent_hash" || method == "consistent_hash_port") {
-		return fmt.Errorf("the method can only be one of %q, %q, %q or %q when listen_type is %q", "roundrobin", "source", "weight_roundrobin", "leastconn", "request_proxy")
+	if listenType == "request_proxy" && !isStringIn(method, []string{"roundrobin", "source", "weight_roundrobin", "leastconn"}) {
+		return fmt.Errorf("the method can only be one of %q, %q, %q or %q when listen_type is %q",
+			"roundrobin", "source", "weight_roundrobin", "leastconn", "request_proxy")
 	}
 
-	if listenType == "packets_transmit" && (method == "roundrobin" || method == "weight_roundrobin" || method == "leastconn" || method == "source") {
-		return fmt.Errorf("the method can only be one of %q, %q or %q when listen_type is %q", "source_port", "consistent_hash", "consistent_hash_port", "request_proxy")
+	if listenType == "packets_transmit" && !isStringIn(method, []string{"consistent_hash", "source_port", "consistent_hash_port", "roundrobin", "source", "weight_roundrobin"}) {
+		return fmt.Errorf("the method can only be one of %q, %q, %q, %q, %q or %q when listen_type is %q",
+			"consistent_hash", "source_port", "consistent_hash_port", "roundrobin", "source", "weight_roundrobin", "packets_transmit")
+	}
+
+	return nil
+}
+
+func customizeDiffLBProtocolToListenType(diff *schema.ResourceDiff, v interface{}) error {
+	listenType := diff.Get("listen_type").(string)
+	protocol := diff.Get("protocol").(string)
+	if listenType == "request_proxy" && !isStringIn(protocol, []string{"http", "https", "tcp"}) {
+		return fmt.Errorf("the protocol can only be one of %q, %q or %q when listen_type is %q", "http", "https", "tcp", "request_proxy")
+	}
+
+	if listenType == "packets_transmit" && !isStringIn(protocol, []string{"udp", "tcp"}) {
+		return fmt.Errorf("the protocol can only be one of %q, %q when listen_type is %q", "tcp", "udp", "packets_transmit")
 	}
 
 	return nil
