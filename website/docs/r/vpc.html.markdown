@@ -43,3 +43,11 @@ In addition to all arguments above, the following attributes are exported:
 The attribute (`network_info`) support the following:
 
 * `cidr_block` - The CIDR block of the VPC.
+
+## Import
+
+VPC can be imported using the `id`, e.g.
+
+```
+$ terraform import ucloud_vpc.example uvnet-abc123456
+```

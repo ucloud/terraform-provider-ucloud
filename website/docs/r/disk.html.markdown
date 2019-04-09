@@ -39,3 +39,11 @@ In addition to all arguments above, the following attributes are exported:
 * `create_time` - The time of creation of disk, formatted in RFC3339 time string.
 * `expire_time` - The expiration time of disk, formatted in RFC3339 time string.
 * `status` -  The status of disk. Possible values are: `Available`, `InUse`, `Detaching`, `Initializating`, `Failed`, `Cloning`, `Restoring`, `RestoreFailed`.
+
+## Import
+
+Disk can be imported using the `id`, e.g.
+
+```
+$ terraform import ucloud_disk.example bsm-abcdefg
+```

@@ -31,7 +31,7 @@ The following arguments are supported:
 * `load_balancer_id` - (Required) The ID of load balancer instance.
 * `protocol` - (Required) Listener protocol. Possible values: `http`, `https`, `tcp` if `listen_type` is `request_proxy`, `tcp` and `udp` if `listen_type` is `packets_transmit`.
 * `name` - (Optional) The name of the listener. If not specified, terraform will autogenerate a name beginning with `tf-lb-listener`.
-* `listen_type` - (Optional) The type of listener. Possible values are `request_proxy` and `packets_transmit`. (Default: `packets_transmit`).
+* `listen_type` - (Optional) The type of listener. Possible values are `request_proxy` and `packets_transmit`. (Default: `request_proxy`).
 * `port` - (Optional) Port opened on the listeners to receive requests, range: 1-65535. (Default: `80`).
 * `idle_timeout` - (Optional) Amount of time in seconds to wait for the response for in between two sessions if `listen_type` is `request_proxy`, range: 0-86400. (Default: `60`). Amount of time in seconds to wait for one session if `listen_type` is `packets_transmit`, range: 60-900. The session will be closed as soon as no response if it is `0`.
 * `method` - (Optional) The load balancer method in which the listener is. Possible values are: `roundrobin`, `source`, `consistent_hash`, `source_port` , `consistent_hash_port`, `weight_roundrobin` and `leastconn`. (Default: `roundrobin`).
@@ -48,4 +48,11 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `status` - Listener status. Possible values are: `allNormal` for all resource functioning well, `partNormal` for partial resource functioning well and `allException` for all resource functioning exceptional.
-`
+
+## Import
+
+LB Listener can be imported using the `id`, e.g.
+
+```
+$ terraform import ucloud_lb_listener.example vserver-abcdefg
+```

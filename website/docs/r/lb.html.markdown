@@ -44,3 +44,11 @@ The attribute (`ip_set`) support the following:
 
 * `internet_type` - Type of Elastic IP routes.
 * `ip` - Elastic IP address.
+
+## Import
+
+LB can be imported using the `id`, e.g.
+
+```
+$ terraform import ucloud_lb.example ulb-abc123456
+```

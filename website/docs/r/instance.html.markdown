@@ -122,3 +122,11 @@ The attribute (`ip_set`) supports the following:
 
 * `internet_type` - Type of Elastic IP routes. Possible values are: `International` as internaltional BGP IP, `BGP` as china BGP IP and `Private` as private IP.
 * `ip` - Elastic IP address.
+
+## Import
+
+Instance can be imported using the `id`, e.g.
+
+```
+$ terraform import ucloud_instance.example uhost-abcdefg
+```

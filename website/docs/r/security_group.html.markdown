@@ -57,3 +57,11 @@ The attribute (`rules`) support the following:
 In addition to all arguments above, the following attributes are exported:
 
 * `create_time` - The time of creation of security group, formatted in RFC3339 time string.
+
+## Import
+
+Security Group can be imported using the `id`, e.g.
+
+```
+$ terraform import ucloud_security_group.example firewall-abc123456
+```

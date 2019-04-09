@@ -54,3 +54,11 @@ The attribute (`resource`) support the following:
 
 * `id` - The ID of the resource with EIP attached.
 * `type` - The type of resource with EIP attached. Possible values are `instance` as instance, `vrouter` as visual router, `lb` as load balancer.
+
+## Import
+
+EIP can be imported using the `id`, e.g.
+
+```
+$ terraform import ucloud_eip.example eip-abcdefg
+```

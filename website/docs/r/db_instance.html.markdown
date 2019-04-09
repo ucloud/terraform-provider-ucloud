@@ -83,3 +83,12 @@ In addition to all arguments above, the following attributes are exported:
 * `create_time` - The creation time of database, formatted by RFC3339 time string.
 * `expire_time` - The expiration time of database, formatted by RFC3339 time string.
 * `modify_time` - The modification time of database, formatted by RFC3339 time string.
+
+
+## Import
+
+DB Instance can be imported using the `id`, e.g.
+
+```
+$ terraform import ucloud_db_instance.example udbha-abc123456
+```
