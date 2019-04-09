@@ -27,6 +27,7 @@ func migrateUCloudEIPAssociationV0toV1(is *terraform.InstanceState) (*terraform.
 	}
 
 	is.ID = fmt.Sprintf("%s:%s", ai.PrimaryId, ai.ResourceId)
+	is.Attributes["id"] = fmt.Sprintf("%s:%s", ai.PrimaryId, ai.ResourceId)
 
 	return is, nil
 }
