@@ -376,12 +376,12 @@ func customizeDiffLBMethodToListenType(diff *schema.ResourceDiff, v interface{})
 	listenType := diff.Get("listen_type").(string)
 	method := diff.Get("method").(string)
 	if listenType == "request_proxy" && !isStringIn(method, []string{"roundrobin", "source", "weight_roundrobin", "leastconn"}) {
-		return fmt.Errorf("the method can only be one of %q, %q, %q or %q when listen_type is %q",
+		return fmt.Errorf("The method can only be one of %q, %q, %q or %q when listen_type is %q",
 			"roundrobin", "source", "weight_roundrobin", "leastconn", "request_proxy")
 	}
 
 	if listenType == "packets_transmit" && !isStringIn(method, []string{"consistent_hash", "source_port", "consistent_hash_port", "roundrobin", "source", "weight_roundrobin"}) {
-		return fmt.Errorf("the method can only be one of %q, %q, %q, %q, %q or %q when listen_type is %q",
+		return fmt.Errorf("The method can only be one of %q, %q, %q, %q, %q or %q when listen_type is %q",
 			"consistent_hash", "source_port", "consistent_hash_port", "roundrobin", "source", "weight_roundrobin", "packets_transmit")
 	}
 
@@ -392,11 +392,11 @@ func customizeDiffLBProtocolToListenType(diff *schema.ResourceDiff, v interface{
 	listenType := diff.Get("listen_type").(string)
 	protocol := diff.Get("protocol").(string)
 	if listenType == "request_proxy" && !isStringIn(protocol, []string{"http", "https", "tcp"}) {
-		return fmt.Errorf("the protocol can only be one of %q, %q or %q when listen_type is %q", "http", "https", "tcp", "request_proxy")
+		return fmt.Errorf("The protocol can only be one of %q, %q or %q when listen_type is %q", "http", "https", "tcp", "request_proxy")
 	}
 
 	if listenType == "packets_transmit" && !isStringIn(protocol, []string{"udp", "tcp"}) {
-		return fmt.Errorf("the protocol can only be one of %q, %q when listen_type is %q", "tcp", "udp", "packets_transmit")
+		return fmt.Errorf("The protocol can only be one of %q, %q when listen_type is %q", "tcp", "udp", "packets_transmit")
 	}
 
 	return nil
