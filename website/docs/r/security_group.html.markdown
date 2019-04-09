@@ -39,18 +39,18 @@ resource "ucloud_security_group" "example" {
 
 The following arguments are supported:
 
-* `rules` - (Required) A list of security group rules. Each element contains the following attributes: `protocol`, `port_range`, `cidr_block`, `policy` (possbile values are:`accept` and `drop`) and priority (possible values are: `high`, `medium` and `low`. (eg: tcp|22|192.168.1.1/22|drop|low).
+* `rules` - (Required) A list of security group rules. Can be specified multiple times for each rules. Each rules supports fields documented below.
 * `name` - (Optional) The name of the security group which contains 1-63 characters and only support Chinese, English, numbers, '-', '_' and '.'. If not specified, terraform will autogenerate a name beginning with `tf-security-group`.
 * `remark` - (Optional) The remarks of the security group. (Default: `""`).
 * `tag` - (Optional) A tag assigned to security group, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
 
-The attribute (`rules`) support the following:
+The `rules` supports:
 
-* `cidr_block` - The cidr block of source.
-* `policy` - Authorization policy. Can be either `accept` or `drop`.
-* `port_range` - The range of port numbers, range: 1-65535. (eg: `port` or `port1-port2`).
-* `priority` - Rule priority. Can be `high`, `medium`, `low`.
-* `protocol` - The protocol. Can be `tcp`, `udp`, `icmp`, `gre`.
+* `port_range` - (Optional) The range of port numbers, range: 1-65535. (eg: `port` or `port1-port2`).
+* `cidr_block` - (Optional) The cidr block of source.
+* `policy` - (Optional) Authorization policy. Possible values are: `accept`, `drop`.
+* `priority` - (Optional) Rule priority. Possible values are: `high`, `medium`, `low`.
+* `protocol` - (Optional) The protocol. Possible values are: `tcp`, `udp`, `icmp`, `gre`.
 
 ## Attributes Reference
 
