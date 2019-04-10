@@ -64,7 +64,7 @@ resource "ucloud_db_instance" "foo" {
 	engine			  = "mysql"
 	engine_version 	  = "5.7"
 	password 		  = "2018_UClou"
-	tag               = "tf-acc"
+    tag               = "tf-acc"
 }
 
 data "ucloud_db_instances" "foo" {

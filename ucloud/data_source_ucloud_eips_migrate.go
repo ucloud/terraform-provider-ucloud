@@ -7,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-var eipschargeTypePattern = regexp.MustCompile(`^eips\.\d+\.charge_type$`)
-var eipschargeModePattern = regexp.MustCompile(`^eips\.\d+\.charge_mode$`)
+var eipsChargeTypePattern = regexp.MustCompile(`^eips\.\d+\.charge_type$`)
+var eipsChargeModePattern = regexp.MustCompile(`^eips\.\d+\.charge_mode$`)
 
 func dataSourceUCloudEipsMigrateState(
 	v int, is *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {
@@ -27,11 +27,11 @@ func migrateUCloudEipsV0toV1(is *terraform.InstanceState) (*terraform.InstanceSt
 
 	for k, v := range is.Attributes {
 
-		if eipschargeTypePattern.MatchString(k) {
+		if eipsChargeTypePattern.MatchString(k) {
 			is.Attributes[k] = upperCamelCvt.convert(v)
 		}
 
-		if eipschargeModePattern.MatchString(k) {
+		if eipsChargeModePattern.MatchString(k) {
 			is.Attributes[k] = upperCamelCvt.convert(v)
 		}
 	}

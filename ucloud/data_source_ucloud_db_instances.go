@@ -176,13 +176,13 @@ func dataSourceUCloudDBInstancesRead(d *schema.ResourceData, meta interface{}) e
 
 	for {
 		req := conn.NewDescribeUDBInstanceRequest()
-
 		if val, ok := d.GetOk("availability_zone"); ok {
 			req.Zone = ucloud.String(val.(string))
 		}
 		req.Limit = ucloud.Int(limit)
 		req.Offset = ucloud.Int(offset)
 		req.ClassType = ucloud.String("SQL")
+
 		resp, err := conn.DescribeUDBInstance(req)
 		if err != nil {
 			return fmt.Errorf("error on reading db instance list, %s", err)
@@ -247,7 +247,7 @@ func dataSourceUCloudDBInstancesSave(d *schema.ResourceData, dbInstances []udb.U
 		data = append(data, map[string]interface{}{
 			"id":                dbInstance.DBId,
 			"availability_zone": dbInstance.Zone,
-			"instance_type":     (fmt.Sprintf("%s-%s-%d", dbType.Engine, dbType.Type, dbType.Memory)),
+			"instance_type":     fmt.Sprintf("%s-%s-%d", dbType.Engine, dbType.Type, dbType.Memory),
 			"standby_zone":      dbInstance.BackupZone,
 			"name":              dbInstance.Name,
 			"vpc_id":            dbInstance.VPCId,
