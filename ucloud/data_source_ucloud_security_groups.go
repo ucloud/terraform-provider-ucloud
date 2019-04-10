@@ -3,6 +3,7 @@ package ucloud
 import (
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
@@ -30,6 +31,16 @@ func dataSourceUCloudSecurityGroups() *schema.Resource {
 				ValidateFunc: validation.ValidateRegexp,
 			},
 
+			"type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"user_defined",
+					"recommend_web",
+					"recommend_non_web",
+				}, false),
+			},
+
 			"output_file": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -51,6 +62,11 @@ func dataSourceUCloudSecurityGroups() *schema.Resource {
 						},
 
 						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
+						"type": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -87,6 +103,7 @@ func dataSourceUCloudSecurityGroups() *schema.Resource {
 								},
 							},
 						},
+
 						"tag": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -129,7 +146,15 @@ func dataSourceUCloudSecurityGroupsRead(d *schema.ResourceData, meta interface{}
 			break
 		}
 
-		allSecurityGroups = append(allSecurityGroups, resp.DataSet...)
+		if v, ok := d.GetOk("type"); ok {
+			for _, item := range resp.DataSet {
+				if v == strings.ReplaceAll(item.Type, " ", "_") {
+					allSecurityGroups = append(allSecurityGroups, item)
+				}
+			}
+		} else {
+			allSecurityGroups = append(allSecurityGroups, resp.DataSet...)
+		}
 
 		if len(resp.DataSet) < limit {
 			break
@@ -191,6 +216,7 @@ func dataSourceUCloudSecurityGroupsSave(d *schema.ResourceData, securityGroups [
 			"name":        item.Name,
 			"tag":         item.Tag,
 			"rules":       rules,
+			"type":        strings.ReplaceAll(item.Type, " ", "_"),
 			"create_time": timestampToString(item.CreateTime),
 		})
 	}

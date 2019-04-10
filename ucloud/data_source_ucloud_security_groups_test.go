@@ -23,6 +23,7 @@ func TestAccUCloudSecurityGroupsDataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("data.ucloud_security_groups.foo", "security_groups.#", "1"),
 					resource.TestCheckResourceAttr("data.ucloud_security_groups.foo", "security_groups.0.tag", "tf-acc"),
 					resource.TestCheckResourceAttr("data.ucloud_security_groups.foo", "security_groups.0.rules.0.port_range", "80"),
+					resource.TestCheckResourceAttr("data.ucloud_security_groups.foo", "security_groups.0.type", "user_defined"),
 				),
 			},
 		},
@@ -50,6 +51,25 @@ func TestAccUCloudSecurityGroupsDataSource_ids(t *testing.T) {
 	})
 }
 
+func TestAccUCloudSecurityGroupsDataSource_type(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSecurityGroupsConfigType,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIDExists("data.ucloud_security_groups.foo"),
+					resource.TestCheckResourceAttr("data.ucloud_security_groups.foo", "security_groups.#", "1"),
+					resource.TestCheckResourceAttr("data.ucloud_security_groups.foo", "security_groups.0.type", "recommend_non_web"),
+				),
+			},
+		},
+	})
+}
+
 func testAccDataSecurityGroupsConfig(rInt int) string {
 	return fmt.Sprintf(`
 variable "name" {
@@ -69,6 +89,7 @@ resource "ucloud_security_group" "foo" {
 
 data "ucloud_security_groups" "foo" {
 	name_regex  = "${ucloud_security_group.foo.name}"
+	type = "user_defined"
 }
 `, rInt)
 }
@@ -95,3 +116,9 @@ data "ucloud_security_groups" "foo" {
 }
 `, rInt)
 }
+
+const testAccDataSecurityGroupsConfigType = `
+data "ucloud_security_groups" "foo" {
+	type = "recommend_non_web"
+}
+`

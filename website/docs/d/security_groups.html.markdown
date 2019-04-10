@@ -26,6 +26,7 @@ The following arguments are supported:
 
 * `ids` - (Optional) A list of Security Group IDs, all the Security Group resources belong to this region will be retrieved if the ID is `""`.
 * `name_regex` - (Optional) A regex string to filter resulting Security Group resources by name.
+* `type` - (Optional) The type of Security Group. Possible values are: `recommend_web` as the default Web security group that UCloud recommend to users, `recommend_non_web` as the default non Web security group that UCloud recommend to users, `user_defined` as the security groups defined by users.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
@@ -40,6 +41,7 @@ The attribute (`security_groups`) support the following:
 * `id` - The ID of Security Group.
 * `name` - The name of Security Group.
 * `rules` - It is a nested type which documented below.
+* `type` - The type of Security Group.
 * `remark` - The remarks of the security group.
 * `tag` - A tag assigned to the security group.
 * `create_time` - The time of creation for the security group, formatted in RFC3339 time string.
