@@ -43,3 +43,11 @@ In addition to all arguments above, the following attributes are exported:
 
 * `create_time` - The time of creation for UDPN connection, formatted by RFC3339 time string.
 * `expire_time` - The expiration time for UDPN connection, formatted by RFC3339 time string.
+
+## Import
+
+UDPN connection can be imported using the `id`, e.g.
+
+```
+$ terraform import ucloud_udpn_connection.example udpn-abc123456
+```

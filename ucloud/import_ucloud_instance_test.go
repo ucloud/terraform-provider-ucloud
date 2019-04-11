@@ -27,7 +27,6 @@ func TestAccUCloudInstance_import(t *testing.T) {
 
 				ImportStateVerifyIgnore: []string{
 					"root_password",
-					"security_group",
 					"duration",
 				},
 			},

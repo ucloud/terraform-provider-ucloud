@@ -239,9 +239,9 @@ func diskWaitForState(client *UCloudClient, diskId string) *resource.StateChange
 	return &resource.StateChangeConf{
 		Pending:    []string{statusPending},
 		Target:     []string{"available", "inuse"},
-		Timeout:    10 * time.Minute,
-		Delay:      5 * time.Second,
-		MinTimeout: 3 * time.Second,
+		Timeout:    5 * time.Minute,
+		Delay:      2 * time.Second,
+		MinTimeout: 1 * time.Second,
 		Refresh: func() (interface{}, string, error) {
 			diskSet, err := client.describeDiskById(diskId)
 			if err != nil {

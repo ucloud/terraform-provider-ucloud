@@ -2,8 +2,10 @@ package ucloud
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/ucloud/ucloud-sdk-go/services/uaccount"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 )
@@ -15,6 +17,12 @@ func dataSourceUCloudProjects() *schema.Resource {
 			"is_finance": {
 				Type:     schema.TypeBool,
 				Optional: true,
+			},
+
+			"name_regex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.ValidateRegexp,
 			},
 
 			"output_file": {
@@ -88,14 +96,20 @@ func dataSourceUCloudProjectsRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	var projects []uaccount.ProjectListInfo
-	for _, item := range resp.ProjectSet {
-		// filter projects by query at here
-		// ...
 
-		projects = append(projects, item)
+	if nameRegex, ok := d.GetOk("name_regex"); ok {
+		r := regexp.MustCompile(nameRegex.(string))
+		for _, v := range resp.ProjectSet {
+			if r != nil && !r.MatchString(v.ProjectName) {
+				continue
+			}
+
+			projects = append(projects, v)
+		}
+	} else {
+		projects = resp.ProjectSet
 	}
 
-	d.Set("total_count", resp.ProjectCount)
 	err = dataSourceUCloudProjectsSave(d, projects)
 	if err != nil {
 		return fmt.Errorf("error on reading project list, %s", err)
@@ -122,6 +136,7 @@ func dataSourceUCloudProjectsSave(d *schema.ResourceData, projects []uaccount.Pr
 	}
 
 	d.SetId(hashStringArray(ids))
+	d.Set("total_count", len(data))
 	if err := d.Set("projects", data); err != nil {
 		return err
 	}

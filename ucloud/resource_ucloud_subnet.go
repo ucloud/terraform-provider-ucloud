@@ -211,7 +211,7 @@ func subnetWaitForState(client *UCloudClient, subnetId string) *resource.StateCh
 	return &resource.StateChangeConf{
 		Pending:    []string{statusPending},
 		Target:     []string{statusInitialized},
-		Timeout:    5 * time.Minute,
+		Timeout:    3 * time.Minute,
 		Delay:      2 * time.Second,
 		MinTimeout: 1 * time.Second,
 		Refresh: func() (interface{}, string, error) {

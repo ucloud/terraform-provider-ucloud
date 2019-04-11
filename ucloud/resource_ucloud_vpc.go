@@ -235,7 +235,7 @@ func vpcWaitForState(client *UCloudClient, id string) *resource.StateChangeConf 
 	return &resource.StateChangeConf{
 		Pending:    []string{statusPending},
 		Target:     []string{statusInitialized},
-		Timeout:    5 * time.Minute,
+		Timeout:    3 * time.Minute,
 		Delay:      2 * time.Second,
 		MinTimeout: 1 * time.Second,
 		Refresh: func() (interface{}, string, error) {

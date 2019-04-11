@@ -52,7 +52,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 	// enable auto retry with http/connection error
 	cfg.MaxRetries = c.MaxRetries
 	cfg.LogLevel = log.DebugLevel
-	cfg.UserAgent = "Terraform/1.11.x"
+	cfg.UserAgent = "Terraform-UCloud/1.6.0"
 
 	// if no base url be set, get insecure http or secure https default url
 	// uf base url is set, use it

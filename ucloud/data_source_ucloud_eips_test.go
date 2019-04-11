@@ -17,7 +17,28 @@ func TestAccUCloudEipsDataSource_basic(t *testing.T) {
 				Config: testAccDataEipsConfig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIDExists("data.ucloud_eips.foo"),
+					resource.TestCheckResourceAttr("data.ucloud_eips.foo", "eips.#", "1"),
+					resource.TestCheckResourceAttr("data.ucloud_eips.foo", "eips.0.name", "tf-acc-eips-dataSource-basic"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccUCloudEipsDataSource_ids(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataEipsConfigIds,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIDExists("data.ucloud_eips.foo"),
 					resource.TestCheckResourceAttr("data.ucloud_eips.foo", "eips.#", "2"),
+					resource.TestCheckResourceAttr("data.ucloud_eips.foo", "eips.0.bandwidth", "1"),
+					resource.TestCheckResourceAttr("data.ucloud_eips.foo", "eips.1.charge_type", "month"),
 				),
 			},
 		},
@@ -25,12 +46,42 @@ func TestAccUCloudEipsDataSource_basic(t *testing.T) {
 }
 
 const testAccDataEipsConfig = `
+variable "name" {
+	default = "tf-acc-eips-dataSource-basic"
+}
+
 resource "ucloud_eip" "foo" {
-	count         = 2
-	name          = "tf-test-acc-eip"
+	name          = "${var.name}"
 	bandwidth     = 1
 	internet_type = "bgp"
 	duration      = 1
+}
+
+data "ucloud_eips" "foo" {
+	name_regex  = "${ucloud_eip.foo.name}"
+}
+`
+
+const testAccDataEipsConfigIds = `
+
+variable "name" {
+	default = "tf-acc-eips-dataSource-ids"
+}
+
+variable "count" {
+	default = 2
+}
+
+variable "count_format" {
+	default = "%02d"
+}
+
+resource "ucloud_eip" "foo" {
+	name          = "${var.name}-${format(var.count_format, count.index+1)}"
+	bandwidth     = 1
+	internet_type = "bgp"
+	duration      = 1
+	count 	      = 2
 }
 
 data "ucloud_eips" "foo" {

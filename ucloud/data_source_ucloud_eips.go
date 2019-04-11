@@ -2,8 +2,10 @@ package ucloud
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 
 	"github.com/ucloud/ucloud-sdk-go/services/unet"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
@@ -21,6 +23,12 @@ func dataSourceUCloudEips() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Set: schema.HashString,
+			},
+
+			"name_regex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.ValidateRegexp,
 			},
 
 			"output_file": {
@@ -116,9 +124,9 @@ func dataSourceUCloudEipsRead(d *schema.ResourceData, meta interface{}) error {
 		req.EIPIds = schemaSetToStringSlice(ids)
 	}
 
+	var allEips []unet.UnetEIPSet
 	var eips []unet.UnetEIPSet
 	var limit int = 100
-	var totalCount int
 	var offset int
 	for {
 		req.Limit = ucloud.Int(limit)
@@ -132,9 +140,7 @@ func dataSourceUCloudEipsRead(d *schema.ResourceData, meta interface{}) error {
 			break
 		}
 
-		eips = append(eips, resp.EIPSet...)
-
-		totalCount = totalCount + resp.TotalCount
+		allEips = append(allEips, resp.EIPSet...)
 
 		if len(resp.EIPSet) < limit {
 			break
@@ -143,7 +149,18 @@ func dataSourceUCloudEipsRead(d *schema.ResourceData, meta interface{}) error {
 		offset = offset + limit
 	}
 
-	d.Set("total_count", totalCount)
+	if nameRegex, ok := d.GetOk("name_regex"); ok {
+		r := regexp.MustCompile(nameRegex.(string))
+		for _, v := range allEips {
+			if r != nil && !r.MatchString(v.Name) {
+				continue
+			}
+			eips = append(eips, v)
+		}
+	} else {
+		eips = allEips
+	}
+
 	err := dataSourceUCloudEipsSave(d, eips)
 	if err != nil {
 		return fmt.Errorf("error on reading eip list, %s", err)
@@ -169,8 +186,8 @@ func dataSourceUCloudEipsSave(d *schema.ResourceData, eips []unet.UnetEIPSet) er
 
 		data = append(data, map[string]interface{}{
 			"bandwidth":   item.Bandwidth,
-			"charge_type": item.ChargeType,
-			"charge_mode": item.PayMode,
+			"charge_type": upperCamelCvt.convert(item.ChargeType),
+			"charge_mode": upperCamelCvt.convert(item.PayMode),
 			"name":        item.Name,
 			"remark":      item.Remark,
 			"tag":         item.Tag,
@@ -182,6 +199,7 @@ func dataSourceUCloudEipsSave(d *schema.ResourceData, eips []unet.UnetEIPSet) er
 	}
 
 	d.SetId(hashStringArray(ids))
+	d.Set("total_count", len(data))
 	if err := d.Set("eips", data); err != nil {
 		return err
 	}

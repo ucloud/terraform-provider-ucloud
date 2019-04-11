@@ -39,7 +39,6 @@ func TestAccUCloudDisksDataSource_ids(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIDExists("data.ucloud_disks.foo"),
 					resource.TestCheckResourceAttr("data.ucloud_disks.foo", "disks.#", "2"),
-					resource.TestCheckResourceAttr("data.ucloud_disks.foo", "disks.0.name", "tf-acc-disks-dataSource-ids"),
 					resource.TestCheckResourceAttr("data.ucloud_disks.foo", "disks.0.tag", "tf-acc"),
 					resource.TestCheckResourceAttr("data.ucloud_disks.foo", "disks.0.disk_size", "10"),
 				),
@@ -95,14 +94,22 @@ variable "name" {
 	default = "tf-acc-disks-dataSource-ids"
 }
 
+variable "count" {
+	default = 2
+}
+
+variable "count_format" {
+	default = "%02d"
+}
+
 data "ucloud_zones" "default" {}
 
 resource "ucloud_disk" "foo" {
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	name              = "${var.name}"
+	name              = "${var.name}-${format(var.count_format, count.index+1)}"
 	tag               = "tf-acc"
 	disk_size         = 10
-	count 			  = 2
+	count 			  = "${var.count}"
 }
 
 data "ucloud_disks" "foo" {

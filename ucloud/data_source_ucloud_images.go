@@ -146,7 +146,6 @@ func dataSourceUCloudImagesRead(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	var images []uhost.UHostImageSet
-	var totalCount int
 	var offset int
 	limit := 100
 	for {
@@ -161,9 +160,11 @@ func dataSourceUCloudImagesRead(d *schema.ResourceData, meta interface{}) error 
 			break
 		}
 
-		images = append(images, resp.ImageSet...)
-
-		totalCount = totalCount + resp.TotalCount
+		for _, v := range resp.ImageSet {
+			if v.State == "Available" {
+				images = append(images, v)
+			}
+		}
 
 		if len(resp.ImageSet) < limit {
 			break
@@ -175,18 +176,15 @@ func dataSourceUCloudImagesRead(d *schema.ResourceData, meta interface{}) error 
 	var filteredImages []uhost.UHostImageSet
 	if nameRegexOk {
 		r := regexp.MustCompile(nameRegex.(string))
-		totalCount = 0
 		for _, image := range images {
-			if r.MatchString(image.ImageName) && image.State == "Available" {
+			if r.MatchString(image.ImageName) {
 				filteredImages = append(filteredImages, image)
-				totalCount++
 			}
 		}
 	} else {
-		filteredImages = images[:]
+		filteredImages = images
 	}
 
-	d.Set("total_count", totalCount)
 	err := dataSourceUCloudImagesSave(d, filteredImages)
 	if err != nil {
 		return fmt.Errorf("error on reading image list, %s", err)
@@ -217,6 +215,7 @@ func dataSourceUCloudImagesSave(d *schema.ResourceData, projects []uhost.UHostIm
 	}
 
 	d.SetId(hashStringArray(ids))
+	d.Set("total_count", len(data))
 	if err := d.Set("images", data); err != nil {
 		return err
 	}

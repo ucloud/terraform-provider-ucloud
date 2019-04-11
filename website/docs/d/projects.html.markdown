@@ -8,7 +8,7 @@ description: |-
 
 # ucloud_projects
 
-This data source providers a list of projects owned by user with finance permission.
+This data source providers a list of projects owned by user according to finance permission and name.
 
 ## Example Usage
 
@@ -27,6 +27,7 @@ output "first" {
 The following arguments are supported:
 
 * `is_finance` - (Optional) To identify if the current account is granted with financial permission.
+* `name_regex` - (Optional) A regex string to filter resulting projects by name.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
@@ -34,14 +35,15 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `projects` - It is a nested type which documented below.
-* `total_count` - Total number of project that satisfy the condition.
+* `total_count` - Total number of projects that satisfy the condition.
 
 The attribute (`projects`) support the following:
 
-* `create_time` - The time of creation for instance, formatted in RFC3339 time string.
+
 * `id` - The ID of project defined.
-* `member_count` - The number of members belongs to the defined project.
 * `name` - The name of the defined project.
 * `parent_id` - The ID of the parent project where the sub project belongs to.
 * `parent_name` - The name of the parent project where the sub project belongs to.
+* `member_count` - The number of members belongs to the defined project.
 * `resource_count` - The number of the resounce instance belong/s to the defined project.
+* `create_time` - The time of creation for instance, formatted in RFC3339 time string.

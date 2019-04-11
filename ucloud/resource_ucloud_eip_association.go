@@ -16,9 +16,6 @@ func resourceUCloudEIPAssociation() *schema.Resource {
 		Create: resourceUCloudEIPAssociationCreate,
 		Read:   resourceUCloudEIPAssociationRead,
 		Delete: resourceUCloudEIPAssociationDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
 
 		SchemaVersion: 1,
 		MigrateState:  resourceUCloudEIPAssociationMigrateState,

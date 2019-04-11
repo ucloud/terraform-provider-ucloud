@@ -42,7 +42,8 @@ The attribute (`lbs`) support the following:
 
 * `id` - The ID of Load Balancer.
 * `name` - The name of Load Balancer.
-* `tag` - A mapping of tags to assign to Load Balancer.
+* `internal` - Indicate whether the load balancer is intranet.
+* `tag` - A tag assigned to Load Balancer.
 * `remark` - The remarks of Load Balancer.
 * `vpc_id` - The ID of the VPC linked to the Load Balancers.
 * `subnet_id` - (Optional) The ID of subnet that intrant load balancer belongs to. 

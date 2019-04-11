@@ -40,10 +40,11 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `images` - It is a nested type which documented below.
-* `total_count` - Total number of image that satisfy the condition.
+* `total_count` - Total number of images that satisfy the condition.
 
 The attribute (`images`) support the following:
 
+* `availability_zone` - Availability zone where image is located.
 * `create_time` - The time of creation for EIP, formatted in RFC3339 time string.
 * `features` - To identify if any particular feature belongs to the instance, the value is `NetEnhnced` as I/O enhanced instance for now.
 * `description` - The description of image if any.

@@ -16,6 +16,11 @@ func dataSourceUCloudZones() *schema.Resource {
 				Optional: true,
 			},
 
+			"total_count": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+
 			"zones": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -33,7 +38,8 @@ func dataSourceUCloudZones() *schema.Resource {
 }
 
 func dataSourceUCloudZonesRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*UCloudClient).uaccountconn
+	client := meta.(*UCloudClient)
+	conn := client.uaccountconn
 
 	req := conn.NewGetRegionRequest()
 
@@ -44,10 +50,9 @@ func dataSourceUCloudZonesRead(d *schema.ResourceData, meta interface{}) error {
 
 	var zones []uaccount.RegionInfo
 	for _, item := range resp.Regions {
-		// filter by query at here
-		// ...
-
-		zones = append(zones, item)
+		if item.Region == client.region {
+			zones = append(zones, item)
+		}
 	}
 
 	err = dataSourceUCloudZonesSave(d, zones, meta)
@@ -61,17 +66,15 @@ func dataSourceUCloudZonesRead(d *schema.ResourceData, meta interface{}) error {
 func dataSourceUCloudZonesSave(d *schema.ResourceData, zones []uaccount.RegionInfo, meta interface{}) error {
 	ids := []string{}
 	data := []map[string]interface{}{}
-	client := meta.(*UCloudClient)
 	for _, item := range zones {
-		if item.Region == client.region {
-			ids = append(ids, item.Zone)
-			data = append(data, map[string]interface{}{
-				"id": item.Zone,
-			})
-		}
+		ids = append(ids, item.Zone)
+		data = append(data, map[string]interface{}{
+			"id": item.Zone,
+		})
 	}
 
 	d.SetId(hashStringArray(ids))
+	d.Set("total_count", len(data))
 	if err := d.Set("zones", data); err != nil {
 		return err
 	}

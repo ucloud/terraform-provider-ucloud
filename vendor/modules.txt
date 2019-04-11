@@ -163,7 +163,7 @@ github.com/posener/complete/cmd
 github.com/posener/complete/match
 # github.com/sirupsen/logrus v1.3.0
 github.com/sirupsen/logrus
-# github.com/ucloud/ucloud-sdk-go v0.8.1
+# github.com/ucloud/ucloud-sdk-go v0.8.2
 github.com/ucloud/ucloud-sdk-go/external
 github.com/ucloud/ucloud-sdk-go/services/uaccount
 github.com/ucloud/ucloud-sdk-go/services/udb

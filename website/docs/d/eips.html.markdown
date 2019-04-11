@@ -25,6 +25,7 @@ output "first" {
 The following arguments are supported:
 
 * `ids` - (Optional)  A list of Elastic IP IDs, all the EIPs belong to this region will be retrieved if the ID is `""`.
+* `name_regex` - (Optional) A regex string to filter resulting eips by name.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
@@ -32,7 +33,7 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `eips` - It is a nested type which documented below.
-* `total_count` - Total number of Elastic IP that satisfy the condition.
+* `total_count` - Total number of Elastic IPs that satisfy the condition.
 
 The attribute (`eips`) support the following:
 
@@ -45,7 +46,7 @@ The attribute (`eips`) support the following:
 * `name` - The name of Elastic IP.
 * `remark` - The remarks of Elastic IP.
 * `status` - Elastic IP status. Possible values are: `used` as in use, `free` as available and `freeze` as associating.
-* `tag` - A mapping of tags to assign to Elastic IP.
+* `tag` - A tag assigned to Elastic IP.
 
 The attribute (`ip_set`) support the following:
 

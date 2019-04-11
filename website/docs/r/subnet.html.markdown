@@ -40,10 +40,18 @@ The following arguments are supported:
 * `vpc_id` - (Required) The id of the VPC that the desired subnet belongs to.
 * `name` - (Optional) The name of the desired subnet. If not specified, terraform will autogenerate a name beginning with `tf-subnet`.
 * `remark` - (Optional) The remarks of the subnet. (Default: `""`).
-* `tag` - (Optional) A mapping of tags to assign to VPC, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
+* `tag` - (Optional) A tag assigned to subnet, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
 * `create_time` - The time of creation of subnet, formatted in RFC3339 time string.
+
+## Import
+
+Subnet can be imported using the `id`, e.g.
+
+```
+$ terraform import ucloud_subnet.example subnet-abc123456
+```

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform/helper/customdiff"
 	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -25,6 +26,10 @@ func resourceUCloudSecurityGroup() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 
+		CustomizeDiff: customdiff.All(
+			diffValidatePortRangeWithProtocol,
+		),
+
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -40,7 +45,7 @@ func resourceUCloudSecurityGroup() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"port_range": {
 							Type:         schema.TypeString,
-							Required:     true,
+							Optional:     true,
 							ValidateFunc: validateSecurityGroupPort,
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								if v, ok := d.GetOk("protocol"); ok && shouldIgnorePort(v.(string)) {
@@ -343,7 +348,7 @@ func securityWaitForState(client *UCloudClient, sgId string) *resource.StateChan
 	return &resource.StateChangeConf{
 		Pending:    []string{statusPending},
 		Target:     []string{statusInitialized},
-		Timeout:    5 * time.Minute,
+		Timeout:    3 * time.Minute,
 		Delay:      2 * time.Second,
 		MinTimeout: 1 * time.Second,
 		Refresh: func() (interface{}, string, error) {
@@ -362,4 +367,15 @@ func securityWaitForState(client *UCloudClient, sgId string) *resource.StateChan
 
 func shouldIgnorePort(protocol string) bool {
 	return checkStringIn(protocol, portIndependentProtocols) == nil
+}
+
+func diffValidatePortRangeWithProtocol(diff *schema.ResourceDiff, v interface{}) error {
+	for _, item := range diff.Get("rules").(*schema.Set).List() {
+		rule := item.(map[string]interface{})
+
+		if v := rule["protocol"].(string); !shouldIgnorePort(v) && rule["port_range"].(string) == "" {
+			return fmt.Errorf("%q must be set when %q is %q or %q", "port_range", "protocol", "tcp", "udp")
+		}
+	}
+	return nil
 }

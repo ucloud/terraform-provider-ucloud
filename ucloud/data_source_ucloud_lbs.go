@@ -68,6 +68,11 @@ func dataSourceUCloudLBs() *schema.Resource {
 							Computed: true,
 						},
 
+						"internal": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+
 						"tag": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -202,10 +207,17 @@ func dataSourceUCloudLBsSave(d *schema.ResourceData, lbs []ulb.ULBSet) error {
 				"internet_type": addr.OperatorName,
 			})
 		}
+		var internal bool
+		if item.ULBType == "OuterMode" {
+			internal = false
+		} else if item.ULBType == "InnerMode" {
+			internal = true
+		}
 
 		data = append(data, map[string]interface{}{
 			"id":          item.ULBId,
 			"name":        item.Name,
+			"internal":    internal,
 			"tag":         item.Tag,
 			"remark":      item.Remark,
 			"vpc_id":      item.VPCId,

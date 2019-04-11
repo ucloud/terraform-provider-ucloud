@@ -2,8 +2,10 @@ package ucloud
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/ucloud/ucloud-sdk-go/services/uhost"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 )
@@ -12,10 +14,19 @@ func dataSourceUCloudInstances() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceUCloudInstancesRead,
 
+		SchemaVersion: 1,
+		MigrateState:  dataSourceUCloudInstancesMigrateState,
+
 		Schema: map[string]*schema.Schema{
 			"availability_zone": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+
+			"name_regex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.ValidateRegexp,
 			},
 
 			"ids": {
@@ -83,7 +94,7 @@ func dataSourceUCloudInstances() *schema.Resource {
 						},
 
 						"auto_renew": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeBool,
 							Computed: true,
 						},
 
@@ -133,7 +144,7 @@ func dataSourceUCloudInstances() *schema.Resource {
 									},
 
 									"is_boot": {
-										Type:     schema.TypeString,
+										Type:     schema.TypeBool,
 										Computed: true,
 									},
 								},
@@ -181,10 +192,10 @@ func dataSourceUCloudInstancesRead(d *schema.ResourceData, meta interface{}) err
 		req.Tag = ucloud.String(v.(string))
 	}
 
+	var allInstances []uhost.UHostInstanceSet
 	var instances []uhost.UHostInstanceSet
 	var limit int = 100
 	var offset int
-	var totalCount int
 	for {
 		req.Limit = ucloud.Int(limit)
 		req.Offset = ucloud.Int(offset)
@@ -197,9 +208,7 @@ func dataSourceUCloudInstancesRead(d *schema.ResourceData, meta interface{}) err
 			break
 		}
 
-		instances = append(instances, resp.UHostSet...)
-
-		totalCount = totalCount + resp.TotalCount
+		allInstances = append(allInstances, resp.UHostSet...)
 
 		if len(resp.UHostSet) < limit {
 			break
@@ -208,7 +217,19 @@ func dataSourceUCloudInstancesRead(d *schema.ResourceData, meta interface{}) err
 		offset = offset + limit
 	}
 
-	d.Set("total_count", totalCount)
+	if nameRegex, ok := d.GetOk("name_regex"); ok {
+		r := regexp.MustCompile(nameRegex.(string))
+		for _, v := range allInstances {
+			if r != nil && !r.MatchString(v.Name) {
+				continue
+			}
+
+			instances = append(instances, v)
+		}
+	} else {
+		instances = allInstances
+	}
+
 	err := dataSourceUCloudInstancesSave(d, instances)
 	if err != nil {
 		return fmt.Errorf("error on reading instance list, %s", err)
@@ -235,33 +256,35 @@ func dataSourceUCloudInstancesSave(d *schema.ResourceData, instances []uhost.UHo
 		diskSet := []map[string]interface{}{}
 		for _, item := range instance.DiskSet {
 			diskSet = append(diskSet, map[string]interface{}{
-				"type":    item.DiskType,
+				"type":    upperCvt.convert(item.DiskType),
 				"size":    item.Size,
 				"id":      item.DiskId,
-				"is_boot": item.IsBoot,
+				"is_boot": boolValueCvt.unconvert(item.IsBoot),
 			})
 		}
-
+		memory := instance.Memory
+		cpu := instance.CPU
 		data = append(data, map[string]interface{}{
 			"availability_zone": instance.Zone,
 			"id":                instance.UHostId,
 			"name":              instance.Name,
-			"cpu":               instance.CPU,
-			"memory":            instance.Memory,
-			"instance_type":     instanceTypeSetFunc(instance.CPU, instance.Memory/1024),
+			"cpu":               cpu,
+			"memory":            memory / 1024,
+			"instance_type":     instanceTypeSetFunc(cpu, memory/1024),
 			"create_time":       timestampToString(instance.CreateTime),
 			"expire_time":       timestampToString(instance.ExpireTime),
-			"auto_renew":        instance.AutoRenew,
+			"auto_renew":        boolCamelCvt.unconvert(instance.AutoRenew),
 			"remark":            instance.Remark,
 			"tag":               instance.Tag,
 			"status":            instance.State,
-			"charge_type":       instance.ChargeType,
+			"charge_type":       upperCamelCvt.convert(instance.ChargeType),
 			"ip_set":            ipSet,
 			"disk_set":          diskSet,
 		})
 	}
 
 	d.SetId(hashStringArray(ids))
+	d.Set("total_count", len(data))
 	if err := d.Set("instances", data); err != nil {
 		return err
 	}
