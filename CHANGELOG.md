@@ -1,20 +1,20 @@
-## 1.6.0 (Unreleased)
+## 1.6.0 (April 12, 2019)
 
 FEATURES:
 
-* **New Datasource:** `ucloud_db_instances`[GH-24]
-* **New Datasource:** `ucloud_lb_ssls`[GH-24]
-* **New Datasource:** `ucloud_lb_security_groups`[GH-24]
-* **New Datasource:** `ucloud_lb_vpcs`[GH-24]
-* **New Datasource:** `ucloud_lb_subnets`[GH-24]
+* **New Datasource:** `ucloud_db_instances`([#24](https://github.com/terraform-providers/terraform-provider-ucloud/issues/24))
+* **New Datasource:** `ucloud_lb_ssls`([#24](https://github.com/terraform-providers/terraform-provider-ucloud/issues/24))
+* **New Datasource:** `ucloud_lb_security_groups`([#24](https://github.com/terraform-providers/terraform-provider-ucloud/issues/24))
+* **New Datasource:** `ucloud_lb_vpcs`([#24](https://github.com/terraform-providers/terraform-provider-ucloud/issues/24))
+* **New Datasource:** `ucloud_lb_subnets`([#24](https://github.com/terraform-providers/terraform-provider-ucloud/issues/24))
 
 ENHANCEMENTS:
 
-* datasource/ucloud_lbs: Add attribute `internal` [GH-24]
-* datasource/ucloud_instances: Add argument `name_regex` [GH-24]
-* datasource/ucloud_eips: Add argument `name_regex` [GH-24]
-* datasource/ucloud_projects: Add argument `name_regex` [GH-24]
-* datasource/ucloud_zones: Add attribute `total_count` [GH-24]
+* datasource/ucloud_lbs: Add attribute `internal` ([#24](https://github.com/terraform-providers/terraform-provider-ucloud/issues/24))
+* datasource/ucloud_instances: Add argument `name_regex` ([#24](https://github.com/terraform-providers/terraform-provider-ucloud/issues/24))
+* datasource/ucloud_eips: Add argument `name_regex` ([#24](https://github.com/terraform-providers/terraform-provider-ucloud/issues/24))
+* datasource/ucloud_projects: Add argument `name_regex` ([#24](https://github.com/terraform-providers/terraform-provider-ucloud/issues/24))
+* datasource/ucloud_zones: Add attribute `total_count` ([#24](https://github.com/terraform-providers/terraform-provider-ucloud/issues/24))
 
 ## 1.5.0 (April 01, 2019)
 
