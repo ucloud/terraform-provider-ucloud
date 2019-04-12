@@ -105,7 +105,7 @@ func parseInstanceTypeByCustomize(splited ...string) (*instanceType, error) {
 	}
 
 	if memory < 1 || 256 < memory {
-		return nil, fmt.Errorf("memory count is invalid, it must between 1 ~ 128")
+		return nil, fmt.Errorf("memory count is invalid, it must between 1 ~ 256")
 	}
 
 	if memory/cpu == 1 || memory/cpu == 2 || memory/cpu == 4 || memory/cpu == 8 {

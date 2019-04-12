@@ -15,66 +15,34 @@ Provides an UHost Instance resource.
 ## Example Usage
 
 ```hcl
-resource "ucloud_security_group" "default" {
-    name = "tf-example-instance"
-    tag  = "tf-example"
-
-    # http access from LAN
-    rules {
-        port_range = "80"
-        protocol   = "tcp"
-        cidr_block = "192.168.0.0/16"
-        policy     = "accept"
-    }
-
-    # https access from LAN
-    rules {
-        port_range = "443"
-        protocol   = "tcp"
-        cidr_block = "192.168.0.0/16"
-        policy     = "accept"
-    }
+# Query default security group
+data "ucloud_security_groups" "default" {
+    type = "recommend_web"
 }
 
-resource "ucloud_vpc" "default" {
-    name = "tf-example-instance"
-    tag  = "tf-example"
-
-    # vpc network
-    cidr_blocks = ["192.168.0.0/16"]
+# Query image
+data "ucloud_images" "default" {
+  availability_zone = "cn-bj2-04"
+  name_regex        = "^CentOS 6.5 64"
+  image_type        = "base"
 }
 
-resource "ucloud_subnet" "default" {
-    name = "tf-example-instance"
-    tag  = "tf-example"
-
-    # subnet's network must be contained by vpc network
-    # and a subnet must have least 8 ip addresses in it (netmask < 30).
-    cidr_block = "192.168.1.0/24"
-    vpc_id     = "${ucloud_vpc.default.id}"
-}
-
+# Create web instance 
 resource "ucloud_instance" "web" {
     name              = "tf-example-instance"
     tag               = "tf-example"
-    availability_zone = "cn-bj2-02"
-    image_id          = "uimage-of3pac"
+    availability_zone = "cn-bj2-04"
+    image_id          = "${data.ucloud_images.default.images.0.id}"
     instance_type     = "n-standard-1"
 
-    # use cloud disk as data disk
+    # use local disk as data disk
     data_disk_size     = 50
     data_disk_type     = "local_normal"
     root_password      = "wA1234567"
 
-    # we will put all the instances into same vpc and subnet,
-    # so they can communicate with each other.
-    vpc_id    = "${ucloud_vpc.default.id}"
-    subnet_id = "${ucloud_subnet.default.id}"
-
-    # this security group to allow http and https access
-    security_group = "${ucloud_security_group.default.id}"
+    # the default Web Security Group that UCloud recommend to users
+    security_group = "${data.ucloud_security_groups.default.security_groups.0.id}"
 }
-
 ```
 
 ## Argument Reference
@@ -94,9 +62,9 @@ The following arguments are supported:
 * `name` - (Optional) The name of instance, which contains 1-63 characters and only support Chinese, English, numbers, '-', '_', '.'. If not specified, terraform will autogenerate a name beginning with `tf-instance`.
 * `remark` - (Optional) The remarks of instance. (Default: `""`).
 * `security_group` - (Optional) The ID of the associated security group.
-* `subnet_id` - (Optional) The ID of subnet.
+* `subnet_id` - (Optional) The ID of subnet. If defined `vpc_id`, the `subnet_id` is Required. If not defined `vpc_id` and `subnet_id`, the instance will use the default subnet in the current region.
 * `tag` - (Optional) A tag assigned to instance, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
-* `vpc_id` - (Optional) The ID of VPC linked to the instance.
+* `vpc_id` - (Optional) The ID of VPC linked to the instance. If not defined `vpc_id`, the instance will use the default VPC in the current region.
 
 ## Attributes Reference
 

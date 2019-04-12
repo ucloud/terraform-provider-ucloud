@@ -26,7 +26,7 @@ The following arguments are supported:
 
 * `ids` - (Optional) A list of Security Group IDs, all the Security Group resources belong to this region will be retrieved if the ID is `""`.
 * `name_regex` - (Optional) A regex string to filter resulting Security Group resources by name.
-* `type` - (Optional) The type of Security Group. Possible values are: `recommend_web` as the default Web security group that UCloud recommend to users, `recommend_non_web` as the default non Web security group that UCloud recommend to users, `user_defined` as the security groups defined by users.
+* `type` - (Optional) The type of Security Group. Possible values are: `recommend_web` as the default Web security group that UCloud recommend to users, default opened port include 80, 443, 22, 3389, `recommend_non_web` as the default non Web security group that UCloud recommend to users, default opened port include 22, 3389, `user_defined` as the security groups defined by users. You may refer to [security group](https://docs.ucloud.cn/network/firewall/firewall.html).
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference

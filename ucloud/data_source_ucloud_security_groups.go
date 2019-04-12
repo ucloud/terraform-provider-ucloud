@@ -148,7 +148,7 @@ func dataSourceUCloudSecurityGroupsRead(d *schema.ResourceData, meta interface{}
 
 		if v, ok := d.GetOk("type"); ok {
 			for _, item := range resp.DataSet {
-				if v == strings.ReplaceAll(item.Type, " ", "_") {
+				if v == strings.Replace(item.Type, " ", "_", -1) {
 					allSecurityGroups = append(allSecurityGroups, item)
 				}
 			}
@@ -216,7 +216,7 @@ func dataSourceUCloudSecurityGroupsSave(d *schema.ResourceData, securityGroups [
 			"name":        item.Name,
 			"tag":         item.Tag,
 			"rules":       rules,
-			"type":        strings.ReplaceAll(item.Type, " ", "_"),
+			"type":        strings.Replace(item.Type, " ", "_", -1),
 			"create_time": timestampToString(item.CreateTime),
 		})
 	}
