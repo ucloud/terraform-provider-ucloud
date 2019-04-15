@@ -5,9 +5,9 @@ FEATURES:
 
 * **New Datasource:** `ucloud_db_instances`([#24](https://github.com/terraform-providers/terraform-provider-ucloud/issues/24))
 * **New Datasource:** `ucloud_lb_ssls`([#24](https://github.com/terraform-providers/terraform-provider-ucloud/issues/24))
-* **New Datasource:** `ucloud_lb_security_groups`([#24](https://github.com/terraform-providers/terraform-provider-ucloud/issues/24))
-* **New Datasource:** `ucloud_lb_vpcs`([#24](https://github.com/terraform-providers/terraform-provider-ucloud/issues/24))
-* **New Datasource:** `ucloud_lb_subnets`([#24](https://github.com/terraform-providers/terraform-provider-ucloud/issues/24))
+* **New Datasource:** `ucloud_security_groups`([#24](https://github.com/terraform-providers/terraform-provider-ucloud/issues/24))
+* **New Datasource:** `ucloud_vpcs`([#24](https://github.com/terraform-providers/terraform-provider-ucloud/issues/24))
+* **New Datasource:** `ucloud_subnets`([#24](https://github.com/terraform-providers/terraform-provider-ucloud/issues/24))
 
 ENHANCEMENTS:
 
