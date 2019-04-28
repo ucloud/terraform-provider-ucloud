@@ -60,6 +60,35 @@ func TestAccUCloudLBListener_basic(t *testing.T) {
 	})
 }
 
+func TestAccUCloudLBListener_internal(t *testing.T) {
+	var lbSet ulb.ULBSet
+	var vserverSet ulb.ULBVServerSet
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		IDRefreshName: "ucloud_lb_listener.foo",
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckLBListenerDestroy,
+
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLBListenerConfigInternal,
+
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBExists("ucloud_lb.foo", &lbSet),
+					testAccCheckLBListenerExists("ucloud_lb_listener.foo", &lbSet, &vserverSet),
+					testAccCheckLBListenerAttributes(&vserverSet),
+					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "protocol", "tcp"),
+					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "method", "roundrobin"),
+					resource.TestCheckResourceAttr("ucloud_lb_listener.foo", "listen_type", "packets_transmit"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckLBListenerExists(n string, lbSet *ulb.ULBSet, vserverSet *ulb.ULBVServerSet) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -154,4 +183,16 @@ resource "ucloud_lb_listener" "foo" {
 	health_check_type = "port"
 	domain            = "www.ucloud.cn"
 }
+`
+const testAccLBListenerConfigInternal = `
+resource "ucloud_lb" "foo" {
+	name     = "tf-example-lb"
+	tag      = "tf-example"
+	internal = true
+  }
+  
+  resource "ucloud_lb_listener" "foo" {
+	load_balancer_id = "${ucloud_lb.foo.id}"
+	protocol         = "tcp"
+  }
 `
