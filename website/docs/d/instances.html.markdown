@@ -54,6 +54,9 @@ The attribute (`instances`) support the following:
 * `status` - Instance current status. Possible values are `Initializing`, `Starting`, `Running`, `Stopping`, `Stopped`, `Install Fail` and `Rebooting`.
 * `create_time` - The time of creation for instance, formatted in RFC3339 time string.
 * `expire_time` - The expiration time for instance, formatted in RFC3339 time string.
+* `private_ip` - The private IP address assigned to the instance.
+* `vpc_id` - The ID of VPC linked to the instance.
+* `subnet_id` - The ID of subnet linked to the instance.
 * `ip_set` - It is a nested type which documented below.
 * `disk_set` - It is a nested type which documented below.
 

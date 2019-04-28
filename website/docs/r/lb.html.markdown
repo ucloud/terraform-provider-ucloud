@@ -23,7 +23,7 @@ resource "ucloud_lb" "web" {
 
 The following arguments are supported:
 
-* `internal` - (Optional) Indicate whether the load balancer is intranet.(Default: `"false"`)
+* `internal` - (Optional) Indicate whether the load balancer is intranet mode.(Default: `"false"`)
 * `name` - (Optional) The name of the load balancer. If not specified, terraform will autogenerate a name beginning with `tf-lb`.
 * `charge_type` - **Deprecated**, argument `charge_type` is deprecated for optimizing parameters.
 * `vpc_id` - (Optional) The ID of the VPC linked to the Load Balancers, This argumnet is not required if default VPC.
