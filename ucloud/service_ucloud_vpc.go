@@ -7,6 +7,9 @@ import (
 )
 
 func (c *UCloudClient) describeVPCById(vpcId string) (*vpc.VPCInfo, error) {
+	if vpcId == "" {
+		return nil, newNotFoundError(getNotFoundMessage("vpc", vpcId))
+	}
 	conn := c.vpcconn
 
 	req := conn.NewDescribeVPCRequest()
@@ -25,6 +28,9 @@ func (c *UCloudClient) describeVPCById(vpcId string) (*vpc.VPCInfo, error) {
 }
 
 func (c *UCloudClient) describeSubnetById(subnetId string) (*vpc.VPCSubnetInfoSet, error) {
+	if subnetId == "" {
+		return nil, newNotFoundError(getNotFoundMessage("subnet", subnetId))
+	}
 	conn := c.vpcconn
 
 	req := conn.NewDescribeSubnetRequest()

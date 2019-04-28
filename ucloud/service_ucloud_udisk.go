@@ -6,6 +6,9 @@ import (
 )
 
 func (client *UCloudClient) describeDiskById(diskId string) (*udisk.UDiskDataSet, error) {
+	if diskId == "" {
+		return nil, newNotFoundError(getNotFoundMessage("disk", diskId))
+	}
 	req := client.udiskconn.NewDescribeUDiskRequest()
 	req.UDiskId = ucloud.String(diskId)
 

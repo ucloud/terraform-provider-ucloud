@@ -9,6 +9,9 @@ import (
 )
 
 func (c *UCloudClient) describeEIPById(eipId string) (*unet.UnetEIPSet, error) {
+	if eipId == "" {
+		return nil, newNotFoundError(getNotFoundMessage("eip", eipId))
+	}
 	conn := c.unetconn
 
 	req := conn.NewDescribeEIPRequest()
@@ -58,17 +61,20 @@ func (c *UCloudClient) checkDefaultFirewall() error {
 
 	resp, err := conn.DescribeFirewall(req)
 	if err != nil {
-		return err
+		return fmt.Errorf("error on reading default security group before creating instance, %s", err)
 	}
 
 	if resp == nil || len(resp.DataSet) < 2 {
-		return fmt.Errorf("the default firewall is not found for this project/region, it will be initializing automiticly, please try again later")
+		return fmt.Errorf("the default security group is not found for this project/region, it will be initializing automiticly, please try again later")
 	}
 
 	return nil
 }
 
 func (c *UCloudClient) describeFirewallById(sgId string) (*unet.FirewallDataSet, error) {
+	if sgId == "" {
+		return nil, newNotFoundError(getNotFoundMessage("security group", sgId))
+	}
 	conn := c.unetconn
 
 	req := conn.NewDescribeFirewallRequest()
