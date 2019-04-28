@@ -96,7 +96,11 @@ func parseInstanceTypeByCustomize(splited ...string) (*instanceType, error) {
 	}
 
 	if cpu < 1 || 32 < cpu {
-		return nil, fmt.Errorf("cpu count is invalid, it must between 1 ~ 32")
+		return nil, fmt.Errorf("expected cpu to be in the range (1 - 32), got %d", cpu)
+	}
+
+	if cpu != 1 && (cpu%2) != 0 {
+		return nil, fmt.Errorf("expected cpu to be divided by 2, got %d", cpu)
 	}
 
 	memory, err := strconv.Atoi(splited[3])
@@ -106,6 +110,10 @@ func parseInstanceTypeByCustomize(splited ...string) (*instanceType, error) {
 
 	if memory < 1 || 256 < memory {
 		return nil, fmt.Errorf("memory count is invalid, it must between 1 ~ 256")
+	}
+
+	if memory != 1 && (memory%2) != 0 {
+		return nil, fmt.Errorf("expected memory to be divided by 2, got %d", cpu)
 	}
 
 	if memory/cpu == 1 || memory/cpu == 2 || memory/cpu == 4 || memory/cpu == 8 {
@@ -141,8 +149,12 @@ func parseInstanceTypeByNormal(splited ...string) (*instanceType, error) {
 			return nil, fmt.Errorf("cpu count is invalid, please use a number")
 		}
 
+		if cpu != 1 && (cpu%2) != 0 {
+			return nil, fmt.Errorf("expected cpu to be divided by 2, got %d", cpu)
+		}
+
 		if cpu < 1 || 32 < cpu {
-			return nil, fmt.Errorf("cpu count is invalid, it must between 1 ~ 32")
+			return nil, fmt.Errorf("expected cpu to be in the range (1 - 32), got %d", cpu)
 		}
 
 		memory := cpu * scale
