@@ -113,7 +113,7 @@ func parseInstanceTypeByCustomize(splited ...string) (*instanceType, error) {
 	}
 
 	if memory != 1 && (memory%2) != 0 {
-		return nil, fmt.Errorf("expected memory to be divided by 2, got %d", cpu)
+		return nil, fmt.Errorf("expected memory to be divided by 2, got %d", memory)
 	}
 
 	if memory/cpu == 1 || memory/cpu == 2 || memory/cpu == 4 || memory/cpu == 8 {
@@ -208,25 +208,25 @@ var availableDBMemory = []int{1, 2, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128}
 func parseDBInstanceType(s string) (*dbInstanceType, error) {
 	splited := strings.Split(s, "-")
 	if len(splited) != 3 {
-		return nil, fmt.Errorf("db instance type is invalid, got %q", s)
+		return nil, fmt.Errorf("db instance type is invalid, should like xx-xx-1, got %q", s)
 	}
 	engine := splited[0]
 	if err := checkStringIn(engine, availableDBEngine); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("db instance type is invalid, the engine %s", err)
 	}
 
 	dbType := splited[1]
 	if err := checkStringIn(dbType, availableDBTypes); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("db instance type is invalid, the type %s", err)
 	}
 
 	memory, err := strconv.Atoi(splited[2])
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("db instance type is invalid, the memory %s", err)
 	}
 
 	if err := checkIntIn(memory, availableDBMemory); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("db instance type is invalid, memory is out of range, %s", err)
 	}
 
 	t := &dbInstanceType{}
