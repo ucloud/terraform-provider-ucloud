@@ -9,6 +9,9 @@ import (
 )
 
 func (client *UCloudClient) describeInstanceById(instanceId string) (*uhost.UHostInstanceSet, error) {
+	if instanceId == "" {
+		return nil, newNotFoundError(getNotFoundMessage("instance", instanceId))
+	}
 	req := client.uhostconn.NewDescribeUHostInstanceRequest()
 	req.UHostIds = []string{instanceId}
 
@@ -24,6 +27,9 @@ func (client *UCloudClient) describeInstanceById(instanceId string) (*uhost.UHos
 }
 
 func (client *UCloudClient) DescribeImageById(imageId string) (*uhost.UHostImageSet, error) {
+	if imageId == "" {
+		return nil, newNotFoundError(getNotFoundMessage("image", imageId))
+	}
 	req := client.uhostconn.NewDescribeImageRequest()
 	req.ImageId = ucloud.String(imageId)
 
@@ -32,7 +38,7 @@ func (client *UCloudClient) DescribeImageById(imageId string) (*uhost.UHostImage
 		return nil, err
 	}
 	if len(resp.ImageSet) < 1 {
-		return nil, newNotFoundError(getNotFoundMessage("instance", imageId))
+		return nil, newNotFoundError(getNotFoundMessage("image", imageId))
 	}
 
 	return &resp.ImageSet[0], nil

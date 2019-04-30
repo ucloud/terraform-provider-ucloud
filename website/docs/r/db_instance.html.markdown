@@ -64,6 +64,7 @@ The following arguments are supported:
     - "mysql" and "percona"for engine;
     - "ha" as high availability version for type of database, high availability version use the dual main hot standby structure which can thoroughly solved the issue of unavailable database caused by the system downtime or hardware failure, the "ha" version only supports "mysql" and "percona" engine.
     - possible values for memory are: 1, 2, 4, 6, 8, 12, 16, 24, 32, 48, 64GB.
+You may refer to [list of instance type](https://docs.ucloud.cn/compute/terraform/specification/db_instance)
 * `port` - (Optional) The port on which the database accepts connections, the default port is 3306 for mysql and percona.
 * `charge_type` - (Optional) The charge type of db instance, possible values are: `year`, `month` and `dynamic` as pay by hour (specific permission required). (Default: `month`).
 * `duration` - (Optional) The duration that you will buy the db instance (Default: `1`). The value is `0` when pay by month and the instance will be vaild till the last day of that month. It is not required when `dynamic` (pay by hour).

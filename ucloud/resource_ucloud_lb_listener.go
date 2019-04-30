@@ -57,7 +57,7 @@ func resourceUCloudLBListener() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Default:  "request_proxy",
+				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"request_proxy",
 					"packets_transmit",
@@ -145,12 +145,30 @@ func resourceUCloudLBListenerCreate(d *schema.ResourceData, meta interface{}) er
 	conn := client.ulbconn
 
 	lbId := d.Get("load_balancer_id").(string)
+	protocol := d.Get("protocol").(string)
+	lbSet, err := client.describeLBById(lbId)
+	if err != nil {
+		return fmt.Errorf("error on reading lb %q when creating lb listener, %s", lbId, err)
+	}
 
 	req := conn.NewCreateVServerRequest()
+	if v, ok := d.GetOk("listen_type"); ok {
+		err := availableLBChoices.validate(lbSet.ULBType, protocol, v.(string))
+		if err != nil {
+			return err
+		}
+		req.ListenType = ucloud.String(upperCamelCvt.unconvert(v.(string)))
+	} else {
+		if choices := availableLBChoices.availableChoices(lbSet.ULBType, protocol); len(choices) == 0 {
+			return fmt.Errorf("The protocol can only be one of %q, %q when lb is intranet, got %q", "tcp", "udp", protocol)
+		} else {
+			req.ListenType = ucloud.String(upperCamelCvt.unconvert(choices[0]))
+		}
+	}
+
 	req.ULBId = ucloud.String(lbId)
-	req.Protocol = ucloud.String(upperCvt.unconvert(d.Get("protocol").(string)))
+	req.Protocol = ucloud.String(upperCvt.unconvert(protocol))
 	req.FrontendPort = ucloud.Int(d.Get("port").(int))
-	req.ListenType = ucloud.String(upperCamelCvt.unconvert(d.Get("listen_type").(string)))
 	req.Method = ucloud.String(upperCamelCvt.unconvert(d.Get("method").(string)))
 
 	if v, ok := d.GetOk("name"); ok {
@@ -376,12 +394,12 @@ func customizeDiffLBMethodToListenType(diff *schema.ResourceDiff, v interface{})
 	listenType := diff.Get("listen_type").(string)
 	method := diff.Get("method").(string)
 	if listenType == "request_proxy" && !isStringIn(method, []string{"roundrobin", "source", "weight_roundrobin", "leastconn"}) {
-		return fmt.Errorf("The method can only be one of %q, %q, %q or %q when listen_type is %q",
+		return fmt.Errorf("the method can only be one of %q, %q, %q or %q when listen_type is %q",
 			"roundrobin", "source", "weight_roundrobin", "leastconn", "request_proxy")
 	}
 
 	if listenType == "packets_transmit" && !isStringIn(method, []string{"consistent_hash", "source_port", "consistent_hash_port", "roundrobin", "source", "weight_roundrobin"}) {
-		return fmt.Errorf("The method can only be one of %q, %q, %q, %q, %q or %q when listen_type is %q",
+		return fmt.Errorf("the method can only be one of %q, %q, %q, %q, %q or %q when listen_type is %q",
 			"consistent_hash", "source_port", "consistent_hash_port", "roundrobin", "source", "weight_roundrobin", "packets_transmit")
 	}
 
@@ -391,13 +409,70 @@ func customizeDiffLBMethodToListenType(diff *schema.ResourceDiff, v interface{})
 func customizeDiffLBProtocolToListenType(diff *schema.ResourceDiff, v interface{}) error {
 	listenType := diff.Get("listen_type").(string)
 	protocol := diff.Get("protocol").(string)
-	if listenType == "request_proxy" && !isStringIn(protocol, []string{"http", "https", "tcp"}) {
-		return fmt.Errorf("The protocol can only be one of %q, %q or %q when listen_type is %q", "http", "https", "tcp", "request_proxy")
+	if listenType == "" {
+		return nil
 	}
 
-	if listenType == "packets_transmit" && !isStringIn(protocol, []string{"udp", "tcp"}) {
-		return fmt.Errorf("The protocol can only be one of %q, %q when listen_type is %q", "tcp", "udp", "packets_transmit")
+	choices := map[string]struct{}{}
+	for _, r := range availableLBChoices {
+		if listenType != r.ListenType {
+			continue
+		}
+
+		choices[r.Protocol] = struct{}{}
+		if protocol == r.Protocol {
+			return nil
+		}
+	}
+
+	values := []string{}
+	for k := range choices {
+		values = append(values, k)
+	}
+
+	return fmt.Errorf("the protocol can only be one of %v, when listen_type is %q, got %q", values, listenType, protocol)
+}
+
+type lBChoice struct {
+	Mode       string
+	Protocol   string
+	ListenType string
+}
+
+type lbChoices []lBChoice
+
+var availableLBChoices = lbChoices{
+	{"OuterMode", "http", "request_proxy"},
+	{"OuterMode", "https", "request_proxy"},
+	{"OuterMode", "tcp", "request_proxy"},
+	{"OuterMode", "tcp", "packets_transmit"},
+	{"OuterMode", "udp", "packets_transmit"},
+	{"InnerMode", "tcp", "packets_transmit"},
+	{"InnerMode", "udp", "packets_transmit"},
+}
+
+func (lc *lbChoices) validate(mode, protocol, listen_type string) error {
+	choices := lc.availableChoices(mode, protocol)
+
+	if listen_type != "" && !isStringIn(listen_type, choices) {
+		if mode == "InnerMode" {
+			return fmt.Errorf("the listen_type can only be one of %v, when protocol is %q in the intranet mode,  got %q", choices, protocol, listen_type)
+		} else {
+			return fmt.Errorf("the listen_type can only be one of %v, when protocol is %q in the extranet mode, got %q", choices, protocol, listen_type)
+		}
 	}
 
 	return nil
+}
+
+func (lc *lbChoices) availableChoices(mode, protocol string) []string {
+	choices := []string{}
+
+	for _, r := range availableLBChoices {
+		if mode == r.Mode && protocol == r.Protocol {
+			choices = append(choices, r.ListenType)
+		}
+	}
+
+	return choices
 }

@@ -96,7 +96,11 @@ func parseInstanceTypeByCustomize(splited ...string) (*instanceType, error) {
 	}
 
 	if cpu < 1 || 32 < cpu {
-		return nil, fmt.Errorf("cpu count is invalid, it must between 1 ~ 32")
+		return nil, fmt.Errorf("expected cpu to be in the range (1 - 32), got %d", cpu)
+	}
+
+	if cpu != 1 && (cpu%2) != 0 {
+		return nil, fmt.Errorf("expected cpu to be divided by 2, got %d", cpu)
 	}
 
 	memory, err := strconv.Atoi(splited[3])
@@ -106,6 +110,10 @@ func parseInstanceTypeByCustomize(splited ...string) (*instanceType, error) {
 
 	if memory < 1 || 256 < memory {
 		return nil, fmt.Errorf("memory count is invalid, it must between 1 ~ 256")
+	}
+
+	if memory != 1 && (memory%2) != 0 {
+		return nil, fmt.Errorf("expected memory to be divided by 2, got %d", memory)
 	}
 
 	if memory/cpu == 1 || memory/cpu == 2 || memory/cpu == 4 || memory/cpu == 8 {
@@ -141,8 +149,12 @@ func parseInstanceTypeByNormal(splited ...string) (*instanceType, error) {
 			return nil, fmt.Errorf("cpu count is invalid, please use a number")
 		}
 
+		if cpu != 1 && (cpu%2) != 0 {
+			return nil, fmt.Errorf("expected cpu to be divided by 2, got %d", cpu)
+		}
+
 		if cpu < 1 || 32 < cpu {
-			return nil, fmt.Errorf("cpu count is invalid, it must between 1 ~ 32")
+			return nil, fmt.Errorf("expected cpu to be in the range (1 - 32), got %d", cpu)
 		}
 
 		memory := cpu * scale
@@ -196,25 +208,25 @@ var availableDBMemory = []int{1, 2, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128}
 func parseDBInstanceType(s string) (*dbInstanceType, error) {
 	splited := strings.Split(s, "-")
 	if len(splited) != 3 {
-		return nil, fmt.Errorf("db instance type is invalid, got %q", s)
+		return nil, fmt.Errorf("db instance type is invalid, should like xx-xx-1, got %q", s)
 	}
 	engine := splited[0]
 	if err := checkStringIn(engine, availableDBEngine); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("db instance type is invalid, the engine %s", err)
 	}
 
 	dbType := splited[1]
 	if err := checkStringIn(dbType, availableDBTypes); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("db instance type is invalid, the type %s", err)
 	}
 
 	memory, err := strconv.Atoi(splited[2])
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("db instance type is invalid, the memory %s", err)
 	}
 
 	if err := checkIntIn(memory, availableDBMemory); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("db instance type is invalid, memory is out of range, %s", err)
 	}
 
 	t := &dbInstanceType{}

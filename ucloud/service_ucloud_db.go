@@ -7,6 +7,9 @@ import (
 )
 
 func (client *UCloudClient) describeDBInstanceById(dbInstanceId string) (*udb.UDBInstanceSet, error) {
+	if dbInstanceId == "" {
+		return nil, newNotFoundError(getNotFoundMessage("db_instance", dbInstanceId))
+	}
 	req := client.udbconn.NewDescribeUDBInstanceRequest()
 	req.DBId = ucloud.String(dbInstanceId)
 

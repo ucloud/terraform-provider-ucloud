@@ -6,6 +6,9 @@ import (
 )
 
 func (c *UCloudClient) describeDPNById(id string) (*udpn.UDPNData, error) {
+	if id == "" {
+		return nil, newNotFoundError(getNotFoundMessage("dpn", id))
+	}
 	conn := c.udpnconn
 
 	req := conn.NewDescribeUDPNRequest()

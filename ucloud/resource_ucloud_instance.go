@@ -230,6 +230,11 @@ func resourceUCloudInstance() *schema.Resource {
 				},
 			},
 
+			"private_ip": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
 			"create_time": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -698,6 +703,7 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 		if item.Type == "Private" {
 			d.Set("vpc_id", item.VPCId)
 			d.Set("subnet_id", item.SubnetId)
+			d.Set("private_ip", item.IP)
 		}
 	}
 

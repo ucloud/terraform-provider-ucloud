@@ -113,6 +113,21 @@ func dataSourceUCloudInstances() *schema.Resource {
 							Computed: true,
 						},
 
+						"vpc_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
+						"subnet_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
+						"private_ip": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
 						"create_time": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -244,6 +259,7 @@ func dataSourceUCloudInstancesSave(d *schema.ResourceData, instances []uhost.UHo
 
 	for _, instance := range instances {
 		ids = append(ids, string(instance.UHostId))
+		var vpcId, subnetId, privateIp string
 
 		ipSet := []map[string]interface{}{}
 		for _, item := range instance.IPSet {
@@ -251,6 +267,12 @@ func dataSourceUCloudInstancesSave(d *schema.ResourceData, instances []uhost.UHo
 				"ip":            item.IP,
 				"internet_type": item.Type,
 			})
+
+			if item.Type == "Private" {
+				vpcId = item.VPCId
+				subnetId = item.SubnetId
+				privateIp = item.IP
+			}
 		}
 
 		diskSet := []map[string]interface{}{}
@@ -280,6 +302,9 @@ func dataSourceUCloudInstancesSave(d *schema.ResourceData, instances []uhost.UHo
 			"charge_type":       upperCamelCvt.convert(instance.ChargeType),
 			"ip_set":            ipSet,
 			"disk_set":          diskSet,
+			"private_ip":        privateIp,
+			"vpc_id":            vpcId,
+			"subnet_id":         subnetId,
 		})
 	}
 

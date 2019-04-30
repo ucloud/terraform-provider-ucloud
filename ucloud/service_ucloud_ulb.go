@@ -9,6 +9,9 @@ import (
 )
 
 func (client *UCloudClient) describeLBById(lbId string) (*ulb.ULBSet, error) {
+	if lbId == "" {
+		return nil, newNotFoundError(getNotFoundMessage("lb", lbId))
+	}
 	conn := client.ulbconn
 	req := conn.NewDescribeULBRequest()
 	req.ULBId = ucloud.String(lbId)
@@ -32,6 +35,9 @@ func (client *UCloudClient) describeLBById(lbId string) (*ulb.ULBSet, error) {
 }
 
 func (client *UCloudClient) describeVServerById(lbId, listenerId string) (*ulb.ULBVServerSet, error) {
+	if listenerId == "" {
+		return nil, newNotFoundError(getNotFoundMessage("listener", listenerId))
+	}
 	conn := client.ulbconn
 	req := conn.NewDescribeVServerRequest()
 	req.ULBId = ucloud.String(lbId)
@@ -56,6 +62,9 @@ func (client *UCloudClient) describeVServerById(lbId, listenerId string) (*ulb.U
 }
 
 func (client *UCloudClient) describeBackendById(lbId, listenerId, backendId string) (*ulb.ULBBackendSet, error) {
+	if backendId == "" {
+		return nil, newNotFoundError(getNotFoundMessage("backend", backendId))
+	}
 	vserverSet, err := client.describeVServerById(lbId, listenerId)
 
 	if err != nil {
@@ -73,6 +82,9 @@ func (client *UCloudClient) describeBackendById(lbId, listenerId, backendId stri
 }
 
 func (client *UCloudClient) describePolicyById(lbId, listenerId, policyId string) (*ulb.ULBPolicySet, error) {
+	if policyId == "" {
+		return nil, newNotFoundError(getNotFoundMessage("policy", policyId))
+	}
 	vserverSet, err := client.describeVServerById(lbId, listenerId)
 
 	if err != nil {
@@ -90,6 +102,9 @@ func (client *UCloudClient) describePolicyById(lbId, listenerId, policyId string
 }
 
 func (client *UCloudClient) describeLBSSLById(sslId string) (*ulb.ULBSSLSet, error) {
+	if sslId == "" {
+		return nil, newNotFoundError(getNotFoundMessage("lb_ssl", sslId))
+	}
 	conn := client.ulbconn
 	req := conn.NewDescribeSSLRequest()
 	req.SSLId = ucloud.String(sslId)
