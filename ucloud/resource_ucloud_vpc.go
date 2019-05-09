@@ -39,10 +39,7 @@ func resourceUCloudVPC() *schema.Resource {
 				Required: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
-					ValidateFunc: validateAll(
-						validateCIDRNetwork,
-						validateCIDRPrivate,
-					),
+					ValidateFunc: validateCIDRBlock,
 				},
 				Set: hashCIDR,
 			},

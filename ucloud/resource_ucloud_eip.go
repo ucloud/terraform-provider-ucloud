@@ -66,8 +66,7 @@ func resourceUCloudEIP() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				ForceNew:     true,
-				Default:      1,
-				ValidateFunc: validation.IntBetween(1, 9),
+				ValidateFunc: validateDuration,
 			},
 
 			"name": {
@@ -157,10 +156,15 @@ func resourceUCloudEIPCreate(d *schema.ResourceData, meta interface{}) error {
 
 	req := conn.NewAllocateEIPRequest()
 	req.Bandwidth = ucloud.Int(d.Get("bandwidth").(int))
-	req.Quantity = ucloud.Int(d.Get("duration").(int))
 	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
 	req.PayMode = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_mode").(string)))
 	req.OperatorName = ucloud.String(upperCamelCvt.unconvert(d.Get("internet_type").(string)))
+
+	if v, ok := d.GetOk("duration"); ok {
+		req.Quantity = ucloud.Int(v.(int))
+	} else {
+		req.Quantity = ucloud.Int(1)
+	}
 
 	if v, ok := d.GetOk("name"); ok {
 		req.Name = ucloud.String(v.(string))

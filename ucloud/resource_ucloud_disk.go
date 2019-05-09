@@ -64,7 +64,6 @@ func resourceUCloudDisk() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				ForceNew:     true,
-				Default:      1,
 				ValidateFunc: validateDuration,
 			},
 
@@ -104,7 +103,12 @@ func resourceUCloudDiskCreate(d *schema.ResourceData, meta interface{}) error {
 	req.Size = ucloud.Int(d.Get("disk_size").(int))
 	req.DiskType = ucloud.String(diskTypeCvt.unconvert(d.Get("disk_type").(string)))
 	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
-	req.Quantity = ucloud.Int(d.Get("duration").(int))
+
+	if v, ok := d.GetOk("duration"); ok {
+		req.Quantity = ucloud.Int(v.(int))
+	} else {
+		req.Quantity = ucloud.Int(1)
+	}
 
 	if v, ok := d.GetOk("name"); ok {
 		req.Name = ucloud.String(v.(string))

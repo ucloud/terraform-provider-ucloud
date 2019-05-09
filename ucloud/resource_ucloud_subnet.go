@@ -24,10 +24,7 @@ func resourceUCloudSubnet() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-				ValidateFunc: validateAll(
-					validateCIDRNetwork,
-					validateCIDRPrivate,
-				),
+				ValidateFunc: validateCIDRBlock,
 			},
 
 			"vpc_id": {

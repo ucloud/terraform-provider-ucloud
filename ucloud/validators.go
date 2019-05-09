@@ -190,22 +190,21 @@ func validateAll(validators ...schema.SchemaValidateFunc) schema.SchemaValidateF
 	}
 }
 
-var validateCIDRNetwork = validation.CIDRNetwork(16, 29)
+var validateCIDRNetwork16 = validation.CIDRNetwork(16, 29)
+var validateCIDRNetwork8 = validation.CIDRNetwork(8, 29)
 
-func validateCIDRPrivate(v interface{}, k string) (ws []string, errors []error) {
+func validateCIDRBlock(v interface{}, k string) (ws []string, errors []error) {
 	cidr := v.(string)
 
-	found := false
-	for _, prefix := range []string{"192.168.", "172.16.", "10."} {
-		if strings.HasPrefix(cidr, prefix) {
-			found = true
-			break
-		}
+	if strings.HasPrefix(cidr, "192.168.") || strings.HasPrefix(cidr, "172.16.") {
+		return validateCIDRNetwork16(v, k)
 	}
 
-	if !found {
-		errors = append(errors, fmt.Errorf("excepted cidr network in one of 192.168.x.x, 172.16.x.x, 10.x.x.x"))
+	if strings.HasPrefix(cidr, "10.") {
+		return validateCIDRNetwork8(v, k)
 	}
 
-	return
+	errors = append(errors, fmt.Errorf("excepted cidr network in one of 192.168.x.x, 172.16.x.x, 10.x.x.x"))
+	return 
 }
+
