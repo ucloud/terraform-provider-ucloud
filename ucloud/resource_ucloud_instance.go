@@ -49,6 +49,12 @@ func resourceUCloudInstance() *schema.Resource {
 			"image_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if o, _ := d.GetChange("image_id"); o != "" {
+						return true
+					}
+					return false
+				},
 			},
 
 			"root_password": {
@@ -678,7 +684,6 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 
 	memory := instance.Memory
 	cpu := instance.CPU
-	d.Set("image_id", instance.BasicImageId)
 	d.Set("root_password", d.Get("root_password"))
 	d.Set("name", instance.Name)
 	d.Set("charge_type", upperCamelCvt.convert(instance.ChargeType))
@@ -692,6 +697,11 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 	d.Set("auto_renew", boolCamelCvt.unconvert(instance.AutoRenew))
 	d.Set("remark", instance.Remark)
 	d.Set("instance_type", instanceTypeSetFunc(cpu, memory/1024))
+
+	basicImageId := instance.BasicImageId
+	if basicImageId != "" {
+		d.Set("image_id", basicImageId)
+	}
 
 	ipSet := []map[string]interface{}{}
 	for _, item := range instance.IPSet {
