@@ -1,16 +1,16 @@
-## 1.7.0 (Unreleased)
+## 1.7.0 (May 10, 2019)
 
 ENHANCEMENTS:
 
-* datasource/ucloud_instances: Add attribute `vpc_id `, `subnet_id`, `private_ip` [GH-27]
-* resource/ucloud_instance: Add attribute `private_ip` [GH-27]
-* resource/ucloud_lb_listener: Update customdiff precheck about `protocol` and `listen_type` [GH-27]
+* datasource/ucloud_instances: Add attribute `vpc_id `, `subnet_id`, `private_ip` ([#27](https://github.com/terraform-providers/terraform-provider-ucloud/issues/27))
+* resource/ucloud_instance: Add attribute `private_ip` ([#27](https://github.com/terraform-providers/terraform-provider-ucloud/issues/27))
+* resource/ucloud_lb_listener: Update customdiff precheck about `protocol` and `listen_type` ([#27](https://github.com/terraform-providers/terraform-provider-ucloud/issues/27))
 
 BUG FIXES:
 
-* resource/ucloud_vpc: Fix `cidr_blocks` validate func [GH-28]
-* resource/ucloud_subnet: Fix `cidr_block` validate func [GH-28]
-* resource/ucloud_instance: Fix `image_id` read [GH-28]
+* resource/ucloud_vpc: Fix `cidr_blocks` validate func ([#28](https://github.com/terraform-providers/terraform-provider-ucloud/issues/28))
+* resource/ucloud_subnet: Fix `cidr_block` validate func ([#28](https://github.com/terraform-providers/terraform-provider-ucloud/issues/28))
+* resource/ucloud_instance: Fix `image_id` read ([#28](https://github.com/terraform-providers/terraform-provider-ucloud/issues/28))
 
 ## 1.6.0 (April 12, 2019)
 
