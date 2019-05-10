@@ -24,43 +24,46 @@ provider "ucloud" {
   public_key = "${var.ucloud_public_key}"
   private_key = "${var.ucloud_private_key}"
   project_id = "${var.ucloud_project_id}"
-  region     = "cn-sh2"
+  region     = "cn-bj2"
 }
 
-# Query availability zone
-data "ucloud_zones" "default" {
+# Query default security group
+data "ucloud_security_groups" "default" {
+    type = "recommend_web"
 }
 
 # Query image
 data "ucloud_images" "default" {
-    availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-    os_type = "Linux"
+  availability_zone = "cn-bj2-04"
+  name_regex        = "^CentOS 6.5 64"
+  image_type        = "base"
 }
 
-# Create security group
-resource "ucloud_security_group" "default" {
-    name = "tf-example-eip"
-    tag  = "tf-example"
-
-    rules {
-        port_range = "80"
-        protocol   = "tcp"
-        cidr_block = "192.168.0.0/16"
-        policy     = "ACCEPT"
-    }
-}
-
-# Create a web server
+# Create web instance 
 resource "ucloud_instance" "web" {
+    availability_zone = "cn-bj2-04"
+    image_id          = "${data.ucloud_images.default.images.0.id}"
     instance_type     = "n-standard-1"
-    availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-    image_id = "${data.ucloud_images.default.images.0.id}"
-
-    root_password      = "wA1234567"
-    security_group     = "${ucloud_security_group.default.id}"
-
-    name              = "tf-example-eip"
+    root_password     = "wA1234567"
+    name              = "tf-example-instance"
     tag               = "tf-example"
+
+    # the default Web Security Group that UCloud recommend to users
+    security_group = "${data.ucloud_security_groups.default.security_groups.0.id}"
+}
+
+# Create cloud disk
+resource "ucloud_disk" "example" {
+    availability_zone = "cn-bj2-04"
+    name              = "tf-example-instance"
+    disk_size         = 30
+}
+
+# Attach cloud disk to instance
+resource "ucloud_disk_attachment" "example" {
+  availability_zone = "cn-bj2-04"
+  disk_id           = "${ucloud_disk.example.id}"
+  instance_id       = "${ucloud_instance.web.id}"
 }
 ```
 
@@ -136,7 +139,7 @@ In addition to [generic `provider` arguments](https://www.terraform.io/docs/conf
 
 * `shared_credentials_file` - (Optional) This is the path to the shared credentials file, it can also be sourced from the `UCLOUD_SHARED_CREDENTIAL_FILE` environment variables. If this is not set and a profile is specified, `~/.ucloud/credential.json` will be used.
 
-* `base_url` - (Optional) This is the ***.(Default: `https://api.ucloud.cn`)
+* `base_url` - (Optional) This is the base url.(Default: `https://api.ucloud.cn`)
 
 ## Testing
 

@@ -34,7 +34,7 @@ func Provider() terraform.ResourceProvider {
 			"shared_credentials_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("UCLOUD_SHARED_CREDENTIAL_FILE", defaultSharedCredentialsFile),
+				DefaultFunc: schema.EnvDefaultFunc("UCLOUD_SHARED_CREDENTIAL_FILE", nil),
 				Description: descriptions["shared_credentials_file"],
 			},
 

@@ -557,7 +557,7 @@ func diffValidateDBEngineAndEngineVersion(diff *schema.ResourceDiff, v interface
 	dbType, _ := parseDBInstanceType(diff.Get("instance_type").(string))
 
 	if err := checkStringIn(engineVersion, []string{"5.5", "5.6", "5.7"}); err != nil && (engine == "mysql" || engine == "percona") {
-		return fmt.Errorf("The current engine version %q is not supported, %s", engineVersion, err)
+		return fmt.Errorf("the current engine version %q is not supported, %s", engineVersion, err)
 	}
 
 	if dbType.Engine != engine {

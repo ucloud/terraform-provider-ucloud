@@ -25,9 +25,6 @@ const (
 
 	// defaultTag is the default tag for all of resources
 	defaultTag = "Default"
-
-	//defaultSharedCredentialsFile is the default path to the shared credentials file
-	defaultSharedCredentialsFile = "~/.ucloud/credential.json"
 )
 
 const (

@@ -1,4 +1,17 @@
 ## 1.6.1 (Unreleased)
+
+ENHANCEMENTS:
+
+* datasource/ucloud_instances: Add attribute `vpc_id `, `subnet_id`, `private_ip` [GH-27]
+* resource/ucloud_instance: Add attribute `private_ip` [GH-27]
+* resource/ucloud_lb_listener: Update customdiff precheck about `protocol` and `listen_type` [GH-27]
+
+BUG FIXES:
+
+* resource/ucloud_vpc: Fix `cidr_blocks` validate func [GH-28]
+* resource/ucloud_subnet: Fix `cidr_block` validate func [GH-28]
+* resource/ucloud_instance: Fix `image_id` read [GH-28]
+
 ## 1.6.0 (April 12, 2019)
 
 FEATURES:
