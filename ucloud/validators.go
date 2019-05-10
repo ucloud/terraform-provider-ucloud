@@ -205,6 +205,5 @@ func validateCIDRBlock(v interface{}, k string) (ws []string, errors []error) {
 	}
 
 	errors = append(errors, fmt.Errorf("excepted cidr network in one of 192.168.x.x, 172.16.x.x, 10.x.x.x"))
-	return 
+	return
 }
-

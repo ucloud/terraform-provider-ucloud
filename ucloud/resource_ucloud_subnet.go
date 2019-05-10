@@ -21,9 +21,9 @@ func resourceUCloudSubnet() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"cidr_block": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validateCIDRBlock,
 			},
 
