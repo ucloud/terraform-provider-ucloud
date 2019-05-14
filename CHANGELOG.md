@@ -1,4 +1,9 @@
 ## 1.8.0 (Unreleased)
+
+ENHANCEMENTS:
+* datasource/ucloud_disks: Add attribute `availability_zone`[GH-30]
+* resource/ucloud_instance: Optimization of validate about `instance_type` [GH-30]
+
 ## 1.7.0 (May 10, 2019)
 
 ENHANCEMENTS:
