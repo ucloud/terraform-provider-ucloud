@@ -168,8 +168,14 @@ func parseInstanceTypeByNormal(splited ...string) (*instanceType, error) {
 			if hostScaleType == "highmem" && cpu == 64 {
 				return nil, fmt.Errorf("this instance type %q is not supported, please refer to instance type document", "o-highmem-64")
 			}
-		} else if cpu < 1 || 64 < cpu {
-			return nil, fmt.Errorf("expected cpu to be in the range (1 - 64) for normal instance type, got %d", cpu)
+		} else {
+			if hostScaleType == "highmem" && cpu > 16 {
+				return nil, fmt.Errorf("expected cpu to be in the range (1 - 16) for normal highmem instance type, got %d", cpu)
+			}
+
+			if cpu < 1 || 32 < cpu {
+				return nil, fmt.Errorf("expected cpu to be in the range (1 - 32) for normal instance type, got %d", cpu)
+			}
 		}
 
 		memory := cpu * scale

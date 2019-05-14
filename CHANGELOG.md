@@ -1,6 +1,7 @@
 ## 1.8.0 (Unreleased)
 
 ENHANCEMENTS:
+
 * datasource/ucloud_disks: Add attribute `availability_zone`[GH-30]
 * datasource/ucloud_disks: Add possible value `rssd_data_disk` of `disk_type` [GH-30]
 * resource/ucloud_disks: Add possible value `rssd_data_disk` of `disk_type` [GH-30]
