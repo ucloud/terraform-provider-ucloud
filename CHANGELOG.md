@@ -4,7 +4,7 @@ ENHANCEMENTS:
 
 * datasource/ucloud_disks: Add attribute `availability_zone`[GH-30]
 * datasource/ucloud_disks: Add possible value `rssd_data_disk` of `disk_type` [GH-30]
-* resource/ucloud_disks: Add possible value `rssd_data_disk` of `disk_type` [GH-30]
+* resource/ucloud_disk: Add possible value `rssd_data_disk` of `disk_type` [GH-30]
 * resource/ucloud_instance: Optimization of validate about `instance_type` [GH-30]
 * resource/ucloud_instance: Add Outstanding `instance_type` [GH-30]
 
