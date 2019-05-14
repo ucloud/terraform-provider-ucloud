@@ -26,6 +26,9 @@ type AttachUDiskRequest struct {
 
 	// 需要挂载的UDisk实例ID.
 	UDiskId *string `required:"true"`
+
+	// 是否允许多点挂载（Yes: 允许多点挂载， No: 不允许多点挂载， 不填默认Yes ）
+	MultiAttach *string `required:"false"`
 }
 
 // AttachUDiskResponse is response schema for AttachUDisk action
@@ -44,7 +47,7 @@ func (c *UDiskClient) NewAttachUDiskRequest() *AttachUDiskRequest {
 	req := &AttachUDiskRequest{}
 
 	// setup request with client config
-	c.client.SetupRequest(req)
+	c.Client.SetupRequest(req)
 
 	// setup retryable with default retry policy (retry for non-create action and common error)
 	req.SetRetryable(true)
@@ -56,7 +59,7 @@ func (c *UDiskClient) AttachUDisk(req *AttachUDiskRequest) (*AttachUDiskResponse
 	var err error
 	var res AttachUDiskResponse
 
-	err = c.client.InvokeAction("AttachUDisk", req, &res)
+	err = c.Client.InvokeAction("AttachUDisk", req, &res)
 	if err != nil {
 		return &res, err
 	}
