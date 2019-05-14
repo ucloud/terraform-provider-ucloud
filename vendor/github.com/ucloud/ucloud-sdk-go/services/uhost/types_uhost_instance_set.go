@@ -14,8 +14,11 @@ type UHostInstanceSet struct {
 	// UHost实例ID
 	UHostId string
 
-	// 云主机机型。参考[[api:uhost-api:uhost_type|云主机机型说明]]。
+	// 【建议不再使用】云主机机型（旧）。参考[[api:uhost-api:uhost_type|云主机机型说明]]。
 	UHostType string
+
+	// 云主机机型（新）。参考[[api:uhost-api:uhost_type|云主机机型说明]]。
+	MachineType string
 
 	// 【建议不再使用】主机磁盘类型。 枚举值为：\\ > LocalDisk，本地磁盘; \\ > UDisk 云盘。\\只要有一块磁盘为本地盘，即返回LocalDisk。
 	StorageType string
@@ -104,7 +107,7 @@ type UHostInstanceSet struct {
 	// 系统盘状态 Normal表示初始化完成；Initializing表示在初始化。仍在初始化的系统盘无法制作镜像。
 	BootDiskState string
 
-	// 总的存储空间。包含系统盘与全部数据盘的总容量。
+	// 总的数据盘存储空间。
 	TotalDiskSpace int
 
 	// 隔离组id，不在隔离组则返回""

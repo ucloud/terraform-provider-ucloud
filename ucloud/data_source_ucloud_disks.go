@@ -16,6 +16,11 @@ func dataSourceUCloudDisks() *schema.Resource {
 		Read: dataSourceUCloudDisksRead,
 
 		Schema: map[string]*schema.Schema{
+			"availability_zone": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
 			"ids": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -39,6 +44,7 @@ func dataSourceUCloudDisks() *schema.Resource {
 					"ssd_data_disk",
 					"system_disk",
 					"ssd_system_disk",
+					"rssd_data_disk",
 				}, false),
 			},
 
@@ -125,6 +131,10 @@ func dataSourceUCloudDisksRead(d *schema.ResourceData, meta interface{}) error {
 		req.Offset = ucloud.Int(offset)
 		if v, ok := d.GetOk("disk_type"); ok {
 			req.DiskType = ucloud.String(diskTypeCvt.unconvert(v.(string)))
+		}
+
+		if v, ok := d.GetOk("availability_zone"); ok {
+			req.Zone = ucloud.String(v.(string))
 		}
 
 		resp, err := conn.DescribeUDisk(req)

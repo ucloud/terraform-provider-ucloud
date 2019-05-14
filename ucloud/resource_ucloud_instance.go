@@ -37,6 +37,7 @@ func resourceUCloudInstance() *schema.Resource {
 			customdiff.ValidateChange("data_disk_size", diffValidateInstanceDataDiskSize),
 			customdiff.ValidateChange("boot_disk_size", diffValidateInstanceBootDiskSize),
 			diffValidateBootDiskTypeWithDataDiskType,
+			diffValidateInstanceTypeWithZone,
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -285,6 +286,11 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 		req.Password = ucloud.String(v.(string))
 	} else {
 		req.Password = ucloud.String(password)
+	}
+
+	if t.HostType == "o" {
+		req.MachineType = ucloud.String("O")
+		req.MinimalCpuPlatform = ucloud.String("Intel/Cascadelake")
 	}
 
 	if v, ok := d.GetOk("name"); ok {
@@ -696,7 +702,7 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 	d.Set("expire_time", timestampToString(instance.ExpireTime))
 	d.Set("auto_renew", boolCamelCvt.unconvert(instance.AutoRenew))
 	d.Set("remark", instance.Remark)
-	d.Set("instance_type", instanceTypeSetFunc(cpu, memory/1024))
+	d.Set("instance_type", instanceTypeSetFunc(upperCvt.convert(instance.MachineType), cpu, memory/1024))
 
 	basicImageId := instance.BasicImageId
 	if basicImageId != "" {
@@ -883,5 +889,16 @@ func diffValidateBootDiskTypeWithDataDiskType(diff *schema.ResourceDiff, v inter
 	if checkStringIn(bootDiskType, []string{"cloud_normal", "cloud_ssd"}) == nil && checkStringIn(dataDiskType, []string{"local_normal", "local_ssd"}) == nil {
 		return fmt.Errorf("the instance cannot have local data disk, When the %q is %q", "boot_disk_type", bootDiskType)
 	}
+	return nil
+}
+
+func diffValidateInstanceTypeWithZone(diff *schema.ResourceDiff, v interface{}) error {
+	t, _ := parseInstanceType(diff.Get("instance_type").(string))
+	zone := diff.Get("availability_zone").(string)
+
+	if t.HostType == "o" && zone != "cn-bj2-05" {
+		return fmt.Errorf("the outstanding type about %q only be supported in %q, got %q", "instance_type", "cn-bj2-05", zone)
+	}
+
 	return nil
 }

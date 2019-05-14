@@ -124,6 +124,7 @@ var diskTypeCvt = newStringConverter(map[string]string{
 	"SSDDataDisk":   "ssd_data_disk",
 	"SystemDisk":    "system_disk",
 	"SSDSystemDisk": "ssd_system_disk",
+	"RSSDDataDisk":  "rssd_data_disk",
 })
 
 // upperCvt is used to transform uppercase with underscore to lowercase with underscore. eg. LOCAL_SSD -> local_ssd

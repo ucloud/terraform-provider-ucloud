@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform/helper/customdiff"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
@@ -20,6 +21,10 @@ func resourceUCloudDisk() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
+
+		CustomizeDiff: customdiff.All(
+			diffValidateDiskTypeWithZone,
+		),
 
 		Schema: map[string]*schema.Schema{
 			"availability_zone": {
@@ -49,7 +54,7 @@ func resourceUCloudDisk() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				Default:      "data_disk",
-				ValidateFunc: validation.StringInSlice([]string{"data_disk", "ssd_data_disk"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"data_disk", "ssd_data_disk", "rssd_data_disk"}, false),
 			},
 
 			"charge_type": {
@@ -263,4 +268,15 @@ func diskWaitForState(client *UCloudClient, diskId string) *resource.StateChange
 			return diskSet, state, nil
 		},
 	}
+}
+
+func diffValidateDiskTypeWithZone(diff *schema.ResourceDiff, v interface{}) error {
+	diskType := diff.Get("disk_type").(string)
+	zone := diff.Get("availability_zone").(string)
+
+	if diskType == "rssd_data_disk" && zone != "cn-bj2-05" {
+		return fmt.Errorf("the disk type about %q only be supported in %q, got %q", "rssd_data_disk", "cn-bj2-05", zone)
+	}
+
+	return nil
 }

@@ -36,8 +36,14 @@ type DescribeUHostInstanceRequest struct {
 	// 返回数据长度，默认为20，最大100
 	Limit *int `required:"false"`
 
-	// 硬件隔离组id
+	// 硬件隔离组id。通过硬件隔离组筛选主机。
 	IsolationGroup *string `required:"false"`
+
+	// vpc id。通过VPC筛选主机。
+	VPCId *string `required:"false"`
+
+	// 子网id。通过子网筛选主机。
+	SubnetId *string `required:"false"`
 }
 
 // DescribeUHostInstanceResponse is response schema for DescribeUHostInstance action
@@ -56,7 +62,7 @@ func (c *UHostClient) NewDescribeUHostInstanceRequest() *DescribeUHostInstanceRe
 	req := &DescribeUHostInstanceRequest{}
 
 	// setup request with client config
-	c.client.SetupRequest(req)
+	c.Client.SetupRequest(req)
 
 	// setup retryable with default retry policy (retry for non-create action and common error)
 	req.SetRetryable(true)
@@ -68,7 +74,7 @@ func (c *UHostClient) DescribeUHostInstance(req *DescribeUHostInstanceRequest) (
 	var err error
 	var res DescribeUHostInstanceResponse
 
-	err = c.client.InvokeAction("DescribeUHostInstance", req, &res)
+	err = c.Client.InvokeAction("DescribeUHostInstance", req, &res)
 	if err != nil {
 		return &res, err
 	}
