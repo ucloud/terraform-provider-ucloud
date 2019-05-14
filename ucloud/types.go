@@ -100,6 +100,10 @@ func parseInstanceTypeByCustomize(splited ...string) (*instanceType, error) {
 		return nil, fmt.Errorf("memory count is invalid, please use a number")
 	}
 
+	if cpu/memory > 2 || memory/cpu > 12 {
+		return nil, fmt.Errorf("the ratio of cpu to memory should be range of 2:1 ~ 1:12, got %d:%d", cpu, memory)
+	}
+
 	if memory/cpu == 1 || memory/cpu == 2 || memory/cpu == 4 || memory/cpu == 8 {
 		return nil, fmt.Errorf("instance type is invalid, expected %q like %q,"+
 			"the Type can be highcpu, basic, standard, highmem when the ratio of cpu to memory is 1:1, 1:2, 1:4, 1:8", "n-Type-CPU", "n-standard-1")

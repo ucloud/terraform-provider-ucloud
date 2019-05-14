@@ -64,7 +64,7 @@ The following arguments are supported:
 * `instance_type` - (Required) The type of instance. 
     - The normal type (range of CPU in core: 1-32, range of memory in MB: 1-128, and both of them should be divided by 2):
         - One is normal type defined by UCloud provider: `n-Type-CPU`(eg:`n-highcpu-2`), `Type` can be `highcpu`, `basic`, `standard`, `highmem` which represents the ratio of CPU and memory respectively (1:1, 1:2, 1:4, 1:8), CPU can be the specific number of cores of cpu.
-        - One is normal type defined by Customized: `n-customized-CPU-Memory`(eg:`n-customized-1-16`). 
+        - One is normal type defined by Customized: `n-customized-CPU-Memory`, the ratio of cpu to memory should be range of 2:1 ~ 1:12 (eg:`n-customized-1-10`). Thereinto, the custmized not be valid when ratio of cpu to memory is 1:1, 1:2, 1:4, 1:8.
     
     - There is a new outstanding type defined by UCloud provider only valid in availability_zone `cn-bj2-05`: `o-Type-CPU`(eg: `o-standard-4`). `Type` can be `highcpu`, `basic`, `standard`, `highmem` which   represents the ratio of CPU and memory respectively (1:1, 1:2, 1:4, 1:8). This type range of CPU in core: 1-64, range of memory in MB: 1-256, and both of them should be divided by 2. In order to use it, we must set `boot_disk_type` to `cloud_ssd`. In addition, this type needs to be specified to `image_id`, the image type is `base` and the name of which is prefix with "高内核". Furthermore, the disk attached to instance must be RDMA-SSD cloud disk if required. 
 
