@@ -54,6 +54,35 @@ func TestAccUCloudInstance_basic(t *testing.T) {
 	})
 }
 
+func TestAccUCloudInstance_outstanding(t *testing.T) {
+	var instance uhost.UHostInstanceSet
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		IDRefreshName: "ucloud_instance.foo",
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckInstanceDestroy,
+
+		Steps: []resource.TestStep{
+			{
+				Config: testAccInstanceConfigOutstanding,
+
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckInstanceExists("ucloud_instance.foo", &instance),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "name", "tf-acc-instance-config-outstanding"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "tag", "tf-acc"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "instance_type", "o-standard-4"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "cpu", "4"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "memory", "16"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccUCloudInstance_vpc(t *testing.T) {
 	rInt := acctest.RandInt()
 	var instance uhost.UHostInstanceSet
@@ -237,6 +266,28 @@ resource "ucloud_instance" "foo" {
   tag               = ""
 }`, rInt)
 }
+
+const testAccInstanceConfigOutstanding = `
+data "ucloud_images" "default" {
+  availability_zone = "cn-bj2-05"
+  name_regex        = "^高内核CentOS 7.0 64"
+  image_type        = "base"
+}
+data "ucloud_security_groups" "default" {
+	type = "recommend_web"
+}
+
+resource "ucloud_instance" "foo" {
+  availability_zone = "cn-bj2-05"
+  image_id          = "${data.ucloud_images.default.images.0.id}"
+  security_group    = "${data.ucloud_security_groups.default.security_groups.0.id}"
+  instance_type     = "o-standard-4"
+  boot_disk_type    = "cloud_ssd"
+  root_password     = "wA1234567"
+  name              = "tf-acc-instance-config-outstanding"
+  tag               = "tf-acc"
+}
+`
 
 func testAccInstanceConfigVPC(rInt int) string {
 	return fmt.Sprintf(`
