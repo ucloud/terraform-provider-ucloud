@@ -48,6 +48,34 @@ func TestAccUCloudDisk_basic(t *testing.T) {
 	})
 }
 
+func TestAccUCloudDisk_rssd(t *testing.T) {
+	var diskSet udisk.UDiskDataSet
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		IDRefreshName: "ucloud_disk.foo",
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckDiskDestroy,
+
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDiskRssd,
+
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDiskExists("ucloud_disk.foo", &diskSet),
+					testAccCheckDiskAttributes(&diskSet),
+					resource.TestCheckResourceAttr("ucloud_disk.foo", "name", "tf-acc-disk-rssd"),
+					resource.TestCheckResourceAttr("ucloud_disk.foo", "disk_size", "10"),
+					resource.TestCheckResourceAttr("ucloud_disk.foo", "disk_type", "rssd_data_disk"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccUCloudDisk_tag(t *testing.T) {
 	var diskSet udisk.UDiskDataSet
 
@@ -159,7 +187,15 @@ resource "ucloud_disk" "foo" {
 	disk_size         = 20
 }
 `
-
+const testAccDiskRssd = `
+resource "ucloud_disk" "foo" {
+	availability_zone = "cn-bj2-05"
+	name              = "tf-acc-disk-rssd"
+	tag               = "tf-acc"
+	disk_size         = 10
+	disk_type         = "rssd_data_disk"
+}
+`
 const testAccDiskDefaultTag = `
 locals {
 	tag = ""
