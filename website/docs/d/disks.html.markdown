@@ -24,8 +24,9 @@ output "first" {
 
 The following arguments are supported:
 
+* `availability_zone` - (Optional) Availability zone where Disk are located. Such as: "cn-bj2-02". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
 * `ids` - (Optional) A list of Disk IDs, all the Disks belong to this region will be retrieved if the ID is `""`.
-* `disk_type` - (Optional) The type of disk. Possible values are: `data_disk`as cloud disk, `ssd_data_disk` as ssd cloud disk, `system_disk`as system disk, `ssd_system_disk` as ssd system disk. 
+* `disk_type` - (Optional) The type of disk. Possible values are: `data_disk`as cloud disk, `ssd_data_disk` as SSD cloud disk, `system_disk`as system disk, `ssd_system_disk` as SSD system disk, `rssd_data_disk` as RDMA-SSD cloud disk. 
 * `name_regex` - (Optional) A regex string to filter resulting disks by name.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 

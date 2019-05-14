@@ -64,7 +64,8 @@ The following arguments are supported:
 * `instance_type` - (Required) The type of instance. The normal type(range of CPU in core: 1-32, range of memory in MB: 1-256, and both of them should be divided by 2):
     - One is normal type defined by UCloud provider: `n-Type-CPU`(eg:`n-highcpu-2`), `Type` can be `highcpu`, `basic`, `standard`, `highmem` which represent the ratio of CPU and memory respectively (1:1, 1:2, 1:4, 1:8).(range of CPU in core: 1-32, range of memory in MB: 1-128, and both of them should be divided by 2)
     - One is normal type defined by Customized: `n-customized-CPU-Memory`(eg:`n-customized-1-3`). (range of CPU in core: 1-32, range of memory in MB: 1-128, and both of them should be divided by 2)
-    - In addition, there is a new outstanding type defined by UCloud provider in availability_zone `cn-bj2-05`: `o-standard-CPU`(eg: `o-standard-64`). (range of CPU in core: 1-64, range of memory in MB: 1-256, and both of them should be divided by 2)
+    
+    There is a new outstanding type defined by UCloud provider in availability_zone `cn-bj2-05`: `o-standard-CPU`(eg: `o-standard-4`). This type range of CPU in core: 1-64, range of memory in MB: 1-256, and both of them should be divided by 2. In order to use it, we must set `boot_disk_type` to `cloud_ssd`.
 
     ~> **Note**  When it is changed, the instance will reboot automatically to make the change take effect. You may refer to [list of instance type](https://docs.ucloud.cn/compute/terraform/specification/instance)
 * `root_password` - (Optional) The password for the instance, which contains 8-30 characters, and at least 2 items of capital letters, lower case letters, numbers and special characters. The special characters include <code>`()~!@#$%^&*-+=_|{}\[]:;'<>,.?/</code>. If not specified, terraform will autogenerate a password. 
