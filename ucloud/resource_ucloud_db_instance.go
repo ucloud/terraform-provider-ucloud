@@ -162,6 +162,7 @@ func resourceUCloudDBInstance() *schema.Resource {
 			"tag": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				ForceNew:     true,
 				ValidateFunc: validateTag,
 				Computed:     true,
 			},

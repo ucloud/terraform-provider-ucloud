@@ -37,6 +37,7 @@ func resourceUCloudUDPNConnection() *schema.Resource {
 			"charge_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 				Default:  "month",
 				ValidateFunc: validation.StringInSlice([]string{
 					"year",
@@ -48,6 +49,7 @@ func resourceUCloudUDPNConnection() *schema.Resource {
 			"duration": {
 				Type:         schema.TypeInt,
 				Optional:     true,
+				ForceNew:     true,
 				ValidateFunc: validateDuration,
 			},
 

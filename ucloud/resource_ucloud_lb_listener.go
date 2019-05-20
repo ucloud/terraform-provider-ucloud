@@ -68,7 +68,7 @@ func resourceUCloudLBListener() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				ForceNew:     true,
-				Computed:	  true,
+				Computed:     true,
 				ValidateFunc: validation.IntBetween(1, 65535),
 			},
 
@@ -175,12 +175,12 @@ func resourceUCloudLBListenerCreate(d *schema.ResourceData, meta interface{}) er
 		req.FrontendPort = ucloud.Int(v.(int))
 	} else {
 		switch protocol {
-			case "http": 
-				req.FrontendPort = ucloud.Int(80)
-			case "https":
-				req.FrontendPort = ucloud.Int(443)
-			default: 
-				req.FrontendPort = ucloud.Int(1024)	
+		case "http":
+			req.FrontendPort = ucloud.Int(80)
+		case "https":
+			req.FrontendPort = ucloud.Int(443)
+		default:
+			req.FrontendPort = ucloud.Int(1024)
 		}
 	}
 
