@@ -13,40 +13,18 @@ data "ucloud_images" "default" {
   image_type        = "base"
 }
 
-# Create security group
-resource "ucloud_security_group" "default" {
-  name = "tf-example-instance"
-  tag  = "tf-example"
-
-  # HTTP access from LAN
-  rules {
-    port_range = "80"
-    protocol   = "tcp"
-    cidr_block = "192.168.0.0/16"
-    policy     = "accept"
-  }
-
-  # HTTPS access from LAN
-  rules {
-    port_range = "443"
-    protocol   = "tcp"
-    cidr_block = "192.168.0.0/16"
-    policy     = "accept"
-  }
-}
-
-# Create vpc
+# Create VPC
 resource "ucloud_vpc" "default" {
-  name = "tf-example-instance"
+  name = "tf-example-intranet-cluster"
   tag  = "tf-example"
 
   # vpc network
   cidr_blocks = ["192.168.0.0/16"]
 }
 
-# Create subnet
+# Create Subnet under the VPC
 resource "ucloud_subnet" "default" {
-  name = "tf-example-instance"
+  name = "tf-example-intranet-cluster"
   tag  = "tf-example"
 
   # subnet's network must be contained by vpc network
@@ -56,18 +34,14 @@ resource "ucloud_subnet" "default" {
   vpc_id = "${ucloud_vpc.default.id}"
 }
 
-# Create a web server
-resource "ucloud_instance" "web" {
-  name              = "tf-example-instance"
-  tag               = "tf-example"
+# Create a intranet cluster
+resource "ucloud_instance" "intranet" {
+  count = "${var.count}"
+
   availability_zone = "${data.ucloud_zones.default.zones.0.id}"
   image_id          = "${data.ucloud_images.default.images.0.id}"
-  instance_type     = "n-highcpu-1"
-
-  # use cloud disk as data disk
-  data_disk_size = 50
-  data_disk_type = "local_normal"
-  root_password  = "${var.instance_password}"
+  instance_type     = "n-basic-2"
+  root_password     = "${var.instance_password}"
 
   # we will put all the instances into same vpc and subnet,
   # so they can communicate with each other.
@@ -75,6 +49,6 @@ resource "ucloud_instance" "web" {
 
   subnet_id = "${ucloud_subnet.default.id}"
 
-  # this security group allows HTTP and HTTPS access
-  security_group = "${ucloud_security_group.default.id}"
+  name = "tf-example-intranet-cluster-${format(var.count_format, count.index + 1)}"
+  tag  = "tf-example"
 }

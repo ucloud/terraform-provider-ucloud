@@ -31,7 +31,7 @@ data "ucloud_images" "default" {
 resource "ucloud_instance" "web" {
     availability_zone = "cn-bj2-04"
     image_id          = "${data.ucloud_images.default.images.0.id}"
-    instance_type     = "n-standard-1"
+    instance_type     = "n-basic-2"
     root_password     = "wA1234567"
     name              = "tf-example-instance"
     tag               = "tf-example"
@@ -62,11 +62,11 @@ The following arguments are supported:
 * `availability_zone` - (Required) Availability zone where instance is located. such as: `cn-bj2-02`. You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
 * `image_id` - (Required) The ID for the image to use for the instance.
 * `instance_type` - (Required) The type of instance. 
-    - The normal type (range of CPU in core: 1-32, range of memory in MB: 1-128, and both of them should be divided by 2):
+    - The normal type (range of CPU in core: 1-32, range of memory in MB: 1-128, and the number of cores of CPU and memory must be divisible by 2 without a remainder (except single core or memory)):
         - One is normal type defined by UCloud provider: `n-Type-CPU`(eg:`n-highcpu-2`), `Type` can be `highcpu`, `basic`, `standard`, `highmem` which represents the ratio of CPU and memory respectively (1:1, 1:2, 1:4, 1:8), CPU can be the specific number of cores of cpu.
         - One is normal type defined by Customized: `n-customized-CPU-Memory`, the ratio of cpu to memory should be range of 2:1 ~ 1:12 (eg:`n-customized-1-10`). Thereinto, the custmized not be valid when ratio of cpu to memory is 1:1, 1:2, 1:4, 1:8.
     
-    - There is a new outstanding type defined by UCloud provider only valid in availability_zone `cn-bj2-05`: `o-Type-CPU`(eg: `o-standard-4`). `Type` can be `highcpu`, `basic`, `standard`, `highmem` which represents the ratio of CPU and memory respectively (1:1, 1:2, 1:4, 1:8). This type range of CPU in core: 1-64, range of memory in MB: 1-256, and both of them should be divided by 2. In order to use it, we must set `boot_disk_type` to `cloud_ssd`. In addition, this type needs to be specified to `image_id`, the image type is `base` and the name of which is prefix with "高内核". Furthermore, the disk attached to instance must be `rssd_data_disk` (RDMA-SSD) cloud disk if required. 
+    - There is a new outstanding type defined by UCloud provider only valid in availability_zone `cn-bj2-05`: `o-Type-CPU`(eg: `o-standard-4`). `Type` can be `highcpu`, `basic`, `standard`, `highmem` which represents the ratio of CPU and memory respectively (1:1, 1:2, 1:4, 1:8). This type range of CPU in core: 4-64, range of memory in MB: 4-256, the number of cores of CPU and memory must be divisible by 2 without a remainder (except single core or memory). In order to use it, we must set `boot_disk_type` to `cloud_ssd`. In addition, this type needs to be specified to `image_id`, the image type is `base` and the name of which is prefix with "高内核". Furthermore, the disk attached to instance must be `rssd_data_disk` (RDMA-SSD) cloud disk if required. 
 
     ~> **Note**  When it is changed, the instance will reboot automatically to make the change take effect. You may refer to [list of instance type](https://docs.ucloud.cn/compute/terraform/specification/instance)
 * `root_password` - (Optional) The password for the instance, which contains 8-30 characters, and at least 2 items of capital letters, lower case letters, numbers and special characters. The special characters include <code>`()~!@#$%^&*-+=_|{}\[]:;'<>,.?/</code>. If not specified, terraform will autogenerate a password. 

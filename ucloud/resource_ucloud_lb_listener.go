@@ -67,7 +67,8 @@ func resourceUCloudLBListener() *schema.Resource {
 			"port": {
 				Type:         schema.TypeInt,
 				Optional:     true,
-				Default:      80,
+				ForceNew:     true,
+				Computed:     true,
 				ValidateFunc: validation.IntBetween(1, 65535),
 			},
 
@@ -168,8 +169,20 @@ func resourceUCloudLBListenerCreate(d *schema.ResourceData, meta interface{}) er
 
 	req.ULBId = ucloud.String(lbId)
 	req.Protocol = ucloud.String(upperCvt.unconvert(protocol))
-	req.FrontendPort = ucloud.Int(d.Get("port").(int))
 	req.Method = ucloud.String(upperCamelCvt.unconvert(d.Get("method").(string)))
+
+	if v, ok := d.GetOk("port"); ok {
+		req.FrontendPort = ucloud.Int(v.(int))
+	} else {
+		switch protocol {
+		case "http":
+			req.FrontendPort = ucloud.Int(80)
+		case "https":
+			req.FrontendPort = ucloud.Int(443)
+		default:
+			req.FrontendPort = ucloud.Int(1024)
+		}
+	}
 
 	if v, ok := d.GetOk("name"); ok {
 		req.VServerName = ucloud.String(v.(string))
@@ -236,11 +249,6 @@ func resourceUCloudLBListenerUpdate(d *schema.ResourceData, meta interface{}) er
 		req.VServerName = ucloud.String(d.Get("name").(string))
 	}
 
-	if d.HasChange("protocol") && !d.IsNewResource() {
-		isChanged = true
-		req.Protocol = ucloud.String(upperCvt.unconvert(d.Get("protocol").(string)))
-	}
-
 	if d.HasChange("method") && !d.IsNewResource() {
 		isChanged = true
 		req.Method = ucloud.String(upperCamelCvt.unconvert(d.Get("method").(string)))
@@ -283,7 +291,6 @@ func resourceUCloudLBListenerUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		d.SetPartial("name")
-		d.SetPartial("protocol")
 		d.SetPartial("method")
 		d.SetPartial("persistence_type")
 		d.SetPartial("persistence")

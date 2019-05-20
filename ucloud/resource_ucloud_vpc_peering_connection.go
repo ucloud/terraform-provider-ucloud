@@ -32,6 +32,7 @@ func resourceUCloudVPCPeeringConnection() *schema.Resource {
 			"peer_project_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 				Computed: true,
 			},
 		},

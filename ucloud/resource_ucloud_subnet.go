@@ -51,6 +51,7 @@ func resourceUCloudSubnet() *schema.Resource {
 			"remark": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 				Computed: true,
 			},
 
