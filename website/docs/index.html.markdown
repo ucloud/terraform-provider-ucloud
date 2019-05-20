@@ -43,7 +43,7 @@ data "ucloud_images" "default" {
 resource "ucloud_instance" "web" {
     availability_zone = "cn-bj2-04"
     image_id          = "${data.ucloud_images.default.images.0.id}"
-    instance_type     = "n-standard-1"
+    instance_type     = "n-basic-2"
     root_password     = "wA1234567"
     name              = "tf-example-instance"
     tag               = "tf-example"

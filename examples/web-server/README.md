@@ -1,6 +1,6 @@
-# Disk Example
+# Instance Example
 
-The disk example launches disk and also attach Host instance.
+The web-server example builds a web server infrastructure, which launches elastic ip and cloud disk to bind UHost instance.
 
 To run, configure your UCloud provider as described in https://www.terraform.io/docs/providers/ucloud/index.html
 

@@ -13,40 +13,38 @@ Provides a Load Balancer Attachment resource for attaching Load Balancer to UHos
 ## Example Usage
 
 ```hcl
+# Query image
+data "ucloud_images" "default" {
+  availability_zone = "cn-bj2-04"
+  name_regex        = "^CentOS 6.5 64"
+  image_type        = "base"
+}
+
+# Create Load Balancer
 resource "ucloud_lb" "web" {
     name = "tf-example-lb"
     tag  = "tf-example"
 }
 
+# Create Load Balancer Listener with http protocol
 resource "ucloud_lb_listener" "default" {
     load_balancer_id = "${ucloud_lb.web.id}"
-    protocol         = "https"
+    protocol         = "http"
 }
 
-resource "ucloud_security_group" "default" {
-    name = "tf-example-eip"
-    tag  = "tf-example"
-
-    rules {
-        port_range = "80"
-        protocol   = "tcp"
-        cidr_block = "192.168.0.0/16"
-        policy     = "accept"
-    }
-}
-
+# Create web server
 resource "ucloud_instance" "web" {
-    instance_type     = "n-standard-1"
-    availability_zone = "cn-bj2-02"
+    instance_type     = "n-basic-2"
+    availability_zone = "cn-bj2-04"
 
-    root_password      = "wA1234567"
-    image_id           = "uimage-of3pac"
-    security_group     = "${ucloud_security_group.default.id}"
+    root_password     = "wA1234567"
+    image_id          = "${data.ucloud_images.default.images.0.id}"
 
     name              = "tf-example-lb"
     tag               = "tf-example"
 }
 
+# Attach instances to Load Balancer
 resource "ucloud_lb_attachment" "example" {
     load_balancer_id = "${ucloud_lb.web.id}"
     listener_id      = "${ucloud_lb_listener.default.id}"

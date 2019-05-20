@@ -13,6 +13,12 @@ Provides a Load Balancer Rule resource to add content forwarding policies for Lo
 ## Example Usage
 
 ```hcl
+data "ucloud_images" "default" {
+  availability_zone = "cn-bj2-02"
+  name_regex        = "^CentOS 6.5 64"
+  image_type        = "base"
+}
+
 resource "ucloud_lb" "web" {
     name = "tf-example-lb"
     tag  = "tf-example"
@@ -20,28 +26,15 @@ resource "ucloud_lb" "web" {
 
 resource "ucloud_lb_listener" "default" {
     load_balancer_id = "${ucloud_lb.web.id}"
-    protocol         = "https"
-}
-
-resource "ucloud_security_group" "default" {
-    name = "tf-example-eip"
-    tag  = "tf-example"
-
-    rules {
-        port_range = "80"
-        protocol   = "tcp"
-        cidr_block = "192.168.0.0/16"
-        policy     = "accept"
-    }
+    protocol         = "http"
 }
 
 resource "ucloud_instance" "web" {
-    instance_type     = "n-standard-1"
+    instance_type     = "n-basic-2"
     availability_zone = "cn-bj2-02"
 
-    root_password      = "wA1234567"
-    image_id           = "uimage-of3pac"
-    security_group     = "${ucloud_security_group.default.id}"
+    root_password     = "wA1234567"
+    image_id          = "${data.ucloud_images.default.images.0.id}"
 
     name              = "tf-example-lb"
     tag               = "tf-example"

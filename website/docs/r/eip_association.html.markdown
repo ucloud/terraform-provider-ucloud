@@ -31,7 +31,7 @@ resource "ucloud_security_group" "default" {
   rules {
     port_range = "80"
     protocol   = "tcp"
-    cidr_block = "192.168.0.0/16"
+    cidr_block = "0.0.0.0/0"
     policy     = "accept"
   }
 }
@@ -47,7 +47,7 @@ resource "ucloud_eip" "default" {
 
 # Create a web server
 resource "ucloud_instance" "web" {
-  instance_type     = "n-standard-1"
+  instance_type     = "n-basic-2"
   availability_zone = "${data.ucloud_zones.default.zones.0.id}"
   image_id          = "${data.ucloud_images.default.images.0.id}"
 

@@ -1,6 +1,6 @@
-# Elastic IP Example
+# Instance Example
 
-The eip example launches elastic ip and also bind Host instance. The count parameter in variables.tf can let you create specify number Host instances.
+The intranet-cluster example builds a intranet cluster infrastructure, which launches a certain amount of UHost instance with the same configuration. It also create vpc and subnet to the Host instances for network isolation.
 
 To run, configure your UCloud provider as described in https://www.terraform.io/docs/providers/ucloud/index.html
 
