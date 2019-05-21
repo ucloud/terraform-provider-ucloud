@@ -101,6 +101,11 @@ func dataSourceUCloudDBInstances() *schema.Resource {
 							Computed: true,
 						},
 
+						"private_ip": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
 						"instance_storage": {
 							Type:     schema.TypeInt,
 							Computed: true,
@@ -255,6 +260,7 @@ func dataSourceUCloudDBInstancesSave(d *schema.ResourceData, dbInstances []udb.U
 			"engine":            arr[0],
 			"engine_version":    arr[1],
 			"port":              dbInstance.Port,
+			"private_ip":        dbInstance.VirtualIP,
 			"status":            dbInstance.State,
 			"instance_storage":  dbInstance.DiskSpace,
 			"charge_type":       upperCamelCvt.convert(dbInstance.ChargeType),

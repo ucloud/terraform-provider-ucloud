@@ -167,6 +167,11 @@ func resourceUCloudDBInstance() *schema.Resource {
 				Computed:     true,
 			},
 
+			"private_ip": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
 			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -414,6 +419,7 @@ func resourceUCloudDBInstanceRead(d *schema.ResourceData, meta interface{}) erro
 	d.Set("engine", arr[0])
 	d.Set("engine_version", arr[1])
 	d.Set("port", db.Port)
+	d.Set("private_ip", db.VirtualIP)
 	d.Set("status", db.State)
 	d.Set("password", d.Get("password"))
 	d.Set("charge_type", upperCamelCvt.convert(db.ChargeType))

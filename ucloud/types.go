@@ -118,11 +118,11 @@ func parseInstanceTypeByCustomize(splited ...string) (*instanceType, error) {
 	}
 
 	if cpu != 1 && (cpu%2) != 0 {
-		return nil, fmt.Errorf("expected cpu to be divided by 2, got %d", cpu)
+		return nil, fmt.Errorf("expected the number of cores of cpu must be divisible by 2 without a remainder (except single core), got %d", cpu)
 	}
 
 	if memory != 1 && (memory%2) != 0 {
-		return nil, fmt.Errorf("expected memory to be divided by 2, got %d", memory)
+		return nil, fmt.Errorf("expected the number of memory must be divisible by 2 without a remainder (except single memory), got %d", memory)
 	}
 
 	t := &instanceType{}
@@ -157,7 +157,7 @@ func parseInstanceTypeByNormal(splited ...string) (*instanceType, error) {
 		}
 
 		if cpu != 1 && (cpu%2) != 0 {
-			return nil, fmt.Errorf("expected cpu to be divided by 2, got %d", cpu)
+			return nil, fmt.Errorf("expected the number of cores of cpu must be divisible by 2 without a remainder (except single core), got %d", cpu)
 		}
 
 		if hostType == "o" {
@@ -256,4 +256,97 @@ func parseDBInstanceType(s string) (*dbInstanceType, error) {
 	t.Memory = memory
 
 	return t, nil
+}
+
+type redisInstanceType struct {
+	Engine string
+	Type   string
+	Memory int
+}
+
+var availableRedisType = []string{"master", "distributed"}
+var availableMasterRedisMemory = []int{1, 2, 4, 6, 8, 12, 16, 24, 32}
+
+func parseRedisInstanceType(s string) (*redisInstanceType, error) {
+	splited := strings.Split(s, "-")
+	if len(splited) != 3 {
+		return nil, fmt.Errorf("redis instance type is invalid, should like redis-xx-1, got %s", s)
+	}
+
+	engine := splited[0]
+	if engine != "redis" {
+		return nil, fmt.Errorf("redis instance type is invalid, the engine of instance type must be %q", "redis")
+	}
+
+	t := splited[1]
+	if err := checkStringIn(t, availableRedisType); err != nil {
+		return nil, fmt.Errorf("redis instance type is invalid, the type of instance type  %s", err)
+	}
+
+	memory, err := strconv.Atoi(splited[2])
+	if err != nil {
+		return nil, fmt.Errorf("redis instance type is invalid, the memory of instance type %s", err)
+	}
+
+	if engine == "redis" && t == "master" {
+		if err := checkIntIn(memory, availableMasterRedisMemory); err != nil {
+			return nil, fmt.Errorf("redis instance type is invalid, memory of instance type is out of range, %s", err)
+		}
+	} else if engine == "redis" && t == "distributed" {
+		if memory < 16 || 1000 < memory {
+			return nil, fmt.Errorf("redis instance type is invalid, memory of instance type should between 16-1000, got %v", memory)
+		}
+
+		if memory%4 != 0 {
+			return nil, fmt.Errorf("redis instance type is invalid, memory of instance type should multiple of 4, got %v", memory)
+		}
+	} else {
+		return nil, fmt.Errorf("redis instance type is invalid, excepted redis.master/redis.distributed, got %q", fmt.Sprintf("%s.%s", engine, t))
+	}
+
+	return &redisInstanceType{
+		Engine: engine,
+		Type:   t,
+		Memory: memory,
+	}, nil
+}
+
+type memcacheInstanceType struct {
+	Engine string
+	Type   string
+	Memory int
+}
+
+var availableMasterMemcacheMemory = []int{1, 2, 4, 8, 16, 24, 32}
+
+func parseMemcacheInstanceType(s string) (*memcacheInstanceType, error) {
+	splited := strings.Split(s, "-")
+	if len(splited) != 3 {
+		return nil, fmt.Errorf("memcache instance type is invalid, should like memcache-xx-1, got %s", s)
+	}
+
+	engine := splited[0]
+	if engine != "memcache" {
+		return nil, fmt.Errorf("memcache instance type is invalid, the engine of instance type must be %q", "memcache")
+	}
+
+	t := splited[1]
+	if t != "master" {
+		return nil, fmt.Errorf("memcache instance type is invalid, the type of instance type must be %q", "master")
+	}
+
+	memory, err := strconv.Atoi(splited[2])
+	if err != nil {
+		return nil, fmt.Errorf("memcache instance type is invalid, the memory of instance type %s", err)
+	}
+
+	if err := checkIntIn(memory, availableMasterMemcacheMemory); err != nil {
+		return nil, fmt.Errorf("memcache instance type is invalid, memory of instance type is out of range, %s", err)
+	}
+
+	return &memcacheInstanceType{
+		Engine: engine,
+		Type:   t,
+		Memory: memory,
+	}, nil
 }

@@ -48,6 +48,7 @@ The attribute (`db_instances`) support the following:
 * `engine` - The type of database instance engine.
 * `engine_version` - The database instance engine version.
 * `port` - The port on which the database instance accepts connections.
+* `private_ip` - The private IP address assigned to the database instance.
 * `instance_storage` - Specifies the allocated storage size in gigabytes (GB).
 * `charge_type` - The charge type of db instance,
 * `backup_count` - Specifies the number of backup saved per week.

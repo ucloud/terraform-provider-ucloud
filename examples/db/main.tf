@@ -9,7 +9,7 @@ data "ucloud_zones" "default" {}
 # Create database instance
 resource "ucloud_db_instance" "master" {
   availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-  name              = "tf-example-db-instance"
+  name              = "tf-example-db"
   instance_storage  = 20
   instance_type     = "mysql-ha-1"
   engine            = "mysql"

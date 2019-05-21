@@ -1,12 +1,14 @@
 package ucloud
 
 import (
+	pumem "github.com/ucloud/ucloud-sdk-go/private/services/umem"
 	"github.com/ucloud/ucloud-sdk-go/services/uaccount"
 	"github.com/ucloud/ucloud-sdk-go/services/udb"
 	"github.com/ucloud/ucloud-sdk-go/services/udisk"
 	"github.com/ucloud/ucloud-sdk-go/services/udpn"
 	"github.com/ucloud/ucloud-sdk-go/services/uhost"
 	"github.com/ucloud/ucloud-sdk-go/services/ulb"
+	"github.com/ucloud/ucloud-sdk-go/services/umem"
 	"github.com/ucloud/ucloud-sdk-go/services/unet"
 	"github.com/ucloud/ucloud-sdk-go/services/vpc"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
@@ -29,4 +31,8 @@ type UCloudClient struct {
 	udiskconn    *udisk.UDiskClient
 	udpnconn     *udpn.UDPNClient
 	udbconn      *udb.UDBClient
+	umemconn     *umem.UMemClient
+
+	// private services
+	pumemconn *pumem.UMemClient
 }
