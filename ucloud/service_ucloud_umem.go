@@ -11,7 +11,7 @@ import (
 
 func (c *UCloudClient) describeActiveStandbyRedisById(id string) (*umem.URedisGroupSet, error) {
 	if id == "" {
-		return nil, newNotFoundError(getNotFoundMessage("redis group", id))
+		return nil, newNotFoundError(getNotFoundMessage("redis", id))
 	}
 	conn := c.umemconn
 
@@ -24,7 +24,7 @@ func (c *UCloudClient) describeActiveStandbyRedisById(id string) (*umem.URedisGr
 	}
 
 	if resp == nil || len(resp.DataSet) < 1 {
-		return nil, newNotFoundError(getNotFoundMessage("redis group", id))
+		return nil, newNotFoundError(getNotFoundMessage("redis", id))
 	}
 
 	return &resp.DataSet[0], nil
@@ -32,7 +32,7 @@ func (c *UCloudClient) describeActiveStandbyRedisById(id string) (*umem.URedisGr
 
 func (c *UCloudClient) describeDistributedRedisById(id string) (*umem.UMemSpaceSet, error) {
 	if id == "" {
-		return nil, newNotFoundError(getNotFoundMessage("redis space", id))
+		return nil, newNotFoundError(getNotFoundMessage("redis", id))
 	}
 	conn := c.umemconn
 
@@ -45,7 +45,7 @@ func (c *UCloudClient) describeDistributedRedisById(id string) (*umem.UMemSpaceS
 	}
 
 	if resp == nil || len(resp.DataSet) < 1 {
-		return nil, newNotFoundError(getNotFoundMessage("redis space", id))
+		return nil, newNotFoundError(getNotFoundMessage("redis", id))
 	}
 
 	return &resp.DataSet[0], nil
