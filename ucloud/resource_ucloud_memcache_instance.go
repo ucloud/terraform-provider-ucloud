@@ -17,9 +17,6 @@ func resourceUCloudMemcacheInstance() *schema.Resource {
 		Read:   resourceUCloudMemcacheInstanceRead,
 		Update: resourceUCloudMemcacheInstanceUpdate,
 		Delete: resourceUCloudMemcacheInstanceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
 
 		CustomizeDiff: customdiff.All(
 			customdiff.ValidateChange("instance_type", diffValidateMemcacheInstanceType),

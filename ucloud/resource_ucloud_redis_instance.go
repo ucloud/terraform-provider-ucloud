@@ -17,9 +17,6 @@ func resourceUCloudRedisInstance() *schema.Resource {
 		Read:   resourceUCloudRedisInstanceRead,
 		Update: resourceUCloudRedisInstanceUpdate,
 		Delete: resourceUCloudRedisInstanceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
 
 		CustomizeDiff: customdiff.All(
 			diffValidateRedisInstanceTypeAndEngineVersion,
@@ -148,8 +145,8 @@ func resourceUCloudRedisInstanceCreate(d *schema.ResourceData, meta interface{})
 	if t.Type == "master" {
 		return createActiveStandbyRedisInstance(d, meta)
 	}
+
 	return createDistributedRedisInstance(d, meta)
-	// return fmt.Errorf("error on creating redis instance, unexpected type of instance type")
 }
 
 func resourceUCloudRedisInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -223,7 +220,7 @@ func createActiveStandbyRedisInstance(d *schema.ResourceData, meta interface{}) 
 	}
 
 	// set default value of parametergroup
-	parameterGroupId, err := setRedisDefaultParameterGroup(d, client)
+	parameterGroupId, err := getRedisDefaultParameterGroup(d, client)
 	if err != nil {
 		return err
 	} else {
@@ -527,7 +524,7 @@ func getRedisCapability(instType string) int {
 	return t.Memory
 }
 
-func setRedisDefaultParameterGroup(d *schema.ResourceData, client *UCloudClient) (string, error) {
+func getRedisDefaultParameterGroup(d *schema.ResourceData, client *UCloudClient) (string, error) {
 	conn := client.pumemconn
 	limit := 100
 	offset := 0
