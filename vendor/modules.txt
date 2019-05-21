@@ -163,23 +163,25 @@ github.com/posener/complete/cmd
 github.com/posener/complete/match
 # github.com/sirupsen/logrus v1.3.0
 github.com/sirupsen/logrus
-# github.com/ucloud/ucloud-sdk-go v0.8.7-beta2
+# github.com/ucloud/ucloud-sdk-go v0.8.7-beta3
 github.com/ucloud/ucloud-sdk-go/external
+github.com/ucloud/ucloud-sdk-go/private/services/umem
 github.com/ucloud/ucloud-sdk-go/services/uaccount
 github.com/ucloud/ucloud-sdk-go/services/udb
 github.com/ucloud/ucloud-sdk-go/services/udisk
 github.com/ucloud/ucloud-sdk-go/services/udpn
 github.com/ucloud/ucloud-sdk-go/services/uhost
 github.com/ucloud/ucloud-sdk-go/services/ulb
+github.com/ucloud/ucloud-sdk-go/services/umem
 github.com/ucloud/ucloud-sdk-go/services/unet
 github.com/ucloud/ucloud-sdk-go/services/vpc
 github.com/ucloud/ucloud-sdk-go/ucloud
 github.com/ucloud/ucloud-sdk-go/ucloud/auth
 github.com/ucloud/ucloud-sdk-go/ucloud/error
 github.com/ucloud/ucloud-sdk-go/ucloud/log
+github.com/ucloud/ucloud-sdk-go/private/utils
 github.com/ucloud/ucloud-sdk-go/ucloud/request
 github.com/ucloud/ucloud-sdk-go/ucloud/response
-github.com/ucloud/ucloud-sdk-go/private/utils
 github.com/ucloud/ucloud-sdk-go/private/protocol/http
 github.com/ucloud/ucloud-sdk-go/ucloud/version
 # github.com/ulikunitz/xz v0.5.4

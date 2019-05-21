@@ -8,12 +8,14 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/ucloud/auth"
 	"github.com/ucloud/ucloud-sdk-go/ucloud/log"
 
+	pumem "github.com/ucloud/ucloud-sdk-go/private/services/umem"
 	"github.com/ucloud/ucloud-sdk-go/services/uaccount"
 	"github.com/ucloud/ucloud-sdk-go/services/udb"
 	"github.com/ucloud/ucloud-sdk-go/services/udisk"
 	"github.com/ucloud/ucloud-sdk-go/services/udpn"
 	"github.com/ucloud/ucloud-sdk-go/services/uhost"
 	"github.com/ucloud/ucloud-sdk-go/services/ulb"
+	"github.com/ucloud/ucloud-sdk-go/services/umem"
 	"github.com/ucloud/ucloud-sdk-go/services/unet"
 	"github.com/ucloud/ucloud-sdk-go/services/vpc"
 )
@@ -52,7 +54,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 	// enable auto retry with http/connection error
 	cfg.MaxRetries = c.MaxRetries
 	cfg.LogLevel = log.DebugLevel
-	cfg.UserAgent = "Terraform-UCloud/1.6.0"
+	cfg.UserAgent = "Terraform-UCloud/1.9.0"
 
 	// if no base url be set, get insecure http or secure https default url
 	// uf base url is set, use it
@@ -87,6 +89,10 @@ func (c *Config) Client() (*UCloudClient, error) {
 	client.udiskconn = udisk.NewClient(cfg, cred)
 	client.udpnconn = udpn.NewClient(cfg, cred)
 	client.udbconn = udb.NewClient(cfg, cred)
+	client.umemconn = umem.NewClient(cfg, cred)
+
+	// initialize client connections for private usage
+	client.pumemconn = pumem.NewClient(cfg, cred)
 
 	client.config = cfg
 	client.credential = cred

@@ -207,3 +207,61 @@ func validateCIDRBlock(v interface{}, k string) (ws []string, errors []error) {
 	errors = append(errors, fmt.Errorf("excepted cidr network in one of 192.168.x.x, 172.16.x.x, 10.x.x.x"))
 	return
 }
+
+func validateRedisInstanceType(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+
+	if _, err := parseRedisInstanceType(value); err != nil {
+		errors = append(errors, err)
+	}
+
+	return
+}
+
+func validateMemcacheInstanceType(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+
+	if _, err := parseMemcacheInstanceType(value); err != nil {
+		errors = append(errors, err)
+	}
+
+	return
+}
+
+var validateKVStoreInstanceName = validation.StringMatch(
+	regexp.MustCompile(`^[A-Za-z0-9-_]{6,63}$`),
+	"expected value to be have 1 - 63 characters and only support english, numbers, '-', '_'",
+)
+
+var kvstoreInstancePasswordSpecialPattern = regexp.MustCompile(`[-_]`)
+var kvstoreInstancePasswordPattern = regexp.MustCompile(`^[A-Za-z0-9-_]{6,36}$`)
+
+func validateKVStoreInstancePassword(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	if !kvstoreInstancePasswordPattern.MatchString(value) {
+		errors = append(errors, fmt.Errorf("%q is invalid, should have between 6-36 characters and any characters must be legal, got %q", k, value))
+	}
+
+	categoryCount := 0
+	if instancePasswordUpperPattern.MatchString(value) {
+		categoryCount++
+	}
+
+	if instancePasswordLowerPattern.MatchString(value) {
+		categoryCount++
+	}
+
+	if instancePasswordNumPattern.MatchString(value) {
+		categoryCount++
+	}
+
+	if kvstoreInstancePasswordSpecialPattern.MatchString(value) {
+		categoryCount++
+	}
+
+	if categoryCount < 3 {
+		errors = append(errors, fmt.Errorf("%q is invalid, should have least 3 items of Capital letters, small letter, numbers and special characters, got %q", k, value))
+	}
+
+	return
+}

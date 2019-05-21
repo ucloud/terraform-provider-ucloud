@@ -26,7 +26,7 @@ func resourceUCloudEIP() *schema.Resource {
 			"bandwidth": {
 				Type:         schema.TypeInt,
 				Optional:     true,
-				Default:      1,
+				Computed:     true,
 				ValidateFunc: validation.IntBetween(1, 800),
 			},
 
@@ -54,8 +54,8 @@ func resourceUCloudEIP() *schema.Resource {
 
 			"charge_mode": {
 				Type:     schema.TypeString,
-				Default:  "bandwidth",
 				Optional: true,
+				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"traffic",
 					"bandwidth",
@@ -155,10 +155,21 @@ func resourceUCloudEIPCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := client.unetconn
 
 	req := conn.NewAllocateEIPRequest()
-	req.Bandwidth = ucloud.Int(d.Get("bandwidth").(int))
 	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
 	req.PayMode = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_mode").(string)))
 	req.OperatorName = ucloud.String(upperCamelCvt.unconvert(d.Get("internet_type").(string)))
+
+	if v, ok := d.GetOk("charge_mode"); ok {
+		req.PayMode = ucloud.String(upperCamelCvt.unconvert(v.(string)))
+	} else {
+		req.PayMode = ucloud.String(upperCamelCvt.unconvert("bandwidth"))
+	}
+
+	if v, ok := d.GetOk("bandwidth"); ok {
+		req.Bandwidth = ucloud.Int(v.(int))
+	} else {
+		req.Bandwidth = ucloud.Int(1)
+	}
 
 	if v, ok := d.GetOk("duration"); ok {
 		req.Quantity = ucloud.Int(v.(int))

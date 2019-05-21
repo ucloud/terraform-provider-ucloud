@@ -1,4 +1,25 @@
-## 1.8.1 (Unreleased)
+## 1.9.0 (Unreleased)
+
+FEATURES:
+
+* **New Resource:** `ucloud_redis_instance` [GH-33]
+* **New Resource:** `ucloud_memcache_instance` [GH-33]
+
+ENHANCEMENTS:
+
+* datasource/ucloud_db_instances: Add attribute `private_ip`[GH-33]
+* resource/ucloud_db_instance: Add attribute `private_ip`[GH-33]
+
+BUG FIXES:
+
+* resource/ucloud_lb_listener: Fix `port` to ForceNew and fix default value about it [GH-32]
+* resource/ucloud_lb: Fix `vpc_id` `subnet_id` to ForceNew [GH-32]
+* resource/ucloud_db_instance: Fix `tag` to ForceNew [GH-32]
+* resource/ucloud_subnet: Fix `remark` to ForceNew [GH-32]
+* resource/ucloud_vpc_peering_connection: Fix `peer_project_id` to ForceNew [GH-32]
+* resource/ucloud_udpn_connection: Fix `charge_type` `duration`to ForceNew [GH-32]
+
+
 ## 1.8.0 (May 14, 2019)
 
 ENHANCEMENTS:

@@ -81,6 +81,7 @@ You may refer to [list of instance type](https://docs.ucloud.cn/compute/terrafor
 In addition to all arguments above, the following attributes are exported:
 
 * `status` - Specifies the status of database, possible values are: `Init`, `Fail`, `Starting`, `Running`, `Shutdown`, `Shutoff`, `Delete`, `Upgrading`, `Promoting`, `Recovering` and `Recover fail`.
+* `private_ip` - The private IP address assigned to the database instance.
 * `create_time` - The creation time of database, formatted by RFC3339 time string.
 * `expire_time` - The expiration time of database, formatted by RFC3339 time string.
 * `modify_time` - The modification time of database, formatted by RFC3339 time string.

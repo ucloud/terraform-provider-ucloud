@@ -112,6 +112,8 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_lb_ssl":                 resourceUCloudLBSSL(),
 			"ucloud_lb_ssl_attachment":      resourceUCloudLBSSLAttachment(),
 			"ucloud_db_instance":            resourceUCloudDBInstance(),
+			"ucloud_redis_instance":         resourceUCloudRedisInstance(),
+			"ucloud_memcache_instance":      resourceUCloudMemcacheInstance(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

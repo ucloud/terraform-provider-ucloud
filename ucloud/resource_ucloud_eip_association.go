@@ -107,7 +107,7 @@ func resourceUCloudEIPAssociationRead(d *schema.ResourceData, meta interface{}) 
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error on reading eip association when creating %q, %s", d.Id(), err)
+		return fmt.Errorf("error on reading eip association %q, %s", d.Id(), err)
 	}
 
 	// remote api has not returned eip

@@ -68,7 +68,7 @@ all: mac windows linux
 
 dev: clean fmt
 	@chmod +x scripts/devinit.sh
-	@sh ./scripts/devinit.sh
+	@bash ./scripts/devinit.sh
 
 clean:
 	rm -rf bin/*

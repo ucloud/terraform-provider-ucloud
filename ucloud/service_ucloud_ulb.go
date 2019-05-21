@@ -63,7 +63,7 @@ func (client *UCloudClient) describeVServerById(lbId, listenerId string) (*ulb.U
 
 func (client *UCloudClient) describeBackendById(lbId, listenerId, backendId string) (*ulb.ULBBackendSet, error) {
 	if backendId == "" {
-		return nil, newNotFoundError(getNotFoundMessage("backend", backendId))
+		return nil, newNotFoundError(getNotFoundMessage("lb_attachment", backendId))
 	}
 	vserverSet, err := client.describeVServerById(lbId, listenerId)
 
@@ -78,7 +78,7 @@ func (client *UCloudClient) describeBackendById(lbId, listenerId, backendId stri
 		}
 	}
 
-	return nil, newNotFoundError(getNotFoundMessage("backend", backendId))
+	return nil, newNotFoundError(getNotFoundMessage("lb_attachment", backendId))
 }
 
 func (client *UCloudClient) describePolicyById(lbId, listenerId, policyId string) (*ulb.ULBPolicySet, error) {
