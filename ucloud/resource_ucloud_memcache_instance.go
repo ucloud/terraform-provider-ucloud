@@ -287,7 +287,7 @@ func diffValidateMemcacheInstanceType(old, new, meta interface{}) error {
 			return fmt.Errorf("memcache instance is not supported update the type of %q", "instance_type")
 		}
 		if newType.Engine != oldType.Engine {
-			return fmt.Errorf("memcache instance is not supported update the engin of %q", "instance_type")
+			return fmt.Errorf("memcache instance is not supported update the engine of %q", "instance_type")
 		}
 	}
 

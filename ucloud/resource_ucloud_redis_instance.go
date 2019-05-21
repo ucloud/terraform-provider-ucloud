@@ -611,7 +611,7 @@ func diffValidateRedisInstanceType(old, new, meta interface{}) error {
 			return fmt.Errorf("redis instance is not supported update the type of %q", "instance_type")
 		}
 		if newType.Engine != oldType.Engine {
-			return fmt.Errorf("redis instance is not supported update the engin of %q", "instance_type")
+			return fmt.Errorf("redis instance is not supported update the engine of %q", "instance_type")
 		}
 	}
 
