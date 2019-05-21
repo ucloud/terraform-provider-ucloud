@@ -8,7 +8,7 @@ data "ucloud_zones" "default" {}
 
 # Create VPC
 resource "ucloud_vpc" "default" {
-  name = "tf-example-intranet-cluster"
+  name = "tf-example-memcache"
   tag  = "tf-example"
 
   # vpc network
@@ -17,7 +17,7 @@ resource "ucloud_vpc" "default" {
 
 # Create Subnet under the VPC
 resource "ucloud_subnet" "default" {
-  name = "tf-example-intranet-cluster"
+  name = "tf-example-memcache"
   tag  = "tf-example"
 
   # subnet's network must be contained by vpc network
