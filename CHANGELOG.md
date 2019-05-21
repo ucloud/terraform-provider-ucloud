@@ -7,8 +7,8 @@ FEATURES:
 
 ENHANCEMENTS:
 
-* datasource/ucloud_db_instances: Add attribute `private_ip`[#33]
-* resource/ucloud_db_instance: Add attribute `private_ip`[#33]
+* datasource/ucloud_db_instances: Add attribute `private_ip`[GH-33]
+* resource/ucloud_db_instance: Add attribute `private_ip`[GH-33]
 
 BUG FIXES:
 
