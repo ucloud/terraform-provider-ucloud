@@ -1,8 +1,8 @@
-## 1.10.0 (Unreleased)
+## 1.10.0 (June 10, 2019)
 
 FEATURES:
 
-* **Terraform 0.12** update terraform SDK to 0.12 [GH-34]
+* **Terraform 0.12** update terraform SDK to 0.12 ([#34](https://github.com/terraform-providers/terraform-provider-ucloud/issues/34))
 
 ## 1.9.0 (May 21, 2019)
 
