@@ -20,21 +20,22 @@ resource "ucloud_lb" "foo" {
 
 resource "ucloud_lb_listener" "foo" {
     name             = "tf-example-lb-ssl-attachment"
-    load_balancer_id = "${ucloud_lb.foo.id}"
+    load_balancer_id = ucloud_lb.foo.id
     protocol         = "https"
 }
 
 resource "ucloud_lb_ssl" "foo" {
-    name = "tf-example-lb-ssl-attachment"
-    private_key = "${file("test-fixtures/private.key")}"
-    user_cert = "${file("test-fixtures/user.crt")}"
-    ca_cert = "${file("test-fixtures/ca.crt")}"
+  name        = "tf-example-lb-ssl-attachment"
+  private_key = file("private.key")
+  user_cert   = file("user.crt")
+  ca_cert     = file("ca.crt")
 }
 
+
 resource "ucloud_lb_ssl_attachment" "foo" {
-    load_balancer_id = "${ucloud_lb.foo.id}"
-    listener_id      = "${ucloud_lb_listener.foo.id}"
-    ssl_id      = "${ucloud_lb_ssl.foo.id}"
+    load_balancer_id = ucloud_lb.foo.id
+    listener_id      = ucloud_lb_listener.foo.id
+    ssl_id      = ucloud_lb_ssl.foo.id
 }
 ```
 

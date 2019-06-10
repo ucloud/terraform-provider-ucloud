@@ -18,7 +18,7 @@ data "ucloud_zones" "default" {}
 
 # Query image
 data "ucloud_images" "default" {
-  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  availability_zone = data.ucloud_zones.default.zones[0].id
   name_regex        = "^CentOS 7.[1-2] 64"
   image_type        = "base"
 }
@@ -48,12 +48,12 @@ resource "ucloud_eip" "default" {
 # Create a web server
 resource "ucloud_instance" "web" {
   instance_type     = "n-basic-2"
-  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-  image_id          = "${data.ucloud_images.default.images.0.id}"
+  availability_zone = data.ucloud_zones.default.zones[0].id
+  image_id          = data.ucloud_images.default.images[0].id
 
   data_disk_size = 50
   root_password  = "wA1234567"
-  security_group = "${ucloud_security_group.default.id}"
+  security_group = ucloud_security_group.default.id
 
   name = "tf-example-eip"
   tag  = "tf-example"
@@ -61,8 +61,8 @@ resource "ucloud_instance" "web" {
 
 # Bind eip to instance
 resource "ucloud_eip_association" "default" {
-  resource_id   = "${ucloud_instance.web.id}"
-  eip_id        = "${ucloud_eip.default.id}"
+  resource_id   = ucloud_instance.web.id
+  eip_id        = ucloud_eip.default.id
 }
 ```
 

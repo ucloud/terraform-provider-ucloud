@@ -19,7 +19,7 @@ data "ucloud_lb_attachments" "example" {
 }
 
 output "first" {
-    value = "${data.ucloud_lb_attachments.example.lb_attachments.0.id}"
+    value = data.ucloud_lb_attachments.example.lb_attachments[0].id
 }
 ```
 

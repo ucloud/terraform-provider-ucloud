@@ -4,6 +4,10 @@ The lb example launches load balancer and  attach Host instances. It also create
 
 To run, configure your UCloud provider as described in https://www.terraform.io/docs/providers/ucloud/index.html
 
+## Requirements
+
+- [Terraform](https://www.terraform.io/downloads.html) 0.12.x
+
 ## Setup Environment
 
 ```sh

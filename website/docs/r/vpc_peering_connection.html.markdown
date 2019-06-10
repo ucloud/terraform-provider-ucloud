@@ -26,8 +26,8 @@ resource "ucloud_vpc" "bar" {
 }
 
 resource "ucloud_vpc_peering_connection" "connection" {
-    vpc_id      = "${ucloud_vpc.foo.id}"
-    peer_vpc_id = "${ucloud_vpc.bar.id}"
+    vpc_id      = ucloud_vpc.foo.id
+    peer_vpc_id = ucloud_vpc.bar.id
 }
 ```
 

@@ -21,7 +21,7 @@ resource "ucloud_lb" "web" {
 }
 
 resource "ucloud_lb_listener" "example" {
-    load_balancer_id = "${ucloud_lb.web.id}"
+    load_balancer_id = ucloud_lb.web.id
     protocol         = "http"
 }
 ```

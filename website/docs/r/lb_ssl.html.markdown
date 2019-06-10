@@ -13,11 +13,11 @@ Provides a Load Balancer SSL certificate resource.
 ## Example Usage
 
 ```hcl
-resource "ucloud_lb_ssl" "example" {
-    name = "tf-example-lb-ssl"
-    private_key = "${file("test-fixtures/private.key")}"
-    user_cert = "${file("test-fixtures/user.crt")}"
-    ca_cert = "${file("test-fixtures/ca.crt")}"
+resource "ucloud_lb_ssl" "default" {
+  name        = "tf-example-lb-ssl"
+  private_key = file("private.key")
+  user_cert   = file("user.crt")
+  ca_cert     = file("ca.crt")
 }
 ```
 

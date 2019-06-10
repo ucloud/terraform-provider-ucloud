@@ -1,6 +1,6 @@
 # Specify the provider and access details
 provider "ucloud" {
-  region = "${var.region}"
+  region = var.region
 }
 
 resource "ucloud_vpc" "foo" {
@@ -16,6 +16,7 @@ resource "ucloud_vpc" "bar" {
 }
 
 resource "ucloud_vpc_peering_connection" "connection" {
-  vpc_id      = "${ucloud_vpc.foo.id}"
-  peer_vpc_id = "${ucloud_vpc.bar.id}"
+  vpc_id      = ucloud_vpc.foo.id
+  peer_vpc_id = ucloud_vpc.bar.id
 }
+

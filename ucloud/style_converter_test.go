@@ -10,7 +10,7 @@ func Test_upperConverter_convert(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		cvt     *upperConverter
+		cvt     styleConverter
 		args    args
 		want    string
 		wantErr bool
@@ -39,7 +39,7 @@ func Test_upperConverter_unconvert(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		cvt     *upperConverter
+		cvt     styleConverter
 		args    args
 		want    string
 		wantErr bool
@@ -68,7 +68,7 @@ func Test_lowerCamelConverter_convert(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		cvt     *lowerCamelConverter
+		cvt     styleConverter
 		args    args
 		want    string
 		wantErr bool
@@ -102,7 +102,7 @@ func Test_lowerCamelConverter_unconvert(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		cvt     *lowerCamelConverter
+		cvt     styleConverter
 		args    args
 		want    string
 		wantErr bool
@@ -135,7 +135,7 @@ func Test_upperCamelConverter_convert(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		cvt     *upperCamelConverter
+		cvt     styleConverter
 		args    args
 		want    string
 		wantErr bool
@@ -167,7 +167,7 @@ func Test_upperCamelConverter_unconvert(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		cvt     *upperCamelConverter
+		cvt     styleConverter
 		args    args
 		want    string
 		wantErr bool

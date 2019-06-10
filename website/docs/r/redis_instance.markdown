@@ -16,7 +16,7 @@ The UCloud Redis instance is a key-value online storage service compatible with 
 data "ucloud_zones" "default" {}
 
 resource "ucloud_redis_instance" "master" {
-  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  availability_zone = data.ucloud_zones.default.zones[0].id
   instance_type     = "redis-master-2"
   password          = "2018_Tfacc"
   engine_version    = "4.0"
@@ -26,7 +26,7 @@ resource "ucloud_redis_instance" "master" {
 }
 
 resource "ucloud_redis_instance" "distributed" {
-  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  availability_zone = data.ucloud_zones.default.zones[0].id
   instance_type     = "redis-distributed-16"
 
   name              = "tf-example-redis-distributed"

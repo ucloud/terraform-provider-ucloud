@@ -1,10 +1,11 @@
 # Specify the provider and access details
 provider "ucloud" {
-  region = "${var.region}"
+  region = var.region
 }
 
 # Query availability zone
-data "ucloud_zones" "default" {}
+data "ucloud_zones" "default" {
+}
 
 # Create VPC
 resource "ucloud_vpc" "default" {
@@ -24,15 +25,16 @@ resource "ucloud_subnet" "default" {
   # and a subnet must have least 8 ip addresses in it (netmask < 30).
   cidr_block = "192.168.1.0/24"
 
-  vpc_id = "${ucloud_vpc.default.id}"
+  vpc_id = ucloud_vpc.default.id
 }
 
 # Create memcache instance
 resource "ucloud_memcache_instance" "master" {
-  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  availability_zone = data.ucloud_zones.default.zones[0].id
   name              = "tf-example-memcache"
   instance_type     = "memcache-master-2"
 
-  vpc_id    = "${ucloud_vpc.default.id}"
-  subnet_id = "${ucloud_subnet.default.id}"
+  vpc_id    = ucloud_vpc.default.id
+  subnet_id = ucloud_subnet.default.id
 }
+

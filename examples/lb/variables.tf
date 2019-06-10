@@ -7,10 +7,11 @@ variable "instance_password" {
   default = "wA123456"
 }
 
-variable "count" {
+variable "instance_count" {
   default = 2
 }
 
 variable "count_format" {
   default = "%02d"
 }
+

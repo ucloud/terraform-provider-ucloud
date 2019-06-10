@@ -15,33 +15,18 @@ Provides a Database instance resource.
 
 ```hcl
 # Query availability zone
-data "ucloud_zones" "default" {}
-
-# Create parameter group
-data "ucloud_db_parameter_groups" "default" {
-  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-  multi_az          = "false"
-  engine            = "mysql"
-  engine_version    = "5.7"
+data "ucloud_zones" "default" {
 }
 
 # Create database instance
 resource "ucloud_db_instance" "master" {
-  availability_zone  = "${data.ucloud_zones.default.zones.0.id}"
-  name               = "tf-example-db-instance"
-  instance_storage   = 20
-  instance_type      = "mysql-ha-1"
-  engine             = "mysql"
-  engine_version     = "5.7"
-  password           = "2018_dbInstance"
-  parameter_group_id = "${data.ucloud_db_parameter_groups.default.parameter_groups.0.id}"
-  tag                = "tf-example"
-
-  # Backup policy
-  backup_begin_time = 4
-  backup_count      = 6
-  backup_date       = "0111110"
-  backup_black_list = ["test.%"]
+c
+  name              = "tf-example-db"
+  instance_storage  = 20
+  instance_type     = "mysql-ha-1"
+  engine            = "mysql"
+  engine_version    = "5.7"
+  password          = "2018_dbInstance"
 }
 ```
 ## Argument Reference

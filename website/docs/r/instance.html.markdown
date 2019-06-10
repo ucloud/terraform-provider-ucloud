@@ -30,14 +30,14 @@ data "ucloud_images" "default" {
 # Create web instance 
 resource "ucloud_instance" "web" {
     availability_zone = "cn-bj2-04"
-    image_id          = "${data.ucloud_images.default.images.0.id}"
+    image_id          = data.ucloud_images.default.images[0].id
     instance_type     = "n-basic-2"
     root_password     = "wA1234567"
     name              = "tf-example-instance"
     tag               = "tf-example"
 
     # the default Web Security Group that UCloud recommend to users
-    security_group = "${data.ucloud_security_groups.default.security_groups.0.id}"
+    security_group = data.ucloud_security_groups.default.security_groups[0].id
 }
 
 # Create cloud disk
@@ -50,8 +50,8 @@ resource "ucloud_disk" "example" {
 # Attach cloud disk to instance
 resource "ucloud_disk_attachment" "example" {
   availability_zone = "cn-bj2-04"
-  disk_id           = "${ucloud_disk.example.id}"
-  instance_id       = "${ucloud_instance.web.id}"
+  disk_id           = ucloud_disk.example.id
+  instance_id       = ucloud_instance.web.id
 }
 ```
 

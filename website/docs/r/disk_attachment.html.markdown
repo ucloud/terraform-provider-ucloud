@@ -18,24 +18,24 @@ data "ucloud_zones" "default" {}
 
 # Query image
 data "ucloud_images" "default" {
-  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  availability_zone = data.ucloud_zones.default.zones[0].id
   name_regex        = "^CentOS 7.[1-2] 64"
   image_type        = "base"
 }
 
 # Create cloud disk
 resource "ucloud_disk" "default" {
-  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  availability_zone = data.ucloud_zones.default.zones[0].id
   name              = "tf-example-disk"
   disk_size         = 10
 }
 
 # Create a web server
 resource "ucloud_instance" "web" {
-  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  availability_zone = data.ucloud_zones.default.zones[0].id
   instance_type     = "n-basic-2"
 
-  image_id      = "${data.ucloud_images.default.images.0.id}"
+  image_id      = data.ucloud_images.default.images[0].id
   root_password = "wA1234567"
 
   name = "tf-example-disk"
@@ -44,9 +44,9 @@ resource "ucloud_instance" "web" {
 
 # attach cloud disk to instance
 resource "ucloud_disk_attachment" "default" {
-  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-  disk_id           = "${ucloud_disk.default.id}"
-  instance_id       = "${ucloud_instance.web.id}"
+  availability_zone = data.ucloud_zones.default.zones[0].id
+  disk_id           = ucloud_disk.default.id
+  instance_id       = ucloud_instance.web.id
 }
 ```
 
