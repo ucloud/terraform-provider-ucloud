@@ -117,7 +117,7 @@ variable "name" {
 	default = "tf-acc-disks-dataSource-ids"
 }
 
-variable "count" {
+variable "instance_count" {
 	default = 2
 }
 
@@ -132,11 +132,11 @@ resource "ucloud_disk" "foo" {
 	name              = "${var.name}-${format(var.count_format, count.index+1)}"
 	tag               = "tf-acc"
 	disk_size         = 10
-	count 			  = "${var.count}"
+	count 			  = "${var.instance_count}"
 }
 
 data "ucloud_disks" "foo" {
-	ids = ["${ucloud_disk.foo.*.id}"]
+	ids = ucloud_disk.foo.*.id
 }
 `
 

@@ -4,6 +4,10 @@ The db example launches a master data base.
 
 To run, configure your UCloud provider as described in https://www.terraform.io/docs/providers/ucloud/index.html
 
+## Requirements
+
+- [Terraform](https://www.terraform.io/downloads.html) 0.12.x
+
 ## Setup Environment
 
 ```sh

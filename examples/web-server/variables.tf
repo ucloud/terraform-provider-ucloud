@@ -6,3 +6,4 @@ variable "region" {
 variable "instance_password" {
   default = "wA123456"
 }
+

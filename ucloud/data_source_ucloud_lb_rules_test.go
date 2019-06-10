@@ -25,7 +25,7 @@ func TestAccUCloudLBRulesDataSource_basic(t *testing.T) {
 }
 
 const testAccDataLBRulesConfig = `
-variable "count" {
+variable "instance_count" {
 	default = 2
 }
 
@@ -63,34 +63,34 @@ resource "ucloud_instance" "foo"{
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
 	image_id          = "${data.ucloud_images.default.images.0.id}"
 	root_password     = "wA123456"
-	count 			  = "${var.count}"
+	count 			  = "${var.instance_count}"
 }
 
 resource "ucloud_lb_attachment" "foo" {
-	count 			 = "${var.count}"
+	count 			 = "${var.instance_count}"
 	load_balancer_id = "${ucloud_lb.foo.id}"
 	listener_id      = "${ucloud_lb_listener.foo.id}"
-	resource_id      = "${element(ucloud_instance.foo.*.id, count.index)}"
+	resource_id      = ucloud_instance.foo[count.index].id
 	port             = 80
 }
 
 resource "ucloud_lb_rule" "test_domain" {
 	load_balancer_id = "${ucloud_lb.foo.id}"
 	listener_id      = "${ucloud_lb_listener.foo.id}"
-	backend_ids      = ["${element(ucloud_lb_attachment.foo.*.id, count.index)}"]
+	backend_ids      = ucloud_lb_attachment.foo.*.id
 	domain           = "www.ucloud.cn"
 }
 
 resource "ucloud_lb_rule" "test_path" {
 	load_balancer_id = "${ucloud_lb.foo.id}"
 	listener_id      = "${ucloud_lb_listener.foo.id}"
-	backend_ids      = ["${element(ucloud_lb_attachment.foo.*.id, count.index)}"]
+	backend_ids      = ucloud_lb_attachment.foo.*.id
 	path             = "/foo"
 }
 
 
 data "ucloud_lb_rules" "foo" {
-	ids 			 = ["${ucloud_lb_rule.test_domain.id}", "${ucloud_lb_rule.test_path.id}"]
+	ids 			 = [ucloud_lb_rule.test_domain.id, ucloud_lb_rule.test_path.id]
 	listener_id      = "${ucloud_lb_listener.foo.id}"
 	load_balancer_id = "${ucloud_lb.foo.id}"
 }

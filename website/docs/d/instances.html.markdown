@@ -18,7 +18,7 @@ data "ucloud_instances" "example" {
 }
 
 output "first" {
-    value = "${data.ucloud_instances.example.instances.0.id}"
+    value = data.ucloud_instances.example.instances[0].id
 }
 ```
 

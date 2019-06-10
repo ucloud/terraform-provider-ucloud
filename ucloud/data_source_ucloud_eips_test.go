@@ -68,7 +68,7 @@ variable "name" {
 	default = "tf-acc-eips-dataSource-ids"
 }
 
-variable "count" {
+variable "instance_count" {
 	default = 2
 }
 
@@ -81,10 +81,10 @@ resource "ucloud_eip" "foo" {
 	bandwidth     = 1
 	internet_type = "bgp"
 	duration      = 1
-	count 	      = 2
+	count 	      = var.instance_count
 }
 
 data "ucloud_eips" "foo" {
-	ids = ["${ucloud_eip.foo.*.id}"]
+	ids = ucloud_eip.foo.*.id
 }
 `

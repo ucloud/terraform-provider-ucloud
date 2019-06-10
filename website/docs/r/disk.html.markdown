@@ -13,8 +13,12 @@ Provides a Cloud Disk resource.
 ## Example Usage
 
 ```hcl
+# Query availability zone
+data "ucloud_zones" "default" {}
+
+# Create cloud disk
 resource "ucloud_disk" "example" {
-    availability_zone = "cn-bj2-02"
+    availability_zone = data.ucloud_zones.default.zones[0].id
     name              = "tf-example-disk"
     disk_size         = 10
 }

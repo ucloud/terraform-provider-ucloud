@@ -1,4 +1,9 @@
-## 1.9.1 (Unreleased)
+## 1.10.0 (Unreleased)
+
+FEATURES:
+
+* **Terraform 0.12** update terraform SDK to 0.12 [GH-34]
+
 ## 1.9.0 (May 21, 2019)
 
 FEATURES:

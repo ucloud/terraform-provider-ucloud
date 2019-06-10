@@ -110,7 +110,7 @@ resource "ucloud_subnet" "foo" {
 }
 
 data "ucloud_subnets" "foo" {
-	ids = ["${ucloud_subnet.foo.*.id}"]
+	ids = ucloud_subnet.foo.*.id
 }
 `
 

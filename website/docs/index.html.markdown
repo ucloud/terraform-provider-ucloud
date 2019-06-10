@@ -21,10 +21,10 @@ Use the navigation to the left to read about the available resources.
 ```hcl
 # Configure the UCloud Provider
 provider "ucloud" {
-  public_key = "${var.ucloud_public_key}"
-  private_key = "${var.ucloud_private_key}"
-  project_id = "${var.ucloud_project_id}"
-  region     = "cn-bj2"
+  public_key  = var.ucloud_public_key
+  private_key = var.ucloud_private_key
+  project_id  = var.ucloud_project_id
+  region      = "cn-bj2"
 }
 
 # Query default security group
@@ -42,14 +42,14 @@ data "ucloud_images" "default" {
 # Create web instance 
 resource "ucloud_instance" "web" {
     availability_zone = "cn-bj2-04"
-    image_id          = "${data.ucloud_images.default.images.0.id}"
+    image_id          = data.ucloud_images.default.images[0].id
     instance_type     = "n-basic-2"
     root_password     = "wA1234567"
     name              = "tf-example-instance"
     tag               = "tf-example"
 
     # the default Web Security Group that UCloud recommend to users
-    security_group = "${data.ucloud_security_groups.default.security_groups.0.id}"
+    security_group = data.ucloud_security_groups.default.security_groups[0].id
 }
 
 # Create cloud disk
@@ -62,8 +62,8 @@ resource "ucloud_disk" "example" {
 # Attach cloud disk to instance
 resource "ucloud_disk_attachment" "example" {
   availability_zone = "cn-bj2-04"
-  disk_id           = "${ucloud_disk.example.id}"
-  instance_id       = "${ucloud_instance.web.id}"
+  disk_id           = ucloud_disk.example.id
+  instance_id       = ucloud_instance.web.id
 }
 ```
 
@@ -88,7 +88,7 @@ provider "ucloud" {
   public_key = "your_public_key"
   private_key = "your_private_key"
   project_id = "your_project_id"
-  region     = "cn-sh2"
+  region     = "cn-bj2"
 }
 ```
 
@@ -107,7 +107,7 @@ Usage:
 ```hcl
 $ export UCLOUD_PUBLIC_KEY="your_public_key"
 $ export UCLOUD_PRIVATE_KEY="your_private_key"
-$ export UCLOUD_REGION="cn-sh2"
+$ export UCLOUD_REGION="cn-bj2"
 $ export UCLOUD_PROJECT_ID="org-xxx"
 
 $ terraform plan

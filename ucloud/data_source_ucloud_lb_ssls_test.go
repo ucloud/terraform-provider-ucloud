@@ -67,7 +67,7 @@ variable "name" {
 	default = "tf-acc-lb-ssls-dataSource-ids"
 }
 
-variable "count" {
+variable "instance_count" {
 	default = 2
 }
 
@@ -81,10 +81,10 @@ resource "ucloud_lb_ssl" "foo" {
 	private_key = "${file("test-fixtures/private.key")}"
 	user_cert 	= "${file("test-fixtures/user.crt")}"
 	ca_cert 	= "${file("test-fixtures/ca.crt")}"
-	count 		= "${var.count}"
+	count 		= "${var.instance_count}"
 }
 
 data "ucloud_lb_ssls" "foo" {
-	ids = ["${ucloud_lb_ssl.foo.*.id}"]
+	ids = ucloud_lb_ssl.foo.*.id
 }
 `

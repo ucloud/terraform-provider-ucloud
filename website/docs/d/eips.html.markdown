@@ -16,7 +16,7 @@ This data source provides a list of EIP resources (Elastic IP address) according
 data "ucloud_eips" "example" {}
 
 output "first" {
-    value = "${data.ucloud_eips.example.eips.0.ip_set.0.ip}"
+    value = data.ucloud_eips.example.eips[0].ip_set[0].ip
 }
 ```
 

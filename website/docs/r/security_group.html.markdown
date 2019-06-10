@@ -14,7 +14,7 @@ Provides a Security Group resource.
 
 ```hcl
 resource "ucloud_security_group" "example" {
-    name = "tf-example-instance"
+    name = "tf-example-security-group"
     tag  = "tf-example"
 
     # http access from LAN

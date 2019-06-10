@@ -25,7 +25,7 @@ resource "ucloud_lb" "web" {
 }
 
 resource "ucloud_lb_listener" "default" {
-    load_balancer_id = "${ucloud_lb.web.id}"
+    load_balancer_id = ucloud_lb.web.id
     protocol         = "http"
 }
 
@@ -34,24 +34,24 @@ resource "ucloud_instance" "web" {
     availability_zone = "cn-bj2-02"
 
     root_password     = "wA1234567"
-    image_id          = "${data.ucloud_images.default.images.0.id}"
+    image_id          = data.ucloud_images.default.images[0].id
 
     name              = "tf-example-lb"
     tag               = "tf-example"
 }
 
 resource "ucloud_lb_attachment" "default" {
-    load_balancer_id = "${ucloud_lb.web.id}"
-    listener_id      = "${ucloud_lb_listener.default.id}"
+    load_balancer_id = ucloud_lb.web.id
+    listener_id      = ucloud_lb_listener.default.id
     resource_type    = "instance"
-    resource_id      = "${ucloud_instance.web.id}"
+    resource_id      = ucloud_instance.web.id
     port             = 80
 }
 
 resource "ucloud_lb_rule" "example" {
-    load_balancer_id = "${ucloud_lb.web.id}"
-    listener_id      = "${ucloud_lb_listener.default.id}"
-    backend_ids      = ["${ucloud_lb_attachment.default.id}"]
+    load_balancer_id = ucloud_lb.web.id
+    listener_id      = ucloud_lb_listener.default.id
+    backend_ids      = ucloud_lb_attachment.default.*.id
     domain           = "www.ucloud.cn"
 }
 ```

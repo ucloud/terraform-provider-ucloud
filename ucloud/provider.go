@@ -62,7 +62,6 @@ func Provider() terraform.ResourceProvider {
 			"insecure": {
 				Type:          schema.TypeBool,
 				Optional:      true,
-				Default:       defaultInSecure,
 				Description:   descriptions["insecure"],
 				ConflictsWith: []string{"base_url"},
 			},

@@ -82,7 +82,7 @@ resource "ucloud_lb" "foo" {
 	tag  = "tf-acc"
 }
 
-variable "count" {
+variable "instance_count" {
 	default = 2
 }
 
@@ -98,7 +98,7 @@ variable "port_range" {
 }
 
 resource "ucloud_lb_listener" "foo" {
-	count 			  = "${var.count}"
+	count 			  = "${var.instance_count}"
 	load_balancer_id  = "${ucloud_lb.foo.id}"
 	protocol          = "https"
 	port			  = "${var.port_range[count.index]}"
@@ -112,6 +112,6 @@ resource "ucloud_lb_listener" "foo" {
 
 data "ucloud_lb_listeners" "foo" {
 	load_balancer_id = "${ucloud_lb.foo.id}"
-	ids				 = ["${ucloud_lb_listener.foo.*.id}"]
+	ids				 = ucloud_lb_listener.foo.*.id
 }
 `

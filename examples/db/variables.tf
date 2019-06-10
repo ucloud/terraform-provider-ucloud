@@ -6,3 +6,4 @@ variable "region" {
 variable "db_password" {
   default = "2018_UClou"
 }
+

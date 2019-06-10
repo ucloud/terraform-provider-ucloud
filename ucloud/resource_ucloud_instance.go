@@ -281,7 +281,10 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
 	req.CPU = ucloud.Int(t.CPU)
 	req.Memory = ucloud.Int(t.Memory)
-	password := fmt.Sprintf("%s%s", acctest.RandStringFromCharSet(5, defaultPasswordStr), acctest.RandStringFromCharSet(5, defaultPasswordNum))
+	password := fmt.Sprintf("%s%s%s",
+		acctest.RandStringFromCharSet(5, defaultPasswordStr),
+		acctest.RandStringFromCharSet(1, defaultPasswordSpe),
+		acctest.RandStringFromCharSet(5, defaultPasswordNum))
 	if v, ok := d.GetOk("root_password"); ok {
 		req.Password = ucloud.String(v.(string))
 	} else {
