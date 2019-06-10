@@ -56,6 +56,9 @@ func (c *Config) Client() (*UCloudClient, error) {
 	cfg.LogLevel = log.DebugLevel
 	cfg.UserAgent = "Terraform-UCloud/1.10.0"
 
+	// excepted logging
+	cfg.SetActionLevel("GetRegion", log.WarnLevel)
+
 	// if no base url be set, get insecure http or secure https default url
 	// uf base url is set, use it
 	if len(c.BaseURL) == 0 && c.Insecure {
