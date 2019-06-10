@@ -16,7 +16,7 @@ type styleConverter interface {
 
 type upperConverter struct{}
 
-func newUpperConverter() styleConverter {
+func newUpperConverter(specials map[string]string) styleConverter {
 	return &upperConverter{}
 }
 
@@ -46,7 +46,7 @@ func (cvt *upperConverter) unconvert(input string) string {
 
 type lowerCamelConverter struct{}
 
-func newLowerCamelConverter() styleConverter {
+func newLowerCamelConverter(specials map[string]string) styleConverter {
 	return &lowerCamelConverter{}
 }
 
@@ -85,7 +85,7 @@ func (cvt *lowerCamelConverter) unconvert(input string) string {
 
 type upperCamelConverter struct{}
 
-func newUpperCamelConverter() styleConverter {
+func newUpperCamelConverter(specials map[string]string) styleConverter {
 	return &upperCamelConverter{}
 }
 
