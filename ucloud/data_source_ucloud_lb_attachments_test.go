@@ -31,7 +31,7 @@ variable "name" {
 	default = "tf-acc-lb-attachments-dataSource-basic"
 }
 
-variable "count" {
+variable "instance_count" {
 	default = 2
 }
 
@@ -65,11 +65,11 @@ resource "ucloud_instance" "foo"{
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
 	image_id          = "${data.ucloud_images.default.images.0.id}"
 	root_password     = "wA123456"
-	count 			  = "${var.count}"
+	count 			  = "${var.instance_count}"
 }
 
 resource "ucloud_lb_attachment" "foo" {
-	count 			 = "${var.count}"
+	count 			 = "${var.instance_count}"
 	load_balancer_id = "${ucloud_lb.foo.id}"
 	listener_id      = "${ucloud_lb_listener.foo.id}"
 	resource_id      = "${element(ucloud_instance.foo.*.id, count.index)}"
@@ -77,7 +77,7 @@ resource "ucloud_lb_attachment" "foo" {
 }
 
 data "ucloud_lb_attachments" "foo" {
-	ids 			 = ["${ucloud_lb_attachment.foo.*.id}"]
+	ids 			 = ucloud_lb_attachment.foo.*.id
 	listener_id      = "${ucloud_lb_listener.foo.id}"
 	load_balancer_id = "${ucloud_lb.foo.id}"
 }

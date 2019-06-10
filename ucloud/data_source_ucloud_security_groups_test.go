@@ -112,7 +112,7 @@ resource "ucloud_security_group" "foo" {
 }
 
 data "ucloud_security_groups" "foo" {
-	ids = ["${ucloud_security_group.foo.*.id}"]
+	ids = ucloud_security_group.foo.*.id
 }
 `, rInt)
 }

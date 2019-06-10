@@ -76,6 +76,6 @@ resource "ucloud_vpc" "foo" {
 }
 
 data "ucloud_vpcs" "foo" {
-	ids = ["${ucloud_vpc.foo.*.id}"]
+	ids = ucloud_vpc.foo.*.id
 }
 `

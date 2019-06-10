@@ -101,7 +101,7 @@ resource "ucloud_lb" "foo" {
 }
 
 data "ucloud_lbs" "foo" {
-	ids = ["${ucloud_lb.foo.*.id}"]
+	ids = ucloud_lb.foo.*.id
 }
 `
 

@@ -44,6 +44,6 @@ resource "ucloud_instance" "foo" {
 }
 
 data "ucloud_instances" "foo" {
-	ids = ["${ucloud_instance.foo.*.id}"]
+	ids = ucloud_instance.foo.*.id
 }
 `
