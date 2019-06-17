@@ -500,20 +500,21 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 
 	if d.HasChange("boot_disk_size") {
 		bootDiskType := d.Get("boot_disk_type").(string)
+		bootDiskSize := d.Get("boot_disk_size").(int)
 		imageResp, err := client.DescribeImageById(d.Get("image_id").(string))
 		if err != nil {
 			return fmt.Errorf("error on %s when updating instance %q, %s", "DescribeImage", d.Id(), err)
 		}
 
-		if d.Get("boot_disk_size").(int) < imageResp.ImageSize {
+		if bootDiskSize < imageResp.ImageSize {
 			return fmt.Errorf("expected boot_disk_size to be at least %d", imageResp.ImageSize)
 		}
 
 		// the initialization of cloud boot disk is done at creation instance
-		if (bootDiskType == "cloud_normal" || bootDiskType == "cloud_ssd") && d.IsNewResource() {
+		if ((bootDiskType == "cloud_normal" || bootDiskType == "cloud_ssd") && d.IsNewResource()) || imageResp.ImageSize == bootDiskSize {
 			bootDiskNeedUpdate = false
 		} else {
-			bootDiskReq.DiskSpace = ucloud.Int(d.Get("boot_disk_size").(int))
+			bootDiskReq.DiskSpace = ucloud.Int(bootDiskSize)
 			bootDiskReq.UHostId = ucloud.String(d.Id())
 			bootDiskNeedUpdate = true
 		}
@@ -531,11 +532,46 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 			return fmt.Errorf("error on reading instance when updating %q, %s", d.Id(), err)
 		}
 
-		if instance.BootDiskState == "Normal" {
-			passwordNeedUpdate = true
-		} else {
-			return fmt.Errorf("reset password not successful, please try again 20 minutes later after the instance starts up")
+		if strings.ToLower(instance.BootDiskState) != bootDisksStatusNormal {
+			if strings.ToLower(instance.State) != statusRunning {
+				startReq := conn.NewStartUHostInstanceRequest()
+				startReq.UHostId = ucloud.String(d.Id())
+				_, err := conn.StartUHostInstance(startReq)
+				if err != nil {
+					return fmt.Errorf("error on starting instance when updating %q, %s", d.Id(), err)
+				}
+
+				// after start instance, we need to wait it Running
+				stateConf := &resource.StateChangeConf{
+					Pending:    []string{statusPending},
+					Target:     []string{statusRunning},
+					Refresh:    instanceStateRefreshFunc(client, d.Id(), statusRunning),
+					Timeout:    d.Timeout(schema.TimeoutUpdate),
+					Delay:      3 * time.Second,
+					MinTimeout: 2 * time.Second,
+				}
+
+				if _, err = stateConf.WaitForState(); err != nil {
+					return fmt.Errorf("error on waiting for starting instance when updating %q, %s", d.Id(), err)
+				}
+			}
 		}
+
+		// wait for instance initialized about boot disk
+		stateConf := &resource.StateChangeConf{
+			Pending:    []string{statusPending},
+			Target:     []string{bootDisksStatusNormal},
+			Refresh:    bootDiskStateRefreshFunc(client, d.Id(), bootDisksStatusNormal),
+			Timeout:    d.Timeout(schema.TimeoutUpdate),
+			Delay:      3 * time.Second,
+			MinTimeout: 2 * time.Second,
+		}
+
+		if _, err := stateConf.WaitForState(); err != nil {
+			return fmt.Errorf("error on waiting for instance initialized about boot disk when updating %q, %s", d.Id(), err)
+		}
+
+		passwordNeedUpdate = true
 	}
 
 	if passwordNeedUpdate || resizeNeedUpdate || dataDiskNeedUpdate || bootDiskNeedUpdate {
@@ -648,7 +684,16 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 			return fmt.Errorf("error on waiting for %s complete to instance %q, %s", "ResizeUHostInstance", d.Id(), err)
 		}
 
-		if strings.ToLower(instance.State) == statusRunning {
+		instanceAfter, err := client.describeInstanceById(d.Id())
+		if err != nil {
+			if isNotFoundError(err) {
+				d.SetId("")
+				return nil
+			}
+			return fmt.Errorf("error on reading instance when updating %q, %s", d.Id(), err)
+		}
+
+		if strings.ToLower(instanceAfter.State) != statusRunning {
 			// after instance update, we need to wait it started
 			startReq := conn.NewStartUHostInstanceRequest()
 			startReq.UHostId = ucloud.String(d.Id())
@@ -835,7 +880,42 @@ func instanceStateRefreshFunc(client *UCloudClient, instanceId, target string) r
 			return nil, "", err
 		}
 
+		if instance.State == "ResizeFail" {
+			return nil, "", fmt.Errorf("resizing instance failed")
+		}
+
+		if instance.State == "Install Fail" {
+			return nil, "", fmt.Errorf("install failed")
+		}
+
 		state := strings.ToLower(instance.State)
+		if state != target {
+			state = statusPending
+		}
+
+		return instance, state, nil
+	}
+}
+
+func bootDiskStateRefreshFunc(client *UCloudClient, instanceId, target string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		instance, err := client.describeInstanceById(instanceId)
+		if err != nil {
+			if isNotFoundError(err) {
+				return nil, statusPending, nil
+			}
+			return nil, "", err
+		}
+
+		if instance.State == "ResizeFail" {
+			return nil, "", fmt.Errorf("resizing instance failed")
+		}
+
+		if instance.State == "Install Fail" {
+			return nil, "", fmt.Errorf("install failed")
+		}
+
+		state := strings.ToLower(instance.BootDiskState)
 		if state != target {
 			state = statusPending
 		}
@@ -896,7 +976,10 @@ func diffValidateBootDiskTypeWithDataDiskType(diff *schema.ResourceDiff, v inter
 }
 
 func diffValidateInstanceTypeWithZone(diff *schema.ResourceDiff, v interface{}) error {
-	t, _ := parseInstanceType(diff.Get("instance_type").(string))
+	t, err := parseInstanceType(diff.Get("instance_type").(string))
+	if err != nil {
+		return err
+	}
 	zone := diff.Get("availability_zone").(string)
 
 	if t.HostType == "o" && zone != "cn-bj2-05" {

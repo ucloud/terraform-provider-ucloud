@@ -39,6 +39,9 @@ const (
 
 	// statusStopped is the general status when remote resource is stopped
 	statusStopped = "stopped"
+
+	// bootDisksStatusNormal is the boot disk status whe remote resource is initialized
+	bootDisksStatusNormal = "normal"
 )
 
 const (
