@@ -1,4 +1,9 @@
-## 1.11.0 (Unreleased)
+## 1.10.1 (Unreleased)
+
+BUG FIXES:
+
+* resource/ucloud_instance: Fix the problem that the instance updates some specific attributes (`instance_type`, `root_password`, `boot_disk_size`, `data_disk_size`) without automatically starting up [GH-36]
+
 ## 1.10.0 (June 10, 2019)
 
 FEATURES:

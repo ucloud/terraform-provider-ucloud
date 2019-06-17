@@ -10,7 +10,7 @@ description: |-
 
 Provides an UHost Instance resource.
 
-~> **Note** The instance will reboot automatically to make the change take effect when update `instance_type`, `root_password`, `boot_disk_size`, `data_disk_size`.
+~> **Note** The instance will reboot automatically to make the change take effect when update `instance_type`, `root_password`, `boot_disk_size`, `data_disk_size`. In addition, after the instance created complete, it takes around 10 mins for boot disk initialization when the instance is running, update some specific attributes (`root_password`, `boot_disk_size`) must after initialized complete.
 
 ## Example Usage
 

@@ -2,6 +2,7 @@ package ucloud
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/ucloud/ucloud-sdk-go/external"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
@@ -54,7 +55,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 	// enable auto retry with http/connection error
 	cfg.MaxRetries = c.MaxRetries
 	cfg.LogLevel = log.DebugLevel
-	cfg.UserAgent = "Terraform-UCloud/1.10.0"
+	cfg.UserAgent = "Terraform-UCloud/1.10.1"
 
 	// excepted logging
 	cfg.SetActionLevel("GetRegion", log.WarnLevel)
@@ -83,8 +84,14 @@ func (c *Config) Client() (*UCloudClient, error) {
 		cred.PrivateKey = c.PrivateKey
 	}
 
+	f, err := os.OpenFile("debug.log", os.O_WRONLY|os.O_CREATE, 0755)
+	if err != nil {
+		return nil, err
+	}
+
 	// initialize client connections
 	client.uhostconn = uhost.NewClient(cfg, cred)
+	client.uhostconn.GetLogger().SetOutput(f)
 	client.unetconn = unet.NewClient(cfg, cred)
 	client.ulbconn = ulb.NewClient(cfg, cred)
 	client.vpcconn = vpc.NewClient(cfg, cred)
