@@ -572,11 +572,6 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 		}
 
 		passwordNeedUpdate = true
-		//if instance.BootDiskState == "Normal" {
-		//	passwordNeedUpdate = true
-		//} else {
-		//	return fmt.Errorf("reset password not successful, please try again 20 minutes later after the instance starts up")
-		//}
 	}
 
 	if passwordNeedUpdate || resizeNeedUpdate || dataDiskNeedUpdate || bootDiskNeedUpdate {
