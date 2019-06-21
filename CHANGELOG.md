@@ -1,4 +1,9 @@
-## 1.11.0 (Unreleased)
+## 1.10.2 (Unreleased)
+
+BUG FIXES:
+
+* update terraform SDK to 0.12.2 [GH-37]
+
 ## 1.10.1 (June 17, 2019)
 
 BUG FIXES:
