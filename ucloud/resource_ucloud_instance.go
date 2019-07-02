@@ -1027,19 +1027,21 @@ func diffValidateInstanceTypeWithZone(diff *schema.ResourceDiff, meta interface{
 
 func diffValidateIsolationGroup(diff *schema.ResourceDiff, meta interface{}) error {
 	client := meta.(*UCloudClient)
-	igId := diff.Get("isolation_group").(string)
-	zone := diff.Get("availability_zone").(string)
 
-	igSet, err := client.describeIsolationGroupById(igId)
-	if err != nil {
-		return fmt.Errorf("error on reading isolation group %q before creating instance, %s", igId, err)
-	}
-	for _, val := range igSet.SpreadInfoSet {
-		if val.Zone == zone && val.UHostCount >= 7 {
-			return fmt.Errorf("%q is invalid, "+
-				"up to seven instance can be added to the isolation group %q in availability_zone %q",
-				"isolation_group", igId, zone)
+	if v, ok := diff.GetOk("isolation_group"); ok {
+		zone := diff.Get("availability_zone").(string)
+		igSet, err := client.describeIsolationGroupById(v.(string))
+		if err != nil {
+			return fmt.Errorf("error on reading isolation group %q before creating instance, %s", v.(string), err)
+		}
+		for _, val := range igSet.SpreadInfoSet {
+			if val.Zone == zone && val.UHostCount >= 7 {
+				return fmt.Errorf("%q is invalid, "+
+					"up to seven instance can be added to the isolation group %q in availability_zone %q",
+					"isolation_group", v.(string), zone)
+			}
 		}
 	}
+
 	return nil
 }
