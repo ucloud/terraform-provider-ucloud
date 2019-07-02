@@ -36,8 +36,10 @@ func resourceUCloudInstance() *schema.Resource {
 			customdiff.ValidateChange("security_group", diffValidateDefaultSecurityGroup),
 			customdiff.ValidateChange("data_disk_size", diffValidateInstanceDataDiskSize),
 			customdiff.ValidateChange("boot_disk_size", diffValidateInstanceBootDiskSize),
+			customdiff.ValidateChange("instance_type", diffValidateInstanceType),
 			diffValidateBootDiskTypeWithDataDiskType,
 			diffValidateInstanceTypeWithZone,
+			diffValidateIsolationGroup,
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -162,6 +164,13 @@ func resourceUCloudInstance() *schema.Resource {
 				Computed: true,
 			},
 
+			"isolation_group": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
+
 			"vpc_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -276,7 +285,8 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 
 	req := conn.NewCreateUHostInstanceRequest()
 	req.LoginMode = ucloud.String("Password")
-	req.Zone = ucloud.String(d.Get("availability_zone").(string))
+	zone := d.Get("availability_zone").(string)
+	req.Zone = ucloud.String(zone)
 	req.ImageId = ucloud.String(imageId)
 	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
 	req.CPU = ucloud.Int(t.CPU)
@@ -308,7 +318,7 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 		req.Quantity = ucloud.Int(1)
 	}
 
-	imageResp, err := client.DescribeImageById(imageId)
+	imageResp, err := client.describeImageById(imageId)
 	if err != nil {
 		return fmt.Errorf("error on reading image %q when creating instance, %s", imageId, err)
 	}
@@ -325,6 +335,10 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 		if bootDiskType == "cloud_normal" || bootDiskType == "cloud_ssd" {
 			bootDisk.Size = ucloud.Int(v.(int))
 		}
+	}
+
+	if v, ok := d.GetOk("isolation_group"); ok {
+		req.IsolationGroup = ucloud.String(v.(string))
 	}
 
 	req.Disks = append(req.Disks, bootDisk)
@@ -501,7 +515,7 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 	if d.HasChange("boot_disk_size") {
 		bootDiskType := d.Get("boot_disk_type").(string)
 		bootDiskSize := d.Get("boot_disk_size").(int)
-		imageResp, err := client.DescribeImageById(d.Get("image_id").(string))
+		imageResp, err := client.describeImageById(d.Get("image_id").(string))
 		if err != nil {
 			return fmt.Errorf("error on %s when updating instance %q, %s", "DescribeImage", d.Id(), err)
 		}
@@ -739,6 +753,7 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 	memory := instance.Memory
 	cpu := instance.CPU
 	d.Set("root_password", d.Get("root_password"))
+	d.Set("isolation_group", instance.IsolationGroup)
 	d.Set("name", instance.Name)
 	d.Set("charge_type", upperCamelCvt.convert(instance.ChargeType))
 	d.Set("availability_zone", instance.Zone)
@@ -952,7 +967,28 @@ func diffValidateInstanceBootDiskSize(old, new, meta interface{}) error {
 	return nil
 }
 
-func diffValidateBootDiskTypeWithDataDiskType(diff *schema.ResourceDiff, v interface{}) error {
+func diffValidateInstanceType(old, new, meta interface{}) error {
+	if old.(string) == "" {
+		return nil
+	}
+
+	o, err := parseInstanceType(old.(string))
+	if err != nil {
+		return err
+	}
+
+	n, err := parseInstanceType(new.(string))
+	if err != nil {
+		return err
+	}
+
+	if o.HostType != n.HostType {
+		return fmt.Errorf("update host type: %q to %q of %q not be allowed, please rebuild instance if required", o.HostType, n.HostType, "instance_type")
+	}
+	return nil
+}
+
+func diffValidateBootDiskTypeWithDataDiskType(diff *schema.ResourceDiff, meta interface{}) error {
 	var dataDiskType string
 	var bootDiskType string
 
@@ -975,7 +1011,7 @@ func diffValidateBootDiskTypeWithDataDiskType(diff *schema.ResourceDiff, v inter
 	return nil
 }
 
-func diffValidateInstanceTypeWithZone(diff *schema.ResourceDiff, v interface{}) error {
+func diffValidateInstanceTypeWithZone(diff *schema.ResourceDiff, meta interface{}) error {
 	t, err := parseInstanceType(diff.Get("instance_type").(string))
 	if err != nil {
 		return err
@@ -986,5 +1022,24 @@ func diffValidateInstanceTypeWithZone(diff *schema.ResourceDiff, v interface{}) 
 		return fmt.Errorf("the outstanding type about %q only be supported in %q, got %q", "instance_type", "cn-bj2-05", zone)
 	}
 
+	return nil
+}
+
+func diffValidateIsolationGroup(diff *schema.ResourceDiff, meta interface{}) error {
+	client := meta.(*UCloudClient)
+	igId := diff.Get("isolation_group").(string)
+	zone := diff.Get("availability_zone").(string)
+
+	igSet, err := client.describeIsolationGroupById(igId)
+	if err != nil {
+		return fmt.Errorf("error on reading isolation group %q before creating instance, %s", igId, err)
+	}
+	for _, val := range igSet.SpreadInfoSet {
+		if val.Zone == zone && val.UHostCount >= 7 {
+			return fmt.Errorf("%q is invalid, "+
+				"up to seven instance can be added to the isolation group %q in availability_zone %q",
+				"isolation_group", igId, zone)
+		}
+	}
 	return nil
 }

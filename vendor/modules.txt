@@ -219,7 +219,7 @@ github.com/sirupsen/logrus
 # github.com/spf13/afero v1.2.1
 github.com/spf13/afero
 github.com/spf13/afero/mem
-# github.com/ucloud/ucloud-sdk-go v0.8.7-beta3
+# github.com/ucloud/ucloud-sdk-go v0.8.8
 github.com/ucloud/ucloud-sdk-go/external
 github.com/ucloud/ucloud-sdk-go/private/services/umem
 github.com/ucloud/ucloud-sdk-go/services/uaccount

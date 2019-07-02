@@ -143,7 +143,7 @@ func parseInstanceTypeByNormal(splited ...string) (*instanceType, error) {
 	hostType := splited[0]
 	err := checkStringIn(hostType, []string{"n", "o"})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("instance type is invalid, the host type of %q must be one of %#v", "instance_type", []string{"n", "o"})
 	}
 
 	hostScaleType := splited[1]
