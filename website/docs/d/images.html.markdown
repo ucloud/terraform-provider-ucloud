@@ -45,7 +45,7 @@ In addition to all arguments above, the following attributes are exported:
 The attribute (`images`) support the following:
 
 * `availability_zone` - Availability zone where image is located.
-* `create_time` - The time of creation for EIP, formatted in RFC3339 time string.
+* `create_time` - The time of creation for image, formatted in RFC3339 time string.
 * `features` - To identify if any particular feature belongs to the instance, the value is `NetEnhnced` as I/O enhanced instance for now.
 * `description` - The description of image if any.
 * `id` - The ID of image.
