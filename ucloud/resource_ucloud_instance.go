@@ -301,6 +301,9 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 		req.Password = ucloud.String(password)
 	}
 
+	req.MachineType = ucloud.String("N")
+	req.MinimalCpuPlatform = ucloud.String("Intel/Auto")
+
 	if t.HostType == "o" {
 		req.MachineType = ucloud.String("O")
 		req.MinimalCpuPlatform = ucloud.String("Intel/Cascadelake")

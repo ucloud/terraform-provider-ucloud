@@ -64,9 +64,9 @@ The following arguments are supported:
 * `instance_type` - (Required) The type of instance. You may refer to [list of instance type](https://docs.ucloud.cn/compute/terraform/specification/instance)
 
     ~> **Note**  When it is changed, the instance will reboot automatically to make the change take effect. 
-    - The normal type (range of CPU in core: 1-32, range of memory in MB: 1-128, and the number of cores of CPU and memory must be divisible by 2 without a remainder (except single core or memory)):
+    - The normal type ( range of CPU in core: 1-32, range of memory in MB: 1-128, and the number of cores of CPU and memory must be divisible by 2 without a remainder (except single core or memory):
         - One is normal type defined by UCloud provider: `n-Type-CPU`(eg:`n-highcpu-2`), `Type` can be `highcpu`, `basic`, `standard`, `highmem` which represents the ratio of CPU and memory respectively (1:1, 1:2, 1:4, 1:8), CPU can be the specific number of cores of cpu.
-        - One is normal type defined by Customized: `n-customized-CPU-Memory`, the ratio of cpu to memory should be range of 2:1 ~ 1:12 (eg:`n-customized-1-10`). Thereinto, the custmized not be valid when ratio of cpu to memory is 1:1, 1:2, 1:4, 1:8.
+        - Another is normal type defined by Customized: `n-customized-CPU-Memory`, the ratio of cpu to memory should be range of 2:1 ~ 1:12 (eg:`n-customized-1-10`). Thereinto, the custmized not be valid when ratio of cpu to memory is 1:1, 1:2, 1:4, 1:8.
     - There is a new outstanding type defined by UCloud provider only valid in availability_zone `cn-bj2-05`: `o-Type-CPU`(eg: `o-standard-4`). `Type` can be `highcpu`, `basic`, `standard`, `highmem` which represents the ratio of CPU and memory respectively (1:1, 1:2, 1:4, 1:8). This type range of CPU in core: 4-64, range of memory in MB: 4-256, the number of cores of CPU and memory must be divisible by 2 without a remainder (except single core or memory). In order to use it, we must set `boot_disk_type` to `cloud_ssd`. In addition, this type needs to be specified to `image_id`, the image type is `base` and the name of which is prefix with "高内核". Furthermore, the disk attached to instance must be `rssd_data_disk` (RDMA-SSD) cloud disk if required. 
 * `root_password` - (Optional) The password for the instance, which contains 8-30 characters, and at least 2 items of capital letters, lower case letters, numbers and special characters. The special characters include <code>`()~!@#$%^&*-+=_|{}\[]:;'<>,.?/</code>. If not specified, terraform will autogenerate a password. 
 
@@ -84,9 +84,10 @@ The following arguments are supported:
 * `name` - (Optional) The name of instance, which contains 1-63 characters and only support Chinese, English, numbers, '-', '_', '.'. If not specified, terraform will autogenerate a name beginning with `tf-instance`.
 * `remark` - (Optional) The remarks of instance. (Default: `""`).
 * `security_group` - (Optional) The ID of the associated security group.
+* `vpc_id` - (Optional) The ID of VPC linked to the instance. If not defined `vpc_id`, the instance will use the default VPC in the current region.
 * `subnet_id` - (Optional) The ID of subnet. If defined `vpc_id`, the `subnet_id` is Required. If not defined `vpc_id` and `subnet_id`, the instance will use the default subnet in the current region.
 * `tag` - (Optional) A tag assigned to instance, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
-* `vpc_id` - (Optional) The ID of VPC linked to the instance. If not defined `vpc_id`, the instance will use the default VPC in the current region.
+* `isolation_group` - (Optional) The ID of the associated isolation group.
 
 ## Attributes Reference
 
