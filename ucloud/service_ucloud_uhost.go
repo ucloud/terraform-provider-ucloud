@@ -1,6 +1,7 @@
 package ucloud
 
 import (
+	"github.com/ucloud/ucloud-sdk-go/ucloud/error"
 	"strconv"
 	"strings"
 
@@ -26,7 +27,7 @@ func (client *UCloudClient) describeInstanceById(instanceId string) (*uhost.UHos
 	return &resp.UHostSet[0], nil
 }
 
-func (client *UCloudClient) DescribeImageById(imageId string) (*uhost.UHostImageSet, error) {
+func (client *UCloudClient) describeImageById(imageId string) (*uhost.UHostImageSet, error) {
 	if imageId == "" {
 		return nil, newNotFoundError(getNotFoundMessage("image", imageId))
 	}
@@ -42,6 +43,29 @@ func (client *UCloudClient) DescribeImageById(imageId string) (*uhost.UHostImage
 	}
 
 	return &resp.ImageSet[0], nil
+}
+
+func (client *UCloudClient) describeIsolationGroupById(igId string) (*uhost.IsolationGroup, error) {
+	if igId == "" {
+		return nil, newNotFoundError(getNotFoundMessage("isolation group", igId))
+	}
+	req := client.uhostconn.NewDescribeIsolationGroupRequest()
+	req.GroupId = ucloud.String(igId)
+
+	resp, err := client.uhostconn.DescribeIsolationGroup(req)
+
+	if err != nil {
+		if uErr, ok := err.(uerr.Error); ok && uErr.Code() == 8037 {
+			return nil, newNotFoundError(getNotFoundMessage("isolation group", igId))
+		}
+		return nil, err
+	}
+
+	if len(resp.IsolationGroupSet) < 1 {
+		return nil, newNotFoundError(getNotFoundMessage("isolation group", igId))
+	}
+
+	return &resp.IsolationGroupSet[0], nil
 }
 
 func instanceTypeSetFunc(machineType string, cpu, memory int) string {

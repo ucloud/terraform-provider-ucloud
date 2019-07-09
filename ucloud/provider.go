@@ -69,7 +69,6 @@ func Provider() terraform.ResourceProvider {
 			"base_url": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				Default:       defaultBaseURL,
 				Description:   descriptions["base_url"],
 				ConflictsWith: []string{"insecure"},
 			},
@@ -113,6 +112,7 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_db_instance":            resourceUCloudDBInstance(),
 			"ucloud_redis_instance":         resourceUCloudRedisInstance(),
 			"ucloud_memcache_instance":      resourceUCloudMemcacheInstance(),
+			"ucloud_isolation_group":        resourceUCloudIsolationGroup(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
@@ -125,9 +125,14 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		Region:                d.Get("region").(string),
 		MaxRetries:            d.Get("max_retries").(int),
 		Insecure:              d.Get("insecure").(bool),
-		BaseURL:               d.Get("base_url").(string),
 		Profile:               d.Get("profile").(string),
 		SharedCredentialsFile: d.Get("shared_credentials_file").(string),
+	}
+
+	if v, ok := d.GetOk("base_url"); ok && v.(string) != "" {
+		config.BaseURL = v.(string)
+	} else {
+		config.BaseURL = defaultBaseURL
 	}
 
 	if projectId, ok := d.GetOk("project_id"); ok && projectId.(string) != "" {

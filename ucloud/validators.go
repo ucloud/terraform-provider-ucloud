@@ -136,6 +136,11 @@ var validateName = validation.StringMatch(
 	"expected value to be 1 - 63 characters and only support chinese, english, numbers, '-', '_', '.'",
 )
 
+var validateIsolationGroupName = validation.StringMatch(
+	regexp.MustCompile(`^[A-Za-z0-9\p{Han}-_.,\[\]:]{1,63}$`),
+	"expected value to be 1 - 63 characters and only support chinese, english, numbers, '-', '_', '.', ',', '[', ']', ':'",
+)
+
 var validateTag = validation.StringMatch(
 	regexp.MustCompile(`^[A-Za-z0-9\p{Han}-_.]{0,63}$`),
 	"expected value to be 0 - 63 characters and only support chinese, english, numbers, '-', '_', '.'",

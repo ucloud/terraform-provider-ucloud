@@ -53,7 +53,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 	// enable auto retry with http/connection error
 	cfg.MaxRetries = c.MaxRetries
 	cfg.LogLevel = log.DebugLevel
-	cfg.UserAgent = "Terraform-UCloud/1.10.2"
+	cfg.UserAgent = "Terraform-UCloud/1.11.0"
 
 	// excepted logging
 	cfg.SetActionLevel("GetRegion", log.WarnLevel)

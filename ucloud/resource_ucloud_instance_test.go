@@ -97,16 +97,43 @@ func TestAccUCloudInstance_localDisk(t *testing.T) {
 
 		Steps: []resource.TestStep{
 			{
-				Config: testAccInstanceConfiglocalDisk,
+				Config: testAccInstanceConfigLocalDisk,
 
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckInstanceExists("ucloud_instance.foo", &instance),
-					resource.TestCheckResourceAttr("ucloud_instance.foo", "name", "tf-acc-debug"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "name", "tf-acc-instance-local-disk"),
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "tag", "tf-acc"),
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "instance_type", "n-basic-1"),
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "status", "Running"),
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "boot_disk_type", "local_normal"),
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "boot_disk_size", "40"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccUCloudInstance_isolationGroup(t *testing.T) {
+	var instance uhost.UHostInstanceSet
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		IDRefreshName: "ucloud_instance.foo",
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckInstanceDestroy,
+
+		Steps: []resource.TestStep{
+			{
+				Config: testAccInstanceConfigIsolationGroup,
+
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckInstanceExists("ucloud_instance.foo", &instance),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "name", "tf-acc-instance-isolation-group"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "tag", "tf-acc"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "instance_type", "n-basic-1"),
 				),
 			},
 		},
@@ -467,22 +494,22 @@ resource "ucloud_instance" "foo" {
 `, rInt)
 }
 
-const testAccInstanceConfiglocalDisk = `
+const testAccInstanceConfigLocalDisk = `
+data "ucloud_zones" "default" {
+}
+
 data "ucloud_security_groups" "default" {
   type = "recommend_web"
 }
 
 data "ucloud_images" "default" {
-  availability_zone = "cn-bj2-02"
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
   name_regex        = "^CentOS 6.5 64"
   image_type        = "base"
 }
 
-data "ucloud_zones" "default" {
-}
-
 resource "ucloud_instance" "foo" {
-  name              = "tf-acc-debug"
+  name              = "tf-acc-instance-local-disk"
   tag               = "tf-acc"
   availability_zone = "${data.ucloud_zones.default.zones.0.id}"
   image_id          = "${data.ucloud_images.default.images.0.id}"
@@ -490,6 +517,36 @@ resource "ucloud_instance" "foo" {
   root_password     = "wA1234567"
   boot_disk_size    = 40
   boot_disk_type    = "local_normal"
+  security_group = "${data.ucloud_security_groups.default.security_groups.0.id}"
+}
+`
+
+const testAccInstanceConfigIsolationGroup = `
+data "ucloud_zones" "default" {
+}
+
+data "ucloud_security_groups" "default" {
+  type = "recommend_web"
+}
+
+data "ucloud_images" "default" {
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  name_regex        = "^CentOS 6.5 64"
+  image_type        = "base"
+}
+
+resource "ucloud_isolation_group" "default" {
+	name = "tf-acc-instance-isolation-group"
+}
+
+resource "ucloud_instance" "foo" {
+  name              = "tf-acc-instance-isolation-group"
+  tag               = "tf-acc"
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  image_id          = "${data.ucloud_images.default.images.0.id}"
+  isolation_group	=  "${ucloud_isolation_group.default.id}"
+  instance_type     = "n-basic-1"
+  root_password     = "wA1234567"
   security_group = "${data.ucloud_security_groups.default.security_groups.0.id}"
 }
 `

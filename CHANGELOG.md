@@ -1,6 +1,9 @@
-## 1.10.2 (Unreleased)
+## 1.11.0 (Unreleased)
+FEATURES:
 
-BUG FIXES:
+* **New Resource:** `ucloud_isolation_group` [GH-38]
+
+ENHANCEMENTS:
 
 * update terraform SDK to 0.12.2 [GH-37]
 
