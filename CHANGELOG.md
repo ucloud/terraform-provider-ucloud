@@ -1,11 +1,11 @@
-## 1.11.0 (Unreleased)
+## 1.11.0 (July 09, 2019)
 FEATURES:
 
-* **New Resource:** `ucloud_isolation_group` [GH-38]
+* **New Resource:** `ucloud_isolation_group` ([#38](https://github.com/terraform-providers/terraform-provider-ucloud/issues/38))
 
 ENHANCEMENTS:
 
-* update terraform SDK to 0.12.2 [GH-37]
+* update terraform SDK to 0.12.2 ([#37](https://github.com/terraform-providers/terraform-provider-ucloud/issues/37))
 
 ## 1.10.1 (June 17, 2019)
 
