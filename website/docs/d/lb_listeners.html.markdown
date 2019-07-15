@@ -14,11 +14,11 @@ This data source provides a list of Load Balancer Listener resources according t
 
 ```hcl
 data "ucloud_lb_listeners" "example" {
-    load_balancer_id = "ulb-xxx"
+  load_balancer_id = "ulb-xxx"
 }
 
 output "first" {
-    value = data.ucloud_lb_listeners.example.lb_listeners[0].id
+  value = data.ucloud_lb_listeners.example.lb_listeners[0].id
 }
 ```
 

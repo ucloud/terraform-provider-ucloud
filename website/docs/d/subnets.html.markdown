@@ -14,11 +14,11 @@ This data source provides a list of Subnet resources according to their Subnet I
 
 ```hcl
 data "ucloud_subnets" "example" {
-    vpc_id  =  "uvnet-xxx"
+  vpc_id = "uvnet-xxx"
 }
 
 output "first" {
-    value = data.ucloud_subnets.example.subnets[0].id
+  value = data.ucloud_subnets.example.subnets[0].id
 }
 ```
 

@@ -18,9 +18,9 @@ data "ucloud_zones" "default" {}
 
 # Create cloud disk
 resource "ucloud_disk" "example" {
-    availability_zone = data.ucloud_zones.default.zones[0].id
-    name              = "tf-example-disk"
-    disk_size         = 10
+  availability_zone = data.ucloud_zones.default.zones[0].id
+  name              = "tf-example-disk"
+  disk_size         = 10
 }
 ```
 

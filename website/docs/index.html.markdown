@@ -29,7 +29,7 @@ provider "ucloud" {
 
 # Query default security group
 data "ucloud_security_groups" "default" {
-    type = "recommend_web"
+  type = "recommend_web"
 }
 
 # Query image
@@ -41,22 +41,22 @@ data "ucloud_images" "default" {
 
 # Create web instance 
 resource "ucloud_instance" "web" {
-    availability_zone = "cn-bj2-04"
-    image_id          = data.ucloud_images.default.images[0].id
-    instance_type     = "n-basic-2"
-    root_password     = "wA1234567"
-    name              = "tf-example-instance"
-    tag               = "tf-example"
+  availability_zone = "cn-bj2-04"
+  image_id          = data.ucloud_images.default.images[0].id
+  instance_type     = "n-basic-2"
+  root_password     = "wA1234567"
+  name              = "tf-example-instance"
+  tag               = "tf-example"
 
-    # the default Web Security Group that UCloud recommend to users
-    security_group = data.ucloud_security_groups.default.security_groups[0].id
+  # the default Web Security Group that UCloud recommend to users
+  security_group = data.ucloud_security_groups.default.security_groups[0].id
 }
 
 # Create cloud disk
 resource "ucloud_disk" "example" {
-    availability_zone = "cn-bj2-04"
-    name              = "tf-example-instance"
-    disk_size         = 30
+  availability_zone = "cn-bj2-04"
+  name              = "tf-example-instance"
+  disk_size         = 30
 }
 
 # Attach cloud disk to instance
@@ -85,10 +85,10 @@ Usage:
 
 ```hcl
 provider "ucloud" {
-  public_key = "your_public_key"
+  public_key  = "your_public_key"
   private_key = "your_private_key"
-  project_id = "your_project_id"
-  region     = "cn-bj2"
+  project_id  = "your_project_id"
+  region      = "cn-bj2"
 }
 ```
 

@@ -14,24 +14,24 @@ Provides a Security Group resource.
 
 ```hcl
 resource "ucloud_security_group" "example" {
-    name = "tf-example-security-group"
-    tag  = "tf-example"
+  name = "tf-example-security-group"
+  tag  = "tf-example"
 
-    # http access from LAN
-    rules {
-        port_range = "80"
-        protocol   = "tcp"
-        cidr_block = "192.168.0.0/16"
-        policy     = "accept"
-    }
+  # http access from LAN
+  rules {
+    port_range = "80"
+    protocol   = "tcp"
+    cidr_block = "192.168.0.0/16"
+    policy     = "accept"
+  }
 
-    # https access from LAN
-    rules {
-        port_range = "443"
-        protocol   = "tcp"
-        cidr_block = "192.168.0.0/16"
-        policy     = "accept"
-    }
+  # https access from LAN
+  rules {
+    port_range = "443"
+    protocol   = "tcp"
+    cidr_block = "192.168.0.0/16"
+    policy     = "accept"
+  }
 }
 ```
 

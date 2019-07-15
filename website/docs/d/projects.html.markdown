@@ -14,11 +14,11 @@ This data source providers a list of projects owned by user according to finance
 
 ```hcl
 data "ucloud_projects" "example" {
-    is_finance = false
+  is_finance = false
 }
 
 output "first" {
-    value = data.ucloud_projects.example.projects[0].id
+  value = data.ucloud_projects.example.projects[0].id
 }
 ```
 

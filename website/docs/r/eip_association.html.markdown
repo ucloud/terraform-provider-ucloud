@@ -61,8 +61,8 @@ resource "ucloud_instance" "web" {
 
 # Bind eip to instance
 resource "ucloud_eip_association" "default" {
-  resource_id   = ucloud_instance.web.id
-  eip_id        = ucloud_eip.default.id
+  resource_id = ucloud_instance.web.id
+  eip_id      = ucloud_eip.default.id
 }
 ```
 

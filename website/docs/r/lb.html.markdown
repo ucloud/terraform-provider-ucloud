@@ -14,8 +14,8 @@ Provides a Load Balancer resource.
 
 ```hcl
 resource "ucloud_lb" "web" {
-    name = "tf-example-lb"
-    tag  = "tf-example"
+  name = "tf-example-lb"
+  tag  = "tf-example"
 }
 ```
 

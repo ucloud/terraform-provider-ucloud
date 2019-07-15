@@ -19,8 +19,8 @@ resource "ucloud_memcache_instance" "master" {
   availability_zone = data.ucloud_zones.default.zones[0].id
   instance_type     = "memcache-master-2"
 
-  name              = "tf-example-memcache"
-  tag               = "tf-example"
+  name = "tf-example-memcache"
+  tag  = "tf-example"
 }
 ```
 

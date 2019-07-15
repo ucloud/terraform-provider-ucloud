@@ -14,12 +14,12 @@ This data source provides a list of Load Balancer Attachment resources according
 
 ```hcl
 data "ucloud_lb_attachments" "example" {
-    load_balancer_id = "ulb-xxx"
-    listener_id = "vserver-xxx"
+  load_balancer_id = "ulb-xxx"
+  listener_id      = "vserver-xxx"
 }
 
 output "first" {
-    value = data.ucloud_lb_attachments.example.lb_attachments[0].id
+  value = data.ucloud_lb_attachments.example.lb_attachments[0].id
 }
 ```
 

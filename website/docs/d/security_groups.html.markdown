@@ -16,7 +16,7 @@ This data source provides a list of Security Group resources according to their 
 data "ucloud_security_groups" "example" {}
 
 output "first" {
-    value = data.ucloud_security_groups.example.security_groups[0].id
+  value = data.ucloud_security_groups.example.security_groups[0].id
 }
 ```
 

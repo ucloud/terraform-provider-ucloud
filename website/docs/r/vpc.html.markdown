@@ -15,11 +15,11 @@ Provides a VPC resource.
 
 ```hcl
 resource "ucloud_vpc" "example" {
-    name = "tf-example-vpc"
-    tag  = "tf-example"
+  name = "tf-example-vpc"
+  tag  = "tf-example"
 
-    # vpc network
-    cidr_blocks = ["192.168.0.0/16"]
+  # vpc network
+  cidr_blocks = ["192.168.0.0/16"]
 }
 ```
 

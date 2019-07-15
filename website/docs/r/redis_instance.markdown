@@ -21,16 +21,16 @@ resource "ucloud_redis_instance" "master" {
   password          = "2018_Tfacc"
   engine_version    = "4.0"
 
-  name              = "tf-example-redis-master"
-  tag               = "tf-example"
+  name = "tf-example-redis-master"
+  tag  = "tf-example"
 }
 
 resource "ucloud_redis_instance" "distributed" {
   availability_zone = data.ucloud_zones.default.zones[0].id
   instance_type     = "redis-distributed-16"
 
-  name              = "tf-example-redis-distributed"
-  tag               = "tf-example"
+  name = "tf-example-redis-distributed"
+  tag  = "tf-example"
 }
 ```
 

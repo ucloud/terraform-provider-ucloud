@@ -16,7 +16,7 @@ This data source provides a list of database instance resources according to the
 data "ucloud_db_instances" "example" {}
 
 output "first" {
-    value = data.ucloud_db_instances.example.db_instances[0].id
+  value = data.ucloud_db_instances.example.db_instances[0].id
 }
 ```
 

@@ -14,11 +14,11 @@ This data source providers a list of UHost instance resources according to their
 
 ```hcl
 data "ucloud_instances" "example" {
-    availability_zone = "cn-bj2-02"
+  availability_zone = "cn-bj2-02"
 }
 
 output "first" {
-    value = data.ucloud_instances.example.instances[0].id
+  value = data.ucloud_instances.example.instances[0].id
 }
 ```
 
