@@ -14,14 +14,14 @@ Provides a Load Balancer SSL attachment resource for attaching SSL certificate t
 
 ```hcl
 resource "ucloud_lb" "foo" {
-    name = "tf-example-lb-ssl-attachment"
-    tag  = "tf-example"
+  name = "tf-example-lb-ssl-attachment"
+  tag  = "tf-example"
 }
 
 resource "ucloud_lb_listener" "foo" {
-    name             = "tf-example-lb-ssl-attachment"
-    load_balancer_id = ucloud_lb.foo.id
-    protocol         = "https"
+  name             = "tf-example-lb-ssl-attachment"
+  load_balancer_id = ucloud_lb.foo.id
+  protocol         = "https"
 }
 
 resource "ucloud_lb_ssl" "foo" {
@@ -33,9 +33,9 @@ resource "ucloud_lb_ssl" "foo" {
 
 
 resource "ucloud_lb_ssl_attachment" "foo" {
-    load_balancer_id = ucloud_lb.foo.id
-    listener_id      = ucloud_lb_listener.foo.id
-    ssl_id      = ucloud_lb_ssl.foo.id
+  load_balancer_id = ucloud_lb.foo.id
+  listener_id      = ucloud_lb_listener.foo.id
+  ssl_id           = ucloud_lb_ssl.foo.id
 }
 ```
 

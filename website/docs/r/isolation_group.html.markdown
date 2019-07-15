@@ -14,8 +14,8 @@ Provides an Isolation Group resource. The Isolation Group is a logical group of 
 
 ```hcl
 resource "ucloud_isolation_group" "foo" {
-	name  = "tf-acc-isolation-group"
-	remark = "test"
+  name   = "tf-acc-isolation-group"
+  remark = "test"
 }
 ```
 

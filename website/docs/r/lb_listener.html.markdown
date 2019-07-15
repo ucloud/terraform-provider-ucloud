@@ -16,13 +16,13 @@ Provides a Load Balancer Listener resource.
 
 ```hcl
 resource "ucloud_lb" "web" {
-    name = "tf-example-lb"
-    tag  = "tf-example"
+  name = "tf-example-lb"
+  tag  = "tf-example"
 }
 
 resource "ucloud_lb_listener" "example" {
-    load_balancer_id = ucloud_lb.web.id
-    protocol         = "http"
+  load_balancer_id = ucloud_lb.web.id
+  protocol         = "http"
 }
 ```
 

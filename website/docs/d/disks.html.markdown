@@ -16,7 +16,7 @@ This data source provides a list of Disk resources according to their Disk ID an
 data "ucloud_disks" "example" {}
 
 output "first" {
-    value = data.ucloud_disks.example.disks[0].id
+  value = data.ucloud_disks.example.disks[0].id
 }
 ```
 

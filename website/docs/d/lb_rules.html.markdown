@@ -14,12 +14,12 @@ This data source provides a list of Load Balancer Rule resources according to th
 
 ```hcl
 data "ucloud_lb_rules" "example" {
-    load_balancer_id = "ulb-xxx"
-    listener_id = "vserver-xxx"
+  load_balancer_id = "ulb-xxx"
+  listener_id      = "vserver-xxx"
 }
 
 output "first" {
-    value = data.ucloud_lb_rules.example.lb_rules[0].id
+  value = data.ucloud_lb_rules.example.lb_rules[0].id
 }
 ```
 

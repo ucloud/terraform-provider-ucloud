@@ -18,14 +18,14 @@ UDPN (UCloud Dedicated Private Network)，you can use Dedicated Private Network 
 
 ```hcl
 provider "ucloud" {
-    region = "cn-bj2"
+  region = "cn-bj2"
 }
 
 // connect provider's region (cn-bj2) and peer region (cn-sh2)
 resource "ucloud_udpn_connection" "example" {
-    bandwidth   = 2
-    peer_region = "cn-sh2"
-} 
+  bandwidth   = 2
+  peer_region = "cn-sh2"
+}
 ```
 
 ## Argument Reference

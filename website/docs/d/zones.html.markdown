@@ -16,7 +16,7 @@ This data source provides a list of available zones in the current region.
 data "ucloud_zones" "example" {}
 
 output "first" {
-    value = data.ucloud_zones.example.zones[0].id
+  value = data.ucloud_zones.example.zones[0].id
 }
 ```
 
