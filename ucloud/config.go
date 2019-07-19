@@ -3,10 +3,6 @@ package ucloud
 import (
 	"fmt"
 	"github.com/ucloud/ucloud-sdk-go/external"
-	"github.com/ucloud/ucloud-sdk-go/ucloud"
-	"github.com/ucloud/ucloud-sdk-go/ucloud/auth"
-	"github.com/ucloud/ucloud-sdk-go/ucloud/log"
-
 	pumem "github.com/ucloud/ucloud-sdk-go/private/services/umem"
 	"github.com/ucloud/ucloud-sdk-go/services/uaccount"
 	"github.com/ucloud/ucloud-sdk-go/services/udb"
@@ -17,6 +13,9 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/services/umem"
 	"github.com/ucloud/ucloud-sdk-go/services/unet"
 	"github.com/ucloud/ucloud-sdk-go/services/vpc"
+	"github.com/ucloud/ucloud-sdk-go/ucloud"
+	"github.com/ucloud/ucloud-sdk-go/ucloud/auth"
+	"github.com/ucloud/ucloud-sdk-go/ucloud/log"
 )
 
 // Config is the configuration of ucloud meta data
@@ -52,11 +51,16 @@ func (c *Config) Client() (*UCloudClient, error) {
 
 	// enable auto retry with http/connection error
 	cfg.MaxRetries = c.MaxRetries
-	cfg.LogLevel = log.DebugLevel
-	cfg.UserAgent = "Terraform-UCloud/1.11.0"
+	cfg.LogLevel = log.PanicLevel
+	cfg.UserAgent = "Terraform-UCloud/1.11.1"
 
-	// excepted logging
-	cfg.SetActionLevel("GetRegion", log.WarnLevel)
+	if isAcc() {
+		//set DebugLevel for acceptance test
+		cfg.LogLevel = log.DebugLevel
+
+		// excepted logging
+		cfg.SetActionLevel("GetRegion", log.WarnLevel)
+	}
 
 	// if no base url be set, get insecure http or secure https default url
 	// uf base url is set, use it
