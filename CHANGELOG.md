@@ -1,4 +1,9 @@
-## 1.12.0 (Unreleased)
+## 1.11.1 (Unreleased)
+
+BUG FIXES:
+
+* Fix the problem of WaitForState function about keep waiting until the timeout occurs in some situation [GH-41] 
+
 ## 1.11.0 (July 09, 2019)
 FEATURES:
 

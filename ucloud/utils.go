@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/terraform/helper/resource"
 	"io/ioutil"
 	"net"
 	"os"
@@ -150,4 +151,8 @@ func hashCIDR(v interface{}) int {
 	}
 
 	return hashcode.String(cidr)
+}
+
+func isAcc() bool {
+	return os.Getenv(resource.TestEnvVar) != ""
 }

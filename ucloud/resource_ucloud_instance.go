@@ -827,7 +827,10 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 	if err != nil {
 		return fmt.Errorf("error on reading security group when reading instance %q, %s", d.Id(), err)
 	}
-	d.Set("security_group", resp.DataSet[0].FWId)
+
+	if len(resp.DataSet) > 0 {
+		d.Set("security_group", resp.DataSet[0].FWId)
+	}
 
 	return nil
 }

@@ -133,9 +133,11 @@ func resourceUCloudDiskCreate(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("error on creating disk, %s", err)
 	}
 
-	if len(resp.UDiskId) > 0 {
-		d.SetId(resp.UDiskId[0])
+	if len(resp.UDiskId) != 1 {
+		return fmt.Errorf("error on creating disk, expected exactly one disk, got %v", len(resp.UDiskId))
 	}
+
+	d.SetId(resp.UDiskId[0])
 
 	// after create disk, we need to wait it initialized
 	stateConf := diskWaitForState(client, d.Id())
