@@ -1,6 +1,6 @@
-# Intranet-Cluster Example
+# Intranet-LB Example
 
-The intranet-cluster example builds a intranet cluster infrastructure, which launches a certain amount of UHost instance with the same configuration. It also create vpc and subnet to the Host instances for network isolation.
+The intranet-lb example launches an intranet load balancer and attach Host instances. 
 
 To run, configure your UCloud provider as described in https://www.terraform.io/docs/providers/ucloud/index.html
 

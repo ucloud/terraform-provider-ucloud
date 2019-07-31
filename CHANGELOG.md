@@ -1,4 +1,14 @@
-## 1.11.2 (Unreleased)
+## 1.12.0 (Unreleased)
+
+ENHANCEMENTS:
+
+* datasource/ucloud_images: Add argument `most_recent`
+* resource/ucloud_disk: Update customdiff precheck about `disk_size`
+
+BUG FIXES:
+
+* resource/ucloud_disk: Fix the problem about update `disk_size` when the disk have attached to the instance
+
 ## 1.11.1 (July 19, 2019)
 
 BUG FIXES:
