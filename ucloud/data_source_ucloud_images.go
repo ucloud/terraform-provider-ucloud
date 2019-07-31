@@ -2,10 +2,10 @@ package ucloud
 
 import (
 	"fmt"
-	"regexp"
-
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
+	"regexp"
+	"sort"
 
 	"github.com/ucloud/ucloud-sdk-go/services/uhost"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
@@ -24,6 +24,12 @@ func dataSourceUCloudImages() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.ValidateRegexp,
+			},
+
+			"most_recent": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 
 			"image_type": {
@@ -127,8 +133,6 @@ func dataSourceUCloudImagesRead(d *schema.ResourceData, meta interface{}) error 
 
 	req := conn.NewDescribeImageRequest()
 
-	nameRegex, nameRegexOk := d.GetOk("name_regex")
-
 	if v, ok := d.GetOk("availability_zone"); ok {
 		req.Zone = ucloud.String(v.(string))
 	}
@@ -173,6 +177,8 @@ func dataSourceUCloudImagesRead(d *schema.ResourceData, meta interface{}) error 
 		offset = offset + limit
 	}
 
+	nameRegex, nameRegexOk := d.GetOk("name_regex")
+
 	var filteredImages []uhost.UHostImageSet
 	if nameRegexOk {
 		r := regexp.MustCompile(nameRegex.(string))
@@ -185,7 +191,18 @@ func dataSourceUCloudImagesRead(d *schema.ResourceData, meta interface{}) error 
 		filteredImages = images
 	}
 
-	err := dataSourceUCloudImagesSave(d, filteredImages)
+	var finalImages []uhost.UHostImageSet
+	if len(filteredImages) > 1 && d.Get("most_recent").(bool) {
+		sort.Slice(filteredImages, func(i, j int) bool {
+			return int64(filteredImages[i].CreateTime) > int64(filteredImages[j].CreateTime)
+		})
+
+		finalImages = []uhost.UHostImageSet{filteredImages[0]}
+	} else {
+		finalImages = filteredImages
+	}
+
+	err := dataSourceUCloudImagesSave(d, finalImages)
 	if err != nil {
 		return fmt.Errorf("error on reading image list, %s", err)
 	}
