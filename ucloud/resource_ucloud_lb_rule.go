@@ -2,6 +2,7 @@ package ucloud
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform/helper/customdiff"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -19,6 +20,10 @@ func resourceUCloudLBRule() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
+
+		CustomizeDiff: customdiff.All(
+			customizeDiffLBRuleDomainWithPath,
+		),
 
 		Schema: map[string]*schema.Schema{
 			"load_balancer_id": {
@@ -64,6 +69,15 @@ func resourceUCloudLBRuleCreate(d *schema.ResourceData, meta interface{}) error 
 
 	lbId := d.Get("load_balancer_id").(string)
 	listenerId := d.Get("listener_id").(string)
+
+	listenerSet, err := client.describeVServerById(lbId, listenerId)
+	if err != nil {
+		return fmt.Errorf("error on reading lb listener when creating lb rule, %s", err)
+	}
+	protocol := listenerSet.Protocol
+	if protocol != "HTTP" && protocol != "HTTPS" {
+		return fmt.Errorf("the lb rule can only be define while the protocol of lb listener is one of http and https, got %s", upperCvt.convert(protocol))
+	}
 
 	req := conn.NewCreatePolicyRequest()
 	req.ULBId = ucloud.String(lbId)
@@ -246,4 +260,13 @@ func lbRuleWaitForState(client *UCloudClient, lbId, listenerId, policyId string)
 			return policySet, statusInitialized, nil
 		},
 	}
+}
+
+func customizeDiffLBRuleDomainWithPath(diff *schema.ResourceDiff, v interface{}) error {
+	_, pOk := diff.GetOk("path")
+	_, dOk := diff.GetOk("domain")
+	if !pOk && !dOk {
+		return fmt.Errorf("should set one of domain and path")
+	}
+	return nil
 }
