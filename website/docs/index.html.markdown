@@ -8,7 +8,7 @@ description: |-
 
 # UCloud Provider
 
-~> **NOTE:** This guide requires an avaliable UCloud account or sub-account with project to create resources.
+~> **NOTE:** This guide requires an available UCloud account or sub-account with project to create resources.
 
 The UCloud provider is used to interact with the
 resources supported by UCloud. The provider needs to be configured

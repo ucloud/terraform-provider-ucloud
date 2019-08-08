@@ -38,7 +38,7 @@ The following arguments are supported:
 
 * `cidr_block` - (Required) The cidr block of the desired subnet, format in "0.0.0.0/0", such as: `192.168.0.0/24`.
 * `vpc_id` - (Required) The id of the VPC that the desired subnet belongs to.
-* `name` - (Optional) The name of the desired subnet. If not specified, terraform will autogenerate a name beginning with `tf-subnet`.
+* `name` - (Optional) The name of the desired subnet. If not specified, terraform will auto-generate a name beginning with `tf-subnet`.
 * `remark` - (Optional) The remarks of the subnet. (Default: `""`).
 * `tag` - (Optional) A tag assigned to subnet, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
 

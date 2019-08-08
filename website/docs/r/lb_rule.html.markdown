@@ -9,6 +9,8 @@ description: |-
 # ucloud_lb_rule
 
 Provides a Load Balancer Rule resource to add content forwarding policies for Load Balancer backend resource.
+ 
+~> **Note** The Load Balancer Rule can only be define while the `protocol` of lb listener is one of HTTP and HTTPS. In addition, should set one of `domain` and `path` if defined.
 
 ## Example Usage
 
@@ -62,6 +64,6 @@ The following arguments are supported:
 
 * `load_balancer_id` - (Required) The ID of a load balancer.
 * `listener_id` - (Required) The ID of a listener server.
-* `backend_ids` - (Required) The IDs of the backend servers where rule applies, this argument is populated base on the `backend_id` responed from `lb_attachment` create.
+* `backend_ids` - (Required) The IDs of the backend servers where rule applies, this argument is populated base on the `backend_id` responded from `lb_attachment` create.
 * `path` - (Optional) The path of Content forward matching fields. `path` and `domain` cannot coexist. `path` and `domain` must be filled in one.
 * `domain` - (Optional) The domain of content forward matching fields. `path` and `domain` cannot coexist. `path` and `domain` must be filled in one.
