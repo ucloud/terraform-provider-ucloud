@@ -28,7 +28,7 @@ resource "ucloud_vpc" "example" {
 The following arguments are supported:
 
 * `cidr_blocks` - (Required) The CIDR blocks of VPC.
-* `name` - (Optional) The name of VPC. If not specified, terraform will autogenerate a name beginning with `tf-vpc`.
+* `name` - (Optional) The name of VPC. If not specified, terraform will auto-generate a name beginning with `tf-vpc`.
 * `tag` - (Optional) A tag assigned to VPC, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
 * `remark` - (Optional) The remarks of the VPC. (Default: `""`).
 

@@ -40,7 +40,7 @@ resource "ucloud_security_group" "example" {
 The following arguments are supported:
 
 * `rules` - (Required) A list of security group rules. Can be specified multiple times for each rules. Each rules supports fields documented below.
-* `name` - (Optional) The name of the security group which contains 1-63 characters and only support Chinese, English, numbers, '-', '_' and '.'. If not specified, terraform will autogenerate a name beginning with `tf-security-group`.
+* `name` - (Optional) The name of the security group which contains 1-63 characters and only support Chinese, English, numbers, '-', '_' and '.'. If not specified, terraform will auto-generate a name beginning with `tf-security-group`.
 * `remark` - (Optional) The remarks of the security group. (Default: `""`).
 * `tag` - (Optional) A tag assigned to security group, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
 

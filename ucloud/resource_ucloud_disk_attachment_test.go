@@ -33,6 +33,17 @@ func TestAccUCloudDiskAttachment_basic(t *testing.T) {
 					testAccCheckDiskExists("ucloud_disk.foo", &diskSet),
 					testAccCheckInstanceExists("ucloud_instance.foo", &instance),
 					testAccCheckDiskAttachmentExists("ucloud_disk_attachment.foo", &diskSet, &instance),
+					resource.TestCheckResourceAttr("ucloud_disk.foo", "disk_size", "20"),
+				),
+			},
+			{
+				Config: testAccDiskAttachmentConfigUpdate,
+
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDiskExists("ucloud_disk.foo", &diskSet),
+					testAccCheckInstanceExists("ucloud_instance.foo", &instance),
+					testAccCheckDiskAttachmentExists("ucloud_disk_attachment.foo", &diskSet, &instance),
+					resource.TestCheckResourceAttr("ucloud_disk.foo", "disk_size", "40"),
 				),
 			},
 		},
@@ -108,7 +119,39 @@ data "ucloud_images" "default" {
 resource "ucloud_disk" "foo" {
   availability_zone = "${data.ucloud_zones.default.zones.0.id}"
   name              = "tf-acc-disk-attachment"
-  disk_size         = 10
+  disk_size         = 20
+}
+
+resource "ucloud_instance" "foo" {
+  name                 = "tf-acc-disk-attachment"
+  instance_type        = "n-highcpu-1"
+  availability_zone    = "${data.ucloud_zones.default.zones.0.id}"
+  image_id             = "${data.ucloud_images.default.images.0.id}"
+  charge_type          = "month"
+  duration             = 1
+  root_password        = "wA123456"
+}
+
+resource "ucloud_disk_attachment" "foo" {
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  disk_id           = "${ucloud_disk.foo.id}"
+  instance_id       = "${ucloud_instance.foo.id}"
+}
+`
+
+const testAccDiskAttachmentConfigUpdate = `
+data "ucloud_zones" "default" {}
+
+data "ucloud_images" "default" {
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  name_regex        = "^CentOS 7.[1-2] 64"
+  image_type        = "base"
+}
+
+resource "ucloud_disk" "foo" {
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  name              = "tf-acc-disk-attachment"
+  disk_size         = 40
 }
 
 resource "ucloud_instance" "foo" {

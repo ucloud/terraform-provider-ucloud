@@ -1,4 +1,15 @@
-## 1.11.2 (Unreleased)
+## 1.12.0 (Unreleased)
+
+ENHANCEMENTS:
+
+* datasource/ucloud_images: Add argument `most_recent`
+* resource/ucloud_disk: Update customdiff precheck about `disk_size`
+
+BUG FIXES:
+
+* Fix the validate function of `duration` about allow the value `0` when pay by month
+* resource/ucloud_disk: Fix the problem about resize the `disk_size` when the disk have attached to the instance
+
 ## 1.11.1 (July 19, 2019)
 
 BUG FIXES:

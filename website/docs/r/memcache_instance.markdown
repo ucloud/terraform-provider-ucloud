@@ -29,14 +29,14 @@ resource "ucloud_memcache_instance" "master" {
 The following arguments are supported:
 
 * `availability_zone` - (Required) Availability zone where Memcache instance is located. Such as: "cn-bj2-02". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
-* `name` - (Optional) The name of Memcache instance, which contains 6-63 characters and only support English, numbers, '-', '_'. If not specified, terraform will autogenerate a name beginning with `tf-memcache-instance`.
+* `name` - (Optional) The name of Memcache instance, which contains 6-63 characters and only support English, numbers, '-', '_'. If not specified, terraform will auto-generate a name beginning with `tf-memcache-instance`.
 * `instance_type` - (Required) The type of Memcache instance, please visit the [instance type table](https://docs.ucloud.cn/compute/terraform/specification/umem_instance) for more details.
 Specifies the type of Memcache instance with format `engine-type-memory`, Possible values are:
     - `engine` can only be `memcache`.
     - `type` can only be `master` as active-standby Memcache instance.
     - `memory` can be one of `1`, `2`, `4`, `8`, `16`, `24`, `32` for active-standby Memcache instance.
 * `charge_type` - (Optional) The charge type of Memcache instance, possible values are: `year`, `month` and `dynamic` as pay by hour (specific permission required). (Default: `month`).
-* `duration` - (Optional) The duration that you will buy the Memcache instance (Default: `1`). The value is `0` when pay by month and the instance will be vaild till the last day of that month. It is not required when `dynamic` (pay by hour).
+* `duration` - (Optional) The duration that you will buy the Memcache instance (Default: `1`). The value is `0` when pay by month and the instance will be valid till the last day of that month. It is not required when `dynamic` (pay by hour).
 * `tag` - (Optional) A tag assigned to Memcache instance, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
 * `vpc_id` - (Optional) The ID of VPC linked to the Memcache instance.
 * `subnet_id` - (Optional) The ID of subnet linked to the Memcache instance.
