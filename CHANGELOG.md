@@ -7,7 +7,8 @@ ENHANCEMENTS:
 
 BUG FIXES:
 
-* resource/ucloud_disk: Fix the problem about update `disk_size` when the disk have attached to the instance
+* Fix the validate function of `duration` about allow the value `0` when pay by month
+* resource/ucloud_disk: Fix the problem about resize the `disk_size` when the disk have attached to the instance
 
 ## 1.11.1 (July 19, 2019)
 
