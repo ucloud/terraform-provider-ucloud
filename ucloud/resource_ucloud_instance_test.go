@@ -327,7 +327,7 @@ resource "ucloud_instance" "foo" {
 const testAccInstanceConfigOutstanding = `
 data "ucloud_images" "default" {
   availability_zone = "cn-bj2-05"
-  name_regex        = "^高内核CentOS 7.0 64"
+  name_regex        = "^高内核CentOS 7.6 64"
   image_type        = "base"
 }
 data "ucloud_security_groups" "default" {
