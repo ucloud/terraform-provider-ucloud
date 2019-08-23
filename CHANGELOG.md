@@ -2,13 +2,13 @@
 
 ENHANCEMENTS:
 
-* datasource/ucloud_images: Add argument `most_recent`
-* resource/ucloud_disk: Update customdiff precheck about `disk_size`
+* datasource/ucloud_images: Add argument `most_recent`[GH-43]
+* resource/ucloud_disk: Update customdiff precheck about `disk_size`[GH-43]
 
 BUG FIXES:
 
-* Fix the validate function of `duration` about allow the value `0` when pay by month
-* resource/ucloud_disk: Fix the problem about resize the `disk_size` when the disk have attached to the instance
+* Fix the validate function of `duration` about allow the value `0` when pay by month[GH-43]
+* resource/ucloud_disk: Fix the problem about resize the `disk_size` when the disk have attached to the instance[GH-43]
 
 ## 1.11.1 (July 19, 2019)
 
