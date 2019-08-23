@@ -124,7 +124,7 @@ func validateSecurityGroupPort(v interface{}, k string) (ws []string, errors []e
 	return
 }
 
-var validateDuration = validation.IntBetween(1, 9)
+var validateDuration = validation.IntBetween(0, 9)
 
 var validateDiskName = validation.StringMatch(
 	regexp.MustCompile(`^[A-Za-z0-9\p{Han}-_]{6,63}$`),
