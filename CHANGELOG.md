@@ -1,14 +1,14 @@
-## 1.12.0 (Unreleased)
+## 1.12.0 (August 23, 2019)
 
 ENHANCEMENTS:
 
-* datasource/ucloud_images: Add argument `most_recent`[GH-43]
-* resource/ucloud_disk: Update customdiff precheck about `disk_size`[GH-43]
+* datasource/ucloud_images: Add argument `most_recent`([#43](https://github.com/terraform-providers/terraform-provider-ucloud/issues/43))
+* resource/ucloud_disk: Update customdiff precheck about `disk_size`([#43](https://github.com/terraform-providers/terraform-provider-ucloud/issues/43))
 
 BUG FIXES:
 
-* Fix the validate function of `duration` about allow the value `0` when pay by month[GH-43]
-* resource/ucloud_disk: Fix the problem about resize the `disk_size` when the disk have attached to the instance[GH-43]
+* Fix the validate function of `duration` about allow the value `0` when pay by month([#43](https://github.com/terraform-providers/terraform-provider-ucloud/issues/43))
+* resource/ucloud_disk: Fix the problem about resize the `disk_size` when the disk have attached to the instance([#43](https://github.com/terraform-providers/terraform-provider-ucloud/issues/43))
 
 ## 1.11.1 (July 19, 2019)
 
