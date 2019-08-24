@@ -1,10 +1,10 @@
 ## 1.12.1 (Unreleased)
 
 BUG FIXES:
-* Fix the `duration` about it can specify zero-value distinguish from null-value[GH-44]
-* resource/ucloud_db_instance: Fix the `backup_begin_time` about it can specify zero-value distinguish from null-value[GH-44]
-* resource/ucloud_instance: Fix the content of return err about `cloud_normal` of `boot_disk_type` is not supported currently[GH-44]
-* resource/ucloud_lb_listener: Fix the `idle_timeout` about it can specify zero-value distinguish from null-value[GH-44]
+* Fix the `duration` about it can specify zero-value distinguish from null-value[GH-45]
+* resource/ucloud_db_instance: Fix the `backup_begin_time` about it can specify zero-value distinguish from null-value[GH-45]
+* resource/ucloud_instance: Fix the content of return err about `cloud_normal` of `boot_disk_type` is not supported currently[GH-45]
+* resource/ucloud_lb_listener: Fix the `idle_timeout` about it can specify zero-value distinguish from null-value[GH-45]
 
 ## 1.12.0 (August 23, 2019)
 
