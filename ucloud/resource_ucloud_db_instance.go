@@ -232,7 +232,7 @@ func resourceUCloudDBInstanceCreate(d *schema.ResourceData, meta interface{}) er
 		req.Name = ucloud.String(resource.PrefixedUniqueId("tf-db-instance-"))
 	}
 
-	if v, ok := d.GetOk("duration"); ok {
+	if v, ok := d.GetOkExists("duration"); ok {
 		req.Quantity = ucloud.Int(v.(int))
 	} else {
 		req.Quantity = ucloud.Int(1)
@@ -364,7 +364,10 @@ func resourceUCloudDBInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 		backupChanged = true
 	}
 
-	if d.HasChange("backup_begin_time") {
+	if v, ok := d.GetOkExists("backup_begin_time"); ok && d.IsNewResource() {
+		buReq.BackupTime = ucloud.Int(v.(int))
+		backupChanged = true
+	} else if d.HasChange("backup_begin_time") {
 		buReq.BackupTime = ucloud.Int(d.Get("backup_begin_time").(int))
 		backupChanged = true
 	}

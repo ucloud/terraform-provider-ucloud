@@ -287,6 +287,8 @@ resource "ucloud_instance" "foo" {
   security_group    = "${ucloud_security_group.default.id}"
   instance_type     = "n-highcpu-1"
   root_password     = "wA1234567"
+  charge_type 		= "month"
+  duration			= 0
   name              = "tf-acc-instance-config-basic"
   tag               = "tf-acc"
 }`, rInt)
@@ -319,6 +321,8 @@ resource "ucloud_instance" "foo" {
   security_group    = "${ucloud_security_group.default.id}"
   instance_type     = "n-basic-2"
   root_password     = "wA1234567"
+  charge_type 		= "month"
+  duration			= 0
   name              = "tf-acc-instance-config-basic-update"
   tag               = ""
 }`, rInt)

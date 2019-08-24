@@ -190,7 +190,7 @@ func resourceUCloudLBListenerCreate(d *schema.ResourceData, meta interface{}) er
 		req.VServerName = ucloud.String(resource.PrefixedUniqueId("tf-lb-listener-"))
 	}
 
-	if v, ok := d.GetOk("idle_timeout"); ok {
+	if v, ok := d.GetOkExists("idle_timeout"); ok {
 		req.ClientTimeout = ucloud.Int(v.(int))
 	}
 

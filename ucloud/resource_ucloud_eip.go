@@ -156,7 +156,6 @@ func resourceUCloudEIPCreate(d *schema.ResourceData, meta interface{}) error {
 
 	req := conn.NewAllocateEIPRequest()
 	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
-	req.PayMode = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_mode").(string)))
 	req.OperatorName = ucloud.String(upperCamelCvt.unconvert(d.Get("internet_type").(string)))
 
 	if v, ok := d.GetOk("charge_mode"); ok {
@@ -171,7 +170,7 @@ func resourceUCloudEIPCreate(d *schema.ResourceData, meta interface{}) error {
 		req.Bandwidth = ucloud.Int(1)
 	}
 
-	if v, ok := d.GetOk("duration"); ok {
+	if v, ok := d.GetOkExists("duration"); ok {
 		req.Quantity = ucloud.Int(v.(int))
 	} else {
 		req.Quantity = ucloud.Int(1)
