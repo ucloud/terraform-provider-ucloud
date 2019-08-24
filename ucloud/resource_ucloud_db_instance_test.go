@@ -80,7 +80,7 @@ func TestAccUCloudDBInstance_backup(t *testing.T) {
 					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "instance_type", "mysql-ha-1"),
 					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "engine", "mysql"),
 					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "engine_version", "5.7"),
-					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "backup_begin_time", "4"),
+					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "backup_begin_time", "0"),
 					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "backup_count", "6"),
 					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "backup_black_list.#", "1"),
 					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "backup_black_list."+strconv.Itoa(schema.HashString("test.%")), "test.%"),
@@ -213,7 +213,7 @@ resource "ucloud_db_instance" "foo" {
 	engine 			  = "mysql"
 	engine_version	  = "5.7"
 	password 		  = "2018_UClou"
-	backup_begin_time = 4
+	backup_begin_time = 0
 	backup_count	  = 6
 	backup_black_list = ["test.%"]
 	backup_date 	  = "1111001"

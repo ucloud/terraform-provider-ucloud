@@ -128,7 +128,7 @@ func resourceUCloudMemcacheInstanceCreate(d *schema.ResourceData, meta interface
 	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
 	req.Protocol = ucloud.String("memcache")
 
-	if v, ok := d.GetOk("duration"); ok {
+	if v, ok := d.GetOkExists("duration"); ok {
 		req.Quantity = ucloud.Int(v.(int))
 	} else {
 		req.Quantity = ucloud.Int(1)
