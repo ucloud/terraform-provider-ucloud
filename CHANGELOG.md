@@ -1,13 +1,13 @@
-## 1.12.1 (Unreleased)
+## 1.12.1 (August 26, 2019)
 
 BUG FIXES:
-* Fix the `duration` about it can specify zero-value distinguish from null-value[GH-45]
-* resource/ucloud_db_instance: Fix the `backup_begin_time` about it can specify zero-value distinguish from null-value[GH-45]
-* resource/ucloud_instance: Fix the content of return err about `cloud_normal` of `boot_disk_type` is not supported currently[GH-45]
-* resource/ucloud_lb_listener: Fix the `idle_timeout` about it can specify zero-value distinguish from null-value[GH-45]
-* resource/ucloud_lb_ssl_attachment: Fix the inaccurate plan about creating lb ssl attachment[GH-46]
-* resource/ucloud_lb_ssl_attachment: Fix the api err about deleting lb ssl attachment[GH-46]
-* resource/ucloud_disk_attachment: Fix the api err about delete disk attachment[GH-47]
+* Fix the `duration` about it can specify zero-value distinguish from null-value([#45](https://github.com/terraform-providers/terraform-provider-ucloud/issues/45))
+* resource/ucloud_db_instance: Fix the `backup_begin_time` about it can specify zero-value distinguish from null-value([#45](https://github.com/terraform-providers/terraform-provider-ucloud/issues/45))
+* resource/ucloud_instance: Fix the content of return err about `cloud_normal` of `boot_disk_type` is not supported currently([#45](https://github.com/terraform-providers/terraform-provider-ucloud/issues/45))
+* resource/ucloud_lb_listener: Fix the `idle_timeout` about it can specify zero-value distinguish from null-value([#45](https://github.com/terraform-providers/terraform-provider-ucloud/issues/45))
+* resource/ucloud_lb_ssl_attachment: Fix the inaccurate plan about creating lb ssl attachment([#46](https://github.com/terraform-providers/terraform-provider-ucloud/issues/46))
+* resource/ucloud_lb_ssl_attachment: Fix the api err about deleting lb ssl attachment([#46](https://github.com/terraform-providers/terraform-provider-ucloud/issues/46))
+* resource/ucloud_disk_attachment: Fix the api err about delete disk attachment([#47](https://github.com/terraform-providers/terraform-provider-ucloud/issues/47))
 
 ## 1.12.0 (August 23, 2019)
 
