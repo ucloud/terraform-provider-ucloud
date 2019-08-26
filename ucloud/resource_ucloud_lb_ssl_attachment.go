@@ -58,6 +58,29 @@ func resourceUCloudLBSSLAttachmentCreate(d *schema.ResourceData, meta interface{
 
 	d.SetId(fmt.Sprintf("%s:%s:%s", sslId, lbId, listenerId))
 
+	stateConf := &resource.StateChangeConf{
+		Pending: []string{statusPending},
+		Target:  []string{statusInitialized},
+		Refresh: func() (interface{}, string, error) {
+			sslSet, err := client.describeLBSSLAttachmentById(sslId, lbId, listenerId)
+			if err != nil {
+				if isNotFoundError(err) {
+					return sslSet, statusPending, nil
+				}
+				return nil, "", err
+			}
+			return sslSet, statusInitialized, nil
+		},
+		Timeout:    2 * time.Minute,
+		Delay:      2 * time.Second,
+		MinTimeout: 1 * time.Second,
+	}
+
+	_, err := stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("error on waiting for ssl attachment %q complete creating, %s", d.Id(), err)
+	}
+
 	return resourceUCloudLBSSLAttachmentRead(d, meta)
 }
 
@@ -77,6 +100,7 @@ func resourceUCloudLBSSLAttachmentRead(d *schema.ResourceData, meta interface{})
 
 	d.Set("load_balancer_id", sslAtSet.ULBId)
 	d.Set("listener_id", sslAtSet.VServerId)
+	d.Set("ssl_id", p[0])
 
 	return nil
 }
@@ -92,19 +116,31 @@ func resourceUCloudLBSSLAttachmentDelete(d *schema.ResourceData, meta interface{
 	req.ULBId = ucloud.String(p[1])
 	req.VServerId = ucloud.String(p[2])
 
-	return resource.Retry(5*time.Minute, func() *resource.RetryError {
-		if _, err := conn.UnbindSSL(req); err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error on deleting lb ssl attachment %q, %s", d.Id(), err))
-		}
+	if _, err := conn.UnbindSSL(req); err != nil {
+		return fmt.Errorf("error on deleting lb ssl attachment %q, %s", d.Id(), err)
+	}
 
-		_, err := client.describeLBSSLAttachmentById(p[0], p[1], p[2])
-		if err != nil {
-			if isNotFoundError(err) {
-				return nil
+	stateConf := &resource.StateChangeConf{
+		Pending: []string{statusPending},
+		Target:  []string{statusInitialized},
+		Refresh: func() (interface{}, string, error) {
+			sslSet, err := client.describeLBSSLAttachmentById(p[0], p[1], p[2])
+			if err != nil {
+				if isNotFoundError(err) {
+					return sslSet, statusInitialized, nil
+				}
+				return nil, "", err
 			}
-			return resource.NonRetryableError(fmt.Errorf("error on reading lb ssl attachment when deleting %q, %s", d.Id(), err))
-		}
+			return sslSet, statusPending, nil
+		},
+		Timeout:    2 * time.Minute,
+		Delay:      2 * time.Second,
+		MinTimeout: 1 * time.Second,
+	}
 
-		return resource.RetryableError(fmt.Errorf("the specified lb ssl attachment %q has not been deleted due to unknown error", d.Id()))
-	})
+	if _, err := stateConf.WaitForState(); err != nil {
+		return fmt.Errorf("error on waiting for ssl attachment %q complete deleting, %s", d.Id(), err)
+	}
+
+	return nil
 }
