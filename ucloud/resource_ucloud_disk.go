@@ -254,6 +254,9 @@ func resourceUCloudDiskUpdate(d *schema.ResourceData, meta interface{}) error {
 				if _, err = stateConf.WaitForState(); err != nil {
 					return fmt.Errorf("error on waiting for starting instance %q after updating the size of disk %q, %s", uhostId, d.Id(), err)
 				}
+
+				// Executing DetachUDisk immediately after starting up the instance will cause an error, this sleep to avoid this error
+				time.Sleep(3 * time.Second)
 			}
 		} else {
 			req := conn.NewResizeUDiskRequest()

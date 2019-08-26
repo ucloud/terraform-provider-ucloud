@@ -7,6 +7,7 @@ BUG FIXES:
 * resource/ucloud_lb_listener: Fix the `idle_timeout` about it can specify zero-value distinguish from null-value[GH-45]
 * resource/ucloud_lb_ssl_attachment: Fix the inaccurate plan about creating lb ssl attachment[GH-46]
 * resource/ucloud_lb_ssl_attachment: Fix the api err about deleting lb ssl attachment[GH-46]
+* resource/ucloud_disk_attachment: Fix the api err about delete disk attachment[GH-47]
 
 ## 1.12.0 (August 23, 2019)
 
