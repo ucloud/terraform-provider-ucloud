@@ -2,6 +2,7 @@ package ucloud
 
 import (
 	"fmt"
+	uerr "github.com/ucloud/ucloud-sdk-go/ucloud/error"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -185,15 +186,32 @@ func resourceUCloudSubnetDelete(d *schema.ResourceData, meta interface{}) error 
 	client := meta.(*UCloudClient)
 	conn := client.vpcconn
 
-	req := conn.NewDeleteSubnetRequest()
-	req.SubnetId = ucloud.String(d.Id())
+	reqDelete := conn.NewDeleteSubnetRequest()
+	reqDelete.SubnetId = ucloud.String(d.Id())
+	reqDes := conn.NewDescribeSubnetResourceRequest()
+	reqDes.SubnetId = ucloud.String(d.Id())
+	return resource.Retry(10*time.Minute, func() *resource.RetryError {
+		respDes, err := conn.DescribeSubnetResource(reqDes)
+		if err != nil {
+			return resource.NonRetryableError(fmt.Errorf("error on %s before deleting subnet %q, %s", "DescribeSubnetResource", d.Id(), err))
+		}
 
-	return resource.Retry(5*time.Minute, func() *resource.RetryError {
-		if _, err := conn.DeleteSubnet(req); err != nil {
+		if len(respDes.DataSet) > 0 {
+			var resourceData []string
+			for _, v := range respDes.DataSet {
+				resourceData = append(resourceData, v.ResourceId)
+			}
+			return resource.NonRetryableError(fmt.Errorf("error on deleting subnet %q, we find the resource %v bind to it", d.Id(), resourceData))
+		}
+
+		if _, err := conn.DeleteSubnet(reqDelete); err != nil {
+			if uErr, ok := err.(uerr.Error); ok && uErr.Code() == 4411 {
+				return resource.RetryableError(fmt.Errorf("error on deleting subnet %q, %s", d.Id(), err))
+			}
 			return resource.NonRetryableError(fmt.Errorf("error on deleting subnet %q, %s", d.Id(), err))
 		}
 
-		_, err := client.describeSubnetById(d.Id())
+		_, err = client.describeSubnetById(d.Id())
 		if err != nil {
 			if isNotFoundError(err) {
 				return nil
