@@ -46,7 +46,7 @@ func resourceUCloudMemcacheInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Default:  "month",
+				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"year",
 					"month",
@@ -125,8 +125,13 @@ func resourceUCloudMemcacheInstanceCreate(d *schema.ResourceData, meta interface
 	req := conn.NewCreateUMemcacheGroupRequest()
 	req.Zone = ucloud.String(d.Get("availability_zone").(string))
 	req.Size = ucloud.Int(getMemcacheCapability(d.Get("instance_type").(string)))
-	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
 	req.Protocol = ucloud.String("memcache")
+
+	if v, ok := d.GetOk("charge_type"); ok {
+		req.ChargeType = ucloud.String(upperCamelCvt.unconvert(v.(string)))
+	} else {
+		req.ChargeType = ucloud.String("Month")
+	}
 
 	if v, ok := d.GetOkExists("duration"); ok {
 		req.Quantity = ucloud.Int(v.(int))

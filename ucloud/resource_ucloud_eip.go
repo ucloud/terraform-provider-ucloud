@@ -43,8 +43,8 @@ func resourceUCloudEIP() *schema.Resource {
 			"charge_type": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "month",
 				ForceNew: true,
+				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"month",
 					"year",
@@ -155,8 +155,12 @@ func resourceUCloudEIPCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := client.unetconn
 
 	req := conn.NewAllocateEIPRequest()
-	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
 	req.OperatorName = ucloud.String(upperCamelCvt.unconvert(d.Get("internet_type").(string)))
+	if v, ok := d.GetOk("charge_type"); ok {
+		req.ChargeType = ucloud.String(upperCamelCvt.unconvert(v.(string)))
+	} else {
+		req.ChargeType = ucloud.String("Month")
+	}
 
 	if v, ok := d.GetOk("charge_mode"); ok {
 		req.PayMode = ucloud.String(upperCamelCvt.unconvert(v.(string)))

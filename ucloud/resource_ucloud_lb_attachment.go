@@ -135,12 +135,12 @@ func resourceUCloudLBAttachmentUpdate(d *schema.ResourceData, meta interface{}) 
 func resourceUCloudLBAttachmentRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
 	var err error
-	var lbId string
-	var listenerId string
 	var backendSet *ulb.ULBBackendSet
-	if v, ok := d.GetOk("load_balancer_id"); ok {
-		listenerId = d.Get("listener_id").(string)
-		backendSet, err = client.describeBackendById(v.(string), listenerId, d.Id())
+	lbId, lbOk := d.GetOk("load_balancer_id")
+	listenerId, lsOk := d.GetOk("listener_id")
+
+	if lbOk && lsOk {
+		backendSet, err = client.describeBackendById(lbId.(string), listenerId.(string), d.Id())
 		if err != nil {
 			if isNotFoundError(err) {
 				d.SetId("")
@@ -149,7 +149,7 @@ func resourceUCloudLBAttachmentRead(d *schema.ResourceData, meta interface{}) er
 			return fmt.Errorf("error on reading lb attachment %q, %s", d.Id(), err)
 		}
 
-		d.Set("load_balancer_id", v)
+		d.Set("load_balancer_id", lbId)
 		d.Set("listener_id", listenerId)
 	} else {
 		backendSet, lbId, listenerId, err = client.describeBackendByOneId(d.Id())
@@ -182,11 +182,19 @@ func resourceUCloudLBAttachmentDelete(d *schema.ResourceData, meta interface{}) 
 	req.BackendId = ucloud.String(d.Id())
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
+		_, err := client.describeBackendById(lbId, listenerId, d.Id())
+		if err != nil {
+			if isNotFoundError(err) {
+				return nil
+			}
+			return resource.NonRetryableError(fmt.Errorf("error on reading lb attachment before deleting %q, %s", d.Id(), err))
+		}
+
 		if _, err := conn.ReleaseBackend(req); err != nil {
 			return resource.NonRetryableError(fmt.Errorf("error on deleting lb attachment %q, %s", d.Id(), err))
 		}
 
-		_, err := client.describeBackendById(lbId, listenerId, d.Id())
+		_, err = client.describeBackendById(lbId, listenerId, d.Id())
 		if err != nil {
 			if isNotFoundError(err) {
 				return nil

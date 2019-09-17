@@ -133,11 +133,20 @@ func resourceUCloudEIPAssociationDelete(d *schema.ResourceData, meta interface{}
 	req.ResourceType = ucloud.String(resourceType)
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
+		_, err := client.describeEIPResourceById(p[0], p[1])
+		if err != nil {
+			if isNotFoundError(err) {
+				d.SetId("")
+				return nil
+			}
+			return resource.NonRetryableError(fmt.Errorf("error on reading eip association before deleting %q, %s", d.Id(), err))
+		}
+
 		if _, err := conn.UnBindEIP(req); err != nil {
 			return resource.NonRetryableError(fmt.Errorf("error on deleting eip association %q, %s", d.Id(), err))
 		}
 
-		_, err := client.describeEIPResourceById(p[0], p[1])
+		_, err = client.describeEIPResourceById(p[0], p[1])
 		if err != nil {
 			if isNotFoundError(err) {
 				return nil

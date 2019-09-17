@@ -110,6 +110,15 @@ func resourceUCloudDiskAttachmentDelete(d *schema.ResourceData, meta interface{}
 	req.UHostId = ucloud.String(p[1])
 
 	return resource.Retry(15*time.Minute, func() *resource.RetryError {
+		_, err := client.describeDiskResource(p[0], p[1])
+		if err != nil {
+			if isNotFoundError(err) {
+				d.SetId("")
+				return nil
+			}
+			return resource.NonRetryableError(fmt.Errorf("error on reading disk attachment before deleting %q, %s", d.Id(), err))
+		}
+
 		if _, err := conn.DetachUDisk(req); err != nil {
 			if uErr, ok := err.(uerr.Error); ok && uErr.Code() != 17060 {
 				return resource.NonRetryableError(fmt.Errorf("error on deleting disk attachment %q, %s", d.Id(), err))
