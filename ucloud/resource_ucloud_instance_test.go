@@ -316,15 +316,16 @@ resource "ucloud_security_group" "default" {
 }
 
 resource "ucloud_instance" "foo" {
-  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-  image_id          = "${data.ucloud_images.default.images.0.id}"
-  security_group    = "${ucloud_security_group.default.id}"
-  instance_type     = "n-basic-2"
-  root_password     = "wA1234567"
-  charge_type       = "month"
-  duration          = 0
-  name              = "tf-acc-instance-config-basic-update"
-  tag               = ""
+  availability_zone 		= "${data.ucloud_zones.default.zones.0.id}"
+  image_id          		= "${data.ucloud_images.default.images.0.id}"
+  security_group    		= "${ucloud_security_group.default.id}"
+  instance_type     		= "n-basic-2"
+  root_password     		= "wA1234567"
+  charge_type       		= "month"
+  duration          		= 0
+  name              		= "tf-acc-instance-config-basic-update"
+  tag               		= ""
+  allow_stopping_for_update = true
 }`, rInt)
 }
 

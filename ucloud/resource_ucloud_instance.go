@@ -84,8 +84,8 @@ func resourceUCloudInstance() *schema.Resource {
 			"charge_type": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "month",
 				ForceNew: true,
+				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"year",
 					"month",
@@ -183,6 +183,11 @@ func resourceUCloudInstance() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
+			},
+
+			"allow_stopping_for_update": {
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 
 			"cpu": {
@@ -293,7 +298,6 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 	zone := d.Get("availability_zone").(string)
 	req.Zone = ucloud.String(zone)
 	req.ImageId = ucloud.String(imageId)
-	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
 	req.CPU = ucloud.Int(t.CPU)
 	req.Memory = ucloud.Int(t.Memory)
 	password := fmt.Sprintf("%s%s%s",
@@ -304,6 +308,12 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 		req.Password = ucloud.String(v.(string))
 	} else {
 		req.Password = ucloud.String(password)
+	}
+
+	if v, ok := d.GetOk("charge_type"); ok {
+		req.ChargeType = ucloud.String(upperCamelCvt.unconvert(v.(string)))
+	} else {
+		req.ChargeType = ucloud.String("Month")
 	}
 
 	req.MachineType = ucloud.String("N")
@@ -380,12 +390,7 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if val, ok := d.GetOk("security_group"); ok {
-		resp, err := client.describeFirewallById(val.(string))
-		if err != nil {
-			return fmt.Errorf("error on reading security group %q when creating instance, %s", val.(string), err)
-		}
-
-		req.SecurityGroupId = ucloud.String(resp.GroupId)
+		req.SecurityGroupId = ucloud.String(val.(string))
 	}
 
 	resp, err := conn.CreateUHostInstance(req)
@@ -611,6 +616,11 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 		}
 
 		if strings.ToLower(instance.State) != statusStopped {
+			//!d.IsNewResource in order to avoid the err of boot disk initialize
+			if !d.Get("allow_stopping_for_update").(bool) && !d.IsNewResource() {
+				return fmt.Errorf("updating the root_password, boot_disk_size, data_disk_size or instance_type on an instance requires stopping it, please set allow_stopping_for_update = true in your config to acknowledge it")
+			}
+
 			_, err := conn.StopUHostInstance(stopReq)
 			if err != nil {
 				return fmt.Errorf("error on stopping instance when updating %q, %s", d.Id(), err)
@@ -763,7 +773,6 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 	d.Set("root_password", d.Get("root_password"))
 	d.Set("isolation_group", instance.IsolationGroup)
 	d.Set("name", instance.Name)
-	d.Set("charge_type", upperCamelCvt.convert(instance.ChargeType))
 	d.Set("availability_zone", instance.Zone)
 	d.Set("tag", instance.Tag)
 	d.Set("cpu", cpu)
@@ -774,6 +783,11 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 	d.Set("auto_renew", boolCamelCvt.unconvert(instance.AutoRenew))
 	d.Set("remark", instance.Remark)
 	d.Set("instance_type", instanceTypeSetFunc(upperCvt.convert(instance.MachineType), cpu, memory/1024))
+
+	//in order to be compatible with returns null
+	if instance.ChargeType != "" {
+		d.Set("charge_type", upperCamelCvt.convert(instance.ChargeType))
+	}
 
 	basicImageId := instance.BasicImageId
 	if basicImageId != "" {
@@ -858,7 +872,7 @@ func resourceUCloudInstanceDelete(d *schema.ResourceData, meta interface{}) erro
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(err)
+			return resource.NonRetryableError(fmt.Errorf("error on reading instance before deleting %q, %s", d.Id(), err))
 		}
 
 		if strings.ToLower(instance.State) != statusStopped {
@@ -867,8 +881,9 @@ func resourceUCloudInstanceDelete(d *schema.ResourceData, meta interface{}) erro
 			}
 
 			stateConf := &resource.StateChangeConf{
-				Pending:    []string{statusPending},
-				Target:     []string{statusStopped},
+				Pending: []string{statusPending},
+				// set `instance.State` as target in order to the instance with incorrect state can be deleted.
+				Target:     []string{statusStopped, instance.State},
 				Refresh:    instanceStateRefreshFunc(client, d.Id(), statusStopped),
 				Timeout:    d.Timeout(schema.TimeoutDelete),
 				Delay:      3 * time.Second,
@@ -906,16 +921,15 @@ func instanceStateRefreshFunc(client *UCloudClient, instanceId, target string) r
 			return nil, "", err
 		}
 
-		if instance.State == "ResizeFail" {
-			return nil, "", fmt.Errorf("resizing instance failed")
-		}
-
-		if instance.State == "Install Fail" {
-			return nil, "", fmt.Errorf("install failed")
-		}
-
 		state := strings.ToLower(instance.State)
 		if state != target {
+			if instance.State == "ResizeFail" {
+				return nil, "", fmt.Errorf("resizing instance failed")
+			}
+
+			if instance.State == "Install Fail" {
+				return nil, "", fmt.Errorf("install failed")
+			}
 			state = statusPending
 		}
 
