@@ -95,7 +95,31 @@ func resourceUCloudUDPNConnectionCreate(d *schema.ResourceData, meta interface{}
 	}
 
 	d.SetId(resp.UDPNId)
-	return resourceUCloudUDPNConnectionUpdate(d, meta)
+
+	// after create udpn connection, we need to wait it initialized
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{statusPending},
+		Target:     []string{statusInitialized},
+		Timeout:    5 * time.Minute,
+		Delay:      0 * time.Second,
+		MinTimeout: 1 * time.Second,
+		Refresh: func() (interface{}, string, error) {
+			inst, err := client.describeDPNById(d.Id())
+			if err != nil {
+				if isNotFoundError(err) {
+					return nil, statusPending, nil
+				}
+				return nil, "", err
+			}
+			return inst, statusInitialized, nil
+		},
+	}
+
+	if _, err := stateConf.WaitForState(); err != nil {
+		return fmt.Errorf("error on waiting for udpn connection %q complete creating, %s", d.Id(), err)
+	}
+
+	return resourceUCloudUDPNConnectionRead(d, meta)
 }
 
 func resourceUCloudUDPNConnectionUpdate(d *schema.ResourceData, meta interface{}) error {
