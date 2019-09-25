@@ -777,7 +777,6 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 	d.Set("tag", instance.Tag)
 	d.Set("cpu", cpu)
 	d.Set("memory", memory/1024)
-	d.Set("status", instance.State)
 	d.Set("create_time", timestampToString(instance.CreateTime))
 	d.Set("expire_time", timestampToString(instance.ExpireTime))
 	d.Set("auto_renew", boolCamelCvt.unconvert(instance.AutoRenew))
@@ -785,13 +784,14 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 	d.Set("instance_type", instanceTypeSetFunc(upperCvt.convert(instance.MachineType), cpu, memory/1024))
 
 	//in order to be compatible with returns null
-	if instance.ChargeType != "" {
+	if notEmptyStringInSet(instance.ChargeType) {
 		d.Set("charge_type", upperCamelCvt.convert(instance.ChargeType))
 	}
-
-	basicImageId := instance.BasicImageId
-	if basicImageId != "" {
-		d.Set("image_id", basicImageId)
+	if notEmptyStringInSet(instance.State) {
+		d.Set("status", instance.State)
+	}
+	if notEmptyStringInSet(instance.BasicImageId) {
+		d.Set("image_id", instance.BasicImageId)
 	}
 
 	ipSet := []map[string]interface{}{}
