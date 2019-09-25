@@ -64,17 +64,15 @@ func resourceUCloudVPNConnection() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						//TODO: review this parameter
-						//"ike_version": {
-						//	Type:         schema.TypeString,
-						//	Optional:     true,
-						//	ValidateFunc: validation.StringInSlice([]string{
-						//		"ikev1",
-						//	}, false),
-						//	Computed:     true,
-						//},
+						"ike_version": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  "ikev1",
+							ValidateFunc: validation.StringInSlice([]string{
+								"ikev1",
+							}, false),
+						},
 
-						//TODO: ValidateFunc
 						"pre_shared_key": {
 							Type:         schema.TypeString,
 							Required:     true,
@@ -115,68 +113,19 @@ func resourceUCloudVPNConnection() *schema.Resource {
 							}, false),
 						},
 
-						//TODO: Review
 						"local_id": {
-							Type:     schema.TypeString,
-							Optional: true,
-							//Default:  "auto",
+							Type:         schema.TypeString,
+							Optional:     true,
 							Computed:     true,
 							ValidateFunc: validateVpnAuto,
 						},
 
 						"remote_id": {
-							Type:     schema.TypeString,
-							Optional: true,
-							//Default:  "auto",
+							Type:         schema.TypeString,
+							Optional:     true,
 							Computed:     true,
 							ValidateFunc: validateVpnAuto,
 						},
-
-						//"local_id": {
-						//	Type:     schema.TypeSet,
-						//	Optional: true,
-						//	MinItems: 1,
-						//	MaxItems: 1,
-						//	Elem: &schema.Resource{
-						//		Schema: map[string]*schema.Schema{
-						//			"domain": {
-						//				Type:          schema.TypeString,
-						//				Optional:      true,
-						//				ConflictsWith: []string{"ip_address"},
-						//			},
-						//
-						//			"ip_address": {
-						//				Type:          schema.TypeString,
-						//				Optional:      true,
-						//				ConflictsWith: []string{"domain"},
-						//				ValidateFunc:  validation.SingleIP(),
-						//			},
-						//		},
-						//	},
-						//},
-
-						//"remote_id": {
-						//	Type:     schema.TypeSet,
-						//	Optional: true,
-						//	MinItems: 1,
-						//	MaxItems: 1,
-						//	Elem: &schema.Resource{
-						//		Schema: map[string]*schema.Schema{
-						//			"domain": {
-						//				Type:          schema.TypeString,
-						//				Optional:      true,
-						//				ConflictsWith: []string{"ip_address"},
-						//			},
-						//
-						//			"ip_address": {
-						//				Type:          schema.TypeString,
-						//				Optional:      true,
-						//				ConflictsWith: []string{"domain"},
-						//				ValidateFunc:  validation.SingleIP(),
-						//			},
-						//		},
-						//	},
-						//},
 
 						"dh_group": {
 							Type:     schema.TypeString,
@@ -272,7 +221,6 @@ func resourceUCloudVPNConnection() *schema.Resource {
 							ValidateFunc: validation.IntBetween(1200, 604800),
 						},
 
-						//TODO:rename this parameter
 						"sa_life_time_bytes": {
 							Type:         schema.TypeInt,
 							Optional:     true,
@@ -280,7 +228,6 @@ func resourceUCloudVPNConnection() *schema.Resource {
 							Computed:     true,
 						},
 
-						//TODO:review
 						"pfs_dh_group": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -333,6 +280,7 @@ func resourceUCloudVPNConnectionCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	ikeCfg := d.Get("ike_config").(*schema.Set).List()[0].(map[string]interface{})
+	req.IKEVersion = ucloud.String(vpnIkeVersionCvt.unconvert(ikeCfg["ike_version"].(string)))
 	req.IKEPreSharedKey = ucloud.String(ikeCfg["pre_shared_key"].(string))
 	req.IKEExchangeMode = ucloud.String(ikeCfg["exchange_mode"].(string))
 	req.IKEEncryptionAlgorithm = ucloud.String(ikeCfg["encryption_algorithm"].(string))
@@ -344,30 +292,12 @@ func resourceUCloudVPNConnectionCreate(d *schema.ResourceData, meta interface{})
 	} else {
 		req.IKELocalId = ucloud.String("auto")
 	}
-	//req.IKELocalId = ucloud.String(ikeCfg["local_id"].(string))
-	//req.IKERemoteId = ucloud.String(ikeCfg["remote_id"].(string))
+
 	if ikeCfg["remote_id"].(string) != "" {
 		req.IKERemoteId = ucloud.String(ikeCfg["remote_id"].(string))
 	} else {
 		req.IKERemoteId = ucloud.String("auto")
 	}
-
-	//localId := cfg["local_id"].(*schema.Set).List()[0].(map[string]interface{})
-	//remoteId := cfg["remote_id"].(*schema.Set).List()[0].(map[string]interface{})
-	//if localId["domain"].(string) != "" {
-	//	req.IKELocalId = ucloud.String(localId["domain"].(string))
-	//} else if localId["ip_address"].(string) != "" {
-	//	req.IKELocalId = ucloud.String(localId["ip_address"].(string))
-	//} else {
-	//	req.IKELocalId = ucloud.String("auto")
-	//}
-	//if remoteId["domain"].(string) != "" {
-	//	req.IKERemoteId = ucloud.String(localId["domain"].(string))
-	//} else if remoteId["ip_address"].(string) != "" {
-	//	req.IKERemoteId = ucloud.String(localId["ip_address"].(string))
-	//} else {
-	//	req.IKERemoteId = ucloud.String("auto")
-	//}
 
 	ipsecCfg := d.Get("ipsec_config").(*schema.Set).List()[0].(map[string]interface{})
 	req.IPSecLocalSubnetIds = schemaSetToStringSlice(ipsecCfg["local_subnet_ids"].(*schema.Set))
@@ -469,6 +399,7 @@ func resourceUCloudVPNConnectionRead(d *schema.ResourceData, meta interface{}) e
 	d.Set("create_time", timestampToString(vcSet.CreateTime))
 
 	ikeData := map[string]interface{}{
+		"ike_version":              vpnIkeVersionCvt.convert(vcSet.IKEData.IKEVersion),
 		"pre_shared_key":           vcSet.IKEData.IKEPreSharedKey,
 		"exchange_mode":            vcSet.IKEData.IKEExchangeMode,
 		"encryption_algorithm":     vcSet.IKEData.IKEEncryptionAlgorithm,

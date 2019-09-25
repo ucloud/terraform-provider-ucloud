@@ -87,7 +87,7 @@ func validateDBInstancePassword(v interface{}, k string) (ws []string, errors []
 	return
 }
 
-func validateSecurityGroupPort(v interface{}, k string) (ws []string, errors []error) {
+func validatePortRange(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 
 	splited := strings.Split(value, "-")
@@ -131,6 +131,11 @@ var validateDiskName = validation.StringMatch(
 	"expected value to be 6 - 63 characters and only support chinese, english, numbers, '-', '_'",
 )
 
+var validateNatGatewayName = validation.StringMatch(
+	regexp.MustCompile(`^[A-Za-z0-9\p{Han}-_.]{6,63}$`),
+	"expected value to be 1 - 63 characters and only support chinese, english, numbers, '-', '_', '.'",
+)
+
 var validateName = validation.StringMatch(
 	regexp.MustCompile(`^[A-Za-z0-9\p{Han}-_.]{1,63}$`),
 	"expected value to be 1 - 63 characters and only support chinese, english, numbers, '-', '_', '.'",
@@ -154,6 +159,11 @@ var validateDBInstanceName = validation.StringMatch(
 var validateDBInstanceBlackList = validation.StringMatch(
 	regexp.MustCompile(`^[^.%]+\.([^.%]+|%)$`),
 	fmt.Sprintf("expected element of %q should like %q or %q", "backup_black_list", "db.%", "dbname.tablename"),
+)
+
+var validateVPNPreSharedKey = validation.StringMatch(
+	regexp.MustCompile(`^[A-Za-z0-9!@#$%^&*()_+-={}\[\]:,./'~]{1,128}$`),
+	"expected value to be 1 - 128 characters and only support english, numbers, !@#$%^&*()_+-=[]:,./'~",
 )
 
 func validateDBInstanceType(v interface{}, k string) (ws []string, errors []error) {
@@ -266,6 +276,20 @@ func validateKVStoreInstancePassword(v interface{}, k string) (ws []string, erro
 
 	if categoryCount < 3 {
 		errors = append(errors, fmt.Errorf("%q is invalid, should have least 3 items of Capital letters, small letter, numbers and special characters, got %q", k, value))
+	}
+
+	return
+}
+
+func validateVpnAuto(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+
+	if strings.EqualFold(value, "auto") && value != "auto" {
+		errors = append(errors, fmt.Errorf("%q is invalid, should set it as %q if you want to automatic identification, got %q", k, "auto", value))
+	}
+
+	if value == "" {
+		errors = append(errors, fmt.Errorf("%q is invalid, can not be set as null string, got %q", k, value))
 	}
 
 	return

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/ucloud/ucloud-sdk-go/external"
 	pumem "github.com/ucloud/ucloud-sdk-go/private/services/umem"
+	"github.com/ucloud/ucloud-sdk-go/services/ipsecvpn"
 	"github.com/ucloud/ucloud-sdk-go/services/uaccount"
 	"github.com/ucloud/ucloud-sdk-go/services/udb"
 	"github.com/ucloud/ucloud-sdk-go/services/udisk"
@@ -96,6 +97,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 	client.udpnconn = udpn.NewClient(cfg, cred)
 	client.udbconn = udb.NewClient(cfg, cred)
 	client.umemconn = umem.NewClient(cfg, cred)
+	client.ipsecvpnClient = ipsecvpn.NewClient(cfg, cred)
 
 	// initialize client connections for private usage
 	client.pumemconn = pumem.NewClient(cfg, cred)

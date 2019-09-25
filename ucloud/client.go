@@ -2,6 +2,7 @@ package ucloud
 
 import (
 	pumem "github.com/ucloud/ucloud-sdk-go/private/services/umem"
+	"github.com/ucloud/ucloud-sdk-go/services/ipsecvpn"
 	"github.com/ucloud/ucloud-sdk-go/services/uaccount"
 	"github.com/ucloud/ucloud-sdk-go/services/udb"
 	"github.com/ucloud/ucloud-sdk-go/services/udisk"
@@ -23,15 +24,16 @@ type UCloudClient struct {
 	config     *ucloud.Config
 	credential *auth.Credential
 
-	uhostconn    *uhost.UHostClient
-	unetconn     *unet.UNetClient
-	ulbconn      *ulb.ULBClient
-	vpcconn      *vpc.VPCClient
-	uaccountconn *uaccount.UAccountClient
-	udiskconn    *udisk.UDiskClient
-	udpnconn     *udpn.UDPNClient
-	udbconn      *udb.UDBClient
-	umemconn     *umem.UMemClient
+	uhostconn      *uhost.UHostClient
+	unetconn       *unet.UNetClient
+	ulbconn        *ulb.ULBClient
+	vpcconn        *vpc.VPCClient
+	uaccountconn   *uaccount.UAccountClient
+	udiskconn      *udisk.UDiskClient
+	udpnconn       *udpn.UDPNClient
+	udbconn        *udb.UDBClient
+	umemconn       *umem.UMemClient
+	ipsecvpnClient *ipsecvpn.IPSecVPNClient
 
 	// private services
 	pumemconn *pumem.UMemClient

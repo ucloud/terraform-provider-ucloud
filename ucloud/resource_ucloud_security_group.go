@@ -46,7 +46,7 @@ func resourceUCloudSecurityGroup() *schema.Resource {
 						"port_range": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ValidateFunc: validateSecurityGroupPort,
+							ValidateFunc: validatePortRange,
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								if v, ok := d.GetOk("protocol"); ok && shouldIgnorePort(v.(string)) {
 									return true

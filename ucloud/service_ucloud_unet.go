@@ -97,3 +97,24 @@ func (c *UCloudClient) describeFirewallById(sgId string) (*unet.FirewallDataSet,
 
 	return &resp.DataSet[0], nil
 }
+
+func (c *UCloudClient) describeVIPById(vipId string) (*unet.VIPDetailSet, error) {
+	if vipId == "" {
+		return nil, newNotFoundError(getNotFoundMessage("vip", vipId))
+	}
+	conn := c.unetconn
+
+	req := conn.NewDescribeVIPRequest()
+	req.VIPId = ucloud.String(vipId)
+
+	resp, err := conn.DescribeVIP(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp == nil || len(resp.VIPSet) < 1 {
+		return nil, newNotFoundError(getNotFoundMessage("vip", vipId))
+	}
+
+	return &resp.VIPSet[0], nil
+}

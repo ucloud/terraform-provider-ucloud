@@ -42,7 +42,7 @@ func resourceUCloudNatGateway() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			//TODO: review this parameter
+
 			"white_list": {
 				Type: schema.TypeSet,
 				Elem: &schema.Schema{
@@ -234,7 +234,6 @@ func resourceUCloudNatGatewayRead(d *schema.ResourceData, meta interface{}) erro
 	}
 	d.Set("subnet_ids", subnetIds)
 
-	//TODO: review this error message
 	if len(ngSet.IPSet) > 1 {
 		var eipIds []string
 		for _, item := range ngSet.IPSet {

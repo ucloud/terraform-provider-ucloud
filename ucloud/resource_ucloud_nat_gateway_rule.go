@@ -39,7 +39,6 @@ func resourceUCloudNatGatewayRule() *schema.Resource {
 				}, false),
 			},
 
-			//TODO:src_elastic_ip?
 			"src_eip_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -50,7 +49,7 @@ func resourceUCloudNatGatewayRule() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validatePortRange,
 			},
-			//TODO:dst_private_ip?
+
 			"dst_ip": {
 				Type:     schema.TypeString,
 				Required: true,

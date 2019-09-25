@@ -22,11 +22,10 @@ func resourceUCloudVPNGateway() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			//TODO: rename this parameter and review whether or not Required (api is Required)
+
 			"grade": {
 				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Required: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"standard",
 					"enhanced",
@@ -102,11 +101,7 @@ func resourceUCloudVPNGatewayCreate(d *schema.ResourceData, meta interface{}) er
 	req := conn.NewCreateVPNGatewayRequest()
 	req.EIPId = ucloud.String(d.Get("eip_id").(string))
 	req.VPCId = ucloud.String(d.Get("vpc_id").(string))
-	if v, ok := d.GetOk("grade"); ok {
-		req.Grade = ucloud.String(upperCamelCvt.unconvert(v.(string)))
-	} else {
-		req.Grade = ucloud.String("standard")
-	}
+	req.Grade = ucloud.String(upperCamelCvt.unconvert(d.Get("grade").(string)))
 
 	if v, ok := d.GetOk("charge_type"); ok {
 		req.ChargeType = ucloud.String(upperCamelCvt.unconvert(v.(string)))
