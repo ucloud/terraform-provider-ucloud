@@ -37,8 +37,9 @@ In addition to all arguments above, the following attributes are exported:
 * `projects` - It is a nested type which documented below.
 * `total_count` - Total number of projects that satisfy the condition.
 
-The attribute (`projects`) support the following:
+- - -
 
+The attribute (`projects`) support the following:
 
 * `id` - The ID of project defined.
 * `name` - The name of the defined project.

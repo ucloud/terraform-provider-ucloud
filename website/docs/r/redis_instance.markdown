@@ -39,12 +39,11 @@ resource "ucloud_redis_instance" "distributed" {
 The following arguments are supported:
 
 * `availability_zone` - (Required) Availability zone where Redis instance is located. Such as: "cn-bj2-02". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
+* `instance_type` - (Required) The type of Redis instance, please visit the [instance type table](../appendix/radis_instance_type.html) for more details.
+
+- - -
+
 * `name` - (Optional) The name of Redis instance, which contains 6-63 characters and only support English, numbers, '-', '_'. If not specified, terraform will auto-generate a name beginning with `tf-redis-instance`.
-* `instance_type` - (Required) The type of Redis instance, please visit the [instance type table](https://docs.ucloud.cn/compute/terraform/specification/umem_instance) for more details.
-Specifies the type of Redis instance with format `engine-type-memory`, Possible values are:
-    - `engine` can only be `redis`.
-    - `type` can be `master` and `distributed`, `master` as active-standby Redis instance, `distributed` as distributed Redis instance.
-    - `memory` can be one of `1`, `2`, `4`, `6`, `8`, `12`, `16`, `24`, `32` for active-standby Redis instance. `memory` range of `16`-`1000` for distributed Redis instance (memory must be divisible by 4).
 * `charge_type` - (Optional) The charge type of Redis instance, possible values are: `year`, `month` and `dynamic` as pay by hour (specific permission required). (Default: `month`).
 * `duration` - (Optional) The duration that you will buy the Redis instance (Default: `1`). The value is `0` when pay by month and the instance will be valid till the last day of that month. It is not required when `dynamic` (pay by hour).
 * `tag` - (Optional) A tag assigned to Redis instance, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
@@ -63,6 +62,8 @@ In addition to all arguments above, the following attributes are exported:
 * `create_time` - The creation time of Redis instance, formatted by RFC3339 time string.
 * `expire_time` - The expiration time of Redis instance, formatted by RFC3339 time string.
 * `status` - The status of KV Redis instance.
+
+- - -
 
 The attribute (`ip_set`) support the following:
 

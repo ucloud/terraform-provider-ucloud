@@ -38,6 +38,8 @@ In addition to all arguments above, the following attributes are exported:
 * `lbs` - It is a nested type which documented below.
 * `total_count` - Total number of Load Balancers that satisfy the condition.
 
+- - -
+
 The attribute (`lbs`) support the following:
 
 * `id` - The ID of Load Balancer.

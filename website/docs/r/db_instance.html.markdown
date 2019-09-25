@@ -20,7 +20,6 @@ data "ucloud_zones" "default" {
 
 # Create database instance
 resource "ucloud_db_instance" "master" {
-c
   name              = "tf-example-db"
   instance_storage  = 20
   instance_type     = "mysql-ha-1"
@@ -34,22 +33,22 @@ c
 The following arguments are supported:
 
 * `availability_zone` - (Required) Availability zone where database instance is located. Such as: "cn-bj2-02". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
-* `standby_zone` - (Optional) Availability zone where the standby database instance is located for the high availability database instance with multiple zone; The disaster recovery of data center can be activated by switching to the standby database instance for the high availability database instance.
-* `password` - (Optional) The password for the database instance which should have 8-30 characters. It must contain at least 3 items of Capital letters, small letter, numbers and special characters. The special characters include `-_`. If not specified, terraform will auto-generate a password.
 * `engine` - (Required) The type of database engine, possible values are: "mysql", "percona".
 * `engine_version` - (Required) The database engine version, possible values are: "5.5", "5.6", "5.7".
-    - 5.5/5.6/5.7 for mysql and percona engine.
+    - 5.5/5.6/5.7 for mysql and percona engine. 
 * `name` - (Optional) The name of database instance, which contains 6-63 characters and only support Chinese, English, numbers, '-', '_', '.', ',', '[', ']', ':'. If not specified, terraform will auto-generate a name beginning with `tf-db-instance`.
-* `instance_storage` - (Required) Specifies the allocated storage size in gigabytes (GB), range from 20 to 3000GB. The volume adjustment must be a multiple of 10 GB. The maximum disk volume for SSD type are：
-    - 500GB if the memory chosen is equal or less than 8GB;
-    - 1000GB if the memory chosen is from 12 to 24GB;
-    - 2000GB if the memory chosen is 32GB;
-    - 3000GB if the memory chosen is equal or more than 48GB.
-* `instance_type` - (Required) Specifies the type of database instance with format "engine-type-memory", Possible values are:
-    - "mysql" and "percona"for engine;
-    - "ha" as high availability version for type of database, high availability version use the dual main hot standby structure which can thoroughly solved the issue of unavailable database caused by the system downtime or hardware failure, the "ha" version only supports "mysql" and "percona" engine.
-    - possible values for memory are: 1, 2, 4, 6, 8, 12, 16, 24, 32, 48, 64GB.
-You may refer to [list of instance type](https://docs.ucloud.cn/compute/terraform/specification/db_instance)
+* `instance_storage` - (Required) Specifies the allocated storage size in gigabytes (GB), range from 20 to 4500GB. The volume adjustment must be a multiple of 10 GB. The maximum disk volume for SSD type are：
+    - 500GB if the memory chosen is equal or less than 6GB;
+    - 1000GB if the memory chosen is from 8 to 16GB;
+    - 2000GB if the memory chosen is 24GB or 32GB;
+    - 3500GB if the memory chosen is 48GB or 64GB;
+    - 4500GB if the memory chosen is equal or more than 96GB;
+* `instance_type` - (Required) The type of database instance. You may refer to [list of instance type](../appendix/db_instance_type.html).
+
+- - -
+
+* `standby_zone` - (Optional) Availability zone where the standby database instance is located for the high availability database instance with multiple zone; The disaster recovery of data center can be activated by switching to the standby database instance for the high availability database instance.
+* `password` - (Optional) The password for the database instance which should have 8-30 characters. It must contain at least 3 items of Capital letters, small letter, numbers and special characters. The special characters include `-_`. If not specified, terraform will auto-generate a password.
 * `port` - (Optional) The port on which the database accepts connections, the default port is 3306 for mysql and percona.
 * `charge_type` - (Optional) The charge type of db instance, possible values are: `year`, `month` and `dynamic` as pay by hour (specific permission required). (Default: `month`).
 * `duration` - (Optional) The duration that you will buy the db instance (Default: `1`). The value is `0` when pay by month and the instance will be vaild till the last day of that month. It is not required when `dynamic` (pay by hour).
@@ -70,7 +69,6 @@ In addition to all arguments above, the following attributes are exported:
 * `create_time` - The creation time of database, formatted by RFC3339 time string.
 * `expire_time` - The expiration time of database, formatted by RFC3339 time string.
 * `modify_time` - The modification time of database, formatted by RFC3339 time string.
-
 
 ## Import
 

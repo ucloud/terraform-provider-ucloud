@@ -61,13 +61,9 @@ The following arguments are supported:
 
 * `availability_zone` - (Required) Availability zone where instance is located. such as: `cn-bj2-02`. You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
 * `image_id` - (Required) The ID for the image to use for the instance.
-* `instance_type` - (Required) The type of instance. You may refer to [list of instance type](https://docs.ucloud.cn/compute/terraform/specification/instance)
+* `instance_type` - (Required) The type of instance. You may refer to [list of instance type]((../appendix/instance_type.html))
 
     ~> **Note** If you want to update this value, you must set `allow_stopping_for_update`to `true`.
-    - The normal type ( range of CPU in core: 1-32, range of memory in GB: 1-128, and the number of cores of CPU and memory must be divisible by 2 without a remainder (except single core or memory):
-        - One is normal type defined by UCloud provider: `n-Type-CPU`(eg:`n-highcpu-2`), `Type` can be `highcpu`, `basic`, `standard`, `highmem` which represents the ratio of CPU and memory respectively (1:1, 1:2, 1:4, 1:8), CPU can be the specific number of cores of cpu.
-        - Another is normal type defined by Customized: `n-customized-CPU-Memory`, the ratio of cpu to memory should be range of 2:1 ~ 1:12 (eg:`n-customized-1-10`). Thereinto, the customized not be valid when ratio of cpu to memory is 1:1, 1:2, 1:4, 1:8.
-    - There is a new outstanding type defined by UCloud provider only valid in availability_zone `cn-bj2-05`: `o-Type-CPU`(eg: `o-standard-4`). `Type` can be `highcpu`, `basic`, `standard`, `highmem` which represents the ratio of CPU and memory respectively (1:1, 1:2, 1:4, 1:8). This type range of CPU in core: 4-64, range of memory in GB: 4-256, the number of cores of CPU and memory must be divisible by 2 without a remainder (except single core or memory). In order to use it, we must set `boot_disk_type` to `cloud_ssd`. In addition, this type needs to be specified to `image_id`, the image type is `base` and the name of which is prefix with "高内核". Furthermore, the disk attached to instance must be `rssd_data_disk` (RDMA-SSD) cloud disk if required. 
 
 - - -
 

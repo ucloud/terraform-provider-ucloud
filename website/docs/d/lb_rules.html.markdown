@@ -29,6 +29,9 @@ The following arguments are supported:
 
 * `load_balancer_id` - (Required) The ID of a load balancer.
 * `listener_id` - (Required) The ID of a listener server.
+
+- - -
+
 * `ids` - (Optional) A list of LB Rule IDs, all the LB Rules belong to the Load Balancer listener will be retrieved if the ID is `""`.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
@@ -38,6 +41,8 @@ In addition to all arguments above, the following attributes are exported:
 
 * `lb_rules` - It is a nested type which documented below.
 * `total_count` - Total number of LB Rules that satisfy the condition.
+
+- - -
 
 The attribute (`lb_rules`) support the following:
 

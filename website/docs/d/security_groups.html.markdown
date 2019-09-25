@@ -36,6 +36,8 @@ In addition to all arguments above, the following attributes are exported:
 * `security_groups` - It is a nested type which documented below.
 * `total_count` - Total number of Security Group resources that satisfy the condition.
 
+- - -
+
 The attribute (`security_groups`) support the following:
 
 * `id` - The ID of Security Group.
