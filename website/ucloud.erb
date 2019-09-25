@@ -10,9 +10,27 @@
                     <a href="/docs/providers/ucloud/index.html">UCloud Provider</a>
                 </li>
 
+                 <li<%= sidebar_current("docs-ucloud-appendix") %>>
+                    <a href="#">Appendix</a>
+                    <ul class="nav">
+                        <li>
+                            <a href="/docs/providers/ucloud/appendix/instance_type.html">Instance Type</a>
+                        </li>
+                        <li>
+                            <a href="/docs/providers/ucloud/appendix/db_instance_type.html">DB Instance Type</a>
+                        </li>
+                        <li>
+                            <a href="/docs/providers/ucloud/appendix/radis_instance_type.html">Radis Instance Type</a>
+                        </li>
+                        <li>
+                            <a href="/docs/providers/ucloud/appendix/memcache_instance_type.html">Memcache Instance Type</a>
+                        </li>
+                    </ul>
+                </li>
+
                 <li<%= sidebar_current("docs-ucloud-datasource") %>>
-                <a href="#">Data Sources</a>
-                    <ul class="nav nav-visible">
+                    <a href="#">Data Sources</a>
+                    <ul class="nav">
 
                         <li<%= sidebar_current("docs-ucloud-datasource-projects") %>>
                             <a href="/docs/providers/ucloud/d/projects.html">ucloud_projects</a>
@@ -78,7 +96,7 @@
 
                 <li<%= sidebar_current("docs-ucloud-resource-uhost") %>>
                   <a href="#">UHost Resources</a>
-                  <ul class="nav nav-visible">
+                  <ul class="nav">
 
                     <li<%= sidebar_current("docs-ucloud-resource-instance") %>>
                       <a href="/docs/providers/ucloud/r/instance.html">ucloud_instance</a>
@@ -100,7 +118,7 @@
 
                 <li<%= sidebar_current("docs-ucloud-resource-unet") %>>
                   <a href="#">UNet Resources</a>
-                  <ul class="nav nav-visible">
+                  <ul class="nav">
 
                     <li<%= sidebar_current("docs-ucloud-resource-security-group") %>>
                       <a href="/docs/providers/ucloud/r/security_group.html">ucloud_security_group</a>
@@ -116,9 +134,9 @@
                   </ul>
                 </li>
 
-                <li<%= sidebar_current("docs-ucloud-resource-lb") %>>
+                <li<%= sidebar_current("docs-ucloud-resource-ulb") %>>
                   <a href="#">ULB Resources</a>
-                  <ul class="nav nav-visible">
+                  <ul class="nav">
 
                     <li<%= sidebar_current("docs-ucloud-resource-lb") %>>
                       <a href="/docs/providers/ucloud/r/lb.html">ucloud_lb</a>
@@ -148,7 +166,7 @@
 
                 <li<%= sidebar_current("docs-ucloud-resource-vpc") %>>
                 <a href="#">VPC Resources</a>
-                <ul class="nav nav-visible">
+                <ul class="nav">
 
                   <li<%= sidebar_current("docs-ucloud-resource-vpc") %>>
                     <a href="/docs/providers/ucloud/r/vpc.html">ucloud_vpc</a>
@@ -161,12 +179,24 @@
                   <li<%= sidebar_current("docs-ucloud-resource-subnet") %>>
                     <a href="/docs/providers/ucloud/r/subnet.html">ucloud_subnet</a>
                   </li>
+
+                  <li<%= sidebar_current("docs-ucloud-resource-nat-gateway") %>>
+                    <a href="/docs/providers/ucloud/r/nat_gateway.html">ucloud_nat_gateway</a>
+                  </li>
+
+                  <li<%= sidebar_current("docs-ucloud-resource-nat-gateway-rule") %>>
+                    <a href="/docs/providers/ucloud/r/nat_gateway_rule.html">ucloud_nat_gateway_rule</a>
+                  </li>
+
+                  <li<%= sidebar_current("docs-ucloud-resource-vip") %>>
+                    <a href="/docs/providers/ucloud/r/vip.html">ucloud_vip</a>
+                  </li>
                 </ul>
               </li>
 
-              <li<%= sidebar_current("docs-ucloud-resource-db") %>>
-              <a href="#">DB Resources</a>
-              <ul class="nav nav-visible">
+              <li<%= sidebar_current("docs-ucloud-resource-udb") %>>
+              <a href="#">UDB Resources</a>
+              <ul class="nav">
 
                 <li<%= sidebar_current("docs-ucloud-resource-db-instance") %>>
                   <a href="/docs/providers/ucloud/r/db_instance.html">ucloud_db_instance</a>
@@ -184,7 +214,7 @@
 
               <li<%= sidebar_current("docs-ucloud-resource-umem") %>>
               <a href="#">UMem Resources</a>
-              <ul class="nav nav-visible">
+              <ul class="nav">
 
                 <li<%= sidebar_current("docs-ucloud-resource-redis-instance") %>>
                   <a href="/docs/providers/ucloud/r/redis_instance.html">ucloud_redis_instance</a>
@@ -192,6 +222,24 @@
 
                 <li<%= sidebar_current("docs-ucloud-resource-memcache-instance") %>>
                   <a href="/docs/providers/ucloud/r/memcache_instance.html">ucloud_memcache_instance</a>
+                </li>
+              </ul>
+            </li>
+
+              <li<%= sidebar_current("docs-ucloud-resource-ipsec-vpn") %>>
+              <a href="#">IPSec VPN Resources</a>
+              <ul class="nav">
+
+                <li<%= sidebar_current("docs-ucloud-resource-vpn-gateway") %>>
+                  <a href="/docs/providers/ucloud/r/vpn_gateway.html">ucloud_vpn_gateway</a>
+                </li>
+
+                <li<%= sidebar_current("docs-ucloud-resource-vpn-customer-gateway") %>>
+                  <a href="/docs/providers/ucloud/r/vpn_customer_gateway.html">ucloud_vpn_customer_gateway</a>
+                </li>
+
+                <li<%= sidebar_current("docs-ucloud-resource-vpn-connection") %>>
+                  <a href="/docs/providers/ucloud/r/vpn_connection.html">ucloud_vpn_connection</a>
                 </li>
               </ul>
             </li>
