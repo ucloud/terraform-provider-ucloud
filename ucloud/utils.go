@@ -40,8 +40,8 @@ func schemaSetToStringSlice(s interface{}) []string {
 	return vL
 }
 
-// insterfaceSliceToStringSlice used for converting interface slice to string slice
-func insterfaceSliceToStringSlice(iface []interface{}) []string {
+// interfaceSliceToStringSlice used for converting interface slice to string slice
+func interfaceSliceToStringSlice(iface []interface{}) []string {
 	s := []string{}
 	for _, i := range iface {
 		s = append(s, i.(string))

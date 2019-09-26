@@ -172,7 +172,7 @@ func resourceUCloudNatGatewayUpdate(d *schema.ResourceData, meta interface{}) er
 
 		if len(add) > 0 {
 			req := conn.NewAddWhiteListResourceRequest()
-			req.ResourceIds = insterfaceSliceToStringSlice(add)
+			req.ResourceIds = interfaceSliceToStringSlice(add)
 			req.NATGWId = ucloud.String(d.Id())
 			if _, err := conn.AddWhiteListResource(req); err != nil {
 				return fmt.Errorf("error on %s to nat gateway %q, %s", "AddWhiteListResource", d.Id(), err)
@@ -180,7 +180,7 @@ func resourceUCloudNatGatewayUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 		if len(remove) > 0 {
 			req := conn.NewDeleteWhiteListResourceRequest()
-			req.ResourceIds = insterfaceSliceToStringSlice(remove)
+			req.ResourceIds = interfaceSliceToStringSlice(remove)
 			req.NATGWId = ucloud.String(d.Id())
 
 			if _, err := conn.DeleteWhiteListResource(req); err != nil {
