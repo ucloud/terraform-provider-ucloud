@@ -63,8 +63,8 @@ func resourceUCloudDiskAttachmentCreate(d *schema.ResourceData, meta interface{}
 
 	// after create disk attachment, we need to wait it initialized
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"attaching"},
-		Target:     []string{"inuse"},
+		Pending:    []string{diskStatusAttaching},
+		Target:     []string{diskStatusInUse},
 		Refresh:    diskAttachmentStateRefreshFunc(client, diskId),
 		Timeout:    3 * time.Minute,
 		Delay:      2 * time.Second,

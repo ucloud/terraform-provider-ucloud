@@ -63,6 +63,9 @@ const (
 	// diskStatusInUse is the status when disk is in use
 	diskStatusInUse = "InUse"
 
+	// diskStatusAttaching is the status when disk is attaching
+	diskStatusAttaching = "Attaching"
+
 	// diskStatusDetaching is the status when disk is detaching
 	diskStatusDetaching = "Detaching"
 
