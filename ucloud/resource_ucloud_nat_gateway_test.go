@@ -13,7 +13,6 @@ import (
 
 func TestAccUCloudNatGW_basic(t *testing.T) {
 	var val vpc.NatGatewayDataSet
-	//var instance uhost.UHostInstanceSet
 	var vpcSet vpc.VPCInfo
 	var subnetSet vpc.VPCSubnetInfoSet
 	var eipSet unet.UnetEIPSet

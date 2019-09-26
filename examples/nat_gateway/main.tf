@@ -51,7 +51,6 @@ resource "ucloud_instance" "foo" {
   charge_type       = "dynamic"
   name              = "tf-example-nat-gateway"
   tag               = "tf-example"
-  count             = 2
 }
 
 resource "ucloud_instance" "bar" {
@@ -63,7 +62,6 @@ resource "ucloud_instance" "bar" {
   charge_type       = "dynamic"
   name              = "tf-example-nat-gateway"
   tag               = "tf-example"
-  count             = 2
 }
 
 resource "ucloud_nat_gateway" "foo" {
@@ -72,7 +70,7 @@ resource "ucloud_nat_gateway" "foo" {
   eip_id            = ucloud_eip.foo.id
   name              = "tf-example-nat-gateway"
   tag               = "tf-example"
-  white_list        = [ucloud_instance.foo.0.id, ucloud_instance.foo.1.id, ucloud_instance.bar.0.id, ucloud_instance.bar.1.id]
+  white_list        = [ucloud_instance.foo.id, ucloud_instance.bar.id]
   enable_white_list = true
   security_group    = data.ucloud_security_groups.foo.security_groups.0.id
 }
@@ -82,7 +80,7 @@ resource "ucloud_nat_gateway_rule" "foo" {
   protocol       = "tcp"
   src_eip_id     = ucloud_eip.foo.id
   src_port_range = "80"
-  dst_ip         = ucloud_instance.foo.0.private_ip
+  dst_ip         = ucloud_instance.foo.private_ip
   dst_port_range = "88"
   name           = "tf-acc-nat-gateway-rule-update"
 }
@@ -92,7 +90,7 @@ resource "ucloud_nat_gateway_rule" "bar" {
   protocol       = "tcp"
   src_eip_id     = ucloud_eip.foo.id
   src_port_range = "90-100"
-  dst_ip         = ucloud_instance.foo.1.private_ip
+  dst_ip         = ucloud_instance.bar.private_ip
   dst_port_range = "90-100"
   name           = "tf-acc-nat-gateway-rule-update"
 }

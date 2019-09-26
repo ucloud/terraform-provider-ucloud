@@ -484,17 +484,18 @@ resource "ucloud_security_group" "default" {
 }
 
 resource "ucloud_instance" "foo" {
-  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-  image_id          = "${data.ucloud_images.default.images.0.id}"
-  security_group    = "${ucloud_security_group.default.id}"
-  instance_type     = "n-highcpu-1"
-  root_password     = "wA1234567"
-  name              = "tf-acc-instance-size-update"
-  tag               = "tf-acc"
-  boot_disk_size    = 30
-  data_disk_size    = 30
-  vpc_id            = "${ucloud_vpc.default.id}"
-  subnet_id         = "${ucloud_subnet.default.id}"
+  availability_zone         = "${data.ucloud_zones.default.zones.0.id}"
+  image_id                  = "${data.ucloud_images.default.images.0.id}"
+  security_group            = "${ucloud_security_group.default.id}"
+  instance_type             = "n-highcpu-1"
+  root_password             = "wA1234567"
+  name                      = "tf-acc-instance-size-update"
+  tag                       = "tf-acc"
+  boot_disk_size            = 30
+  data_disk_size            = 30
+  allow_stopping_for_update = true
+  vpc_id                    = "${ucloud_vpc.default.id}"
+  subnet_id                 = "${ucloud_subnet.default.id}"
 }
 `, rInt)
 }
