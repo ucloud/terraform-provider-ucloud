@@ -2,7 +2,6 @@ package ucloud
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -559,8 +558,8 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 			return fmt.Errorf("error on reading instance when updating %q, %s", d.Id(), err)
 		}
 
-		if strings.ToLower(instance.BootDiskState) != bootDisksStatusNormal {
-			if strings.ToLower(instance.State) != statusRunning {
+		if instance.BootDiskState != instanceBootDisksStatusNormal {
+			if instance.State != statusRunning {
 				startReq := conn.NewStartUHostInstanceRequest()
 				startReq.UHostId = ucloud.String(d.Id())
 				_, err := conn.StartUHostInstance(startReq)
@@ -587,8 +586,8 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 		// wait for instance initialized about boot disk
 		stateConf := &resource.StateChangeConf{
 			Pending:    []string{statusPending},
-			Target:     []string{bootDisksStatusNormal},
-			Refresh:    bootDiskStateRefreshFunc(client, d.Id(), bootDisksStatusNormal),
+			Target:     []string{instanceBootDisksStatusNormal},
+			Refresh:    bootDiskStateRefreshFunc(client, d.Id(), instanceBootDisksStatusNormal),
 			Timeout:    d.Timeout(schema.TimeoutUpdate),
 			Delay:      3 * time.Second,
 			MinTimeout: 2 * time.Second,
@@ -615,7 +614,7 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 			return fmt.Errorf("error on reading instance when updating %q, %s", d.Id(), err)
 		}
 
-		if strings.ToLower(instance.State) != statusStopped {
+		if instance.State != statusStopped {
 			//!d.IsNewResource in order to avoid the err of boot disk initialize
 			if !d.Get("allow_stopping_for_update").(bool) && !d.IsNewResource() {
 				return fmt.Errorf("updating the root_password, boot_disk_size, data_disk_size or instance_type on an instance requires stopping it, please set allow_stopping_for_update = true in your config to acknowledge it")
@@ -725,7 +724,7 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 			return fmt.Errorf("error on reading instance when updating %q, %s", d.Id(), err)
 		}
 
-		if strings.ToLower(instanceAfter.State) != statusRunning {
+		if instanceAfter.State != statusRunning {
 			// after instance update, we need to wait it started
 			startReq := conn.NewStartUHostInstanceRequest()
 			startReq.UHostId = ucloud.String(d.Id())
@@ -875,15 +874,14 @@ func resourceUCloudInstanceDelete(d *schema.ResourceData, meta interface{}) erro
 			return resource.NonRetryableError(fmt.Errorf("error on reading instance before deleting %q, %s", d.Id(), err))
 		}
 
-		if strings.ToLower(instance.State) != statusStopped {
+		if !isStringIn(instance.State, []string{statusStopped, instanceStatusInstallFail, instanceStatusResizeFail}) {
 			if _, err := conn.PoweroffUHostInstance(stopReq); err != nil {
 				return resource.RetryableError(fmt.Errorf("error on stopping instance when deleting %q, %s", d.Id(), err))
 			}
 
 			stateConf := &resource.StateChangeConf{
-				Pending: []string{statusPending},
-				// set `instance.State` as target in order to the instance with incorrect state can be deleted.
-				Target:     []string{statusStopped, instance.State},
+				Pending:    []string{statusPending},
+				Target:     []string{statusStopped},
 				Refresh:    instanceStateRefreshFunc(client, d.Id(), statusStopped),
 				Timeout:    d.Timeout(schema.TimeoutDelete),
 				Delay:      3 * time.Second,
@@ -921,13 +919,13 @@ func instanceStateRefreshFunc(client *UCloudClient, instanceId, target string) r
 			return nil, "", err
 		}
 
-		state := strings.ToLower(instance.State)
+		state := instance.State
 		if state != target {
-			if instance.State == "ResizeFail" {
+			if state == instanceStatusResizeFail {
 				return nil, "", fmt.Errorf("resizing instance failed")
 			}
 
-			if instance.State == "Install Fail" {
+			if state == instanceStatusInstallFail {
 				return nil, "", fmt.Errorf("install failed")
 			}
 			state = statusPending
@@ -947,15 +945,15 @@ func bootDiskStateRefreshFunc(client *UCloudClient, instanceId, target string) r
 			return nil, "", err
 		}
 
-		if instance.State == "ResizeFail" {
+		state := instance.BootDiskState
+		if state == instanceStatusResizeFail {
 			return nil, "", fmt.Errorf("resizing instance failed")
 		}
 
-		if instance.State == "Install Fail" {
+		if state == instanceStatusInstallFail {
 			return nil, "", fmt.Errorf("install failed")
 		}
 
-		state := strings.ToLower(instance.BootDiskState)
 		if state != target {
 			state = statusPending
 		}

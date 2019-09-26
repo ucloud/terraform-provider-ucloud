@@ -306,10 +306,10 @@ func (c *UCloudClient) waitActiveStandbyMemcacheRunning(id string) error {
 			return nil, "", err
 		}
 
-		if resp.State != upperCamelCvt.unconvert(statusRunning) {
+		if resp.State != statusRunning {
 			return nil, statusPending, nil
 		}
-		return resp, "ok", nil
+		return resp, statusInitialized, nil
 	}
 
 	return waitForMemoryInstance(refresh)

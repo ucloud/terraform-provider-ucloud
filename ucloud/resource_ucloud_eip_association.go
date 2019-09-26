@@ -71,7 +71,7 @@ func resourceUCloudEIPAssociationCreate(d *schema.ResourceData, meta interface{}
 	// after bind eip we need to wait it completed
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{statusPending},
-		Target:     []string{"used"},
+		Target:     []string{eipStatusUsed},
 		Timeout:    5 * time.Minute,
 		Delay:      2 * time.Second,
 		MinTimeout: 1 * time.Second,
@@ -82,7 +82,7 @@ func resourceUCloudEIPAssociationCreate(d *schema.ResourceData, meta interface{}
 			}
 
 			state := eip.Status
-			if state != "used" {
+			if state != eipStatusUsed {
 				state = statusPending
 			}
 

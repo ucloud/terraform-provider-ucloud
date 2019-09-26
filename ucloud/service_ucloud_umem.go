@@ -77,7 +77,7 @@ func waitForMemoryInstance(refresh func() (interface{}, string, error)) error {
 		Timeout:    5 * time.Minute,
 		Delay:      2 * time.Second,
 		MinTimeout: 1 * time.Second,
-		Target:     []string{"ok"},
+		Target:     []string{statusInitialized},
 		Pending:    []string{statusPending},
 		Refresh:    refresh,
 	}

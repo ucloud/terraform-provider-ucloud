@@ -127,8 +127,8 @@ func resourceUCloudDiskAttachmentDelete(d *schema.ResourceData, meta interface{}
 
 		// after detach disk, we need to wait it completed
 		stateConf := &resource.StateChangeConf{
-			Pending:    []string{"detaching"},
-			Target:     []string{"available"},
+			Pending:    []string{diskStatusDetaching},
+			Target:     []string{diskStatusAvailable},
 			Refresh:    diskAttachmentStateRefreshFunc(client, p[0]),
 			Timeout:    3 * time.Minute,
 			Delay:      2 * time.Second,
@@ -153,6 +153,6 @@ func diskAttachmentStateRefreshFunc(client *UCloudClient, diskId string) resourc
 			return nil, "", err
 		}
 
-		return diskSet, strings.ToLower(diskSet.Status), nil
+		return diskSet, diskSet.Status, nil
 	}
 }

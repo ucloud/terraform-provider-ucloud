@@ -271,7 +271,7 @@ func resourceUCloudDBInstanceCreate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	// set default value of parametergroup
-	parameterGroupId, err := setDefaultParameterGroup(d, conn, zone, dbTypeId, engine, engineVersion)
+	parameterGroupId, err := setDefaultParameterGroup(d, conn, zone, dbTypeId)
 	if err != nil {
 		return err
 	} else {
@@ -289,7 +289,7 @@ func resourceUCloudDBInstanceCreate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	// after create db, we need to wait it initialized
-	stateConf := client.dbWaitForState(d.Id(), []string{"Running"})
+	stateConf := client.dbWaitForState(d.Id(), []string{statusRunning})
 
 	if _, err := stateConf.WaitForState(); err != nil {
 		return fmt.Errorf("error on waiting for db instance %q complete creating, %s", d.Id(), err)
@@ -350,7 +350,7 @@ func resourceUCloudDBInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		// after resize db instance, we need to wait it completed
-		stateConf := client.dbWaitForState(d.Id(), []string{"Running", "Shutoff"})
+		stateConf := client.dbWaitForState(d.Id(), []string{statusRunning, dbStatusShutoff})
 
 		if _, err := stateConf.WaitForState(); err != nil {
 			return fmt.Errorf("error on waiting for resizing db instance when updating %q, %s", d.Id(), err)
@@ -467,14 +467,13 @@ func resourceUCloudDBInstanceDelete(d *schema.ResourceData, meta interface{}) er
 			return resource.NonRetryableError(err)
 		}
 
-		if db.State != "Shutoff" {
+		if !isStringIn(db.State, []string{dbStatusShutoff, dbStatusRecoverFail}) {
 			if _, err := conn.StopUDBInstance(stopReq); err != nil {
 				return resource.RetryableError(fmt.Errorf("error on stopping db instance when deleting %q, %s", d.Id(), err))
 			}
 
 			// after instance stop, we need to wait it stopped
-			// set `db.State` as target in order to the instance with incorrect state can be deleted.
-			stateConf := client.dbWaitForState(d.Id(), []string{"Shutoff", db.State})
+			stateConf := client.dbWaitForState(d.Id(), []string{dbStatusShutoff})
 
 			if _, err := stateConf.WaitForState(); err != nil {
 				return resource.RetryableError(fmt.Errorf("error on waiting for stopping db instance when deleting %q, %s", d.Id(), err))
@@ -496,7 +495,7 @@ func resourceUCloudDBInstanceDelete(d *schema.ResourceData, meta interface{}) er
 	})
 }
 
-func setDefaultParameterGroup(d *schema.ResourceData, conn *udb.UDBClient, zone, dbTypeId, engine, engineVersion string) (int, error) {
+func setDefaultParameterGroup(d *schema.ResourceData, conn *udb.UDBClient, zone, dbTypeId string) (int, error) {
 	limit := 100
 	offset := 0
 	parameterGroupId := 0
@@ -616,7 +615,7 @@ func (client *UCloudClient) dbWaitForState(dbId string, target []string) *resour
 			state := db.State
 
 			if !isStringIn(state, target) {
-				if db.State == "RecoverFail" {
+				if db.State == dbStatusRecoverFail {
 					return nil, "", fmt.Errorf("db instance recover failed, please make sure your %q is correct and matched with the other parameters", "backup_id")
 				}
 				state = statusPending
