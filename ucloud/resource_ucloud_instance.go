@@ -320,7 +320,6 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 
 	if t.HostType == "o" {
 		req.MachineType = ucloud.String("O")
-		req.MinimalCpuPlatform = ucloud.String("Intel/Cascadelake")
 	}
 
 	if v, ok := d.GetOk("name"); ok {

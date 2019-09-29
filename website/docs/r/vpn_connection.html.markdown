@@ -56,21 +56,12 @@ resource "ucloud_vpn_connection" "foo" {
   tag                 = "tf-acc"
   remark              = "test"
   ike_config {
-    pre_shared_key           = "test_2019"
-    exchange_mode            = "aggressive"
-    encryption_algorithm     = "aes192"
-    authentication_algorithm = "md5"
-    dh_group                 = 14
-    sa_life_time             = 10000
+    pre_shared_key = "test_2019"
   }
 
   ipsec_config {
-    local_subnet_ids         = [ucloud_subnet.foo.id]
-    remote_subnets           = ["10.0.0.0/24"]
-    protocol                 = "ah"
-    encryption_algorithm     = "aes192"
-    authentication_algorithm = "md5"
-    sa_life_time             = 10000
+    local_subnet_ids = [ucloud_subnet.foo.id]
+    remote_subnets   = ["10.0.0.0/24"]
   }
 }
 ```
