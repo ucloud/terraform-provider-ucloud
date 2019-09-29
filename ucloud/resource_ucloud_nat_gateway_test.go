@@ -38,9 +38,9 @@ func TestAccUCloudNatGW_basic(t *testing.T) {
 					testAccCheckEIPExists("ucloud_eip.foo", &eipSet),
 					testAccCheckNatGWAttributes(&val),
 					resource.TestCheckResourceAttr("ucloud_nat_gateway.foo", "name", "tf-acc-nat-gateway-basic"),
-					resource.TestCheckResourceAttr("ucloud_nat_gateway.foo", "enable_white_list", "true"),
 					resource.TestCheckResourceAttr("ucloud_nat_gateway.foo", "subnet_ids.#", "2"),
-					resource.TestCheckResourceAttr("ucloud_nat_gateway.foo", "white_list.#", "4"),
+					resource.TestCheckResourceAttr("ucloud_nat_gateway.foo", "enable_white_list", "false"),
+					resource.TestCheckResourceAttr("ucloud_nat_gateway.foo", "white_list.#", "2"),
 				),
 			},
 			{
@@ -53,7 +53,7 @@ func TestAccUCloudNatGW_basic(t *testing.T) {
 					testAccCheckEIPExists("ucloud_eip.foo", &eipSet),
 					testAccCheckNatGWAttributes(&val),
 					resource.TestCheckResourceAttr("ucloud_nat_gateway.foo", "name", "tf-acc-nat-gateway-basic"),
-					resource.TestCheckResourceAttr("ucloud_nat_gateway.foo", "enable_white_list", "false"),
+					resource.TestCheckResourceAttr("ucloud_nat_gateway.foo", "enable_white_list", "true"),
 					resource.TestCheckResourceAttr("ucloud_nat_gateway.foo", "subnet_ids.#", "1"),
 					resource.TestCheckResourceAttr("ucloud_nat_gateway.foo", "white_list.#", "1"),
 				),
@@ -173,7 +173,6 @@ resource "ucloud_instance" "foo" {
   charge_type       = "dynamic"
   name              = "tf-acc-nat-gateway-basic"
   tag               = "tf-acc"
-  count             = 2
 }
 
 resource "ucloud_instance" "bar" {
@@ -185,7 +184,6 @@ resource "ucloud_instance" "bar" {
   charge_type       = "dynamic"
   name              = "tf-acc-nat-gateway-basic"
   tag               = "tf-acc"
-  count             = 2
 }
 
 resource "ucloud_nat_gateway" "foo" {
@@ -194,8 +192,8 @@ resource "ucloud_nat_gateway" "foo" {
   eip_id            = ucloud_eip.foo.id
   name              = "tf-acc-nat-gateway-basic"
   tag               = "tf-acc"
-  white_list        = [ucloud_instance.foo.0.id, ucloud_instance.foo.1.id, ucloud_instance.bar.0.id, ucloud_instance.bar.1.id]
-  enable_white_list = true
+  white_list        = [ucloud_instance.foo.id, ucloud_instance.bar.id]
+  enable_white_list = false
   security_group    = data.ucloud_security_groups.foo.security_groups.0.id
 }
 `
@@ -243,7 +241,6 @@ resource "ucloud_instance" "foo" {
   charge_type       = "dynamic"
   name              = "tf-acc-nat-gateway-basic"
   tag               = "tf-acc"
-  count             = 1
 }
 
 resource "ucloud_nat_gateway" "foo" {
@@ -252,8 +249,8 @@ resource "ucloud_nat_gateway" "foo" {
   eip_id            = ucloud_eip.foo.id
   name              = "tf-acc-nat-gateway-basic"
   tag               = "tf-acc"
-  white_list        = ucloud_instance.foo.*.id
-  enable_white_list = false
+  enable_white_list = true
+  white_list        = [ucloud_instance.foo.id]
   security_group    = data.ucloud_security_groups.foo.security_groups.0.id
 }
 `

@@ -30,6 +30,7 @@ func TestAccUCloudVPNCusGW_basic(t *testing.T) {
 					testAccCheckVPNCusGWExists("ucloud_vpn_customer_gateway.foo", &val),
 					testAccCheckVPNCusGWAttributes(&val),
 					resource.TestCheckResourceAttr("ucloud_vpn_customer_gateway.foo", "name", "tf-acc-vpn-customer-gateway-basic"),
+					resource.TestCheckResourceAttr("ucloud_vpn_customer_gateway.foo", "ip_address", "10.0.0.1"),
 				),
 			},
 		},

@@ -68,11 +68,11 @@ resource "ucloud_nat_gateway" "foo" {
   vpc_id            = ucloud_vpc.foo.id
   subnet_ids        = [ucloud_subnet.foo.id, ucloud_subnet.bar.id]
   eip_id            = ucloud_eip.foo.id
-  name              = "tf-example-nat-gateway"
-  tag               = "tf-example"
   white_list        = [ucloud_instance.foo.id, ucloud_instance.bar.id]
   enable_white_list = true
   security_group    = data.ucloud_security_groups.foo.security_groups.0.id
+  name              = "tf-example-nat-gateway"
+  tag               = "tf-example"
 }
 
 resource "ucloud_nat_gateway_rule" "foo" {
@@ -82,7 +82,7 @@ resource "ucloud_nat_gateway_rule" "foo" {
   src_port_range = "80"
   dst_ip         = ucloud_instance.foo.private_ip
   dst_port_range = "88"
-  name           = "tf-acc-nat-gateway-rule-update"
+  name           = "tf-acc-nat-gateway-rule"
 }
 
 resource "ucloud_nat_gateway_rule" "bar" {
@@ -92,5 +92,5 @@ resource "ucloud_nat_gateway_rule" "bar" {
   src_port_range = "90-100"
   dst_ip         = ucloud_instance.bar.private_ip
   dst_port_range = "90-100"
-  name           = "tf-acc-nat-gateway-rule-update"
+  name           = "tf-acc-nat-gateway-rule"
 }

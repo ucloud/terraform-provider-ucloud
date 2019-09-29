@@ -58,9 +58,8 @@ func resourceUCloudVPNConnection() *schema.Resource {
 			},
 
 			"ike_config": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Required: true,
-				MinItems: 1,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -152,9 +151,8 @@ func resourceUCloudVPNConnection() *schema.Resource {
 			},
 
 			"ipsec_config": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Required: true,
-				MinItems: 1,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -279,7 +277,7 @@ func resourceUCloudVPNConnectionCreate(d *schema.ResourceData, meta interface{})
 		req.Remark = ucloud.String(v.(string))
 	}
 
-	ikeCfg := d.Get("ike_config").(*schema.Set).List()[0].(map[string]interface{})
+	ikeCfg := d.Get("ike_config").([]interface{})[0].(map[string]interface{})
 	req.IKEVersion = ucloud.String(vpnIkeVersionCvt.unconvert(ikeCfg["ike_version"].(string)))
 	req.IKEPreSharedKey = ucloud.String(ikeCfg["pre_shared_key"].(string))
 	req.IKEExchangeMode = ucloud.String(ikeCfg["exchange_mode"].(string))
@@ -299,7 +297,7 @@ func resourceUCloudVPNConnectionCreate(d *schema.ResourceData, meta interface{})
 		req.IKERemoteId = ucloud.String("auto")
 	}
 
-	ipsecCfg := d.Get("ipsec_config").(*schema.Set).List()[0].(map[string]interface{})
+	ipsecCfg := d.Get("ipsec_config").([]interface{})[0].(map[string]interface{})
 	req.IPSecLocalSubnetIds = schemaSetToStringSlice(ipsecCfg["local_subnet_ids"].(*schema.Set))
 	req.IPSecRemoteSubnets = schemaSetToStringSlice(ipsecCfg["remote_subnets"].(*schema.Set))
 
@@ -333,7 +331,7 @@ func resourceUCloudVPNConnectionUpdate(d *schema.ResourceData, meta interface{})
 
 	updateAttribute := false
 	if d.HasChange("ike_config") && !d.IsNewResource() {
-		cfg := d.Get("ike_config").(*schema.Set).List()[0].(map[string]interface{})
+		cfg := d.Get("ike_config").([]interface{})[0].(map[string]interface{})
 		req.IKEPreSharedKey = ucloud.String(cfg["pre_shared_key"].(string))
 		req.IKEExchangeMode = ucloud.String(cfg["exchange_mode"].(string))
 		req.IKEEncryptionAlgorithm = ucloud.String(cfg["encryption_algorithm"].(string))
@@ -351,7 +349,7 @@ func resourceUCloudVPNConnectionUpdate(d *schema.ResourceData, meta interface{})
 	}
 
 	if d.HasChange("ipsec_config") && !d.IsNewResource() {
-		cfg := d.Get("ipsec_config").(*schema.Set).List()[0].(map[string]interface{})
+		cfg := d.Get("ipsec_config").([]interface{})[0].(map[string]interface{})
 		req.IPSecLocalSubnetIds = schemaSetToStringSlice(cfg["local_subnet_ids"].(*schema.Set))
 		req.IPSecRemoteSubnets = schemaSetToStringSlice(cfg["remote_subnets"].(*schema.Set))
 

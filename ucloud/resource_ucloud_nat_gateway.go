@@ -43,6 +43,11 @@ func resourceUCloudNatGateway() *schema.Resource {
 				Required: true,
 			},
 
+			"enable_white_list": {
+				Type:     schema.TypeBool,
+				Required: true,
+			},
+
 			"white_list": {
 				Type: schema.TypeSet,
 				Elem: &schema.Schema{
@@ -50,12 +55,6 @@ func resourceUCloudNatGateway() *schema.Resource {
 				},
 				Optional: true,
 				Set:      schema.HashString,
-			},
-
-			"enable_white_list": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
 			},
 
 			"name": {
@@ -116,7 +115,7 @@ func resourceUCloudNatGatewayCreate(d *schema.ResourceData, meta interface{}) er
 		req.Remark = ucloud.String(v.(string))
 	}
 
-	if v, ok := d.GetOk("enable_white_list"); ok && v.(bool) {
+	if d.Get("enable_white_list").(bool) {
 		req.IfOpen = ucloud.Int(1)
 	} else {
 		req.IfOpen = ucloud.Int(0)
@@ -136,25 +135,6 @@ func resourceUCloudNatGatewayUpdate(d *schema.ResourceData, meta interface{}) er
 	conn := client.vpcconn
 
 	d.Partial(true)
-
-	if d.HasChange("enable_white_list") && !d.IsNewResource() {
-		if d.Get("enable_white_list").(bool) {
-			req := conn.NewEnableWhiteListRequest()
-			req.NATGWId = ucloud.String(d.Id())
-			req.IfOpen = ucloud.Int(1)
-			if _, err := conn.EnableWhiteList(req); err != nil {
-				return fmt.Errorf("error on %s to nat gateway %q, %s", "EnableWhiteList", d.Id(), err)
-			}
-		} else {
-			req := conn.NewEnableWhiteListRequest()
-			req.NATGWId = ucloud.String(d.Id())
-			req.IfOpen = ucloud.Int(0)
-			if _, err := conn.EnableWhiteList(req); err != nil {
-				return fmt.Errorf("error on %s to nat gateway %q, %s", "EnableWhiteList", d.Id(), err)
-			}
-		}
-		d.SetPartial("enable_white_list")
-	}
 
 	if d.HasChange("white_list") {
 		reqWhite := conn.NewDescribeWhiteListResourceRequest()
@@ -191,6 +171,26 @@ func resourceUCloudNatGatewayUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		d.SetPartial("white_list")
+	}
+
+	// update the `enable_white_list` must be after update the `white_list` to insure the service available.
+	if d.HasChange("enable_white_list") && !d.IsNewResource() {
+		if d.Get("enable_white_list").(bool) {
+			req := conn.NewEnableWhiteListRequest()
+			req.NATGWId = ucloud.String(d.Id())
+			req.IfOpen = ucloud.Int(1)
+			if _, err := conn.EnableWhiteList(req); err != nil {
+				return fmt.Errorf("error on %s to nat gateway %q, %s", "EnableWhiteList", d.Id(), err)
+			}
+		} else {
+			req := conn.NewEnableWhiteListRequest()
+			req.NATGWId = ucloud.String(d.Id())
+			req.IfOpen = ucloud.Int(0)
+			if _, err := conn.EnableWhiteList(req); err != nil {
+				return fmt.Errorf("error on %s to nat gateway %q, %s", "EnableWhiteList", d.Id(), err)
+			}
+		}
+		d.SetPartial("enable_white_list")
 	}
 
 	if d.HasChange("subnet_ids") && !d.IsNewResource() {
@@ -247,13 +247,18 @@ func resourceUCloudNatGatewayRead(d *schema.ResourceData, meta interface{}) erro
 	req.NATGWIds = []string{d.Id()}
 	whiteSet, err := conn.DescribeWhiteListResource(req)
 	if err != nil {
-		return fmt.Errorf("")
+		return fmt.Errorf("error on reading white list when reading nat gateway %q, %s", d.Id(), err)
 	}
 	var whiteList []string
 	for _, v := range whiteSet.DataSet[0].ObjectIPInfo {
 		whiteList = append(whiteList, v.ResourceId)
 	}
 	d.Set("white_list", whiteList)
+	if whiteSet.DataSet[0].IfOpen == 1 {
+		d.Set("enable_white_list", true)
+	} else {
+		d.Set("enable_white_list", false)
+	}
 
 	return nil
 }
