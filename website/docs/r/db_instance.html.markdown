@@ -43,7 +43,7 @@ The following arguments are supported:
     - 2000GB if the memory chosen is 24GB or 32GB;
     - 3500GB if the memory chosen is 48GB or 64GB;
     - 4500GB if the memory chosen is equal or more than 96GB;
-* `instance_type` - (Required) The type of database instance. You may refer to [list of instance type](https://www.terraform.io/docs/providers/ucloud/appendix/db_instance_type.html).
+* `instance_type` - (Required) The type of database instance, please visit the [instance type table](https://www.terraform.io/docs/providers/ucloud/appendix/db_instance_type.html).
 
 - - -
 
