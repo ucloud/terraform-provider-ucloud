@@ -72,3 +72,62 @@ func (c *UCloudClient) describeVPCIntercomById(vpcId, peerVPCId, peerRegion, pee
 
 	return nil, newNotFoundError(getNotFoundMessage("vpc peer connection", vpcId))
 }
+
+func (c *UCloudClient) describeNatGatewayById(natGwId string) (*vpc.NatGatewayDataSet, error) {
+	if natGwId == "" {
+		return nil, newNotFoundError(getNotFoundMessage("nat_gateway", natGwId))
+	}
+	conn := c.vpcconn
+
+	req := conn.NewDescribeNATGWRequest()
+	req.NATGWIds = []string{natGwId}
+
+	resp, err := conn.DescribeNATGW(req)
+
+	// TODO: don't use magic number
+	if err != nil {
+		if uErr, ok := err.(uerr.Error); ok && uErr.Code() == 54002 {
+			return nil, newNotFoundError(getNotFoundMessage("nat_gateway", natGwId))
+		}
+		return nil, err
+	}
+
+	if resp == nil || len(resp.DataSet) < 1 {
+		return nil, newNotFoundError(getNotFoundMessage("nat_gateway", natGwId))
+	}
+
+	return &resp.DataSet[0], nil
+}
+
+func (c *UCloudClient) describeNatGatewayRuleById(policyId, natGwId string) (*vpc.NATGWPolicyDataSet, error) {
+	if policyId == "" {
+		return nil, newNotFoundError(getNotFoundMessage("nat_gateway_rule", policyId))
+	}
+	conn := c.vpcconn
+
+	req := conn.NewDescribeNATGWPolicyRequest()
+	req.NATGWId = ucloud.String(natGwId)
+
+	resp, err := conn.DescribeNATGWPolicy(req)
+
+	// TODO: don't use magic number
+	if err != nil {
+		if uErr, ok := err.(uerr.Error); ok && uErr.Code() == 54002 {
+			return nil, newNotFoundError(getNotFoundMessage("nat_gateway_rule", policyId))
+		}
+		return nil, err
+	}
+
+	if resp == nil || len(resp.DataSet) < 1 {
+		return nil, newNotFoundError(getNotFoundMessage("nat_gateway_rule", policyId))
+	}
+
+	for i := 0; i < len(resp.DataSet); i++ {
+		poliySet := resp.DataSet[i]
+		if poliySet.PolicyId == policyId {
+			return &poliySet, nil
+		}
+	}
+
+	return nil, newNotFoundError(getNotFoundMessage("nat_gateway_rule", policyId))
+}

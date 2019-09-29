@@ -63,8 +63,8 @@ func resourceUCloudDiskAttachmentCreate(d *schema.ResourceData, meta interface{}
 
 	// after create disk attachment, we need to wait it initialized
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"attaching"},
-		Target:     []string{"inuse"},
+		Pending:    []string{diskStatusAttaching},
+		Target:     []string{diskStatusInUse},
 		Refresh:    diskAttachmentStateRefreshFunc(client, diskId),
 		Timeout:    3 * time.Minute,
 		Delay:      2 * time.Second,
@@ -110,6 +110,15 @@ func resourceUCloudDiskAttachmentDelete(d *schema.ResourceData, meta interface{}
 	req.UHostId = ucloud.String(p[1])
 
 	return resource.Retry(15*time.Minute, func() *resource.RetryError {
+		_, err := client.describeDiskResource(p[0], p[1])
+		if err != nil {
+			if isNotFoundError(err) {
+				d.SetId("")
+				return nil
+			}
+			return resource.NonRetryableError(fmt.Errorf("error on reading disk attachment before deleting %q, %s", d.Id(), err))
+		}
+
 		if _, err := conn.DetachUDisk(req); err != nil {
 			if uErr, ok := err.(uerr.Error); ok && uErr.Code() != 17060 {
 				return resource.NonRetryableError(fmt.Errorf("error on deleting disk attachment %q, %s", d.Id(), err))
@@ -118,8 +127,8 @@ func resourceUCloudDiskAttachmentDelete(d *schema.ResourceData, meta interface{}
 
 		// after detach disk, we need to wait it completed
 		stateConf := &resource.StateChangeConf{
-			Pending:    []string{"detaching"},
-			Target:     []string{"available"},
+			Pending:    []string{diskStatusDetaching},
+			Target:     []string{diskStatusAvailable},
 			Refresh:    diskAttachmentStateRefreshFunc(client, p[0]),
 			Timeout:    3 * time.Minute,
 			Delay:      2 * time.Second,
@@ -144,6 +153,6 @@ func diskAttachmentStateRefreshFunc(client *UCloudClient, diskId string) resourc
 			return nil, "", err
 		}
 
-		return diskSet, strings.ToLower(diskSet.Status), nil
+		return diskSet, diskSet.Status, nil
 	}
 }

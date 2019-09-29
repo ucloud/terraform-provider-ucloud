@@ -113,6 +113,12 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_redis_instance":         resourceUCloudRedisInstance(),
 			"ucloud_memcache_instance":      resourceUCloudMemcacheInstance(),
 			"ucloud_isolation_group":        resourceUCloudIsolationGroup(),
+			"ucloud_vip":                    resourceUCloudVIP(),
+			"ucloud_nat_gateway":            resourceUCloudNatGateway(),
+			"ucloud_nat_gateway_rule":       resourceUCloudNatGatewayRule(),
+			"ucloud_vpn_gateway":            resourceUCloudVPNGateway(),
+			"ucloud_vpn_customer_gateway":   resourceUCloudVPNCustomerGateway(),
+			"ucloud_vpn_connection":         resourceUCloudVPNConnection(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

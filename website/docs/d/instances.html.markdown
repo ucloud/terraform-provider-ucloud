@@ -39,6 +39,8 @@ In addition to all arguments above, the following attributes are exported:
 * `instances` - It is a nested type. instances documented below.
 * `total_count` - Total number of instances that satisfy the condition.
 
+- - -
+
 The attribute (`instances`) support the following:
 
 * `availability_zone` - Availability zone where instances are located.

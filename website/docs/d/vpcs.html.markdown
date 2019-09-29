@@ -36,6 +36,8 @@ In addition to all arguments above, the following attributes are exported:
 * `vpcs` - It is a nested type which documented below.
 * `total_count` - Total number of VPC resources that satisfy the condition.
 
+- - -
+
 The attribute (`vpcs`) support the following:
 
 * `id` - The ID of VPC.

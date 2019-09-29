@@ -36,6 +36,8 @@ In addition to all arguments above, the following attributes are exported:
 * `db_instances` - It is a nested type which documented below.
 * `total_count` - Total number of database instances that satisfy the condition.
 
+- - -
+
 The attribute (`db_instances`) support the following:
 
 * `availability_zone` - Availability zone where database instance is located.
@@ -50,7 +52,7 @@ The attribute (`db_instances`) support the following:
 * `port` - The port on which the database instance accepts connections.
 * `private_ip` - The private IP address assigned to the database instance.
 * `instance_storage` - Specifies the allocated storage size in gigabytes (GB).
-* `charge_type` - The charge type of db instance,
+* `charge_type` - The charge type of db instance.
 * `backup_count` - Specifies the number of backup saved per week.
 * `backup_begin_time` - Specifies when the backup starts, measured in hour.
 * `backup_date` - Specifies whether the backup took place from Sunday to Saturday by displaying 7 digits. 0 stands for backup disbaled and 1 stands for backup enabled. The rightmost digit specifies whether the backup took place on Sunday, and the digits from right to left specify whether the backup took place from Monday to Saturday, it's mandatory required to backup twice per week at least. such as: digits "1100000" stands for the backup took place on Saturday and Friday.

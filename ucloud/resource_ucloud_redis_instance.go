@@ -59,7 +59,7 @@ func resourceUCloudRedisInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Default:  "month",
+				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"year",
 					"month",
@@ -190,8 +190,12 @@ func createActiveStandbyRedisInstance(d *schema.ResourceData, meta interface{}) 
 	req := conn.NewCreateURedisGroupRequest()
 	req.Zone = ucloud.String(d.Get("availability_zone").(string))
 	req.Size = ucloud.Int(getRedisCapability(d.Get("instance_type").(string)))
-	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
 	req.HighAvailability = ucloud.String("enable")
+	if v, ok := d.GetOk("charge_type"); ok {
+		req.ChargeType = ucloud.String(upperCamelCvt.unconvert(v.(string)))
+	} else {
+		req.ChargeType = ucloud.String("Month")
+	}
 
 	if v, ok := d.GetOkExists("duration"); ok {
 		req.Quantity = ucloud.Int(v.(int))
@@ -572,10 +576,10 @@ func (c *UCloudClient) waitActiveStandbyRedisRunning(id string) error {
 			return nil, "", err
 		}
 
-		if resp.State != upperCamelCvt.unconvert(statusRunning) {
+		if resp.State != statusRunning {
 			return nil, statusPending, nil
 		}
-		return resp, "ok", nil
+		return resp, statusInitialized, nil
 	}
 
 	return waitForMemoryInstance(refresh)
@@ -591,10 +595,10 @@ func (c *UCloudClient) waitDistributedRedisRunning(id string) error {
 			return nil, "", err
 		}
 
-		if resp.State != upperCamelCvt.unconvert(statusRunning) {
+		if resp.State != statusRunning {
 			return nil, statusPending, nil
 		}
-		return resp, "ok", nil
+		return resp, statusInitialized, nil
 	}
 
 	return waitForMemoryInstance(refresh)

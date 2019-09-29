@@ -111,6 +111,15 @@ func resourceUCloudLBSSLAttachmentDelete(d *schema.ResourceData, meta interface{
 
 	p := strings.Split(d.Id(), ":")
 
+	_, err := client.describeLBSSLAttachmentById(p[0], p[1], p[2])
+	if err != nil {
+		if isNotFoundError(err) {
+			d.SetId("")
+			return nil
+		}
+		return fmt.Errorf("error on reading lb ssl attachment before deleting %q, %s", d.Id(), err)
+	}
+
 	req := conn.NewUnbindSSLRequest()
 	req.SSLId = ucloud.String(p[0])
 	req.ULBId = ucloud.String(p[1])

@@ -39,6 +39,8 @@ In addition to all arguments above, the following attributes are exported:
 * `lb_attachments` - It is a nested type which documented below.
 * `total_count` - Total number of LB Attachments that satisfy the condition.
 
+- - -
+
 The attribute (`lb_attachments`) support the following:
 
 * `id` - The ID of LB Attachment.

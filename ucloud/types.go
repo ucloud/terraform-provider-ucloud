@@ -224,7 +224,7 @@ type dbInstanceType struct {
 
 var availableDBEngine = []string{"mysql", "percona"}
 var availableDBTypes = []string{"ha"}
-var availableDBMemory = []int{1, 2, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128}
+var availableDBMemory = []int{1, 2, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256, 320}
 
 func parseDBInstanceType(s string) (*dbInstanceType, error) {
 	splited := strings.Split(s, "-")

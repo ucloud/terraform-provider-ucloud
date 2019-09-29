@@ -35,6 +35,8 @@ In addition to all arguments above, the following attributes are exported:
 * `eips` - It is a nested type which documented below.
 * `total_count` - Total number of Elastic IPs that satisfy the condition.
 
+- - -
+
 The attribute (`eips`) support the following:
 
 * `bandwidth` - Maximum bandwidth to the elastic public network, measured in Mbps.

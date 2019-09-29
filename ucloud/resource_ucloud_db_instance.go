@@ -77,7 +77,7 @@ func resourceUCloudDBInstance() *schema.Resource {
 				Type:     schema.TypeInt,
 				Required: true,
 				ValidateFunc: validateAll(
-					validation.IntBetween(20, 3000),
+					validation.IntBetween(20, 4500),
 					validateMod(10),
 				),
 			},
@@ -99,7 +99,7 @@ func resourceUCloudDBInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Default:  "month",
+				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"month",
 					"year",
@@ -207,7 +207,6 @@ func resourceUCloudDBInstanceCreate(d *schema.ResourceData, meta interface{}) er
 	dbTypeId := strings.Join([]string{engine, engineVersion}, "-")
 
 	req := conn.NewCreateUDBInstanceRequest()
-	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
 	req.Zone = ucloud.String(zone)
 	req.DiskSpace = ucloud.Int(d.Get("instance_storage").(int))
 	req.AdminUser = ucloud.String("root")
@@ -224,6 +223,12 @@ func resourceUCloudDBInstanceCreate(d *schema.ResourceData, meta interface{}) er
 		req.AdminPassword = ucloud.String(v.(string))
 	} else {
 		req.AdminPassword = ucloud.String(password)
+	}
+
+	if v, ok := d.GetOk("charge_type"); ok {
+		req.ChargeType = ucloud.String(upperCamelCvt.unconvert(v.(string)))
+	} else {
+		req.ChargeType = ucloud.String("Month")
 	}
 
 	if v, ok := d.GetOk("name"); ok {
@@ -266,7 +271,7 @@ func resourceUCloudDBInstanceCreate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	// set default value of parametergroup
-	parameterGroupId, err := setDefaultParameterGroup(d, conn, zone, dbTypeId, engine, engineVersion)
+	parameterGroupId, err := setDefaultParameterGroup(d, conn, zone, dbTypeId)
 	if err != nil {
 		return err
 	} else {
@@ -284,7 +289,7 @@ func resourceUCloudDBInstanceCreate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	// after create db, we need to wait it initialized
-	stateConf := client.dbWaitForState(d.Id(), []string{"Running"})
+	stateConf := client.dbWaitForState(d.Id(), []string{statusRunning})
 
 	if _, err := stateConf.WaitForState(); err != nil {
 		return fmt.Errorf("error on waiting for db instance %q complete creating, %s", d.Id(), err)
@@ -345,7 +350,7 @@ func resourceUCloudDBInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		// after resize db instance, we need to wait it completed
-		stateConf := client.dbWaitForState(d.Id(), []string{"Running", "Shutoff"})
+		stateConf := client.dbWaitForState(d.Id(), []string{statusRunning, dbStatusShutoff})
 
 		if _, err := stateConf.WaitForState(); err != nil {
 			return fmt.Errorf("error on waiting for resizing db instance when updating %q, %s", d.Id(), err)
@@ -462,13 +467,13 @@ func resourceUCloudDBInstanceDelete(d *schema.ResourceData, meta interface{}) er
 			return resource.NonRetryableError(err)
 		}
 
-		if db.State != "Shutoff" {
+		if !isStringIn(db.State, []string{dbStatusShutoff, dbStatusRecoverFail}) {
 			if _, err := conn.StopUDBInstance(stopReq); err != nil {
 				return resource.RetryableError(fmt.Errorf("error on stopping db instance when deleting %q, %s", d.Id(), err))
 			}
 
-			// after instance stop, we need to wait it stoped
-			stateConf := client.dbWaitForState(d.Id(), []string{"Shutoff"})
+			// after instance stop, we need to wait it stopped
+			stateConf := client.dbWaitForState(d.Id(), []string{dbStatusShutoff})
 
 			if _, err := stateConf.WaitForState(); err != nil {
 				return resource.RetryableError(fmt.Errorf("error on waiting for stopping db instance when deleting %q, %s", d.Id(), err))
@@ -490,7 +495,7 @@ func resourceUCloudDBInstanceDelete(d *schema.ResourceData, meta interface{}) er
 	})
 }
 
-func setDefaultParameterGroup(d *schema.ResourceData, conn *udb.UDBClient, zone, dbTypeId, engine, engineVersion string) (int, error) {
+func setDefaultParameterGroup(d *schema.ResourceData, conn *udb.UDBClient, zone, dbTypeId string) (int, error) {
 	limit := 100
 	offset := 0
 	parameterGroupId := 0
@@ -546,16 +551,20 @@ func diffValidateDBMemoryWithInstanceStorage(diff *schema.ResourceDiff, v interf
 	memory := dbType.Memory
 	instanceStorage := diff.Get("instance_storage").(int)
 
-	if memory <= 8 && instanceStorage > 500 {
-		return fmt.Errorf("the upper limit of %q is 500 when the memory is 8 or less", "instance_storage")
+	if memory <= 6 && instanceStorage > 500 {
+		return fmt.Errorf("the upper limit of %q is 500 when the memory is 6 or less", "instance_storage")
 	}
 
-	if memory <= 24 && instanceStorage > 1000 {
-		return fmt.Errorf("the upper limit of %q is 1000 when the memory between 12 and 24", "instance_storage")
+	if memory <= 16 && instanceStorage > 1000 {
+		return fmt.Errorf("the upper limit of %q is 1000 when the memory between 8 and 16", "instance_storage")
 	}
 
-	if memory == 32 && instanceStorage > 2000 {
-		return fmt.Errorf("the upper limit of %q is 2000 when the memory is 32", "instance_storage")
+	if memory <= 32 && instanceStorage > 2000 {
+		return fmt.Errorf("the upper limit of %q is 2000 when the memory is 24 or 32", "instance_storage")
+	}
+
+	if memory <= 64 && instanceStorage > 3500 {
+		return fmt.Errorf("the upper limit of %q is 3500 when the memory is 48 or 64", "instance_storage")
 	}
 
 	return nil
@@ -591,9 +600,9 @@ func (client *UCloudClient) dbWaitForState(dbId string, target []string) *resour
 	return &resource.StateChangeConf{
 		Pending:    []string{statusPending},
 		Target:     target,
-		Timeout:    5 * time.Minute,
-		Delay:      2 * time.Second,
-		MinTimeout: 1 * time.Second,
+		Timeout:    20 * time.Minute,
+		Delay:      3 * time.Second,
+		MinTimeout: 2 * time.Second,
 		Refresh: func() (interface{}, string, error) {
 			db, err := client.describeDBInstanceById(dbId)
 			if err != nil {
@@ -604,11 +613,11 @@ func (client *UCloudClient) dbWaitForState(dbId string, target []string) *resour
 			}
 
 			state := db.State
-			if state == "RecoverFail" {
-				return nil, "", fmt.Errorf("db instance recover failed, please make sure your %q is correct and matched with the other parameters", "backup_id")
-			}
 
 			if !isStringIn(state, target) {
+				if db.State == dbStatusRecoverFail {
+					return nil, "", fmt.Errorf("db instance recover failed, please make sure your %q is correct and matched with the other parameters", "backup_id")
+				}
 				state = statusPending
 			}
 

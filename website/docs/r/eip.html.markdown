@@ -27,6 +27,9 @@ resource "ucloud_eip" "example" {
 The following arguments are supported:
 
 * `internet_type` - (Required) Type of Elastic IP routes. Possible values are: `international` as international BGP IP and `bgp` as china mainland BGP IP.
+
+- - -
+
 * `bandwidth` - (Optional) Maximum bandwidth to the elastic public network, measured in Mbps (Mega bit per second). The ranges for bandwidth are: 1-200 for pay by traffic, 1-800 for pay by bandwidth. (Default: `1`).
 * `share_bandwidth_package_id` - (Optional) The￿ Id of Share Bandwidth Package. If it is filled in, the `charge_mode` can only be set with `share_bandwidth`.
 * `duration` - (Optional) The duration that you will buy the resource. (Default: `1`). It is not required when `dynamic` (pay by hour), the value is `0` when `month`(pay by month) and the instance will be valid till the last day of that month.
@@ -47,6 +50,8 @@ In addition to all arguments above, the following attributes are exported:
 * `status` - EIP status. Possible values are: `used` as in use, `free` as available and `freeze` as associating.
 * `public_ip` - Public IP address of Elastic IP.
 
+- - -
+
 The attribute (`ip_set`) support the following:
 
 * `internet_type` - Type of Elastic IP routes.
@@ -54,7 +59,7 @@ The attribute (`ip_set`) support the following:
 The attribute (`resource`) support the following:
 
 * `id` - The ID of the resource with EIP attached.
-* `type` - The type of resource with EIP attached. Possible values are `instance` as instance, `vrouter` as visual router, `lb` as load balancer.
+* `type` - The type of resource with EIP attached. Possible values are `instance` as instance, `lb` as load balancer.
 
 ## Import
 

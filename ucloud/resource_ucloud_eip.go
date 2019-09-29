@@ -43,8 +43,8 @@ func resourceUCloudEIP() *schema.Resource {
 			"charge_type": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "month",
 				ForceNew: true,
+				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"month",
 					"year",
@@ -155,8 +155,12 @@ func resourceUCloudEIPCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := client.unetconn
 
 	req := conn.NewAllocateEIPRequest()
-	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
 	req.OperatorName = ucloud.String(upperCamelCvt.unconvert(d.Get("internet_type").(string)))
+	if v, ok := d.GetOk("charge_type"); ok {
+		req.ChargeType = ucloud.String(upperCamelCvt.unconvert(v.(string)))
+	} else {
+		req.ChargeType = ucloud.String("Month")
+	}
 
 	if v, ok := d.GetOk("charge_mode"); ok {
 		req.PayMode = ucloud.String(upperCamelCvt.unconvert(v.(string)))
@@ -387,7 +391,7 @@ func resourceUCloudEIPDelete(d *schema.ResourceData, meta interface{}) error {
 func eipWaitForState(client *UCloudClient, eipId string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending:    []string{statusPending},
-		Target:     []string{"free", "used"},
+		Target:     []string{eipStatusFree, eipStatusUsed},
 		Timeout:    2 * time.Minute,
 		Delay:      2 * time.Second,
 		MinTimeout: 1 * time.Second,
@@ -401,7 +405,7 @@ func eipWaitForState(client *UCloudClient, eipId string) *resource.StateChangeCo
 			}
 
 			state := eip.Status
-			if !isStringIn(state, []string{"free", "used"}) {
+			if !isStringIn(state, []string{eipStatusFree, eipStatusUsed}) {
 				state = statusPending
 			}
 

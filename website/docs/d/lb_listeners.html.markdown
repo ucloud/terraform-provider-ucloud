@@ -27,6 +27,9 @@ output "first" {
 The following arguments are supported:
 
 * `load_balancer_id` - (Required) The ID of a load balancer.
+
+- - -
+
 * `ids` - (Optional) A list of LB Listener IDs, all the LB Listeners belong to this region will be retrieved if the ID is `""`.
 * `name_regex` - (Optional) A regex string to filter resulting lb listeners by name.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
@@ -37,6 +40,8 @@ In addition to all arguments above, the following attributes are exported:
 
 * `lb_listeners` - It is a nested type which documented below.
 * `total_count` - Total number of LB listeners that satisfy the condition.
+
+- - -
 
 The attribute (`lb_listeners`) support the following:
 

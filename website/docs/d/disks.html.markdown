@@ -37,6 +37,8 @@ In addition to all arguments above, the following attributes are exported:
 * `disks` - It is a nested type which documented below.
 * `total_count` - Total number of Disks that satisfy the condition.
 
+- - -
+
 The attribute (`disks`) support the following:
 
 * `availability_zone` - Availability zone where disk is located.

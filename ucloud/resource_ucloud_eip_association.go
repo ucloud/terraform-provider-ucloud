@@ -71,7 +71,7 @@ func resourceUCloudEIPAssociationCreate(d *schema.ResourceData, meta interface{}
 	// after bind eip we need to wait it completed
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{statusPending},
-		Target:     []string{"used"},
+		Target:     []string{eipStatusUsed},
 		Timeout:    5 * time.Minute,
 		Delay:      2 * time.Second,
 		MinTimeout: 1 * time.Second,
@@ -82,7 +82,7 @@ func resourceUCloudEIPAssociationCreate(d *schema.ResourceData, meta interface{}
 			}
 
 			state := eip.Status
-			if state != "used" {
+			if state != eipStatusUsed {
 				state = statusPending
 			}
 
@@ -133,11 +133,20 @@ func resourceUCloudEIPAssociationDelete(d *schema.ResourceData, meta interface{}
 	req.ResourceType = ucloud.String(resourceType)
 
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
+		_, err := client.describeEIPResourceById(p[0], p[1])
+		if err != nil {
+			if isNotFoundError(err) {
+				d.SetId("")
+				return nil
+			}
+			return resource.NonRetryableError(fmt.Errorf("error on reading eip association before deleting %q, %s", d.Id(), err))
+		}
+
 		if _, err := conn.UnBindEIP(req); err != nil {
 			return resource.NonRetryableError(fmt.Errorf("error on deleting eip association %q, %s", d.Id(), err))
 		}
 
-		_, err := client.describeEIPResourceById(p[0], p[1])
+		_, err = client.describeEIPResourceById(p[0], p[1])
 		if err != nil {
 			if isNotFoundError(err) {
 				return nil

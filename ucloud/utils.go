@@ -40,6 +40,15 @@ func schemaSetToStringSlice(s interface{}) []string {
 	return vL
 }
 
+// interfaceSliceToStringSlice used for converting interface slice to string slice
+func interfaceSliceToStringSlice(iface []interface{}) []string {
+	s := []string{}
+	for _, i := range iface {
+		s = append(s, i.(string))
+	}
+	return s
+}
+
 func hashStringArray(arr []string) string {
 	var buf bytes.Buffer
 
@@ -155,4 +164,12 @@ func hashCIDR(v interface{}) int {
 
 func isAcc() bool {
 	return os.Getenv(resource.TestEnvVar) != ""
+}
+
+func notEmptyStringInSet(v string) bool {
+	if v != "" {
+		return true
+	}
+
+	return false
 }

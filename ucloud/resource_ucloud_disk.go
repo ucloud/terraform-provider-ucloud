@@ -2,7 +2,6 @@ package ucloud
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/customdiff"
@@ -62,7 +61,7 @@ func resourceUCloudDisk() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				Default:      "month",
+				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"year", "month", "dynamic"}, false),
 			},
 
@@ -108,7 +107,11 @@ func resourceUCloudDiskCreate(d *schema.ResourceData, meta interface{}) error {
 	req.Zone = ucloud.String(d.Get("availability_zone").(string))
 	req.Size = ucloud.Int(d.Get("disk_size").(int))
 	req.DiskType = ucloud.String(diskTypeCvt.unconvert(d.Get("disk_type").(string)))
-	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
+	if v, ok := d.GetOk("charge_type"); ok {
+		req.ChargeType = ucloud.String(upperCamelCvt.unconvert(v.(string)))
+	} else {
+		req.ChargeType = ucloud.String("Month")
+	}
 
 	if v, ok := d.GetOkExists("duration"); ok {
 		req.Quantity = ucloud.Int(v.(int))
@@ -188,7 +191,7 @@ func resourceUCloudDiskUpdate(d *schema.ResourceData, meta interface{}) error {
 			if err != nil {
 				return fmt.Errorf("error on reading instance %q when updating the size of disk %q, %s", uhostId, d.Id(), err)
 			}
-			if strings.ToLower(instance.State) != statusStopped {
+			if instance.State != statusStopped {
 				stopReq := uhostConn.NewStopUHostInstanceRequest()
 				stopReq.UHostId = ucloud.String(uhostId)
 				_, err := uhostConn.StopUHostInstance(stopReq)
@@ -233,7 +236,7 @@ func resourceUCloudDiskUpdate(d *schema.ResourceData, meta interface{}) error {
 				return fmt.Errorf("error on reading instance %q c %q, %s", uhostId, d.Id(), err)
 			}
 
-			if strings.ToLower(instanceAfter.State) != statusRunning {
+			if instanceAfter.State != statusRunning {
 				// after instance update, we need to wait it started
 				startReq := uhostConn.NewStartUHostInstanceRequest()
 				startReq.UHostId = ucloud.String(uhostId)
@@ -338,7 +341,7 @@ func resourceUCloudDiskDelete(d *schema.ResourceData, meta interface{}) error {
 func diskWaitForState(client *UCloudClient, diskId string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending:    []string{statusPending},
-		Target:     []string{"available", "inuse"},
+		Target:     []string{diskStatusAvailable, diskStatusInUse},
 		Timeout:    5 * time.Minute,
 		Delay:      2 * time.Second,
 		MinTimeout: 1 * time.Second,
@@ -351,8 +354,8 @@ func diskWaitForState(client *UCloudClient, diskId string) *resource.StateChange
 				return nil, "", err
 			}
 
-			state := strings.ToLower(diskSet.Status)
-			if !isStringIn(state, []string{"available", "inuse"}) {
+			state := diskSet.Status
+			if !isStringIn(state, []string{diskStatusAvailable, diskStatusInUse}) {
 				state = statusPending
 			}
 

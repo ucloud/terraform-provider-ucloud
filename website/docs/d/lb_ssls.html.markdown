@@ -36,6 +36,8 @@ In addition to all arguments above, the following attributes are exported:
 * `lb_ssls` - It is a nested type which documented below.
 * `total_count` - Total number of LB SSL certificate resources that satisfy the condition.
 
+- - -
+
 The attribute (`lb_ssls`) support the following:
 
 * `id` - The ID of LB SSL certificate resource.

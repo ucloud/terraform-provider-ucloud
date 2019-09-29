@@ -35,13 +35,45 @@ const (
 	statusInitialized = "initialized"
 
 	// statusRunning is the general status when remote resource is running
-	statusRunning = "running"
+	statusRunning = "Running"
 
 	// statusStopped is the general status when remote resource is stopped
-	statusStopped = "stopped"
+	statusStopped = "Stopped"
+)
 
-	// bootDisksStatusNormal is the boot disk status whe remote resource is initialized
-	bootDisksStatusNormal = "normal"
+const (
+	// instanceBootDisksStatusNormal is the status when instance boot disk is initialized
+	instanceBootDisksStatusNormal = "Normal"
+
+	// instanceStatusInstallFail is the status when instance install failed
+	instanceStatusInstallFail = "Install Fail"
+
+	// instanceStatusResizeFail is the status when instance resize failed
+	instanceStatusResizeFail = "ResizeFail"
+
+	// dbStatusShutoff is the status when db instance shut off
+	dbStatusShutoff = "Shutoff"
+
+	// dbStatusRecoverFail is the status when db instance recover failed
+	dbStatusRecoverFail = "RecoverFail"
+
+	// diskStatusAvailable is the status when disk is available
+	diskStatusAvailable = "Available"
+
+	// diskStatusInUse is the status when disk is in use
+	diskStatusInUse = "InUse"
+
+	// diskStatusAttaching is the status when disk is attaching
+	diskStatusAttaching = "Attaching"
+
+	// diskStatusDetaching is the status when disk is detaching
+	diskStatusDetaching = "Detaching"
+
+	// eipStatusFree is the status when eip is free
+	eipStatusFree = "free"
+
+	// eipStatusUsed is the status when eip is used
+	eipStatusUsed = "used"
 )
 
 const (
@@ -128,6 +160,19 @@ var diskTypeCvt = newStringConverter(map[string]string{
 	"SystemDisk":    "system_disk",
 	"SSDSystemDisk": "ssd_system_disk",
 	"RSSDDataDisk":  "rssd_data_disk",
+})
+
+var vpnAutoCvt = newStringConverter(map[string]string{
+	"Auto": "auto",
+})
+
+var vpnDisableCvt = newStringConverter(map[string]string{
+	"Disable": "disable",
+})
+
+var vpnIkeVersionCvt = newStringConverter(map[string]string{
+	"IKE V1": "ikev1",
+	"IKE V2": "ikev2",
 })
 
 // upperCvt is used to transform uppercase with underscore to lowercase with underscore. eg. LOCAL_SSD -> local_ssd

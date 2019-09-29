@@ -38,6 +38,8 @@ In addition to all arguments above, the following attributes are exported:
 * `subnets` - It is a nested type which documented below.
 * `total_count` - Total number of Subnet resources that satisfy the condition.
 
+- - -
+
 The attribute (`subnets`) support the following:
 
 * `id` - The ID of Subnet.
