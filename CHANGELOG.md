@@ -1,22 +1,22 @@
-## 1.13.0 (Unreleased)
+## 1.13.0 (September 30, 2019)
 
 FEATURES:
 
-* **New Resource:** `ucloud_nat_gateway`[GH-48]
-* **New Resource:** `ucloud_nat_gateway_rule`[GH-48]
-* **New Resource:** `ucloud_vpn_gateway`[GH-48] 
-* **New Resource:** `ucloud_vpn_customer_gateway`[GH-48]
-* **New Resource:** `ucloud_vpn_connection`[GH-48]
-* **New Resource:** `ucloud_vip`[GH-48]
+* **New Resource:** `ucloud_nat_gateway`([#48](https://github.com/terraform-providers/terraform-provider-ucloud/issues/48))
+* **New Resource:** `ucloud_nat_gateway_rule`([#48](https://github.com/terraform-providers/terraform-provider-ucloud/issues/48))
+* **New Resource:** `ucloud_vpn_gateway`[[#48](https://github.com/terraform-providers/terraform-provider-ucloud/issues/48)] 
+* **New Resource:** `ucloud_vpn_customer_gateway`([#48](https://github.com/terraform-providers/terraform-provider-ucloud/issues/48))
+* **New Resource:** `ucloud_vpn_connection`([#48](https://github.com/terraform-providers/terraform-provider-ucloud/issues/48))
+* **New Resource:** `ucloud_vip`([#48](https://github.com/terraform-providers/terraform-provider-ucloud/issues/48))
 
 ENHANCEMENTS:
 
-* resource/ucloud_instance: Add argument `allow_stopping_for_update`[GH-48]
-* resource/ucloud_db_instance: Update the range of `instance_type` and `instance_storage`[GH-48]
+* resource/ucloud_instance: Add argument `allow_stopping_for_update`([#48](https://github.com/terraform-providers/terraform-provider-ucloud/issues/48))
+* resource/ucloud_db_instance: Update the range of `instance_type` and `instance_storage`([#48](https://github.com/terraform-providers/terraform-provider-ucloud/issues/48))
 
 BUG FIXES:
 
-* resource/ucloud_subnet: Fix the problem about the subnet can not be deleted while associated resources of it have been deleted.[GH-48]
+* resource/ucloud_subnet: Fix the problem about the subnet can not be deleted while associated resources of it have been deleted.([#48](https://github.com/terraform-providers/terraform-provider-ucloud/issues/48))
 
 ## 1.12.1 (August 26, 2019)
 
