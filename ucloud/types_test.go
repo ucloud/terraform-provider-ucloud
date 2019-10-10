@@ -86,3 +86,46 @@ func Test_parseAssociationInfo(t *testing.T) {
 		})
 	}
 }
+
+func Test_parseUCloudCidrBlock(t *testing.T) {
+	type args struct {
+		s string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *cidrBlock
+		wantErr bool
+	}{
+		{"ok_10.0", args{"10.0.0.0/8"}, &cidrBlock{"10.0.0.0", 8}, false},
+		{"err_10.0", args{"10.1.0.0/8"}, nil, true},
+		{"ok_10.128", args{"10.128.0.0/9"}, &cidrBlock{"10.128.0.0", 9}, false},
+		{"err_10.128", args{"10.128.0.0/8"}, nil, true},
+		{"ok_10.10", args{"10.10.10.248/29"}, &cidrBlock{"10.10.10.248", 29}, false},
+		{"err_10.10", args{"10.10.10.249/29"}, nil, true},
+		{"ok_172.16", args{"172.16.0.0/12"}, &cidrBlock{"172.16.0.0", 12}, false},
+		{"err_172.16", args{"172.16.1.0/12"}, nil, true},
+		{"ok_172.31", args{"172.31.128.0/17"}, &cidrBlock{"172.31.128.0", 17}, false},
+		{"err_172.31", args{"172.31.1.0/17"}, nil, true},
+		{"ok_172.18", args{"172.18.255.248/29"}, &cidrBlock{"172.18.255.248", 29}, false},
+		{"err_172.18", args{"172.18.255.6/29"}, nil, true},
+		{"ok_192.0", args{"192.168.0.0/16"}, &cidrBlock{"192.168.0.0", 16}, false},
+		{"err_192.0", args{"192.168.0.1/16"}, nil, true},
+		{"ok_192.128", args{"192.168.128.0/17"}, &cidrBlock{"192.168.128.0", 17}, false},
+		{"err_192.128", args{"192.168.128.1/17"}, nil, true},
+		{"ok_192.255", args{"192.168.255.248/29"}, &cidrBlock{"192.168.255.248", 29}, false},
+		{"err_192.255", args{"192.168.255.1/17"}, nil, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := parseUCloudCidrBlock(tt.args.s)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("parseUCloudCidrBlock() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("parseUCloudCidrBlock() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

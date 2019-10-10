@@ -1,4 +1,11 @@
 ## 1.13.1 (Unreleased)
+
+BUG FIXES:
+
+* resource/ucloud_subnet: Fix the validate of `cidr_block`[GH-50]
+* resource/ucloud_vpc: Fix the validate of `cidr_blocks`[GH-50]
+* resource/ucloud_vpn_connection: Fix the validate of `remote_subnets`[GH-50]
+
 ## 1.13.0 (September 30, 2019)
 
 FEATURES:
