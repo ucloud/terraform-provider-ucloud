@@ -14,6 +14,9 @@ func resourceUCloudVPNCustomerGateway() *schema.Resource {
 		Create: resourceUCloudVPNCustomerGatewayCreate,
 		Read:   resourceUCloudVPNCustomerGatewayRead,
 		Delete: resourceUCloudVPNCustomerGatewayDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"ip_address": {

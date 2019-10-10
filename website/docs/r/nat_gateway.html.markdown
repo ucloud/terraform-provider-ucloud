@@ -70,3 +70,11 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `create_time` - The time of creation of Nat Gateway, formatted in RFC3339 time string.
+
+## Import
+
+Nat Gateway can be imported using the `id`, e.g.
+
+```
+$ terraform import ucloud_nat_gateway.example natgw-abc123456
+```
