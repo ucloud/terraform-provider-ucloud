@@ -205,21 +205,14 @@ func validateAll(validators ...schema.SchemaValidateFunc) schema.SchemaValidateF
 	}
 }
 
-var validateCIDRNetwork16 = validation.CIDRNetwork(16, 29)
-var validateCIDRNetwork8 = validation.CIDRNetwork(8, 29)
-
 func validateCIDRBlock(v interface{}, k string) (ws []string, errors []error) {
 	cidr := v.(string)
 
-	if strings.HasPrefix(cidr, "192.168.") || strings.HasPrefix(cidr, "172.16.") {
-		return validateCIDRNetwork16(v, k)
+	_, err := parseUCloudCidrBlock(cidr)
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q is invalid, excepted cidr network in one of 192.168.x.x/x, 172.x.x.x/x, 10.x.x.x/x, got %s, %s", k, cidr, err))
 	}
 
-	if strings.HasPrefix(cidr, "10.") {
-		return validateCIDRNetwork8(v, k)
-	}
-
-	errors = append(errors, fmt.Errorf("excepted cidr network in one of 192.168.x.x, 172.16.x.x, 10.x.x.x"))
 	return
 }
 
