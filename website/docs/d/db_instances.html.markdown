@@ -55,8 +55,8 @@ The attribute (`db_instances`) support the following:
 * `charge_type` - The charge type of db instance.
 * `backup_count` - Specifies the number of backup saved per week.
 * `backup_begin_time` - Specifies when the backup starts, measured in hour.
-* `backup_date` - Specifies whether the backup took place from Sunday to Saturday by displaying 7 digits. 0 stands for backup disbaled and 1 stands for backup enabled. The rightmost digit specifies whether the backup took place on Sunday, and the digits from right to left specify whether the backup took place from Monday to Saturday, it's mandatory required to backup twice per week at least. such as: digits "1100000" stands for the backup took place on Saturday and Friday.
-* `backup_black_list` - The backup for database instance such as "test.%" or table such as "city.address" specified in the black lists are not supprted.
+* `backup_date` - Specifies whether the backup took place from Sunday to Saturday by displaying 7 digits. 0 stands for backup disabled and 1 stands for backup enabled. The rightmost digit specifies whether the backup took place on Sunday, and the digits from right to left specify whether the backup took place from Monday to Saturday, it's mandatory required to backup twice per week at least. such as: digits "1100000" stands for the backup took place on Saturday and Friday.
+* `backup_black_list` - The backup for database instance such as "test.%" or table such as "city.address" specified in the black lists are not supported.
 * `tag` - A tag assigned to database instance.
 * `status` - Specifies the status of database instance , possible values are: `Init`, `Fail`, `Starting`, `Running`, `Shutdown`, `Shutoff`, `Delete`, `Upgrading`, `Promoting`, `Recovering` and `Recover fail`.
 * `create_time` - The creation time of database instance , formatted by RFC3339 time string.
