@@ -494,6 +494,7 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 	zone := d.Get("availability_zone").(string)
 	resizeReq := conn.NewResizeUHostInstanceRequest()
 	resizeReq.UHostId = ucloud.String(d.Id())
+	resizeReq.Zone = ucloud.String(zone)
 	dataDiskReq := conn.NewResizeAttachedDiskRequest()
 	dataDiskReq.UHostId = ucloud.String(d.Id())
 	dataDiskReq.Zone = ucloud.String(zone)
