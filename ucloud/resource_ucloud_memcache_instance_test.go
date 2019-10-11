@@ -103,6 +103,8 @@ resource "ucloud_memcache_instance" "foo" {
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
 	name = "tf-acc-memcache"
 	instance_type = "memcache-master-1"
+    charge_type = "month"
+    duration    = 1
 }
 `
 
@@ -113,5 +115,7 @@ resource "ucloud_memcache_instance" "foo" {
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
 	name = "tf-acc-memcache-renamed"
 	instance_type = "memcache-master-2"
+    charge_type = "month"
+    duration    = 1
 }
 `

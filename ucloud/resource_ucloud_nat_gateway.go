@@ -15,6 +15,9 @@ func resourceUCloudNatGateway() *schema.Resource {
 		Update: resourceUCloudNatGatewayUpdate,
 		Read:   resourceUCloudNatGatewayRead,
 		Delete: resourceUCloudNatGatewayDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"vpc_id": {

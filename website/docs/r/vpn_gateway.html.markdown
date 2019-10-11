@@ -59,3 +59,11 @@ In addition to all arguments above, the following attributes are exported:
 
 * `create_time` - The creation time for VPN Gateway, formatted in RFC3339 time string.
 * `expire_time` - The expiration time for VPN Gateway, formatted in RFC3339 time string.
+
+## Import
+
+VPN Gateway can be imported using the `id`, e.g.
+
+```
+$ terraform import ucloud_vpn_gateway.example vpngw-abc123456
+```

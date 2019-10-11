@@ -226,13 +226,13 @@ func resourceUCloudMemcacheInstanceRead(d *schema.ResourceData, meta interface{}
 		return fmt.Errorf("error on reading memcache instance %q, %s", d.Id(), err)
 	}
 
+	d.Set("availability_zone", inst.Zone)
 	d.Set("name", inst.Name)
 	d.Set("tag", inst.Tag)
 	d.Set("charge_type", upperCamelCvt.convert(inst.ChargeType))
 	d.Set("instance_type", fmt.Sprintf("memcache-master-%v", inst.Size))
 	d.Set("vpc_id", inst.VPCId)
 	d.Set("subnet_id", inst.SubnetId)
-
 	d.Set("create_time", timestampToString(inst.CreateTime))
 	d.Set("expire_time", timestampToString(inst.ExpireTime))
 	d.Set("status", inst.State)

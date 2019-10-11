@@ -30,7 +30,7 @@ The following arguments are supported:
 * `ids` - (Optional) A list of instance IDs, all the instances belongs to the defined region will be retrieved if this argument is "".
 * `name_regex` - (Optional) A regex string to filter resulting instances by name.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
-* `tag` - (Optional) A tag assigned to instance, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
+* `tag` - (Optional) A tag assigned to instance.
 
 ## Attributes Reference
 
@@ -71,5 +71,5 @@ The attribute (`disk_set`) supports the following:
 
 The attribute (`ip_set`) supports the following:
 
-* `internet_type` - Type of Elastic IP routes. Possible values are: `International` as internaltional BGP IP, `BGP` as china BGP IP and `Private` as private IP.
+* `internet_type` - Type of Elastic IP routes.
 * `ip` - Elastic IP address.

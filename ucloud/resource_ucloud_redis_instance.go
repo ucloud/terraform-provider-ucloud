@@ -425,12 +425,14 @@ func readActiveStandbyRedisInstance(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("error on reading redis instance %q, %s", d.Id(), err)
 	}
 
+	d.Set("availability_zone", inst.Zone)
 	d.Set("name", inst.Name)
 	d.Set("tag", inst.Tag)
 	d.Set("charge_type", upperCamelCvt.convert(inst.ChargeType))
 	d.Set("instance_type", fmt.Sprintf("redis-master-%v", inst.Size))
 	d.Set("vpc_id", inst.VPCId)
 	d.Set("subnet_id", inst.SubnetId)
+	d.Set("engine_version", inst.Version)
 
 	d.Set("ip_set", []map[string]interface{}{{
 		"ip":   inst.VirtualIP,
@@ -454,6 +456,7 @@ func readDistributedRedisInstance(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("error on reading redis instance %q, %s", d.Id(), err)
 	}
 
+	d.Set("availability_zone", inst.Zone)
 	d.Set("name", inst.Name)
 	d.Set("tag", inst.Tag)
 	d.Set("charge_type", upperCamelCvt.convert(inst.ChargeType))

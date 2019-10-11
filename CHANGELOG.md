@@ -1,4 +1,18 @@
-## 1.13.1 (Unreleased)
+## 1.14.0 (Unreleased)
+
+FEATURES:
+
+* **New Datasource:** `ucloud_nat_gateways`[GH-51]
+* **New Datasource:** `ucloud_vpn_gateways`[GH-51]
+* **New Datasource:** `ucloud_vpn_customer_gateways`[GH-51]
+* **New Datasource:** `ucloud_vpn_connections`[GH-51]
+
+ENHANCEMENTS:
+
+* resource/ucloud_nat_gateway: enable to import[GH-51]
+* resource/ucloud_vpn_gateway: enable to import[GH-51]
+* resource/ucloud_vpn_customer_gateway: enable to import[GH-51]
+* resource/ucloud_vpn_connection: enable to import[GH-51]
 
 BUG FIXES:
 

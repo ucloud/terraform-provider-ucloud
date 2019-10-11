@@ -37,3 +37,11 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `create_time` - The creation time for VPN Customer Gateway, formatted in RFC3339 time string.
+
+## Import
+
+VPN Customer Gateway can be imported using the `id`, e.g.
+
+```
+$ terraform import ucloud_vpn_gateway.example remotevpngw-abc123456
+```

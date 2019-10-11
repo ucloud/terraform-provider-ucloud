@@ -16,6 +16,9 @@ func resourceUCloudVPNConnection() *schema.Resource {
 		Read:   resourceUCloudVPNConnectionRead,
 		Update: resourceUCloudVPNConnectionUpdate,
 		Delete: resourceUCloudVPNConnectionDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"vpn_gateway_id": {
