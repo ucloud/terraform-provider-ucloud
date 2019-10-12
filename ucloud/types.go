@@ -32,6 +32,12 @@ func parseCidrBlock(s string) (*cidrBlock, error) {
 	return &cidr, nil
 }
 
+func parseStringToInt64(str string) int64 {
+	// skip error, because has been validated by parseCidrBlock
+	result, _ := strconv.Atoi(str)
+	return int64(result)
+}
+
 /*
 parseUCloudCidrBlock will parse cidr with specific range constraints
 cidr must contained by subnet as followed
@@ -55,14 +61,13 @@ func parseUCloudCidrBlock(s string) (*cidrBlock, error) {
 
 	n = strings.Split(network, ".")
 
-	// skip error, because has been validated by parseCidrBlock
-	a, _ := strconv.Atoi(n[0])
-	b, _ := strconv.Atoi(n[1])
-	c, _ := strconv.Atoi(n[2])
-	d, _ := strconv.Atoi(n[3])
+	a := parseStringToInt64(n[0])
+	b := parseStringToInt64(n[1])
+	c := parseStringToInt64(n[2])
+	d := parseStringToInt64(n[3])
 
 	// check 192.168.--------.-----000
-	if a == 192 && b == 168 && c&0x0 == 0 && d&0x7 == 0 && 16 <= cidr.Mask && cidr.Mask <= 29 && (((a<<24)+(b<<16)+(c<<8)+d)&(((1<<32)-1)>>uint(cidr.Mask))) == 0 {
+	if a == 192 && b == 168 && 16 <= cidr.Mask && cidr.Mask <= 29 && (((a<<24)+(b<<16)+(c<<8)+d)&(((1<<32)-1)>>uint(cidr.Mask))) == 0 {
 		return cidr, nil
 	}
 
