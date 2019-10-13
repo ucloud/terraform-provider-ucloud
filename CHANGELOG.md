@@ -1,24 +1,24 @@
-## 1.14.0 (Unreleased)
+## 1.14.0 (October 13, 2019)
 
 FEATURES:
 
-* **New Datasource:** `ucloud_nat_gateways`[GH-51]
-* **New Datasource:** `ucloud_vpn_gateways`[GH-51]
-* **New Datasource:** `ucloud_vpn_customer_gateways`[GH-51]
-* **New Datasource:** `ucloud_vpn_connections`[GH-51]
+* **New Datasource:** `ucloud_nat_gateways`([#51](https://github.com/terraform-providers/terraform-provider-ucloud/issues/51))
+* **New Datasource:** `ucloud_vpn_gateways`([#51](https://github.com/terraform-providers/terraform-provider-ucloud/issues/51))
+* **New Datasource:** `ucloud_vpn_customer_gateways`([#51](https://github.com/terraform-providers/terraform-provider-ucloud/issues/51))
+* **New Datasource:** `ucloud_vpn_connections`([#51](https://github.com/terraform-providers/terraform-provider-ucloud/issues/51))
 
 ENHANCEMENTS:
 
-* resource/ucloud_nat_gateway: enable to import[GH-51]
-* resource/ucloud_vpn_gateway: enable to import[GH-51]
-* resource/ucloud_vpn_customer_gateway: enable to import[GH-51]
-* resource/ucloud_vpn_connection: enable to import[GH-51]
+* resource/ucloud_nat_gateway: enable to import([#51](https://github.com/terraform-providers/terraform-provider-ucloud/issues/51))
+* resource/ucloud_vpn_gateway: enable to import([#51](https://github.com/terraform-providers/terraform-provider-ucloud/issues/51))
+* resource/ucloud_vpn_customer_gateway: enable to import([#51](https://github.com/terraform-providers/terraform-provider-ucloud/issues/51))
+* resource/ucloud_vpn_connection: enable to import([#51](https://github.com/terraform-providers/terraform-provider-ucloud/issues/51))
 
 BUG FIXES:
 
-* resource/ucloud_subnet: Fix the validate of `cidr_block`[GH-50]
-* resource/ucloud_vpc: Fix the validate of `cidr_blocks`[GH-50]
-* resource/ucloud_vpn_connection: Fix the validate of `remote_subnets`[GH-50]
+* resource/ucloud_subnet: Fix the validate of `cidr_block`([#50](https://github.com/terraform-providers/terraform-provider-ucloud/issues/50))
+* resource/ucloud_vpc: Fix the validate of `cidr_blocks`([#50](https://github.com/terraform-providers/terraform-provider-ucloud/issues/50))
+* resource/ucloud_vpn_connection: Fix the validate of `remote_subnets`([#50](https://github.com/terraform-providers/terraform-provider-ucloud/issues/50))
 
 ## 1.13.0 (September 30, 2019)
 
