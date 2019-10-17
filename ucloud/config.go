@@ -54,6 +54,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 	cfg.MaxRetries = c.MaxRetries
 	cfg.LogLevel = log.PanicLevel
 	cfg.UserAgent = "Terraform-UCloud/1.12.1"
+	cfg.BaseUrl = c.BaseURL
 
 	if isAcc() {
 		//set DebugLevel for acceptance test
@@ -61,16 +62,6 @@ func (c *Config) Client() (*UCloudClient, error) {
 
 		// excepted logging
 		cfg.SetActionLevel("GetRegion", log.WarnLevel)
-	}
-
-	// if no base url be set, get insecure http or secure https default url
-	// uf base url is set, use it
-	if len(c.BaseURL) == 0 && c.Insecure {
-		cfg.BaseUrl = GetInsecureEndpointURL(c.Region)
-	} else if len(c.BaseURL) == 0 && !c.Insecure {
-		cfg.BaseUrl = GetEndpointURL(c.Region)
-	} else {
-		cfg.BaseUrl = c.BaseURL
 	}
 
 	if len(c.Profile) != 0 {
