@@ -2,7 +2,7 @@
 
 BUG FIXES:
 
-* provider: Fix the `insecure` of provider about didn't take effect[GH-52]
+* provider: Fix the provider about `insecure` didn't take effect[GH-53]
 
 ## 1.14.0 (October 13, 2019)
 
