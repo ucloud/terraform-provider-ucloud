@@ -139,14 +139,18 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		SharedCredentialsFile: d.Get("shared_credentials_file").(string),
 	}
 
-	if v, ok := d.GetOk("base_url"); ok && v.(string) != "" {
-		config.BaseURL = v.(string)
-	} else {
-		config.BaseURL = defaultBaseURL
-	}
-
 	if projectId, ok := d.GetOk("project_id"); ok && projectId.(string) != "" {
 		config.ProjectId = projectId.(string)
+	}
+
+	// if no base url be set, get insecure http or secure https default url
+	// if base url is set, use it
+	if v, ok := d.GetOk("base_url"); ok && v.(string) != "" {
+		config.BaseURL = v.(string)
+	} else if config.Insecure {
+		config.BaseURL = GetInsecureEndpointURL(config.Region)
+	} else if !config.Insecure {
+		config.BaseURL = GetEndpointURL(config.Region)
 	}
 
 	client, err := config.Client()
