@@ -1,8 +1,8 @@
-## 1.14.1 (Unreleased)
+## 1.14.1 (October 18, 2019)
 
 BUG FIXES:
 
-* provider: Fix the provider about `insecure` didn't take effect[GH-53]
+* provider: Fix the provider about `insecure` didn't take effect([#53](https://github.com/terraform-providers/terraform-provider-ucloud/issues/53))
 
 ## 1.14.0 (October 13, 2019)
 
