@@ -3,7 +3,7 @@ package ucloud
 import (
 	"time"
 
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	pumem "github.com/ucloud/ucloud-sdk-go/private/services/umem"
 	"github.com/ucloud/ucloud-sdk-go/services/umem"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"

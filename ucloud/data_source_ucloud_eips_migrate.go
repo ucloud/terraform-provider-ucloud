@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 var eipsChargeTypePattern = regexp.MustCompile(`^eips\.\d+\.charge_type$`)
