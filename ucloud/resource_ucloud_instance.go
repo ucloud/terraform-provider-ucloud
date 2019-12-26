@@ -184,6 +184,13 @@ func resourceUCloudInstance() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"private_ip": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+
 			"allow_stopping_for_update": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -248,11 +255,6 @@ func resourceUCloudInstance() *schema.Resource {
 						},
 					},
 				},
-			},
-
-			"private_ip": {
-				Type:     schema.TypeString,
-				Computed: true,
 			},
 
 			"create_time": {
@@ -377,6 +379,10 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 		req.Tag = ucloud.String(v.(string))
 	} else {
 		req.Tag = ucloud.String(defaultTag)
+	}
+
+	if v, ok := d.GetOk("private_ip"); ok {
+		req.PrivateIp = []string{v.(string)}
 	}
 
 	if v, ok := d.GetOk("vpc_id"); ok {
