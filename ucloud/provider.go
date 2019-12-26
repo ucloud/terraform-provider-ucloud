@@ -71,6 +71,7 @@ func Provider() terraform.ResourceProvider {
 				Optional:      true,
 				Description:   descriptions["base_url"],
 				ConflictsWith: []string{"insecure"},
+				ValidateFunc:  validateBaseUrl,
 			},
 		},
 

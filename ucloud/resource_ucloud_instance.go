@@ -37,7 +37,7 @@ func resourceUCloudInstance() *schema.Resource {
 			customdiff.ValidateChange("boot_disk_size", diffValidateInstanceBootDiskSize),
 			customdiff.ValidateChange("instance_type", diffValidateInstanceType),
 			diffValidateBootDiskTypeWithDataDiskType,
-			diffValidateInstanceTypeWithZone,
+			diffValidateChargeTypeWithDuration,
 			diffValidateIsolationGroup,
 		),
 
@@ -1039,15 +1039,12 @@ func diffValidateBootDiskTypeWithDataDiskType(diff *schema.ResourceDiff, meta in
 	return nil
 }
 
-func diffValidateInstanceTypeWithZone(diff *schema.ResourceDiff, meta interface{}) error {
-	t, err := parseInstanceType(diff.Get("instance_type").(string))
-	if err != nil {
-		return err
-	}
-	zone := diff.Get("availability_zone").(string)
-
-	if t.HostType == "o" && zone != "cn-bj2-05" {
-		return fmt.Errorf("the outstanding type about %q only be supported in %q, got %q", "instance_type", "cn-bj2-05", zone)
+func diffValidateChargeTypeWithDuration(diff *schema.ResourceDiff, meta interface{}) error {
+	if v, ok := diff.GetOkExists("duration"); ok && v.(int) == 0 {
+		chargeType := diff.Get("charge_type").(string)
+		if chargeType == "year" || chargeType == "dynamic" {
+			return fmt.Errorf("the duration can not be 0 when charge_type is %q", chargeType)
+		}
 	}
 
 	return nil

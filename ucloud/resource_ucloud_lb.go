@@ -139,10 +139,6 @@ func resourceUCloudLBCreate(d *schema.ResourceData, meta interface{}) error {
 		req.VPCId = ucloud.String(val.(string))
 	}
 
-	if val, ok := d.GetOk("subnet_id"); ok {
-		req.SubnetId = ucloud.String(val.(string))
-	}
-
 	if val, ok := d.GetOk("internal"); ok {
 		if val.(bool) {
 			req.InnerMode = ucloud.String("Yes")
@@ -151,6 +147,10 @@ func resourceUCloudLBCreate(d *schema.ResourceData, meta interface{}) error {
 		}
 	} else {
 		req.OuterMode = ucloud.String("Yes")
+	}
+
+	if val, ok := d.GetOk("subnet_id"); ok {
+		req.SubnetId = ucloud.String(val.(string))
 	}
 
 	resp, err := conn.CreateULB(req)
@@ -234,8 +234,11 @@ func resourceUCloudLBRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("remark", lbSet.Remark)
 	d.Set("create_time", timestampToString(lbSet.CreateTime))
 	d.Set("vpc_id", lbSet.VPCId)
-	d.Set("subnet_id", lbSet.SubnetId)
 	d.Set("private_ip", lbSet.PrivateIP)
+
+	if notEmptyStringInSet(lbSet.SubnetId) {
+		d.Set("subnet_id", lbSet.SubnetId)
+	}
 
 	if lbSet.ULBType == "OuterMode" {
 		d.Set("internal", false)
