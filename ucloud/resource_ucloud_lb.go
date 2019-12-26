@@ -2,6 +2,7 @@ package ucloud
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform/helper/customdiff"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -19,6 +20,10 @@ func resourceUCloudLB() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
+
+		CustomizeDiff: customdiff.All(
+			customizeDiffLBInternalToSubnet,
+		),
 
 		Schema: map[string]*schema.Schema{
 			"internal": {
@@ -139,18 +144,23 @@ func resourceUCloudLBCreate(d *schema.ResourceData, meta interface{}) error {
 		req.VPCId = ucloud.String(val.(string))
 	}
 
-	if val, ok := d.GetOk("subnet_id"); ok {
-		req.SubnetId = ucloud.String(val.(string))
-	}
-
+	internal := false
 	if val, ok := d.GetOk("internal"); ok {
-		if val.(bool) {
+		internal = val.(bool)
+		if internal {
 			req.InnerMode = ucloud.String("Yes")
 		} else {
 			req.OuterMode = ucloud.String("Yes")
 		}
 	} else {
 		req.OuterMode = ucloud.String("Yes")
+	}
+
+	if val, ok := d.GetOk("subnet_id"); ok {
+		if !internal {
+			return fmt.Errorf("the subnet_id doesn't take effect when internal is false (lb in the extranet mode), please don't set subnet_id")
+		}
+		req.SubnetId = ucloud.String(val.(string))
 	}
 
 	resp, err := conn.CreateULB(req)
@@ -234,8 +244,11 @@ func resourceUCloudLBRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("remark", lbSet.Remark)
 	d.Set("create_time", timestampToString(lbSet.CreateTime))
 	d.Set("vpc_id", lbSet.VPCId)
-	d.Set("subnet_id", lbSet.SubnetId)
 	d.Set("private_ip", lbSet.PrivateIP)
+
+	if notEmptyStringInSet(lbSet.SubnetId) {
+		d.Set("subnet_id", lbSet.SubnetId)
+	}
 
 	if lbSet.ULBType == "OuterMode" {
 		d.Set("internal", false)
@@ -301,4 +314,15 @@ func lbWaitForState(client *UCloudClient, id string) *resource.StateChangeConf {
 			return eip, statusInitialized, nil
 		},
 	}
+}
+
+func customizeDiffLBInternalToSubnet(diff *schema.ResourceDiff, v interface{}) error {
+	internal := diff.Get("internal").(bool)
+	subnetId := diff.Get("subnet_id").(string)
+
+	if !internal && subnetId != "" {
+		return fmt.Errorf("the subnet_id doesn't take effect when internal is false (lb in the extranet mode), please don't set subnet_id")
+	}
+
+	return nil
 }

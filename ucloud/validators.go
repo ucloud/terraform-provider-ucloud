@@ -2,6 +2,7 @@ package ucloud
 
 import (
 	"fmt"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -283,6 +284,16 @@ func validateVpnAuto(v interface{}, k string) (ws []string, errors []error) {
 
 	if value == "" {
 		errors = append(errors, fmt.Errorf("%q is invalid, can not be set as null string, got %q", k, value))
+	}
+
+	return
+}
+
+func validateBaseUrl(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+
+	if _, err := url.Parse(value); err != nil {
+		errors = append(errors, fmt.Errorf("%q is invalid, should be an valid ucloud base_url, got %q, parse error: %s", "base_url", value, err))
 	}
 
 	return

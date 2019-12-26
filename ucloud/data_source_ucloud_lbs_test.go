@@ -128,6 +128,7 @@ resource "ucloud_lb" "foo" {
 	tag  	   = "tf-acc"
 	vpc_id     = "${ucloud_vpc.default.id}"
 	subnet_id  = "${ucloud_subnet.default.id}"
+    internal   = "true"
 }
 
 data "ucloud_lbs" "foo" {

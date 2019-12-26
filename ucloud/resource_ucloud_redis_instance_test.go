@@ -189,12 +189,12 @@ const testAccActiveStandbyRedisConfig = `
 data "ucloud_zones" "default" {}
 
 resource "ucloud_redis_instance" "foo" {
-	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	engine_version = "4.0"
-	instance_type = "redis-master-1"
-	password = "2018_tfacc"
-	name = "tf-acc-redis"
-	tag = "tf-acc"
+availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+engine_version = "4.0"
+instance_type = "redis-master-1"
+password = "2018_tfacc"
+name = "tf-acc-redis"
+tag = "tf-acc"
 }
 `
 
