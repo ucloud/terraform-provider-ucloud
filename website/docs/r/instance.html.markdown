@@ -89,6 +89,7 @@ The following arguments are supported:
 * `subnet_id` - (Optional) The ID of subnet. If defined `vpc_id`, the `subnet_id` is Required. If not defined `vpc_id` and `subnet_id`, the instance will use the default subnet in the current region.
 * `tag` - (Optional) A tag assigned to instance, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
 * `isolation_group` - (Optional) The ID of the associated isolation group.
+* `private_ip` - (Optional) The private IP address assigned to the instance.
 
 ## Attributes Reference
 
@@ -100,7 +101,6 @@ In addition to all arguments above, the following attributes are exported:
 * `create_time` - The time of creation for instance, formatted in RFC3339 time string.
 * `expire_time` - The expiration time for instance, formatted in RFC3339 time string.
 * `status` - Instance current status. Possible values are `Initializing`, `Starting`, `Running`, `Stopping`, `Stopped`, `Install Fail`, `ResizeFail` and `Rebooting`.
-* `private_ip` - The private IP address assigned to the instance.
 * `ip_set` - It is a nested type which documented below.
 * `disk_set` - It is a nested type which documented below.
 
