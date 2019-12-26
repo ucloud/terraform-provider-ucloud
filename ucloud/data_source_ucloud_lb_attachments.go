@@ -3,7 +3,7 @@ package ucloud
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
 	"github.com/ucloud/ucloud-sdk-go/services/ulb"
 )

@@ -3,7 +3,7 @@ package ucloud
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccUCloudDisk_import(t *testing.T) {

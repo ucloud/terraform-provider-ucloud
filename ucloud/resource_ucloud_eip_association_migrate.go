@@ -3,7 +3,7 @@ package ucloud
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func resourceUCloudEIPAssociationMigrateState(

@@ -3,7 +3,7 @@ package ucloud
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccUCloudSubnet_import(t *testing.T) {
