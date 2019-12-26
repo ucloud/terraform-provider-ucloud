@@ -2,7 +2,6 @@ package ucloud
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform/helper/customdiff"
 	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -20,10 +19,6 @@ func resourceUCloudLB() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
-
-		CustomizeDiff: customdiff.All(
-			customizeDiffLBInternalToSubnet,
-		),
 
 		Schema: map[string]*schema.Schema{
 			"internal": {
@@ -144,10 +139,8 @@ func resourceUCloudLBCreate(d *schema.ResourceData, meta interface{}) error {
 		req.VPCId = ucloud.String(val.(string))
 	}
 
-	internal := false
 	if val, ok := d.GetOk("internal"); ok {
-		internal = val.(bool)
-		if internal {
+		if val.(bool) {
 			req.InnerMode = ucloud.String("Yes")
 		} else {
 			req.OuterMode = ucloud.String("Yes")
@@ -157,9 +150,6 @@ func resourceUCloudLBCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if val, ok := d.GetOk("subnet_id"); ok {
-		if !internal {
-			return fmt.Errorf("the subnet_id doesn't take effect when internal is false (lb in the extranet mode), please don't set subnet_id")
-		}
 		req.SubnetId = ucloud.String(val.(string))
 	}
 
@@ -314,15 +304,4 @@ func lbWaitForState(client *UCloudClient, id string) *resource.StateChangeConf {
 			return eip, statusInitialized, nil
 		},
 	}
-}
-
-func customizeDiffLBInternalToSubnet(diff *schema.ResourceDiff, v interface{}) error {
-	internal := diff.Get("internal").(bool)
-	subnetId := diff.Get("subnet_id").(string)
-
-	if !internal && subnetId != "" {
-		return fmt.Errorf("the subnet_id doesn't take effect when internal is false (lb in the extranet mode), please don't set subnet_id")
-	}
-
-	return nil
 }
