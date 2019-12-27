@@ -1,12 +1,12 @@
-## 1.15.0 (Unreleased)
+## 1.15.0 (December 27, 2019)
 
 NOTES:
 
-* provider: The underlying Terraform codebase dependency for the provider SDK and acceptance testing framework has been migrated from `github.com/hashicorp/terraform` to `github.com/hashicorp/terraform-plugin-sdk`. They are functionality equivalent and this should only impact codebase development to switch imports. For more information see the [Terraform Plugin SDK page in the Extending Terraform documentation](https://www.terraform.io/docs/extend/plugin-sdk.html)[GH-54]
+* provider: The underlying Terraform codebase dependency for the provider SDK and acceptance testing framework has been migrated from `github.com/hashicorp/terraform` to `github.com/hashicorp/terraform-plugin-sdk`. They are functionality equivalent and this should only impact codebase development to switch imports. For more information see the [Terraform Plugin SDK page in the Extending Terraform documentation](https://www.terraform.io/docs/extend/plugin-sdk.html)([#54](https://github.com/terraform-providers/terraform-provider-ucloud/issues/54))
 
 ENHANCEMENTS:
 
-* resource/ucloud_instance: add `private_ip` to argument[GH-56]
+* resource/ucloud_instance: add `private_ip` to argument([#56](https://github.com/terraform-providers/terraform-provider-ucloud/issues/56))
 
 
 ## 1.14.1 (October 18, 2019)
