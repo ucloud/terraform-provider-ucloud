@@ -178,10 +178,13 @@ func resourceUCloudVPNGatewayRead(d *schema.ResourceData, meta interface{}) erro
 	d.Set("tag", vgSet.Tag)
 	d.Set("vpc_id", vgSet.VPCId)
 	d.Set("grade", upperCamelCvt.convert(vgSet.Grade))
-	d.Set("eip_id", vgSet.EIPId)
 	d.Set("charge_type", upperCamelCvt.convert(vgSet.ChargeType))
 	d.Set("create_time", timestampToString(vgSet.CreateTime))
 	d.Set("expire_time", timestampToString(vgSet.ExpireTime))
+
+	if notEmptyStringInSet(vgSet.EIPId) {
+		d.Set("eip_id", vgSet.EIPId)
+	}
 
 	return nil
 }

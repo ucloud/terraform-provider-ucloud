@@ -68,28 +68,6 @@ func TestAccUCloudDisksDataSource_diskType(t *testing.T) {
 	})
 }
 
-func TestAccUCloudDisksDataSource_rssd(t *testing.T) {
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDataDisksConfigrssd,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIDExists("data.ucloud_disks.foo"),
-					resource.TestCheckResourceAttr("data.ucloud_disks.foo", "disks.#", "1"),
-					resource.TestCheckResourceAttr("data.ucloud_disks.foo", "disks.0.name", "tf-acc-disks-dataSource-rssd"),
-					resource.TestCheckResourceAttr("data.ucloud_disks.foo", "disks.0.tag", "tf-acc"),
-					resource.TestCheckResourceAttr("data.ucloud_disks.foo", "disks.0.disk_size", "10"),
-					resource.TestCheckResourceAttr("data.ucloud_disks.foo", "disks.0.disk_type", "rssd_data_disk"),
-				),
-			},
-		},
-	})
-}
-
 const testAccDataDisksConfig = `
 
 variable "name" {
@@ -157,27 +135,6 @@ resource "ucloud_disk" "foo" {
 
 data "ucloud_disks" "foo" {
 	disk_type = "data_disk"
-	name_regex  = "${ucloud_disk.foo.name}"
-}
-`
-
-const testAccDataDisksConfigrssd = `
-
-variable "name" {
-	default = "tf-acc-disks-dataSource-rssd"
-}
-
-resource "ucloud_disk" "foo" {
-	availability_zone = "cn-bj2-05"
-	name              = "${var.name}"
-	tag               = "tf-acc"
-	disk_size         = 10
-	disk_type         = "rssd_data_disk"
-}
-
-data "ucloud_disks" "foo" {
-	availability_zone = "cn-bj2-05"
-	disk_type = "rssd_data_disk"
 	name_regex  = "${ucloud_disk.foo.name}"
 }
 `
