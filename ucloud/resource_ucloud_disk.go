@@ -204,7 +204,7 @@ func resourceUCloudDiskUpdate(d *schema.ResourceData, meta interface{}) error {
 					Pending:    []string{statusPending},
 					Target:     []string{statusStopped},
 					Refresh:    instanceStateRefreshFunc(client, uhostId, statusStopped),
-					Timeout:    5 * time.Minute,
+					Timeout:    15 * time.Minute,
 					Delay:      3 * time.Second,
 					MinTimeout: 2 * time.Second,
 				}
@@ -249,7 +249,7 @@ func resourceUCloudDiskUpdate(d *schema.ResourceData, meta interface{}) error {
 					Pending:    []string{statusPending},
 					Target:     []string{statusRunning},
 					Refresh:    instanceStateRefreshFunc(client, uhostId, statusRunning),
-					Timeout:    d.Timeout(schema.TimeoutUpdate),
+					Timeout:    15 * time.Minute,
 					Delay:      3 * time.Second,
 					MinTimeout: 2 * time.Second,
 				}
