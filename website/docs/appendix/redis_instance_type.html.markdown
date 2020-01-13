@@ -8,7 +8,7 @@ description: |-
 
 # Redis Instance Type
 
-The instance type of redis instance.
+The type of redis instance.
 
 ## Active-Standby and Distributed
 

@@ -8,7 +8,7 @@ description: |-
 
 # Memcache Instance Type
 
-The instance type of Memcache instance.
+The type of Memcache instance.
 
 ## Active-Standby
 

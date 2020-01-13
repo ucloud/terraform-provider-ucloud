@@ -8,7 +8,7 @@ description: |-
 
 # DB Instance Type
 
-The instance type of DB instance.
+The type of DB instance.
 
 ## Highly Availability
 

@@ -8,7 +8,7 @@ description: |-
 
 # Instance Type
 
-The instance type of the instance.
+The type of the instance.
 
 ## Normal
 
