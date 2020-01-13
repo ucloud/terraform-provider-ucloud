@@ -1,4 +1,9 @@
-## 1.16.0 (Unreleased)
+## 1.15.1 (Unreleased)
+
+BUG FIXES:
+
+* resource/ucloud_instance: Fix the validate of `instance_type`[GH-58]
+
 ## 1.15.0 (December 27, 2019)
 
 NOTES:
@@ -8,7 +13,6 @@ NOTES:
 ENHANCEMENTS:
 
 * resource/ucloud_instance: add `private_ip` to argument([#56](https://github.com/terraform-providers/terraform-provider-ucloud/issues/56))
-
 
 ## 1.14.1 (October 18, 2019)
 
