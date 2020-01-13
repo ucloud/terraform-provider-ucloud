@@ -21,7 +21,12 @@ func Test_parseInstanceType(t *testing.T) {
 		{"ok_standard", args{"n-standard-1"}, &instanceType{1, 4096, "n", "standard"}, false},
 		{"ok_highmem", args{"n-highmem-1"}, &instanceType{1, 8192, "n", "highmem"}, false},
 		{"ok_customized", args{"n-customized-1-12"}, &instanceType{1, 12288, "n", "customized"}, false},
+		{"ok_customized_ratio", args{"n-customized-8-12"}, &instanceType{8, 12288, "n", "customized"}, false},
+		{"ok_customized_ratio_opposite", args{"n-customized-12-8"}, &instanceType{12, 8192, "n", "customized"}, false},
 
+		{"err_customized_ratio_opposite", args{"n-customized-14-6"}, nil, true},
+		{"err_customized_core", args{"n-customized-3-11"}, nil, true},
+		{"err_customized_ratio", args{"n-customized-4-50"}, nil, true},
 		{"err_customized", args{"n-customized-1-5"}, nil, true},
 		{"err_type", args{"nx-highcpu-1"}, nil, true},
 		{"err_scale_type", args{"n-invalid-1"}, nil, true},
