@@ -229,13 +229,17 @@ func resourceUCloudMemcacheInstanceRead(d *schema.ResourceData, meta interface{}
 	d.Set("availability_zone", inst.Zone)
 	d.Set("name", inst.Name)
 	d.Set("tag", inst.Tag)
-	d.Set("charge_type", upperCamelCvt.convert(inst.ChargeType))
 	d.Set("instance_type", fmt.Sprintf("memcache-master-%v", inst.Size))
 	d.Set("vpc_id", inst.VPCId)
 	d.Set("subnet_id", inst.SubnetId)
 	d.Set("create_time", timestampToString(inst.CreateTime))
 	d.Set("expire_time", timestampToString(inst.ExpireTime))
 	d.Set("status", inst.State)
+
+	//in order to be compatible with returns null
+	if notEmptyStringInSet(inst.ChargeType) {
+		d.Set("charge_type", upperCamelCvt.convert(inst.ChargeType))
+	}
 
 	ipSet := []map[string]interface{}{}
 	for _, addr := range inst.Address {
