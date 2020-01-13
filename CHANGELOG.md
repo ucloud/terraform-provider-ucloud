@@ -1,8 +1,8 @@
-## 1.15.1 (Unreleased)
+## 1.15.1 (January 13, 2020)
 
 BUG FIXES:
 
-* resource/ucloud_instance: Fix the validate of `instance_type`[GH-58]
+* resource/ucloud_instance: Fix the validate of `instance_type`([#58](https://github.com/terraform-providers/terraform-provider-ucloud/issues/58))
 
 ## 1.15.0 (December 27, 2019)
 
