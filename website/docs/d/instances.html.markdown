@@ -27,7 +27,7 @@ output "first" {
 The following arguments are supported:
 
 * `availability_zone` - (Optional) Availability zone where instances are located. Such as: "cn-bj2-02". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
-* `ids` - (Optional) A list of instance IDs, all the instances belongs to the defined region will be retrieved if this argument is "".
+* `ids` - (Optional) A list of instance IDs, all the instances belongs to the defined region will be retrieved if this argument is [].
 * `name_regex` - (Optional) A regex string to filter resulting instances by name.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 * `tag` - (Optional) A tag assigned to instance.
