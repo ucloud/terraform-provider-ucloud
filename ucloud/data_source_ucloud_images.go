@@ -45,8 +45,20 @@ func dataSourceUCloudImages() *schema.Resource {
 			},
 
 			"image_id": {
-				Type:     schema.TypeString,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"ids"},
+			},
+
+			"ids": {
+				Type:     schema.TypeSet,
 				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Set:           schema.HashString,
+				Computed:      true,
+				ConflictsWith: []string{"image_id"},
 			},
 
 			"output_file": {
@@ -149,7 +161,7 @@ func dataSourceUCloudImagesRead(d *schema.ResourceData, meta interface{}) error 
 		req.ImageId = ucloud.String(v.(string))
 	}
 
-	var images []uhost.UHostImageSet
+	var allImages []uhost.UHostImageSet
 	var offset int
 	limit := 100
 	for {
@@ -166,7 +178,7 @@ func dataSourceUCloudImagesRead(d *schema.ResourceData, meta interface{}) error 
 
 		for _, v := range resp.ImageSet {
 			if v.State == "Available" {
-				images = append(images, v)
+				allImages = append(allImages, v)
 			}
 		}
 
@@ -176,19 +188,28 @@ func dataSourceUCloudImagesRead(d *schema.ResourceData, meta interface{}) error 
 
 		offset = offset + limit
 	}
-
+	ids, idsOk := d.GetOk("ids")
 	nameRegex, nameRegexOk := d.GetOk("name_regex")
 
 	var filteredImages []uhost.UHostImageSet
-	if nameRegexOk {
-		r := regexp.MustCompile(nameRegex.(string))
-		for _, image := range images {
-			if r.MatchString(image.ImageName) {
-				filteredImages = append(filteredImages, image)
+
+	if idsOk || nameRegexOk {
+		var r *regexp.Regexp
+		if nameRegex != "" {
+			r = regexp.MustCompile(nameRegex.(string))
+		}
+		for _, image := range allImages {
+			if r != nil && !r.MatchString(image.ImageName) {
+				continue
 			}
+
+			if idsOk && !isStringIn(image.ImageId, schemaSetToStringSlice(ids)) {
+				continue
+			}
+			filteredImages = append(filteredImages, image)
 		}
 	} else {
-		filteredImages = images
+		filteredImages = allImages
 	}
 
 	var finalImages []uhost.UHostImageSet
@@ -233,6 +254,7 @@ func dataSourceUCloudImagesSave(d *schema.ResourceData, projects []uhost.UHostIm
 
 	d.SetId(hashStringArray(ids))
 	d.Set("total_count", len(data))
+	d.Set("ids", ids)
 	if err := d.Set("images", data); err != nil {
 		return err
 	}

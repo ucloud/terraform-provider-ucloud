@@ -25,7 +25,7 @@ output "first" {
 The following arguments are supported:
 
 * `availability_zone` - (Optional) Availability zone where database instances are located. Such as: "cn-bj2-02". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
-* `ids` - (Optional) A list of database instance IDs, all the database instances belong to this region will be retrieved if the ID is `""`.
+* `ids` - (Optional) A list of database instance IDs, all the database instances belong to this region will be retrieved if the ID is `[]`.
 * `name_regex` - (Optional) A regex string to filter resulting database instances by name.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 

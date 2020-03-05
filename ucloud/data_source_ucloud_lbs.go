@@ -22,7 +22,8 @@ func dataSourceUCloudLBs() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Set: schema.HashString,
+				Set:      schema.HashString,
+				Computed: true,
 			},
 
 			"name_regex": {
@@ -230,6 +231,7 @@ func dataSourceUCloudLBsSave(d *schema.ResourceData, lbs []ulb.ULBSet) error {
 
 	d.SetId(hashStringArray(ids))
 	d.Set("total_count", len(data))
+	d.Set("ids", ids)
 	if err := d.Set("lbs", data); err != nil {
 		return err
 	}

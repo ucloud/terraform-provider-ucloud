@@ -27,7 +27,8 @@ func dateSourceUCloudVPNCustomerGateways() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Set: schema.HashString,
+				Set:      schema.HashString,
+				Computed: true,
 			},
 
 			"tag": {
@@ -163,6 +164,7 @@ func dataSourceUCloudVPNCustomerGatewaysSave(d *schema.ResourceData, vpnCusGatew
 
 	d.SetId(hashStringArray(ids))
 	d.Set("total_count", len(data))
+	d.Set("ids", ids)
 	if err := d.Set("vpn_customer_gateways", data); err != nil {
 		return err
 	}

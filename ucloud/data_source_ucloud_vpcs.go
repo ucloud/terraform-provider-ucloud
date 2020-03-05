@@ -21,7 +21,8 @@ func dataSourceUCloudVPCs() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Set: schema.HashString,
+				Set:      schema.HashString,
+				Computed: true,
 			},
 
 			"name_regex": {
@@ -164,6 +165,7 @@ func dataSourceUCloudVPCsSave(d *schema.ResourceData, vpcs []vpc.VPCInfo) error 
 
 	d.SetId(hashStringArray(ids))
 	d.Set("total_count", len(data))
+	d.Set("ids", ids)
 	if err := d.Set("vpcs", data); err != nil {
 		return err
 	}

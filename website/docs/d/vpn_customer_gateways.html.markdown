@@ -25,7 +25,7 @@ output "first" {
 
 The following arguments are supported:
 
-* `ids` - (Optional) A list of VPN Customer Gateway IDs, all the VPN Customer Gateways belongs to the defined region will be retrieved if this argument is "".
+* `ids` - (Optional) A list of VPN Customer Gateway IDs, all the VPN Customer Gateways belongs to the defined region will be retrieved if this argument is `[]`.
 * `name_regex` - (Optional) A regex string to filter resulting VPN Customer Gateways by name.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 * `tag` - (Optional) A tag assigned to VPN Customer Gateway.

@@ -133,13 +133,15 @@ In addition to [generic `provider` arguments](https://www.terraform.io/docs/conf
 
 * `max_retries` - (Optional) This is the max retry attempts number. Default max retry attempts number is `0`.
 
-* `insecure` - (Optional) This is a switch to disable/enable https. (Default: `false`, means enable https).
+* `insecure` - (Optional) This is a switch to disable/enable https.  (Default: `false`, means enable https). 
+ ~> **Note** this argument conflicts with `base_url`.
 
 * `profile` - (Optional) This is the UCloud profile name as set in the shared credentials file, it can also be sourced from the `UCLOUD_PROFILE` environment variables.
 
 * `shared_credentials_file` - (Optional) This is the path to the shared credentials file, it can also be sourced from the `UCLOUD_SHARED_CREDENTIAL_FILE` environment variables. If this is not set and a profile is specified, `~/.ucloud/credential.json` will be used.
 
-* `base_url` - (Optional) This is the base url.(Default: `https://api.ucloud.cn`)
+* `base_url` - (Optional) This is the base url.(Default: `https://api.ucloud.cn`).
+ ~> **Note** this argument conflicts with `insecure`.
 
 ## Testing
 

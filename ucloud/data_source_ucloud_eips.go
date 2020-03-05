@@ -174,7 +174,7 @@ func dataSourceUCloudEipsSave(d *schema.ResourceData, eips []unet.UnetEIPSet) er
 	data := []map[string]interface{}{}
 
 	for _, item := range eips {
-		ids = append(ids, string(item.EIPId))
+		ids = append(ids, item.EIPId)
 
 		eipAddr := []map[string]string{}
 		for _, addr := range item.EIPAddr {
@@ -200,6 +200,7 @@ func dataSourceUCloudEipsSave(d *schema.ResourceData, eips []unet.UnetEIPSet) er
 
 	d.SetId(hashStringArray(ids))
 	d.Set("total_count", len(data))
+	d.Set("ids", ids)
 	if err := d.Set("eips", data); err != nil {
 		return err
 	}

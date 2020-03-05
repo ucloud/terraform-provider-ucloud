@@ -35,7 +35,8 @@ func dataSourceUCloudInstances() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Set: schema.HashString,
+				Set:      schema.HashString,
+				Computed: true,
 			},
 
 			"tag": {
@@ -310,6 +311,7 @@ func dataSourceUCloudInstancesSave(d *schema.ResourceData, instances []uhost.UHo
 
 	d.SetId(hashStringArray(ids))
 	d.Set("total_count", len(data))
+	d.Set("ids", ids)
 	if err := d.Set("instances", data); err != nil {
 		return err
 	}

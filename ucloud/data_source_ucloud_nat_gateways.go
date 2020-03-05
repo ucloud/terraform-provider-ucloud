@@ -27,7 +27,8 @@ func dateSourceUCloudNatGateways() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Set: schema.HashString,
+				Set:      schema.HashString,
+				Computed: true,
 			},
 
 			"output_file": {
@@ -202,6 +203,7 @@ func dataSourceUCloudNatGatewaysSave(d *schema.ResourceData, natGateways []vpc.N
 
 	d.SetId(hashStringArray(ids))
 	d.Set("total_count", len(data))
+	d.Set("ids", ids)
 	if err := d.Set("nat_gateways", data); err != nil {
 		return err
 	}
