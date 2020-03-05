@@ -22,7 +22,8 @@ func dataSourceUCloudEips() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Set: schema.HashString,
+				Set:      schema.HashString,
+				Computed: true,
 			},
 
 			"name_regex": {
