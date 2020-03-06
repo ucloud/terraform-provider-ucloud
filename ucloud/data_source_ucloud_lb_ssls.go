@@ -21,7 +21,8 @@ func dataSourceUCloudLBSSLs() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Set: schema.HashString,
+				Set:      schema.HashString,
+				Computed: true,
 			},
 
 			"name_regex": {
@@ -140,6 +141,7 @@ func dataSourceUCloudLBSSLsSave(d *schema.ResourceData, ssls []ulb.ULBSSLSet) er
 
 	d.SetId(hashStringArray(ids))
 	d.Set("total_count", len(data))
+	d.Set("ids", ids)
 	if err := d.Set("lb_ssls", data); err != nil {
 		return err
 	}

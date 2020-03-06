@@ -25,7 +25,7 @@ output "first" {
 
 The following arguments are supported:
 
-* `ids` - (Optional) A list of Load Balancer IDs, all the LBs belong to this region will be retrieved if the ID is `""`.
+* `ids` - (Optional) A list of Load Balancer IDs, all the LBs belong to this region will be retrieved if the ID is `[]`.
 * `name_regex` - (Optional) A regex string to filter resulting lbs by name.
 * `vpc_id` - (Optional) The ID of the VPC linked to the Load Balancers.
 * `subnet_id` - (Optional) The ID of subnet that intrant load balancer belongs to.

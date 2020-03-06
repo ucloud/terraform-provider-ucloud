@@ -25,7 +25,7 @@ output "first" {
 
 The following arguments are supported:
 
-* `ids` - (Optional) A list of VPC IDs, all the VPC resources belong to this region will be retrieved if the ID is `""`.
+* `ids` - (Optional) A list of VPC IDs, all the VPC resources belong to this region will be retrieved if the ID is `[]`.
 * `name_regex` - (Optional) A regex string to filter resulting VPC resources by name.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 

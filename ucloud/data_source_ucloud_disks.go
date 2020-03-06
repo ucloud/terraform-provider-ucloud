@@ -27,7 +27,8 @@ func dataSourceUCloudDisks() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Set: schema.HashString,
+				Set:      schema.HashString,
+				Computed: true,
 			},
 
 			"name_regex": {
@@ -189,7 +190,7 @@ func dataSourceUCloudDisksSave(d *schema.ResourceData, disks []udisk.UDiskDataSe
 	data := []map[string]interface{}{}
 
 	for _, item := range disks {
-		ids = append(ids, string(item.UDiskId))
+		ids = append(ids, item.UDiskId)
 
 		data = append(data, map[string]interface{}{
 			"id":                item.UDiskId,
@@ -207,6 +208,7 @@ func dataSourceUCloudDisksSave(d *schema.ResourceData, disks []udisk.UDiskDataSe
 
 	d.SetId(hashStringArray(ids))
 	d.Set("total_count", len(data))
+	d.Set("ids", ids)
 	if err := d.Set("disks", data); err != nil {
 		return err
 	}

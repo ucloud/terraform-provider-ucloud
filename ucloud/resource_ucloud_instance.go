@@ -322,6 +322,8 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 
 	if t.HostType == "o" {
 		req.MachineType = ucloud.String("O")
+	} else if t.HostType == "c" {
+		req.MachineType = ucloud.String("C")
 	}
 
 	if v, ok := d.GetOk("name"); ok {

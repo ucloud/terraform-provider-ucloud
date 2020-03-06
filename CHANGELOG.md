@@ -1,4 +1,11 @@
-## 1.15.2 (Unreleased)
+## 1.16.0 (Unreleased)
+
+ENHANCEMENTS:
+
+* resource/ucloud_instance: add high frequency(c) instance type [GH-61]
+* datasource/ucloud_images: add argument `ids`[GH-61]
+* datasource support `ids` as attributes [GH-61]
+
 ## 1.15.1 (January 13, 2020)
 
 BUG FIXES:

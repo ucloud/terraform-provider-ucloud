@@ -19,7 +19,8 @@ func dataSourceUCloudLBAttachments() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Set: schema.HashString,
+				Set:      schema.HashString,
+				Computed: true,
 			},
 
 			"load_balancer_id": {
@@ -125,6 +126,7 @@ func dataSourceUCloudLBAttachmentsSave(d *schema.ResourceData, lbAttachments []u
 
 	d.SetId(hashStringArray(ids))
 	d.Set("total_count", len(data))
+	d.Set("ids", ids)
 	if err := d.Set("lb_attachments", data); err != nil {
 		return err
 	}

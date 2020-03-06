@@ -36,7 +36,7 @@ resource "ucloud_instance" "web" {
 resource "ucloud_disk" "default" {
   availability_zone = data.ucloud_zones.default.zones[0].id
   name              = "tf-example-web-server"
-  disk_size         = 30
+  disk_size         = 20
 }
 
 # Attach cloud disk to instance

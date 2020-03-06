@@ -26,7 +26,7 @@ output "first" {
 
 The following arguments are supported:
 
-* `ids` - (Optional) A list of Subnet IDs, all the Subnet resources belong to this region will be retrieved if the ID is `""`.
+* `ids` - (Optional) A list of Subnet IDs, all the Subnet resources belong to this region will be retrieved if the ID is `[]`.
 * `vpc_id` - (Optional) The id of the VPC that the desired Subnet belongs to.
 * `name_regex` - (Optional) A regex string to filter resulting Subnet resources by name.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).

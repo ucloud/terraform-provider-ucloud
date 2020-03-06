@@ -30,11 +30,14 @@ output "first" {
 The following arguments are supported:
 
 * `availability_zone` - (Optional) Availability zone where images are located. such as: `cn-bj2-02`. You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist).
-* `image_id` - (Optional) The ID of image.
 * `name_regex` - (Optional) A regex string to filter resulting images by name. (Such as: `^CentOS 7.[1-2] 64` means CentOS 7.1 of 64-bit operating system or CentOS 7.2 of 64-bit operating system, "^Ubuntu 16.04 64" means Ubuntu 16.04 of 64-bit operating system).
 * `image_type` - (Optional) The type of image. Possible values are: `base` as standard image, `business` as owned by market place, and `custom` as custom-image, all the image types will be retrieved by default.
 * `os_type` - (Optional) The type of OS. Possible values are: `linux` and `windows`, all the OS types will be retrieved by default.
 * `most_recent` - (Optional) If more than one result is returned, use the most recent image.
+* `image_id` - (Optional) The ID of image.
+ ~> **Note** this argument conflicts with `ids`.
+* `ids` - (Optional) A list of image IDs, all the images belong to this region will be retrieved if the ID is `[]`. 
+ ~> **Note** this argument conflicts with `image_id`.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference

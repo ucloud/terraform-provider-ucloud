@@ -29,7 +29,7 @@ The following arguments are supported:
 
 * `load_balancer_id` - (Required) The ID of a load balancer.
 * `listener_id` - (Required) The ID of a listener server.
-* `ids` - (Optional) A list of LB Attachment IDs, all the LB Attachments belong to the Load Balancer listener will be retrieved if the ID is `""`.
+* `ids` - (Optional) A list of LB Attachment IDs, all the LB Attachments belong to the Load Balancer listener will be retrieved if the ID is `[]`.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference

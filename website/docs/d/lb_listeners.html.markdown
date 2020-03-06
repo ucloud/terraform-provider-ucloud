@@ -30,7 +30,7 @@ The following arguments are supported:
 
 - - -
 
-* `ids` - (Optional) A list of LB Listener IDs, all the LB Listeners belong to this region will be retrieved if the ID is `""`.
+* `ids` - (Optional) A list of LB Listener IDs, all the LB Listeners belong to this region will be retrieved if the ID is `[]`.
 * `name_regex` - (Optional) A regex string to filter resulting lb listeners by name.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
