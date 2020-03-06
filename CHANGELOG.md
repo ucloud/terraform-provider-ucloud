@@ -1,10 +1,10 @@
-## 1.16.0 (Unreleased)
+## 1.16.0 (March 06, 2020)
 
 ENHANCEMENTS:
 
-* resource/ucloud_instance: add high frequency(c) instance type [GH-61]
-* datasource/ucloud_images: add argument `ids`[GH-61]
-* datasource support `ids` as attributes [GH-61]
+* resource/ucloud_instance: add high frequency(c) instance type ([#61](https://github.com/terraform-providers/terraform-provider-ucloud/issues/61))
+* datasource/ucloud_images: add argument `ids`([#61](https://github.com/terraform-providers/terraform-provider-ucloud/issues/61))
+* datasource support `ids` as attributes ([#61](https://github.com/terraform-providers/terraform-provider-ucloud/issues/61))
 
 ## 1.15.1 (January 13, 2020)
 
