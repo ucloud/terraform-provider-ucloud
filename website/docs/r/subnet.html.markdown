@@ -28,7 +28,7 @@ resource "ucloud_subnet" "example" {
   # subnet's network must be contained by vpc network
   # and a subnet must have least 8 ip addresses in it (netmask < 30).
   cidr_block = "192.168.1.0/24"
-  vpc_id     = ucloud_vpc.default.ids
+  vpc_id     = ucloud_vpc.default.id
 }
 ```
 
