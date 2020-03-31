@@ -193,6 +193,11 @@ func resourceUCloudLBUpdate(d *schema.ResourceData, meta interface{}) error {
 	d.Partial(true)
 
 	if d.HasChange("security_group") && !d.IsNewResource() {
+		if val, ok := d.GetOk("internal"); ok {
+			if val.(bool) {
+				return fmt.Errorf("the security_group only takes effect for ULB instances of request_proxy mode and extranet mode at present, got internal = %t", val.(bool))
+			}
+		}
 		conn := client.unetconn
 		req := conn.NewGrantFirewallRequest()
 		req.FWId = ucloud.String(d.Get("security_group").(string))

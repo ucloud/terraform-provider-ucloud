@@ -598,13 +598,15 @@ data "ucloud_images" "default" {
   image_type        = "base"
 }
 
-
 resource "ucloud_instance" "foo" {
   name              = "tf-acc-instance-user-data"
   tag               = "tf-acc"
   availability_zone = "${data.ucloud_zones.default.zones.0.id}"
   image_id          = "${data.ucloud_images.default.images.0.id}"
-  user_data		    = "I_am_user_data"
+  user_data		    = <<EOF
+		#!/bin/bash
+		sleep 5
+		EOF
   instance_type     = "n-basic-1"
   root_password     = "wA1234567"
   security_group = "${data.ucloud_security_groups.default.security_groups.0.id}"
