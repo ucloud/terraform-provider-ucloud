@@ -1,10 +1,10 @@
-## 1.17.0 (Unreleased)
+## 1.17.0 (March 31, 2020)
 
 ENHANCEMENTS:
 
-* resource/ucloud_instance: add `user_data` to argument[GH-64]
-* resource/ucloud_lb: add `security_group` to argument[GH-64]
-* resource/ucloud_redis_instance: add `5.0` enums of `engine_version` and refresh the `instance_type`[GH-64]
+* resource/ucloud_instance: add `user_data` to argument([#64](https://github.com/terraform-providers/terraform-provider-ucloud/issues/64))
+* resource/ucloud_lb: add `security_group` to argument([#64](https://github.com/terraform-providers/terraform-provider-ucloud/issues/64))
+* resource/ucloud_redis_instance: add `5.0` enums of `engine_version` and refresh the `instance_type`([#64](https://github.com/terraform-providers/terraform-provider-ucloud/issues/64))
 
 ## 1.16.0 (March 06, 2020)
 
