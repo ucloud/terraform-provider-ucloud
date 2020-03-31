@@ -1,6 +1,7 @@
 package ucloud
 
 import (
+	"github.com/ucloud/ucloud-sdk-go/services/unet"
 	"github.com/ucloud/ucloud-sdk-go/ucloud/error"
 	"strconv"
 	"strings"
@@ -86,4 +87,29 @@ func instanceTypeSetFunc(machineType string, cpu, memory int) string {
 	}
 
 	return strings.Join([]string{"n", "customized", strconv.Itoa(cpu), strconv.Itoa(memory)}, "-")
+}
+
+func (c *UCloudClient) describeFirewallByIdAndType(resourceId, resourceType string) (*unet.FirewallDataSet, error) {
+	conn := c.unetconn
+
+	req := conn.NewDescribeFirewallRequest()
+	req.ResourceId = ucloud.String(resourceId)
+	req.ResourceType = ucloud.String(resourceType)
+
+	resp, err := conn.DescribeFirewall(req)
+
+	// [API-STYLE] Fire wall api has not found err code, but others don't have
+	// TODO: don't use magic number
+	if err != nil {
+		if uErr, ok := err.(uerr.Error); ok && uErr.Code() == 54002 {
+			return nil, newNotFoundError("")
+		}
+		return nil, err
+	}
+
+	if len(resp.DataSet) < 1 {
+		return nil, newNotFoundError("")
+	}
+
+	return &resp.DataSet[0], nil
 }

@@ -57,13 +57,13 @@ resource "ucloud_lb_attachment" "example" {
 
 The following arguments are supported:
 
-* `load_balancer_id` - (Required) The ID of a load balancer.
-* `listener_id` - (Required) The ID of a listener server.
-* `resource_id` - (Required) The ID of a backend server.
+* `load_balancer_id` - (Required, ForceNew) The ID of a load balancer.
+* `listener_id` - (Required, ForceNew) The ID of a listener server.
+* `resource_id` - (Required, ForceNew) The ID of a backend server.
 
 - - -
 
-* `resource_type` - **Deprecated**, attribute `resource_type` is deprecated for optimizing parameters.
+* `resource_type` - (**Deprecated**, ForceNew), attribute `resource_type` is deprecated for optimizing parameters.
 * `port` - (Optional) The listening port of the backend server, range: 1-65535, (Default: `80`). Backend server port have the following restrictions: If the LB listener type is `request_proxy`, the backend serve can add different ports to implement different service instances of the same IP. Else if LB listener type is `packets_transmit`, the port of the backend server must be consistent with the LB listening port.
 
 ## Attributes Reference

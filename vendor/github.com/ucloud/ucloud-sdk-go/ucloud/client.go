@@ -4,6 +4,7 @@ Package ucloud is a package of utilities to setup ucloud sdk and improve using e
 package ucloud
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/ucloud/ucloud-sdk-go/private/utils"
@@ -18,6 +19,13 @@ import (
 
 type ClientMeta struct {
 	Product string
+}
+
+type ServiceClient interface {
+	AddRequestHandler(h RequestHandler) error
+	AddResponseHandler(h ResponseHandler) error
+	AddHttpRequestHandler(h HttpRequestHandler) error
+	AddHttpResponseHandler(h HttpResponseHandler) error
 }
 
 // Client 客户端
@@ -71,7 +79,7 @@ func (c *Client) SetHttpClient(httpClient http.Client) error {
 	return nil
 }
 
-// GetCredential will return the creadential config of client.
+// GetCredential will return the credential config of client.
 func (c *Client) GetCredential() *auth.Credential {
 	return c.credential
 }
@@ -108,6 +116,13 @@ func (c *Client) InvokeActionWithPatcher(action string, req request.Common, resp
 	req.SetRequestTime(time.Now())
 	resp.SetRequest(req)
 
+	if c.credential.CanExpire && c.credential.IsExpired() {
+		return uerr.NewClientError(
+			uerr.ErrCredentialExpired,
+			fmt.Errorf("credential is expired at %s", c.credential.Expires.Format(time.RFC3339)),
+		)
+	}
+
 	for _, handler := range c.requestHandlers {
 		req, err = handler(c, req)
 		if err != nil {
@@ -142,7 +157,7 @@ func (c *Client) InvokeActionWithPatcher(action string, req request.Common, resp
 
 	if err == nil {
 		// use patch object to resolve the http response body
-		// in general, it will be fix common server error before server bugfix is released.
+		// in general, it will be fix common server error before server bug fix is released.
 		body := httpResp.GetBody()
 
 		for _, patch := range patches {

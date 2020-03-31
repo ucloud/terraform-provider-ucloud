@@ -54,6 +54,6 @@ resource "ucloud_disk_attachment" "default" {
 
 The following arguments are supported:
 
-* `availability_zone` - (Required) The Zone to attach the disk in.
-* `instance_id` - (Required) The ID of host instance.
-* `disk_id` - (Required) The ID of disk that needs to be attached
+* `availability_zone` - (Required, ForceNew) The Zone to attach the disk in.
+* `instance_id` - (Required, ForceNew) The ID of host instance.
+* `disk_id` - (Required, ForceNew) The ID of disk that needs to be attached

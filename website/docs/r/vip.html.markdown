@@ -36,8 +36,8 @@ resource "ucloud_vip" "foo" {
 
 The following arguments are supported:
 
-* `vpc_id` - (Required) The ID of VPC linked to the VIP. 
-* `subnet_id` - (Required) The ID of subnet. If defined `vpc_id`, the `subnet_id` is Required. 
+* `vpc_id` - (Required, ForceNew) The ID of VPC linked to the VIP. 
+* `subnet_id` - (Required, ForceNew) The ID of subnet. If defined `vpc_id`, the `subnet_id` is Required. 
 
 - - -
 

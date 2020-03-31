@@ -30,14 +30,14 @@ resource "ucloud_lb_listener" "example" {
 
 The following arguments are supported:
 
-* `load_balancer_id` - (Required) The ID of load balancer instance.
-* `protocol` - (Required) Listener protocol. Possible values: `http`, `https`, `tcp` if `listen_type` is `request_proxy`, `tcp` and `udp` if `listen_type` is `packets_transmit`.
+* `load_balancer_id` - (Required, ForceNew) The ID of load balancer instance.
+* `protocol` - (Required, ForceNew) Listener protocol. Possible values: `http`, `https`, `tcp` if `listen_type` is `request_proxy`, `tcp` and `udp` if `listen_type` is `packets_transmit`.
 
 - - -
 
 * `name` - (Optional) The name of the listener. If not specified, terraform will auto-generate a name beginning with `tf-lb-listener`.
-* `listen_type` - (Optional) The type of listener. Possible values are `request_proxy` and `packets_transmit`. When `packets_transmit` was specified, you need to config the instances by yourself if the instances attach to the load balancer. You may refer to [configuration instruction](https://docs.ucloud.cn/network/ulb/fast/createulb/vservertype).
-* `port` - (Optional) Port opened on the listeners to receive requests, range: 1-65535. The default value: `80` as `protocol` is `http`, `443` as `protocol` is `https`, `1024` as `protocol` is `tcp` or `udp`.
+* `listen_type` - (Optional, ForceNew) The type of listener. Possible values are `request_proxy` and `packets_transmit`. When `packets_transmit` was specified, you need to config the instances by yourself if the instances attach to the load balancer. You may refer to [configuration instruction](https://docs.ucloud.cn/network/ulb/fast/createulb/vservertype).
+* `port` - (Optional, ForceNew) Port opened on the listeners to receive requests, range: 1-65535. The default value: `80` as `protocol` is `http`, `443` as `protocol` is `https`, `1024` as `protocol` is `tcp` or `udp`.
 * `idle_timeout` - (Optional) Keep alive timeout of the connection between the client and LB, measured in second. Range: 0-86400 when `listen_type` is `request_proxy`, range: 60-900 when `listen_type` is `packets_transmit` (Default: `60`). The connection will be closed as soon as no response between the client and LB if it set by `0`.
 * `method` - (Optional) The load balancer method in which the listener is. Possible values are: `roundrobin`, `source`, `consistent_hash`, `source_port` , `consistent_hash_port`, `weight_roundrobin` and `leastconn`. (Default: `roundrobin`).
     - The `consistent_hash`, `source_port` , `consistent_hash_port`, `roundrobin`, `source` and `weight_roundrobin` are valid if `listen_type` is `packets_transmit`.

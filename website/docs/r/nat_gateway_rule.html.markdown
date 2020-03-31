@@ -91,7 +91,7 @@ resource "ucloud_nat_gateway_rule" "bar" {
 
 The following arguments are supported:
 
-* `nat_gateway_id` - (Required) The ID of the Nat Gateway. 
+* `nat_gateway_id` - (Required, ForceNew) The ID of the Nat Gateway. 
 * `protocol` - (Required) The protocol of the Nat Gateway Rule. Possible values: `tcp`, `udp`.
 * `src_eip_id` - (Required) The ID of eip associate to the Nat Gateway.
 * `src_port_range` - (Required) The range of port numbers of the eip, range: 1-65535. (eg: `port` or `port1-port2`).

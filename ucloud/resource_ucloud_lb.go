@@ -75,6 +75,12 @@ func resourceUCloudLB() *schema.Resource {
 				Computed: true,
 			},
 
+			"security_group": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
 			"ip_set": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -139,8 +145,14 @@ func resourceUCloudLBCreate(d *schema.ResourceData, meta interface{}) error {
 		req.VPCId = ucloud.String(val.(string))
 	}
 
+	if val, ok := d.GetOk("subnet_id"); ok {
+		req.SubnetId = ucloud.String(val.(string))
+	}
+
+	var internal bool
 	if val, ok := d.GetOk("internal"); ok {
-		if val.(bool) {
+		internal = val.(bool)
+		if internal {
 			req.InnerMode = ucloud.String("Yes")
 		} else {
 			req.OuterMode = ucloud.String("Yes")
@@ -149,8 +161,11 @@ func resourceUCloudLBCreate(d *schema.ResourceData, meta interface{}) error {
 		req.OuterMode = ucloud.String("Yes")
 	}
 
-	if val, ok := d.GetOk("subnet_id"); ok {
-		req.SubnetId = ucloud.String(val.(string))
+	if val, ok := d.GetOk("security_group"); ok {
+		if internal && val != "" {
+			return fmt.Errorf("the security_group only takes effect for ULB instances of request_proxy mode and extranet mode at present, got internal = %t", internal)
+		}
+		req.FirewallId = ucloud.String(val.(string))
 	}
 
 	resp, err := conn.CreateULB(req)
@@ -172,9 +187,30 @@ func resourceUCloudLBCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceUCloudLBUpdate(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*UCloudClient).ulbconn
+	client := meta.(*UCloudClient)
+	conn := client.ulbconn
 
 	d.Partial(true)
+
+	if d.HasChange("security_group") && !d.IsNewResource() {
+		if val, ok := d.GetOk("internal"); ok {
+			if val.(bool) {
+				return fmt.Errorf("the security_group only takes effect for ULB instances of request_proxy mode and extranet mode at present, got internal = %t", val.(bool))
+			}
+		}
+		conn := client.unetconn
+		req := conn.NewGrantFirewallRequest()
+		req.FWId = ucloud.String(d.Get("security_group").(string))
+		req.ResourceType = ucloud.String(eipResourceTypeULB)
+		req.ResourceId = ucloud.String(d.Id())
+
+		_, err := conn.GrantFirewall(req)
+		if err != nil {
+			return fmt.Errorf("error on %s to lb %q, %s", "GrantFirewall", d.Id(), err)
+		}
+
+		d.SetPartial("security_group")
+	}
 
 	isChanged := false
 	req := conn.NewUpdateULBAttributeRequest()
@@ -257,6 +293,16 @@ func resourceUCloudLBRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("ip_set", ipSet); err != nil {
 		return err
 	}
+
+	sgSet, err := client.describeFirewallByIdAndType(d.Id(), eipResourceTypeULB)
+	if err != nil {
+		if isNotFoundError(err) {
+			return nil
+		}
+		return fmt.Errorf("error on reading security group when reading lb %q, %s", d.Id(), err)
+	}
+
+	d.Set("security_group", sgSet.FWId)
 
 	return nil
 }

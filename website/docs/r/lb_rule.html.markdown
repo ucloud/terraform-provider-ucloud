@@ -62,9 +62,9 @@ resource "ucloud_lb_rule" "example" {
 
 The following arguments are supported:
 
-* `load_balancer_id` - (Required) The ID of a load balancer.
-* `listener_id` - (Required) The ID of a listener server.
-* `backend_ids` - (Required) The IDs of the backend servers where rule applies, this argument is populated base on the `backend_id` responded from `lb_attachment` create.
+* `load_balancer_id` - (Required, ForceNew) The ID of a load balancer.
+* `listener_id` - (Required, ForceNew) The ID of a listener server.
+* `backend_ids` - (Required, ForceNew) The IDs of the backend servers where rule applies, this argument is populated base on the `backend_id` responded from `lb_attachment` create.
 
 - - -
 

@@ -1,6 +1,7 @@
 package ucloud
 
 import (
+	"encoding/base64"
 	"fmt"
 	"time"
 
@@ -194,6 +195,13 @@ func resourceUCloudInstance() *schema.Resource {
 			"allow_stopping_for_update": {
 				Type:     schema.TypeBool,
 				Optional: true,
+			},
+
+			"user_data": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringLenBetween(0, 16384),
 			},
 
 			"cpu": {
@@ -399,6 +407,14 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 		req.SecurityGroupId = ucloud.String(val.(string))
 	}
 
+	if v, ok := d.GetOk("user_data"); ok {
+		if isStringIn("CloudInit", imageResp.Features) {
+			req.UserData = ucloud.String(base64.StdEncoding.EncodeToString([]byte(v.(string))))
+		} else {
+			return fmt.Errorf("error on creating instance, the image %s must have %q feature, got %#v", "CloudInit", imageId, imageResp.Features)
+		}
+	}
+
 	resp, err := conn.CreateUHostInstance(req)
 	if err != nil {
 		return fmt.Errorf("error on creating instance, %s", err)
@@ -440,7 +456,7 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 		conn := client.unetconn
 		req := conn.NewGrantFirewallRequest()
 		req.FWId = ucloud.String(d.Get("security_group").(string))
-		req.ResourceType = ucloud.String("UHost")
+		req.ResourceType = ucloud.String(eipResourceTypeUHost)
 		req.ResourceId = ucloud.String(d.Id())
 
 		_, err := conn.GrantFirewall(req)
@@ -763,7 +779,6 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 
 func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
-	conn := client.unetconn
 
 	instance, err := client.describeInstanceById(d.Id())
 
@@ -845,18 +860,15 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 
-	req := conn.NewDescribeFirewallRequest()
-	req.ResourceId = ucloud.String(d.Id())
-	req.ResourceType = ucloud.String(eipResourceTypeUHost)
-	resp, err := conn.DescribeFirewall(req)
-
+	sgSet, err := client.describeFirewallByIdAndType(d.Id(), eipResourceTypeUHost)
 	if err != nil {
+		if isNotFoundError(err) {
+			return nil
+		}
 		return fmt.Errorf("error on reading security group when reading instance %q, %s", d.Id(), err)
 	}
 
-	if len(resp.DataSet) > 0 {
-		d.Set("security_group", resp.DataSet[0].FWId)
-	}
+	d.Set("security_group", sgSet.FWId)
 
 	return nil
 }

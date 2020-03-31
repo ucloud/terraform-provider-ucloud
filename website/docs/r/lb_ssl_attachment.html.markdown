@@ -6,7 +6,7 @@ description: |-
   Provides a Load Balancer SSL attachment resource for attaching SSL certificate to Load Balancer Listener.
 ---
 
-# ucloud_lb_ssl
+# ucloud_lb_ssl_attachment
 
 Provides a Load Balancer SSL attachment resource for attaching SSL certificate to Load Balancer Listener.
 
@@ -43,6 +43,6 @@ resource "ucloud_lb_ssl_attachment" "foo" {
 
 The following arguments are supported:
 
-* `ssl_id` - (Required) The ID of SSL certificate.
-* `load_balance_id` - (Required) The ID of load balancer instance.
-* `listener_id` - (Required)  The ID of listener servers.
+* `ssl_id` - (Required, ForceNew) The ID of SSL certificate.
+* `load_balance_id` - (Required, ForceNew) The ID of load balancer instance.
+* `listener_id` - (Required, ForceNew)  The ID of listener servers.

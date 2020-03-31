@@ -23,8 +23,8 @@ resource "ucloud_isolation_group" "foo" {
 
 The following arguments are supported:
 
-* `name` - (Optional) The name of the isolation group information which contains 1-63 characters and only support Chinese, English, numbers, '-', '_', '.', ',', '[', ']', ':'. If not specified, terraform will auto-generate a name beginning with `tf-isolation-group`.
-* `remark` - (Optional) The remarks of the isolation group. (Default: `""`).
+* `name` - (Optional, ForceNew) The name of the isolation group information which contains 1-63 characters and only support Chinese, English, numbers, '-', '_', '.', ',', '[', ']', ':'. If not specified, terraform will auto-generate a name beginning with `tf-isolation-group`.
+* `remark` - (Optional, ForceNew) The remarks of the isolation group. (Default: `""`).
 
 ## Import
 
