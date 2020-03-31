@@ -318,7 +318,7 @@ type redisInstanceType struct {
 }
 
 var availableRedisType = []string{"master", "distributed"}
-var availableMasterRedisMemory = []int{1, 2, 4, 6, 8, 12, 16, 24, 32}
+var availableMasterRedisMemory = []int{1, 2, 4, 6, 8, 12, 16, 24, 32, 40, 52, 64}
 
 func parseRedisInstanceType(s string) (*redisInstanceType, error) {
 	splited := strings.Split(s, "-")

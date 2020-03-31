@@ -52,6 +52,7 @@ func resourceUCloudRedisInstance() *schema.Resource {
 					"3.0",
 					"3.2",
 					"4.0",
+					"5.0",
 				}, false),
 			},
 

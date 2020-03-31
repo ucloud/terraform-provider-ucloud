@@ -22,6 +22,7 @@ func resourceUCloudIsolationGroup() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
+				ForceNew:     true,
 				ValidateFunc: validateIsolationGroupName,
 			},
 
@@ -29,6 +30,7 @@ func resourceUCloudIsolationGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 		},
 	}

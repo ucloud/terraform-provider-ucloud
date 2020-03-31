@@ -35,9 +35,9 @@ resource "ucloud_vpc_peering_connection" "connection" {
 
 The following arguments are supported:
 
-* `vpc_id` - (Required) The short of ID of the requester VPC of the specific VPC Peering Connection to retrieve.
-* `peer_vpc_id` - (Required) The short ID of accepter VPC of the specific VPC Peering Connection to retrieve.
+* `vpc_id` - (Required, ForceNew) The short of ID of the requester VPC of the specific VPC Peering Connection to retrieve.
+* `peer_vpc_id` - (Required, ForceNew) The short ID of accepter VPC of the specific VPC Peering Connection to retrieve.
 
 - - -
 
-* `peer_project_id` - (Optional) The ID of accepter project of the specific VPC Peering Connection to retrieve.
+* `peer_project_id` - (Optional, ForceNew) The ID of accepter project of the specific VPC Peering Connection to retrieve.

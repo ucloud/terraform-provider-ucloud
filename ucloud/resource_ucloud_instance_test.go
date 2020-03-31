@@ -140,6 +140,33 @@ func TestAccUCloudInstance_isolationGroup(t *testing.T) {
 	})
 }
 
+func TestAccUCloudInstance_userData(t *testing.T) {
+	var instance uhost.UHostInstanceSet
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		IDRefreshName: "ucloud_instance.foo",
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckInstanceDestroy,
+
+		Steps: []resource.TestStep{
+			{
+				Config: testAccInstanceConfigUserData,
+
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckInstanceExists("ucloud_instance.foo", &instance),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "name", "tf-acc-instance-user-data"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "tag", "tf-acc"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "instance_type", "n-basic-1"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccUCloudInstance_vpc(t *testing.T) {
 	rInt := acctest.RandInt()
 	var instance uhost.UHostInstanceSet
@@ -551,6 +578,33 @@ resource "ucloud_instance" "foo" {
   availability_zone = "${data.ucloud_zones.default.zones.0.id}"
   image_id          = "${data.ucloud_images.default.images.0.id}"
   isolation_group	=  "${ucloud_isolation_group.default.id}"
+  instance_type     = "n-basic-1"
+  root_password     = "wA1234567"
+  security_group = "${data.ucloud_security_groups.default.security_groups.0.id}"
+}
+`
+
+const testAccInstanceConfigUserData = `
+data "ucloud_zones" "default" {
+}
+
+data "ucloud_security_groups" "default" {
+  type = "recommend_web"
+}
+
+data "ucloud_images" "default" {
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  name_regex        = "^CentOS 7.6 64"
+  image_type        = "base"
+}
+
+
+resource "ucloud_instance" "foo" {
+  name              = "tf-acc-instance-user-data"
+  tag               = "tf-acc"
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  image_id          = "${data.ucloud_images.default.images.0.id}"
+  user_data		    = "I_am_user_data"
   instance_type     = "n-basic-1"
   root_password     = "wA1234567"
   security_group = "${data.ucloud_security_groups.default.security_groups.0.id}"

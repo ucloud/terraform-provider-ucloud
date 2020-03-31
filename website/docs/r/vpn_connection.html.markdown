@@ -70,9 +70,9 @@ resource "ucloud_vpn_connection" "foo" {
 
 The following arguments are supported:
 
-* `vpc_id` - (Required) The ID of VPC linked to the VPN Gateway Connection. 
-* `vpn_gateway_id` - (Required) The ID of  the VPN Customer Gateway. 
-* `customer_gateway_id` - (Required) The grade of the VPN Gateway
+* `vpc_id` - (Required, ForceNew) The ID of VPC linked to the VPN Gateway Connection. 
+* `vpn_gateway_id` - (Required, ForceNew) The ID of  the VPN Customer Gateway. 
+* `customer_gateway_id` - (Required, ForceNew) The grade of the VPN Gateway
 * `ike_config` - (Required) The configurations of IKE negotiation. Each ike_config supports fields documented below.
 * `ipsec_config` - (Required) The configurations of IPSec negotiation. Each ipsec_config supports fields documented below.
 
@@ -80,7 +80,7 @@ The following arguments are supported:
 
 * `name` - (Optional) The name of the VPN Gateway Connection which contains 1-63 characters and only support Chinese, English, numbers and special characters: `-_.`. If not specified, terraform will auto-generate a name beginning with `tf-vpn-connection-`.
 * `remark` - (Optional) The remarks of the VPN Gateway Connection. (Default: `""`).
-* `tag` - (Optional) A tag assigned to VPN Gateway Connection, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
+* `tag` - (Optional, ForceNew) A tag assigned to VPN Gateway Connection, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
 
 ### Block ike_config
 

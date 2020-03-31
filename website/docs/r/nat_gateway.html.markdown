@@ -52,18 +52,18 @@ resource "ucloud_nat_gateway" "foo" {
 
 The following arguments are supported:
 
-* `vpc_id` - (Required) The ID of VPC linked to the Nat Gateway. 
+* `vpc_id` - (Required, ForceNew) The ID of VPC linked to the Nat Gateway. 
 * `subnet_ids` - (Required) The list of subnet ID under the VPC.
-* `eip_id` - (Required) The ID of eip associate to the Nat Gateway. 
+* `eip_id` - (Required, ForceNew) The ID of eip associate to the Nat Gateway. 
 * `security_group` - (Required) The ID of the associated security group.
 * `enable_white_list` - (Required) The boolean value to Controls whether or not start the whitelist mode.
 
 - - -
 
 * `white_list` - (Optional) The white list of instance under the Nat Gateway.
-* `name` - (Optional) The name of the Nat Gateway which contains 6-63 characters and only support Chinese, English, numbers, '-', '_' and '.'. If not specified, terraform will auto-generate a name beginning with `tf-nat-gateway-`.
-* `remark` - (Optional) The remarks of the Nat Gateway. (Default: `""`).
-* `tag` - (Optional) A tag assigned to Nat Gateway, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
+* `name` - (Optional, ForceNew) The name of the Nat Gateway which contains 6-63 characters and only support Chinese, English, numbers, '-', '_' and '.'. If not specified, terraform will auto-generate a name beginning with `tf-nat-gateway-`.
+* `remark` - (Optional, ForceNew) The remarks of the Nat Gateway. (Default: `""`).
+* `tag` - (Optional, ForceNew) A tag assigned to Nat Gateway, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
 * ``
 ## Attributes Reference
 

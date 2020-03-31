@@ -24,13 +24,13 @@ resource "ucloud_vpn_customer_gateway" "foo" {
 
 The following arguments are supported:
 
-* `ip_address` - (Required) The ip address of the VPN Customer Gateway. 
+* `ip_address` - (Required, ForceNew) The ip address of the VPN Customer Gateway. 
 
 - - -
 
-* `name` - (Optional) The name of the VPN Customer Gateway which contains 1-63 characters and only support Chinese, English, numbers, '-', '_' and '.'. If not specified, terraform will auto-generate a name beginning with `tf-vpn-customer-gateway-`.
-* `remark` - (Optional) The remarks of the VPN Customer Gateway. (Default: `""`).
-* `tag` - (Optional) A tag assigned to VPN Customer Gateway, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
+* `name` - (Optional, ForceNew) The name of the VPN Customer Gateway which contains 1-63 characters and only support Chinese, English, numbers, '-', '_' and '.'. If not specified, terraform will auto-generate a name beginning with `tf-vpn-customer-gateway-`.
+* `remark` - (Optional, ForceNew) The remarks of the VPN Customer Gateway. (Default: `""`).
+* `tag` - (Optional, ForceNew) A tag assigned to VPN Customer Gateway, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
 * ``
 ## Attributes Reference
 

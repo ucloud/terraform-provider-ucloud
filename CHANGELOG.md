@@ -1,4 +1,11 @@
 ## 1.17.0 (Unreleased)
+
+ENHANCEMENTS:
+
+* resource/ucloud_instance: add `user_data` to argument
+* resource/ucloud_lb: add `security_group` to argument
+* resource/ucloud_redis_instance: add `5.0` enums of `engine_version` and refresh the `instance_type`
+
 ## 1.16.0 (March 06, 2020)
 
 ENHANCEMENTS:

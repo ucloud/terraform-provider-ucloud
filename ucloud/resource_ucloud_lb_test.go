@@ -2,6 +2,7 @@ package ucloud
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"log"
 	"testing"
 
@@ -11,6 +12,7 @@ import (
 )
 
 func TestAccUCloudLB_basic(t *testing.T) {
+	rInt := acctest.RandInt()
 	var lbSet ulb.ULBSet
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -24,7 +26,7 @@ func TestAccUCloudLB_basic(t *testing.T) {
 
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBConfig,
+				Config: testAccLBConfigBasic(rInt),
 
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBExists("ucloud_lb.foo", &lbSet),
@@ -35,7 +37,7 @@ func TestAccUCloudLB_basic(t *testing.T) {
 			},
 
 			{
-				Config: testAccLBConfigTwo,
+				Config: testAccLBConfigBasicUpdate(rInt),
 
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBExists("ucloud_lb.foo", &lbSet),
@@ -110,15 +112,48 @@ func testAccCheckLBDestroy(s *terraform.State) error {
 	return nil
 }
 
+func testAccLBConfigBasic(rInt int) string {
+	return fmt.Sprintf(`
+resource "ucloud_security_group" "default" {
+  name = "tf-acc-lb-config-basic-%d"
+  tag  = "tf-acc"
+
+  rules {
+    port_range = "80"
+    protocol   = "tcp"
+    cidr_block = "192.168.0.0/16"
+    policy     = "accept"
+  }
+}
+resource "ucloud_lb" "foo" {
+	name 		   = "tf-acc-lb"
+	tag  		   = "tf-acc"
+    security_group = "${ucloud_security_group.default.id}"
+}`, rInt)
+}
+
+func testAccLBConfigBasicUpdate(rInt int) string {
+	return fmt.Sprintf(`
+resource "ucloud_security_group" "default" {
+  name = "tf-acc-lb-config-basic-update-%d"
+  tag  = ""
+
+  rules {
+    port_range = "20-80"
+    protocol   = "tcp"
+    cidr_block = "0.0.0.0/0"
+  }
+}
+resource "ucloud_lb" "foo" {
+	name	   	   = "tf-acc-lb-two"
+	tag 		   = ""
+	security_group = "${ucloud_security_group.default.id}"
+}`, rInt)
+}
+
 const testAccLBConfig = `
 resource "ucloud_lb" "foo" {
 	name = "tf-acc-lb"
 	tag  = "tf-acc"
-}
-`
-const testAccLBConfigTwo = `
-resource "ucloud_lb" "foo" {
-	name = "tf-acc-lb-two"
-	tag  = ""
 }
 `
