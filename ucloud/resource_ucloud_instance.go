@@ -105,7 +105,7 @@ func resourceUCloudInstance() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ValidateFunc: validateAll(
-					validation.IntBetween(20, 100),
+					validation.IntBetween(20, 500),
 					validateMod(10),
 				),
 			},
@@ -156,6 +156,10 @@ func resourceUCloudInstance() *schema.Resource {
 							Type:     schema.TypeInt,
 							Required: true,
 							ForceNew: true,
+							ValidateFunc: validateAll(
+								validation.IntBetween(20, 8000),
+								validateMod(10),
+							),
 						},
 						"type": {
 							Type:     schema.TypeString,
