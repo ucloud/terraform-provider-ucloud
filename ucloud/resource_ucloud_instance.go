@@ -178,7 +178,6 @@ func resourceUCloudInstance() *schema.Resource {
 			"delete_disks_with_instance": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
 			},
 
 			"remark": {
@@ -930,7 +929,11 @@ func resourceUCloudInstanceDelete(d *schema.ResourceData, meta interface{}) erro
 
 	deleReq := conn.NewTerminateUHostInstanceRequest()
 	deleReq.UHostId = ucloud.String(d.Id())
-	deleReq.ReleaseUDisk = ucloud.Bool(d.Get("delete_disks_with_instance").(bool))
+	if v, ok := d.GetOk("delete_disks_with_instance"); ok {
+		deleReq.ReleaseUDisk = ucloud.Bool(v.(bool))
+	} else {
+		deleReq.ReleaseUDisk = ucloud.Bool(true)
+	}
 
 	return resource.Retry(15*time.Minute, func() *resource.RetryError {
 		instance, err := client.describeInstanceById(d.Id())
