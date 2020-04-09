@@ -1,4 +1,9 @@
 ## 1.18.0 (Unreleased)
+
+ENHANCEMENTS:
+
+* resource/ucloud_instance: add `data_disks` to argument
+
 ## 1.17.0 (March 31, 2020)
 
 ENHANCEMENTS:

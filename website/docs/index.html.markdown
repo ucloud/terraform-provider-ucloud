@@ -47,23 +47,16 @@ resource "ucloud_instance" "web" {
   root_password     = "wA1234567"
   name              = "tf-example-instance"
   tag               = "tf-example"
+  boot_disk_type    = "cloud_ssd"
 
   # the default Web Security Group that UCloud recommend to users
   security_group = data.ucloud_security_groups.default.security_groups[0].id
-}
 
-# Create cloud disk
-resource "ucloud_disk" "example" {
-  availability_zone = "cn-bj2-04"
-  name              = "tf-example-instance"
-  disk_size         = 30
-}
-
-# Attach cloud disk to instance
-resource "ucloud_disk_attachment" "example" {
-  availability_zone = "cn-bj2-04"
-  disk_id           = ucloud_disk.example.id
-  instance_id       = ucloud_instance.web.id
+  # create cloud data disk attached to instance
+  data_disks {
+    size = 20
+    type = "cloud_ssd"
+  }
 }
 ```
 
@@ -104,7 +97,7 @@ provider "ucloud" {}
 
 Usage:
 
-```hcl
+```sh
 $ export UCLOUD_PUBLIC_KEY="your_public_key"
 $ export UCLOUD_PRIVATE_KEY="your_private_key"
 $ export UCLOUD_REGION="cn-bj2"

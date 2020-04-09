@@ -113,6 +113,33 @@ func TestAccUCloudInstance_localDisk(t *testing.T) {
 	})
 }
 
+func TestAccUCloudInstance_dataDisks(t *testing.T) {
+	var instance uhost.UHostInstanceSet
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		IDRefreshName: "ucloud_instance.foo",
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckInstanceDestroy,
+
+		Steps: []resource.TestStep{
+			{
+				Config: testAccInstanceConfigDataDisks,
+
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckInstanceExists("ucloud_instance.foo", &instance),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "name", "tf-acc-instance-data-disks"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "tag", "tf-acc"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "instance_type", "n-basic-1"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccUCloudInstance_isolationGroup(t *testing.T) {
 	var instance uhost.UHostInstanceSet
 
@@ -371,7 +398,7 @@ resource "ucloud_instance" "foo" {
   image_id          = "${data.ucloud_images.default.images.0.id}"
   security_group    = "${data.ucloud_security_groups.default.security_groups.0.id}"
   instance_type     = "o-standard-4"
-  boot_disk_type    = "cloud_ssd"
+  boot_disk_type    = "cloud_rssd"
   root_password     = "wA1234567"
   name              = "tf-acc-instance-config-outstanding"
   tag               = "tf-acc"
@@ -551,6 +578,37 @@ resource "ucloud_instance" "foo" {
   boot_disk_size    = 40
   boot_disk_type    = "local_normal"
   security_group = "${data.ucloud_security_groups.default.security_groups.0.id}"
+}
+`
+
+const testAccInstanceConfigDataDisks = `
+data "ucloud_zones" "default" {
+}
+
+data "ucloud_security_groups" "default" {
+  type = "recommend_web"
+}
+
+data "ucloud_images" "default" {
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  name_regex        = "^CentOS 6.5 64"
+  image_type        = "base"
+}
+
+resource "ucloud_instance" "foo" {
+  name              = "tf-acc-instance-data-disks"
+  tag               = "tf-acc"
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  image_id          = "${data.ucloud_images.default.images.0.id}"
+  instance_type     = "n-basic-1"
+  root_password     = "wA1234567"
+  security_group = "${data.ucloud_security_groups.default.security_groups.0.id}"
+  boot_disk_type = "cloud_ssd"
+  data_disks {
+    size = 20
+    type = "cloud_ssd"
+  }
+  delete_disks_with_instance = true
 }
 `
 

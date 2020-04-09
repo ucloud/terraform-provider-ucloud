@@ -40,6 +40,7 @@ resource "ucloud_security_group" "default" {
 resource "ucloud_instance" "web" {
   availability_zone = data.ucloud_zones.default.zones[0].id
   instance_type     = "n-basic-2"
+  boot_disk_type    = "cloud_ssd"
 
   image_id      = data.ucloud_images.default.images[0].id
   root_password = var.instance_password

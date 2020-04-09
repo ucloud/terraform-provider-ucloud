@@ -35,23 +35,16 @@ resource "ucloud_instance" "web" {
   root_password     = "wA1234567"
   name              = "tf-example-instance"
   tag               = "tf-example"
+  boot_disk_type    = "cloud_ssd"
 
   # the default Web Security Group that UCloud recommend to users
   security_group = data.ucloud_security_groups.default.security_groups[0].id
-}
 
-# Create cloud disk
-resource "ucloud_disk" "example" {
-  availability_zone = "cn-bj2-04"
-  name              = "tf-example-instance"
-  disk_size         = 30
-}
-
-# Attach cloud disk to instance
-resource "ucloud_disk_attachment" "example" {
-  availability_zone = "cn-bj2-04"
-  disk_id           = ucloud_disk.example.id
-  instance_id       = ucloud_instance.web.id
+  # create cloud data disk attached to instance
+  data_disks {
+    size = 20
+    type = "cloud_ssd"
+  }
 }
 ```
 
@@ -91,6 +84,17 @@ The following arguments are supported:
 * `isolation_group` - (Optional, ForceNew) The ID of the associated isolation group.
 * `private_ip` - (Optional, ForceNew) The private IP address assigned to the instance.
 * `user_data` - (Optional, ForceNew) The user data to customize the startup behaviors when launching the instance. You may refer to [user_data_document](https://docs.ucloud.cn/uhost/guide/metadata/userdata)
+* `data_disks` - (Optional, ForceNew) Additional cloud data disks to attach to the instance. `data_disks` configurations only apply on resource creation. The count of `data_disks` can only be one. See [data_disks](#data_disks) below for details on attributes.
+* `delete_disks_with_instance` - (Optional)  Whether the cloud data disks attached instance should be destroyed on instance termination (Default: `true`).
+
+### data_disks
+
+The `data_disks` supports the following:
+
+* `size` - (Required) The size of the cloud data disk.
+* `type` - (Required) The type of the cloud data disk. Possible values are: `cloud_normal` and `cloud_ssd` for local boot disk, `cloud_ssd` for cloud SSD boot disk. 
+
+~> **NOTE:** Currently, changes to the `data_disks` configuration of _existing_ resources cannot be automatically detected by Terraform. To manage changes and attachments of an cloud data disk to an instance, use the `ucloud_disk` and `ucloud_disk_attachment` resources instead. `data_disks` cannot be mixed with external `ucloud_disk` and `ucloud_disk_attachment` resources for a given instance.  Recently, we recommend using `data_disks` to allocate cloud data disk attached to instance.
 
 ## Attributes Reference
 

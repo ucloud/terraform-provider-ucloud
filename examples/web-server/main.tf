@@ -27,23 +27,16 @@ resource "ucloud_instance" "web" {
   root_password     = var.instance_password
   name              = "tf-example-web-server"
   tag               = "tf-example"
+  boot_disk_type    = "cloud_ssd"
 
   # the default Web Security Group that UCloud recommend to users
   security_group = data.ucloud_security_groups.default.security_groups[0].id
-}
 
-# Create cloud disk
-resource "ucloud_disk" "default" {
-  availability_zone = data.ucloud_zones.default.zones[0].id
-  name              = "tf-example-web-server"
-  disk_size         = 20
-}
-
-# Attach cloud disk to instance
-resource "ucloud_disk_attachment" "default" {
-  availability_zone = data.ucloud_zones.default.zones[0].id
-  disk_id           = ucloud_disk.default.id
-  instance_id       = ucloud_instance.web.id
+  # create cloud data disk attached to instance
+  data_disks {
+    size = 20
+    type = "cloud_ssd"
+  }
 }
 
 # Create an eip
