@@ -2,7 +2,7 @@
 
 ENHANCEMENTS:
 
-* resource/ucloud_instance: add `data_disks` to argument
+* resource/ucloud_instance: add `data_disks` to argument [GH-65]
 
 ## 1.17.0 (March 31, 2020)
 
