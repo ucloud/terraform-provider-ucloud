@@ -1,8 +1,8 @@
-## 1.18.0 (Unreleased)
+## 1.18.0 (April 10, 2020)
 
 ENHANCEMENTS:
 
-* resource/ucloud_instance: add `data_disks` to argument [GH-65]
+* resource/ucloud_instance: add `data_disks` to argument ([#65](https://github.com/terraform-providers/terraform-provider-ucloud/issues/65))
 
 ## 1.17.0 (March 31, 2020)
 
