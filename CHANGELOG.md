@@ -1,3 +1,4 @@
+## 1.19.0 (Unreleased)
 ## 1.18.0 (April 10, 2020)
 
 ENHANCEMENTS:
