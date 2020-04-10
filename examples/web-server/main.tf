@@ -37,6 +37,7 @@ resource "ucloud_instance" "web" {
     size = 20
     type = "cloud_ssd"
   }
+  delete_disks_with_instance = true
 }
 
 # Create an eip

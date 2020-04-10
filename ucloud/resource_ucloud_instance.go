@@ -40,6 +40,7 @@ func resourceUCloudInstance() *schema.Resource {
 			diffValidateBootDiskTypeWithDataDiskType,
 			diffValidateChargeTypeWithDuration,
 			diffValidateIsolationGroup,
+			diffValidateDataDisks,
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -178,6 +179,7 @@ func resourceUCloudInstance() *schema.Resource {
 			"delete_disks_with_instance": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				ForceNew: true,
 			},
 
 			"remark": {
@@ -839,6 +841,7 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 
 	memory := instance.Memory
 	cpu := instance.CPU
+
 	d.Set("root_password", d.Get("root_password"))
 	d.Set("isolation_group", instance.IsolationGroup)
 	d.Set("name", instance.Name)
@@ -931,8 +934,6 @@ func resourceUCloudInstanceDelete(d *schema.ResourceData, meta interface{}) erro
 	deleReq.UHostId = ucloud.String(d.Id())
 	if v, ok := d.GetOkExists("delete_disks_with_instance"); ok {
 		deleReq.ReleaseUDisk = ucloud.Bool(v.(bool))
-	} else {
-		deleReq.ReleaseUDisk = ucloud.Bool(true)
 	}
 
 	return resource.Retry(15*time.Minute, func() *resource.RetryError {
@@ -1135,6 +1136,16 @@ func diffValidateIsolationGroup(diff *schema.ResourceDiff, meta interface{}) err
 					"up to seven instance can be added to the isolation group %q in availability_zone %q",
 					"isolation_group", v.(string), zone)
 			}
+		}
+	}
+
+	return nil
+}
+
+func diffValidateDataDisks(diff *schema.ResourceDiff, meta interface{}) error {
+	if _, ok := diff.GetOk("data_disks"); ok {
+		if _, ok1 := diff.GetOkExists("delete_disks_with_instance"); !ok1 {
+			return fmt.Errorf("the argument %q is required when set %q", "delete_disks_with_instance", "data_disks")
 		}
 	}
 
