@@ -31,7 +31,7 @@ resource "ucloud_disk" "example" {
 The following arguments are supported:
 
 * `availability_zone` - (Required, ForceNew)  Availability zone where cloud disk is located. Such as: "cn-bj2-02". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist).
-* `disk_size` - (Required) The size of disk. Purchase the size of disk in GB. 1-8000 for a cloud disk, 1-4000 for SSD cloud disk. If the disk have attached to the instance, the instance will reboot automatically to make the change take effect when update the  `disk_size`.
+* `disk_size` - (Required) The size of disk. Purchase the size of disk in GB. 20-8000 for a cloud disk, 20-8000 for SSD cloud disk . If the disk have attached to the instance, the instance will reboot automatically to make the change take effect when update the  `disk_size`.
 
 - - -
 

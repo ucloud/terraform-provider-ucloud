@@ -63,6 +63,7 @@ resource "ucloud_instance" "web" {
   instance_type     = "n-basic-2"
   image_id          = data.ucloud_images.default.images[0].id
   root_password     = var.instance_password
+  boot_disk_type    = "cloud_ssd"
 
   name = "tf-example-two-tier-${format(var.count_format, count.index + 1)}"
   tag  = "tf-example"

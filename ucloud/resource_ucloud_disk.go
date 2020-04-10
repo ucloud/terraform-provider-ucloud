@@ -44,7 +44,7 @@ func resourceUCloudDisk() *schema.Resource {
 				Type:     schema.TypeInt,
 				Required: true,
 				ValidateFunc: validateAll(
-					validation.IntBetween(1, 4000),
+					validation.IntBetween(1, 8000),
 					validateMod(10),
 				),
 			},

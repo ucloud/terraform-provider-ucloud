@@ -40,6 +40,7 @@ func resourceUCloudInstance() *schema.Resource {
 			diffValidateBootDiskTypeWithDataDiskType,
 			diffValidateChargeTypeWithDuration,
 			diffValidateIsolationGroup,
+			diffValidateDataDisks,
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -105,7 +106,7 @@ func resourceUCloudInstance() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ValidateFunc: validateAll(
-					validation.IntBetween(20, 100),
+					validation.IntBetween(20, 500),
 					validateMod(10),
 				),
 			},
@@ -120,6 +121,7 @@ func resourceUCloudInstance() *schema.Resource {
 					"local_ssd",
 					"cloud_normal",
 					"cloud_ssd",
+					"cloud_rssd",
 				}, false),
 			},
 
@@ -142,6 +144,42 @@ func resourceUCloudInstance() *schema.Resource {
 					"local_normal",
 					"local_ssd",
 				}, false),
+			},
+
+			"data_disks": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MinItems: 1,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"size": {
+							Type:     schema.TypeInt,
+							Required: true,
+							ForceNew: true,
+							ValidateFunc: validateAll(
+								validation.IntBetween(20, 8000),
+								validateMod(10),
+							),
+						},
+						"type": {
+							Type:     schema.TypeString,
+							Required: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"cloud_normal",
+								"cloud_ssd",
+								"cloud_rssd",
+							}, false),
+							ForceNew: true,
+						},
+					},
+				},
+			},
+
+			"delete_disks_with_instance": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
 			},
 
 			"remark": {
@@ -290,7 +328,7 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 	var bootDiskType string
 	if v, ok := d.GetOk("boot_disk_type"); ok {
 		if v == "cloud_normal" {
-			choices := []string{"local_normal", "local_ssd", "cloud_ssd"}
+			choices := []string{"local_normal", "local_ssd", "cloud_ssd", "cloud_rssd"}
 			return fmt.Errorf("the %q of boot disk type is not supported currently, please try one of %v", "cloud_normal", choices)
 		}
 		bootDiskType = v.(string)
@@ -360,7 +398,7 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 			return fmt.Errorf("expected boot_disk_size to be at least %d", imageResp.ImageSize)
 		}
 
-		if bootDiskType == "cloud_normal" || bootDiskType == "cloud_ssd" {
+		if bootDiskType == "cloud_normal" || bootDiskType == "cloud_ssd" || bootDiskType == "cloud_rssd" {
 			bootDisk.Size = ucloud.Int(v.(int))
 		}
 	}
@@ -382,6 +420,17 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 		dataDisk.Size = ucloud.Int(v.(int))
 
 		req.Disks = append(req.Disks, dataDisk)
+	}
+
+	if v, ok := d.GetOk("data_disks"); ok {
+		for _, item := range v.([]interface{}) {
+			dataDisk := uhost.UHostDisk{}
+			dataDisk.IsBoot = ucloud.String("false")
+			disk := item.(map[string]interface{})
+			dataDisk.Size = ucloud.Int(disk["size"].(int))
+			dataDisk.Type = ucloud.String(upperCvt.unconvert(disk["type"].(string)))
+			req.Disks = append(req.Disks, dataDisk)
+		}
 	}
 
 	// if tag is empty string, use default tag
@@ -561,7 +610,7 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 		}
 
 		// the initialization of cloud boot disk is done at creation instance
-		if ((bootDiskType == "cloud_normal" || bootDiskType == "cloud_ssd") && d.IsNewResource()) || imageResp.ImageSize == bootDiskSize {
+		if ((bootDiskType == "cloud_normal" || bootDiskType == "cloud_ssd" || bootDiskType == "cloud_rssd") && d.IsNewResource()) || imageResp.ImageSize == bootDiskSize {
 			bootDiskNeedUpdate = false
 		} else {
 			bootDiskReq.DiskSpace = ucloud.Int(bootDiskSize)
@@ -792,6 +841,7 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 
 	memory := instance.Memory
 	cpu := instance.CPU
+
 	d.Set("root_password", d.Get("root_password"))
 	d.Set("isolation_group", instance.IsolationGroup)
 	d.Set("name", instance.Name)
@@ -882,8 +932,9 @@ func resourceUCloudInstanceDelete(d *schema.ResourceData, meta interface{}) erro
 
 	deleReq := conn.NewTerminateUHostInstanceRequest()
 	deleReq.UHostId = ucloud.String(d.Id())
-	deleReq.ReleaseUDisk = ucloud.Bool(true)
-	deleReq.ReleaseEIP = ucloud.Bool(false)
+	if v, ok := d.GetOkExists("delete_disks_with_instance"); ok {
+		deleReq.ReleaseUDisk = ucloud.Bool(v.(bool))
+	}
 
 	return resource.Retry(15*time.Minute, func() *resource.RetryError {
 		instance, err := client.describeInstanceById(d.Id())
@@ -1052,7 +1103,7 @@ func diffValidateBootDiskTypeWithDataDiskType(diff *schema.ResourceDiff, meta in
 			return fmt.Errorf("the data_disk_type %q must be same as boot_disk_type %q", dataDiskType, bootDiskType)
 		}
 	}
-	if checkStringIn(bootDiskType, []string{"cloud_normal", "cloud_ssd"}) == nil && checkStringIn(dataDiskType, []string{"local_normal", "local_ssd"}) == nil {
+	if checkStringIn(bootDiskType, []string{"cloud_normal", "cloud_ssd", "cloud_rssd"}) == nil && checkStringIn(dataDiskType, []string{"local_normal", "local_ssd"}) == nil {
 		return fmt.Errorf("the instance cannot have local data disk, When the %q is %q", "boot_disk_type", bootDiskType)
 	}
 
@@ -1085,6 +1136,16 @@ func diffValidateIsolationGroup(diff *schema.ResourceDiff, meta interface{}) err
 					"up to seven instance can be added to the isolation group %q in availability_zone %q",
 					"isolation_group", v.(string), zone)
 			}
+		}
+	}
+
+	return nil
+}
+
+func diffValidateDataDisks(diff *schema.ResourceDiff, meta interface{}) error {
+	if _, ok := diff.GetOk("data_disks"); ok {
+		if _, ok1 := diff.GetOkExists("delete_disks_with_instance"); !ok1 {
+			return fmt.Errorf("the argument %q is required when set %q", "delete_disks_with_instance", "data_disks")
 		}
 	}
 

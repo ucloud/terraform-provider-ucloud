@@ -38,7 +38,7 @@ The type of the instance.
 
 - Limit: 
     - Currently only supports the `cn-bj2-05`(`availability_zone`) in `cn-bj2`(`region`)
-    - Must set `boot_disk_type` to `cloud_ssd`
+    - Must set `boot_disk_type` to `cloud_rssd`
     - Can only use specified Image (image type is `base` and the name of which is prefix with "高内核")
     - Can only attach specified Disk（the disk attached to instance must be `rssd_data_disk` (RDMA-SSD) cloud disk if required)
 

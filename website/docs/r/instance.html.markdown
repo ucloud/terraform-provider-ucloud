@@ -35,23 +35,17 @@ resource "ucloud_instance" "web" {
   root_password     = "wA1234567"
   name              = "tf-example-instance"
   tag               = "tf-example"
+  boot_disk_type    = "cloud_ssd"
 
   # the default Web Security Group that UCloud recommend to users
   security_group = data.ucloud_security_groups.default.security_groups[0].id
-}
 
-# Create cloud disk
-resource "ucloud_disk" "example" {
-  availability_zone = "cn-bj2-04"
-  name              = "tf-example-instance"
-  disk_size         = 30
-}
-
-# Attach cloud disk to instance
-resource "ucloud_disk_attachment" "example" {
-  availability_zone = "cn-bj2-04"
-  disk_id           = ucloud_disk.example.id
-  instance_id       = ucloud_instance.web.id
+  # create cloud data disk attached to instance
+  data_disks {
+    size = 20
+    type = "cloud_ssd"
+  }
+  delete_disks_with_instance = true
 }
 ```
 
@@ -72,12 +66,12 @@ The following arguments are supported:
 * `root_password` - (Optional) The password for the instance, which contains 8-30 characters, and at least 2 items of capital letters, lower case letters, numbers and special characters. The special characters include <code>`()~!@#$%^&*-+=_|{}\[]:;'<>,.?/</code>. If not specified, terraform will auto-generate a password. 
 
     ~> **Note** If you want to update this value, you must set `allow_stopping_for_update`to `true`.
-* `boot_disk_size` - (Optional) The size of the boot disk, measured in GB (GigaByte). Range: 20-100. The value set of disk size must be larger or equal to `20`(default: `20`) for Linux and `40` (default: `40`) for Windows. The responsive time is a bit longer if the value set is larger than default for local boot disk, and further settings may be required on host instance if the value set is larger than default for cloud boot disk. The disk volume adjustment must be a multiple of 10 GB. In addition, any reduction of boot disk size is not supported.
+* `boot_disk_size` - (Optional) The size of the boot disk, measured in GB (GigaByte). Range: 20-500. The value set of disk size must be larger or equal to `20`(default: `20`) for Linux and `40` (default: `40`) for Windows. The responsive time is a bit longer if the value set is larger than default for local boot disk, and further settings may be required on host instance if the value set is larger than default for cloud boot disk. The disk volume adjustment must be a multiple of 10 GB. In addition, any reduction of boot disk size is not supported.
 
     ~> **Note** If you want to update this value, you must set `allow_stopping_for_update`to `true`. In addition, when it is changed, you need to [go to the instance for configuration](https://docs.ucloud.cn/compute/uhost/guide/disk). 
 * `boot_disk_type` - (Optional, ForceNew) The type of boot disk. Possible values are: `local_normal` and `local_ssd` for local boot disk, `cloud_ssd` for cloud SSD boot disk. (Default: `local_normal`). The `local_ssd` and `cloud_ssd` are not fully support by all regions as boot disk type, please proceed to UCloud console for more details.
 * `data_disk_type` - (Optional, ForceNew) The type of local data disk. Possible values are: `local_normal` and `local_ssd` for local data disk. (Default: `local_normal`). The `local_ssd` is not fully support by all regions as data disk type, please proceed to UCloud console for more details. In addition, the `data_disk_type` must be same as `boot_disk_type` if specified.
-* `data_disk_size` - (Optional) The size of local data disk, measured in GB (GigaByte), range: 0-8000 (Default: `20`), 0-8000 for cloud disk, 0-2000 for local sata disk and 100-1000 for local ssd disk (all the GPU type instances are included). The volume adjustment must be a multiple of 10 GB. In addition, any reduction of data disk size is not supported. 
+* `data_disk_size` - (Optional) The size of local data disk, measured in GB (GigaByte), 20-2000 for local sata disk and 20-1000 for local ssd disk (all the GPU type instances are included). The volume adjustment must be a multiple of 10 GB. In addition, any reduction of data disk size is not supported. 
 
     ~> **Note** If you want to update this value, you must set `allow_stopping_for_update`to `true`. In addition, when it is changed, you need to [go to the instance for configuration](https://docs.ucloud.cn/compute/uhost/guide/disk). 
 * `charge_type` - (Optional, ForceNew) The charge type of instance, possible values are: `year`, `month` and `dynamic` as pay by hour (specific permission required). (Default: `month`).
@@ -91,6 +85,19 @@ The following arguments are supported:
 * `isolation_group` - (Optional, ForceNew) The ID of the associated isolation group.
 * `private_ip` - (Optional, ForceNew) The private IP address assigned to the instance.
 * `user_data` - (Optional, ForceNew) The user data to customize the startup behaviors when launching the instance. You may refer to [user_data_document](https://docs.ucloud.cn/uhost/guide/metadata/userdata)
+* `data_disks` - (Optional, ForceNew) Additional cloud data disks to attach to the instance. `data_disks` configurations only apply on resource creation. The count of `data_disks` can only be one. See [data_disks](#data_disks) below for details on attributes.
+* `delete_disks_with_instance` - (Optional, ForceNew, Required when set `data_disks`)  Whether the cloud data disks attached instance should be destroyed on instance termination.
+
+ ~> **NOTE:** We recommend set `delete_disks_with_instance` to `true` means delete cloud data disks attached to instance when instance termination. Otherwise, the cloud data disks will be not managed by the terraform after instance termination.
+
+### data_disks
+
+The `data_disks` supports the following:
+
+* `size` - (Required) The size of the cloud data disk, range 20-8000, measured in GB (GigaByte).
+* `type` - (Required) The type of the cloud data disk. Possible values are: `cloud_normal` and `cloud_ssd` for local boot disk, `cloud_ssd` for cloud SSD boot disk. 
+
+~> **NOTE:** Currently, changes to the `data_disks` configuration of _existing_ resources cannot be automatically detected by Terraform. To manage changes and attachments of an cloud data disk to an instance, use the `ucloud_disk` and `ucloud_disk_attachment` resources instead. `data_disks` cannot be mixed with external `ucloud_disk` and `ucloud_disk_attachment` resources for a given instance.  Recently, we recommend using `data_disks` to allocate cloud data disk attached to instance.
 
 ## Attributes Reference
 

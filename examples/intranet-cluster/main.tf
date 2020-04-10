@@ -43,6 +43,7 @@ resource "ucloud_instance" "intranet" {
   image_id          = data.ucloud_images.default.images[0].id
   instance_type     = "n-basic-2"
   root_password     = var.instance_password
+  boot_disk_type    = "cloud_ssd"
 
   # we will put all the instances into same vpc and subnet,
   # so they can communicate with each other.
