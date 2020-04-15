@@ -148,9 +148,15 @@ func dataSourceUCloudDBParameterGroupsRead(d *schema.ResourceData, meta interfac
 
 func dataSourceUCloudDBParameterGroupsSave(d *schema.ResourceData, parameterGroups []udb.UDBParamGroupSet) error {
 	var ids []string
+	var id string
 	var data []map[string]interface{}
 	for _, parameterGroup := range parameterGroups {
-		ids = append(ids, fmt.Sprintf("%s:%s", parameterGroup.Zone, strconv.Itoa(parameterGroup.GroupId)))
+		if parameterGroup.Zone != "" {
+			id = fmt.Sprintf("%s:%s", parameterGroup.Zone, strconv.Itoa(parameterGroup.GroupId))
+		} else {
+			id = strconv.Itoa(parameterGroup.GroupId)
+		}
+		ids = append(ids, id)
 		arr := strings.Split(parameterGroup.DBTypeId, "-")
 		data = append(data, map[string]interface{}{
 			"id":                strconv.Itoa(parameterGroup.GroupId),
