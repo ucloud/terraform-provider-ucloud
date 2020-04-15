@@ -20,6 +20,9 @@ const (
 
 	// statusStopped is the general status when remote resource is stopped
 	statusStopped = "Stopped"
+
+	// statusShutdown is the general status when remote resource is Shutdown
+	statusShutdown = "Shutdown"
 )
 
 const (

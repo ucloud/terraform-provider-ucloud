@@ -2,6 +2,7 @@ package ucloud
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -24,6 +25,12 @@ func resourceUCloudDBInstance() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(10 * time.Minute),
+		},
+
 		CustomizeDiff: customdiff.All(
 			diffValidateDBMemoryWithInstanceStorage,
 			diffValidateDBEngineAndEngineVersion,
@@ -42,6 +49,12 @@ func resourceUCloudDBInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+			},
+
+			"parameter_group": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
 			},
 
 			"password": {
@@ -167,6 +180,11 @@ func resourceUCloudDBInstance() *schema.Resource {
 				Computed:     true,
 			},
 
+			"allow_stopping_for_update": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+
 			"private_ip": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -270,12 +288,20 @@ func resourceUCloudDBInstanceCreate(d *schema.ResourceData, meta interface{}) er
 		req.SubnetId = ucloud.String(val.(string))
 	}
 
-	// set default value of parametergroup
-	parameterGroupId, err := setDefaultParameterGroup(d, conn, zone, dbTypeId)
-	if err != nil {
-		return err
+	if val, ok := d.GetOk("parameter_group"); ok {
+		i, err := strconv.Atoi(val.(string))
+		if err != nil {
+			return fmt.Errorf("error on setting the parameter_group %s when create db instance, %s", val.(string), err)
+		}
+		req.ParamGroupId = ucloud.Int(i)
 	} else {
-		req.ParamGroupId = ucloud.Int(parameterGroupId)
+		// set default value of parametergroup
+		parameterGroupId, err := setDefaultParameterGroup(d, conn, zone, dbTypeId)
+		if err != nil {
+			return err
+		} else {
+			req.ParamGroupId = ucloud.Int(parameterGroupId)
+		}
 	}
 
 	resp, err := conn.CreateUDBInstance(req)
@@ -289,7 +315,14 @@ func resourceUCloudDBInstanceCreate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	// after create db, we need to wait it initialized
-	stateConf := client.dbWaitForState(d.Id(), []string{statusRunning})
+	stateConf := resource.StateChangeConf{
+		Pending:    []string{statusPending},
+		Target:     []string{statusRunning},
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Delay:      3 * time.Second,
+		MinTimeout: 2 * time.Second,
+		Refresh:    dbInstanceStateRefreshFunc(client, d.Id(), []string{statusRunning}),
+	}
 
 	if _, err := stateConf.WaitForState(); err != nil {
 		return fmt.Errorf("error on waiting for db instance %q complete creating, %s", d.Id(), err)
@@ -303,6 +336,66 @@ func resourceUCloudDBInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 	conn := client.udbconn
 
 	d.Partial(true)
+
+	if d.HasChange("parameter_group") && !d.IsNewResource() {
+		dbInstance, err := client.describeDBInstanceById(d.Id())
+		if err != nil {
+			if isNotFoundError(err) {
+				d.SetId("")
+				return nil
+			}
+			return fmt.Errorf("error on reading db instance when updating %q, %s", d.Id(), err)
+		}
+
+		if dbInstance.State != statusShutdown {
+			if !d.Get("allow_stopping_for_update").(bool) && !d.IsNewResource() {
+				return fmt.Errorf("updating the parameter_group on the db instance requires restart it, please set allow_stopping_for_update = true in your config to acknowledge it")
+			}
+		}
+
+		req := conn.NewGenericRequest()
+		parameterGroup, err := strconv.Atoi(d.Get("parameter_group").(string))
+		if err != nil {
+			return fmt.Errorf("error on setting the parameter_group %s when updating %q, %s", d.Get("parameter_group").(string), d.Id(), err)
+		}
+
+		err = req.SetPayload(map[string]interface{}{
+			"Action":  "ChangeUDBParamGroup",
+			"DBId":    d.Id(),
+			"GroupId": parameterGroup,
+		})
+		if err != nil {
+			return fmt.Errorf("error on setting request about %s to db instance %q, %s", "ChangeUDBParamGroup", d.Id(), err)
+		}
+
+		_, err = conn.GenericInvoke(req)
+		if err != nil {
+			return fmt.Errorf("error on %s to db instance %q, %s", "ChangeUDBParamGroup", d.Id(), err)
+		}
+
+		// db instance update the attribute need to restart
+		restartReq := conn.NewRestartUDBInstanceRequest()
+		restartReq.DBId = ucloud.String(d.Id())
+		if _, err = conn.RestartUDBInstance(restartReq); err != nil {
+			return fmt.Errorf("error on restarting db instance when updating %q, %s", d.Id(), err)
+		}
+
+		// after restart db instance, we need to wait it completed
+		stateConf := resource.StateChangeConf{
+			Pending:    []string{statusPending},
+			Target:     []string{statusRunning},
+			Timeout:    d.Timeout(schema.TimeoutUpdate),
+			Delay:      3 * time.Second,
+			MinTimeout: 2 * time.Second,
+			Refresh:    dbInstanceStateRefreshFunc(client, d.Id(), []string{statusRunning}),
+		}
+
+		if _, err := stateConf.WaitForState(); err != nil {
+			return fmt.Errorf("error on waiting for restarting db instance when updating %q, %s", d.Id(), err)
+		}
+
+		d.SetPartial("parameter_group")
+	}
 
 	if d.HasChange("name") && !d.IsNewResource() {
 		req := conn.NewModifyUDBInstanceNameRequest()
@@ -350,7 +443,14 @@ func resourceUCloudDBInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		// after resize db instance, we need to wait it completed
-		stateConf := client.dbWaitForState(d.Id(), []string{statusRunning, dbStatusShutoff})
+		stateConf := resource.StateChangeConf{
+			Pending:    []string{statusPending},
+			Target:     []string{statusRunning, dbStatusShutoff},
+			Timeout:    d.Timeout(schema.TimeoutUpdate),
+			Delay:      3 * time.Second,
+			MinTimeout: 2 * time.Second,
+			Refresh:    dbInstanceStateRefreshFunc(client, d.Id(), []string{statusRunning, dbStatusShutoff}),
+		}
 
 		if _, err := stateConf.WaitForState(); err != nil {
 			return fmt.Errorf("error on waiting for resizing db instance when updating %q, %s", d.Id(), err)
@@ -445,6 +545,7 @@ func resourceUCloudDBInstanceRead(d *schema.ResourceData, meta interface{}) erro
 	d.Set("modify_time", timestampToString(db.ModifyTime))
 	d.Set("backup_black_list", backupBlackList)
 	d.Set("instance_type", fmt.Sprintf("%s-%s-%d", dbType.Engine, dbType.Type, dbType.Memory))
+	d.Set("parameter_group", strconv.Itoa(db.ParamGroupId))
 
 	return nil
 }
@@ -473,7 +574,14 @@ func resourceUCloudDBInstanceDelete(d *schema.ResourceData, meta interface{}) er
 			}
 
 			// after instance stop, we need to wait it stopped
-			stateConf := client.dbWaitForState(d.Id(), []string{dbStatusShutoff})
+			stateConf := resource.StateChangeConf{
+				Pending:    []string{statusPending},
+				Target:     []string{dbStatusShutoff},
+				Timeout:    d.Timeout(schema.TimeoutDelete),
+				Delay:      3 * time.Second,
+				MinTimeout: 2 * time.Second,
+				Refresh:    dbInstanceStateRefreshFunc(client, d.Id(), []string{dbStatusShutoff}),
+			}
 
 			if _, err := stateConf.WaitForState(); err != nil {
 				return resource.RetryableError(fmt.Errorf("error on waiting for stopping db instance when deleting %q, %s", d.Id(), err))
@@ -596,32 +704,25 @@ func diffValidateDBStandbyZone(diff *schema.ResourceDiff, v interface{}) error {
 	return nil
 }
 
-func (client *UCloudClient) dbWaitForState(dbId string, target []string) *resource.StateChangeConf {
-	return &resource.StateChangeConf{
-		Pending:    []string{statusPending},
-		Target:     target,
-		Timeout:    20 * time.Minute,
-		Delay:      3 * time.Second,
-		MinTimeout: 2 * time.Second,
-		Refresh: func() (interface{}, string, error) {
-			db, err := client.describeDBInstanceById(dbId)
-			if err != nil {
-				if isNotFoundError(err) {
-					return nil, statusPending, nil
-				}
-				return nil, "", err
+func dbInstanceStateRefreshFunc(client *UCloudClient, dbId string, target []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		db, err := client.describeDBInstanceById(dbId)
+		if err != nil {
+			if isNotFoundError(err) {
+				return nil, statusPending, nil
 			}
+			return nil, "", err
+		}
 
-			state := db.State
+		state := db.State
 
-			if !isStringIn(state, target) {
-				if db.State == dbStatusRecoverFail {
-					return nil, "", fmt.Errorf("db instance recover failed, please make sure your %q is correct and matched with the other parameters", "backup_id")
-				}
-				state = statusPending
+		if !isStringIn(state, target) {
+			if db.State == dbStatusRecoverFail {
+				return nil, "", fmt.Errorf("db instance recover failed, please make sure your %q is correct and matched with the other parameters", "backup_id")
 			}
+			state = statusPending
+		}
 
-			return db, state, nil
-		},
+		return db, state, nil
 	}
 }

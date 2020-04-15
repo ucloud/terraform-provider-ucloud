@@ -10,8 +10,9 @@ description: |-
 
 Provides a Database instance resource.
 
-~> **Note**  Please do confirm if any task pending submission before reset your password, since the password reset will take effect immediately.
-## Example Usagek
+~> **Note**  Please do confirm if any task pending submission before reset your password, since the password reset will take effect immediately. In addition, if you try to update the property `parameter_group` which requires restarting the db instance, you must set `allow_stopping_for_update` to `true` in your config to allows Terraform to restart the instance to update its property. 
+
+## Example Usage
 
 ```hcl
 # Query availability zone
@@ -59,6 +60,16 @@ The following arguments are supported:
 * `backup_date` - (Optional) Specifies whether the backup took place from Sunday to Saturday by displaying 7 digits. 0 stands for backup disabled and 1 stands for backup enabled. The rightmost digit specifies whether the backup took place on Sunday, and the digits from right to left specify whether the backup took place from Monday to Saturday, it's mandatory required to backup twice per week at least. such as: digits "1100000" stands for the backup took place on Saturday and Friday.
 * `backup_black_list` - (Optional) The backup for database such as "test.%" or table such as "city.address" specified in the black lists are not supported.
 * `tag` - (Optional, ForceNew) A tag assigned to database instance, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
+* `parameter_group` - (Optional) The parameter group for database. if not set, the default parameter group will be used.
+* `allow_stopping_for_update` - (Optional) If you try to update the property `parameter_group` which requires restarting the db instance, you must set `allow_stopping_for_update` to `true` in your config to allows Terraform to restart the instance to update its property.
+
+### Timeouts
+
+The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration/resources.html#timeouts) for certain actions:
+
+* `create` - (Defaults to 30 mins) Used when launching the db instance (until it reaches the initial `Running` state)
+* `update` - (Defaults to 20 mins) Used when updating the arguments of the db instance if necessary  - e.g. when changing `instance_storage`
+* `delete` - (Defaults to 10 mins) Used when terminating the db instance
 
 ## Attributes Reference
 

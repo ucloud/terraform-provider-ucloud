@@ -56,6 +56,32 @@ func TestAccUCloudDBInstance_basic(t *testing.T) {
 	})
 }
 
+func TestAccUCloudDBInstance_parameter_group(t *testing.T) {
+	var db udb.UDBInstanceSet
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		IDRefreshName: "ucloud_db_instance.foo",
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckDBInstanceDestroy,
+
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDBInstanceConfigParameterGroup,
+
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDBInstanceExists("ucloud_db_instance.foo", &db),
+					testAccCheckDBInstanceAttributes(&db),
+					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "name", "tf-acc-db-instance-parameter-group"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccUCloudDBInstance_backup(t *testing.T) {
 	var db udb.UDBInstanceSet
 
@@ -235,5 +261,26 @@ resource "ucloud_db_instance" "foo" {
 	backup_count	  = 6
 	backup_black_list = ["test.%", "city.address"]
 	backup_date		  = "0001111"
+}
+`
+
+const testAccDBInstanceConfigParameterGroup = `
+data "ucloud_zones" "default" {
+}
+
+data "ucloud_db_parameter_groups" "default" {
+	availability_zone = data.ucloud_zones.default.zones[0].id
+	name_regex		  = "mysql5.7默认配置"
+}
+
+resource "ucloud_db_instance" "foo" {
+	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+	name 			  = "tf-acc-db-instance-parameter-group"
+	instance_storage  = 20
+	instance_type	  = "mysql-ha-1"
+	engine			  = "mysql"
+	engine_version 	  = "5.7"
+	password 		  = "2018_UClou"
+    parameter_group   = "${data.ucloud_db_parameter_groups.default.parameter_groups.0.id}"
 }
 `
