@@ -1,14 +1,14 @@
-## 1.19.0 (Unreleased)
+## 1.19.0 (April 15, 2020)
 
 FEATURES:
 
-* **New Datasource:** `ucloud_db_parameter_groups` [GH-66]
+* **New Datasource:** `ucloud_db_parameter_groups` ([#66](https://github.com/terraform-providers/terraform-provider-ucloud/issues/66))
 
 ENHANCEMENTS:
 
-* resource/ucloud_db_instance: add `parameter_group` to argument [GH-66]
-* resource/ucloud_db_instance: add `timeouts` to argument [GH-66]
-* resource/ucloud_instance: add `timeouts` to argument [GH-66]
+* resource/ucloud_db_instance: add `parameter_group` to argument ([#66](https://github.com/terraform-providers/terraform-provider-ucloud/issues/66))
+* resource/ucloud_db_instance: add `timeouts` to argument ([#66](https://github.com/terraform-providers/terraform-provider-ucloud/issues/66))
+* resource/ucloud_instance: add `timeouts` to argument ([#66](https://github.com/terraform-providers/terraform-provider-ucloud/issues/66))
 
 ## 1.18.0 (April 10, 2020)
 
