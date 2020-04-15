@@ -210,7 +210,7 @@ func dataSourceUCloudInstancesRead(d *schema.ResourceData, meta interface{}) err
 
 	var allInstances []uhost.UHostInstanceSet
 	var instances []uhost.UHostInstanceSet
-	var limit int = 100
+	var limit = 100
 	var offset int
 	for {
 		req.Limit = ucloud.Int(limit)
@@ -255,14 +255,14 @@ func dataSourceUCloudInstancesRead(d *schema.ResourceData, meta interface{}) err
 }
 
 func dataSourceUCloudInstancesSave(d *schema.ResourceData, instances []uhost.UHostInstanceSet) error {
-	ids := []string{}
-	data := []map[string]interface{}{}
+	var ids []string
+	var data []map[string]interface{}
 
 	for _, instance := range instances {
-		ids = append(ids, string(instance.UHostId))
+		ids = append(ids, instance.UHostId)
 		var vpcId, subnetId, privateIp string
 
-		ipSet := []map[string]interface{}{}
+		var ipSet []map[string]interface{}
 		for _, item := range instance.IPSet {
 			ipSet = append(ipSet, map[string]interface{}{
 				"ip":            item.IP,
@@ -276,7 +276,7 @@ func dataSourceUCloudInstancesSave(d *schema.ResourceData, instances []uhost.UHo
 			}
 		}
 
-		diskSet := []map[string]interface{}{}
+		var diskSet []map[string]interface{}
 		for _, item := range instance.DiskSet {
 			diskSet = append(diskSet, map[string]interface{}{
 				"type":    upperCvt.convert(item.DiskType),

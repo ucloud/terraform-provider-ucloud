@@ -85,7 +85,7 @@ The following arguments are supported:
 * `isolation_group` - (Optional, ForceNew) The ID of the associated isolation group.
 * `private_ip` - (Optional, ForceNew) The private IP address assigned to the instance.
 * `user_data` - (Optional, ForceNew) The user data to customize the startup behaviors when launching the instance. You may refer to [user_data_document](https://docs.ucloud.cn/uhost/guide/metadata/userdata)
-* `data_disks` - (Optional, ForceNew) Additional cloud data disks to attach to the instance. `data_disks` configurations only apply on resource creation. The count of `data_disks` can only be one. See [data_disks](#data_disks) below for details on attributes.
+* `data_disks` - (Optional, ForceNew) Additional cloud data disks to attach to the instance. `data_disks` configurations only apply on resource creation. The count of `data_disks` can only be one. See [data_disks](#data_disks) below for details on attributes. When set `data_disks`, the argument `delete_disks_with_instance` must bet set.
 * `delete_disks_with_instance` - (Optional, ForceNew, Required when set `data_disks`)  Whether the cloud data disks attached instance should be destroyed on instance termination.
 
  ~> **NOTE:** We recommend set `delete_disks_with_instance` to `true` means delete cloud data disks attached to instance when instance termination. Otherwise, the cloud data disks will be not managed by the terraform after instance termination.
@@ -98,6 +98,14 @@ The `data_disks` supports the following:
 * `type` - (Required) The type of the cloud data disk. Possible values are: `cloud_normal` and `cloud_ssd` for local boot disk, `cloud_ssd` for cloud SSD boot disk. 
 
 ~> **NOTE:** Currently, changes to the `data_disks` configuration of _existing_ resources cannot be automatically detected by Terraform. To manage changes and attachments of an cloud data disk to an instance, use the `ucloud_disk` and `ucloud_disk_attachment` resources instead. `data_disks` cannot be mixed with external `ucloud_disk` and `ucloud_disk_attachment` resources for a given instance.  Recently, we recommend using `data_disks` to allocate cloud data disk attached to instance.
+
+### Timeouts
+
+The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration/resources.html#timeouts) for certain actions:
+
+* `create` - (Defaults to 30 mins) Used when launching the instance (until it reaches the initial `Running` state)
+* `update` - (Defaults to 20 mins) Used when updating the arguments of the instance if necessary  - e.g. when changing `instance_type`
+* `delete` - (Defaults to 10 mins) Used when terminating the instance
 
 ## Attributes Reference
 
