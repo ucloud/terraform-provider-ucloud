@@ -75,6 +75,7 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - The ID of the resource db instance.
 * `status` - Specifies the status of database, possible values are: `Init`, `Fail`, `Starting`, `Running`, `Shutdown`, `Shutoff`, `Delete`, `Upgrading`, `Promoting`, `Recovering` and `Recover fail`.
 * `private_ip` - The private IP address assigned to the database instance.
 * `create_time` - The creation time of database, formatted by RFC3339 time string.

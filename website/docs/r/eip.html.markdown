@@ -43,6 +43,7 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - The ID of the resource eip.
 * `create_time` - The time of creation for EIP, formatted in RFC3339 time string.
 * `expire_time` - The expiration time for EIP, formatted in RFC3339 time string.
 * `ip_set` - It is a nested type which documented below.

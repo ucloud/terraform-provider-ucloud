@@ -61,6 +61,7 @@ The `rules` mapping supports the following:
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - The ID of the resource security group.
 * `create_time` - The time of creation of security group, formatted in RFC3339 time string.
 
 ## Import

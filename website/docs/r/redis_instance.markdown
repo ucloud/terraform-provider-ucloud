@@ -58,6 +58,7 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - The ID of the resource Redis instance.
 * `ip_set` - ip_set is a nested type. ip_set documented below.
 * `create_time` - The creation time of Redis instance, formatted by RFC3339 time string.
 * `expire_time` - The expiration time of Redis instance, formatted by RFC3339 time string.

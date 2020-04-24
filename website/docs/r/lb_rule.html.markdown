@@ -70,3 +70,18 @@ The following arguments are supported:
 
 * `path` - (Optional) The path of Content forward matching fields. `path` and `domain` cannot coexist. `path` and `domain` must be filled in one.
 * `domain` - (Optional) The domain of content forward matching fields. `path` and `domain` cannot coexist. `path` and `domain` must be filled in one.
+
+## Attributes Reference
+
+In addition to all arguments above, the following attributes are exported:
+
+* `id` - The ID of the resource lb rule.
+
+
+## Import
+
+LB Listener can be imported using the `id`, e.g.
+
+```
+$ terraform import ucloud_lb_rule.example rule-abcdefg
+```

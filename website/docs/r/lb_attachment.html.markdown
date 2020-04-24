@@ -70,5 +70,14 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - The ID of the resource lb attachment.
 * `private_ip` - The private ip address for backend servers.
 * `status` - The status of backend servers. Possible values are: `normalRunning`, `exceptionRunning`.
+
+## Import
+
+LB Listener can be imported using the `id`, e.g.
+
+```
+$ terraform import ucloud_lb_attachment.example backend-abcdefg
+```

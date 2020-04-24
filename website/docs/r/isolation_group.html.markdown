@@ -26,6 +26,12 @@ The following arguments are supported:
 * `name` - (Optional, ForceNew) The name of the isolation group information which contains 1-63 characters and only support Chinese, English, numbers, '-', '_', '.', ',', '[', ']', ':'. If not specified, terraform will auto-generate a name beginning with `tf-isolation-group`.
 * `remark` - (Optional, ForceNew) The remarks of the isolation group. (Default: `""`).
 
+## Attributes Reference
+
+In addition to all arguments above, the following attributes are exported:
+
+* `id` - The ID of the resource isolation group.
+
 ## Import
 
 Isolation Group can be imported using the `id`, e.g.

@@ -36,6 +36,7 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - The ID of the resource load balancer.
 * `create_time` - The time of creation for load balancer, formatted in RFC3339 time string.
 * `expire_time` - **Deprecated** attribute `expire_time` is deprecated for optimizing outputs.
 * `ip_set` - It is a nested type which documented below.
