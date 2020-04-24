@@ -111,6 +111,7 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - The ID of the resource instance.
 * `auto_renew` - Whether to renew an instance automatically or not.
 * `cpu` - The number of cores of virtual CPU, measured in core.
 * `memory` - The size of memory, measured in GB(Gigabyte).

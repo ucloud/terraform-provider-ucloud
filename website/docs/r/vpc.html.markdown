@@ -39,6 +39,7 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - The ID of the resource VPC.
 * `create_time` - The time of creation for VPC, formatted in RFC3339 time string.
 * `update_time` - The time whenever there is a change made to VPC, formatted in RFC3339 time string.
 * `network_info` - It is a nested type which documented below.

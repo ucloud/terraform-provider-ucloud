@@ -114,6 +114,7 @@ The ipsec_config mapping supports the following:
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - The ID of the resource VPN Gateway Connection.
 * `create_time` - The creation time for VPN Gateway Connection, formatted in RFC3339 time string.
 * `expire_time` - The expiration time for VPN Gateway Connection, formatted in RFC3339 time string.
 

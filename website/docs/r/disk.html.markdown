@@ -45,6 +45,7 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - The ID of the resource disk.
 * `create_time` - The time of creation of disk, formatted in RFC3339 time string.
 * `expire_time` - The expiration time of disk, formatted in RFC3339 time string.
 * `status` -  The status of disk. Possible values are: `Available`, `InUse`, `Detaching`, `Initializating`, `Failed`, `Cloning`, `Restoring`, `RestoreFailed`.
