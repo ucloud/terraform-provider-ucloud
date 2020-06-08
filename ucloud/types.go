@@ -185,7 +185,7 @@ func parseInstanceTypeByCustomize(splited ...string) (*instanceType, error) {
 	return t, nil
 }
 
-var availableOutstandingCpu = []int{4, 8, 16, 32, 64}
+var availableOutstandingCpu = []int{2, 4, 8, 16, 32, 64, 96}
 
 func parseInstanceTypeByNormal(splited ...string) (*instanceType, error) {
 	if len(splited) != 3 {
@@ -195,7 +195,7 @@ func parseInstanceTypeByNormal(splited ...string) (*instanceType, error) {
 	hostType := splited[0]
 	err := checkStringIn(hostType, []string{"n", "o", "c"})
 	if err != nil {
-		return nil, fmt.Errorf("instance type is invalid, the host type of %q must be one of %#v", "instance_type", []string{"n", "o"})
+		return nil, fmt.Errorf("instance type is invalid, the host type of %q must be one of %#v", "instance_type", []string{"n", "o", "c"})
 	}
 
 	hostScaleType := splited[1]

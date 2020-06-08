@@ -1,4 +1,11 @@
 ## 1.20.0 (Unreleased)
+
+ENHANCEMENTS:
+
+* resource/ucloud_instance: add `min_cpu_platform` to argument[GH-68]
+* resource/ucloud_instance: add `cpu_platform` to attributes[GH-68]
+
+
 ## 1.19.0 (April 15, 2020)
 
 FEATURES:

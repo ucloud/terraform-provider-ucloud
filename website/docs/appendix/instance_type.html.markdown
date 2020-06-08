@@ -28,21 +28,23 @@ The type of the instance.
 
 - Introduction: The latest generation of cloud hosts with excellent computing, storage and network performance. Suitable for the overall requirements scenario.
 
-- CPU Platform Support: Intel Skylake/Cascadelake
+- CPU Platform Support: Intel Cascadelake, Amd Epyc2
 
 - CPU Memory Combination (support ratio: 1:1-1:8)
 
 - Unit: CPU-kernel Memory-GB
 
-- Range of CPU: 4-64, Range of memory: 4-256
+- Range of CPU: Intel 4-64, Amd 4-96
+- Range of memory: Intel 4-512, Amd 4-768
 
 - Limit: 
-    - Currently only supports the `cn-bj2-05`(`availability_zone`) in `cn-bj2`(`region`)
+    - Currently not fully support by all `availability_zone`in the `region`, please proceed to [UCloud console](https://console.ucloud.cn/uhost/uhost/create) for more details.
     - Must set `boot_disk_type` to `cloud_rssd`
-    - Can only use specified Image (image type is `base` and the name of which is prefix with "高内核")
-    - Can only attach specified Disk（the disk attached to instance must be `rssd_data_disk` (RDMA-SSD) cloud disk if required)
+    - Can only use specified Image (eg: image type is `base` and the name of which is prefix with "高内核")
+    - Can only attach specified Disk（eg: the disk attached to instance must be `rssd_data_disk` (RDMA-SSD) cloud disk if required)
 
-<table><tr><th colspan="1">Category</th><th colspan="3">High CPU（1:1）</th><th colspan="3"> Basic（1:2）</th><th colspan="3"> Standard（1:4）</th><th colspan="3"> High Memory（1:8）</th></tr><tr><th rowspan="6">OutStanding (O) </th><th>InstanceType</th><th>CPU</th><th>Memory</th><th>InstanceType</th><th>CPU</th><th>Memory</th><th>InstanceType</th><th>CPU</th><th>Memory</th><th>InstanceType</th><th>CPU</th><th>Memory</th></tr><tr><td>o-highcpu-4</td><td>4</td><td>4</td><td>o-basic-4</td><td>4</td><td>8</td><td>o-standard-4</td><td>4</td><td>16</td> <td>o-highmem-4</td><td>4</td><td>32</td> </tr><tr><td>o-highcpu-8</td><td>8</td><td>8</td><td>o-basic-8</td><td>8</td><td>16</td><td>o-standard-8</td><td>8</td><td>32</td> <td>o-highmem-8</td><td>8</td><td>64</td> </tr> <tr><td>o-highcpu-16</td><td>16</td><td>16</td><td>o-basic-16</td><td>16</td><td>32</td><td>o-standard-16</td><td>16</td><td>64</td> <td>o-highmem-16</td><td>16</td><td>128</td> </tr> <tr><td>o-highcpu-32</td><td>32</td><td>32</td><td>o-basic-32</td><td>32</td><td>64</td><td>o-standard-32</td><td>32</td><td>128</td><td>o-highmem-32</td><td>32</td><td>256</td></tr> <tr><td>o-highcpu-64</td><td>64</td><td>64</td><td>o-basic-64</td><td>64</td><td>128</td><td>o-standard-64</td><td>64</td><td>256</td></tr> </table>
+<table><tr><th colspan="1">Category</th><th colspan="3">High CPU（1:1）</th><th colspan="3">Basic（1:2）</th><th colspan="3">Standard（1:4）</th><th colspan="3">High Memory（1:8）</th></tr><tr><th rowspan="8">OutStanding (O)</th><th>InstanceType</th><th>CPU</th><th>Memory</th><th>InstanceType</th><th>CPU</th><th>Memory</th><th>InstanceType</th><th>CPU</th><th>Memory</th><th>InstanceType</th><th>CPU</th><th>Memory</th></tr><tr><td>o-highcpu-2</td><td>2</td><td>2</td><td>o-basic-2</td><td>2</td><td>4</td><td>o-standard-2</td><td>2</td><td>8</td><td>o-highmem-2</td><td>2</td><td>16</td></tr><tr><td>o-highcpu-4</td><td>4</td><td>4</td><td>o-basic-4</td><td>4</td><td>8</td><td>o-standard-4</td><td>4</td><td>16</td><td>o-highmem-4</td><td>4</td><td>32</td></tr><tr><td>o-highcpu-8</td><td>8</td><td>8</td><td>o-basic-8</td><td>8</td><td>16</td><td>o-standard-8</td><td>8</td><td>32</td><td>o-highmem-8</td><td>8</td><td>64</td></tr><tr><td>o-highcpu-16</td><td>16</td><td>16</td><td>o-basic-16</td><td>16</td><td>32</td><td>o-standard-16</td><td>16</td><td>64</td><td>o-highmem-16</td><td>16</td><td>128</td></tr><tr><td>o-highcpu-32</td><td>32</td><td>32</td><td>o-basic-32</td><td>32</td><td>64</td><td>o-standard-32</td><td>32</td><td>128</td><td>o-highmem-32</td><td>32</td><td>256</td></tr><tr><td>o-highcpu-64</td><td>64</td><td>64</td><td>o-basic-64</td><td>64</td><td>128</td><td>o-standard-64</td><td>64</td><td>256</td><td>o-highmem-64</td><td>64</td><td>512</td></tr><tr><td>o-highcpu-96</td><td>96</td><td>96</td><td>o-basic-96</td><td>96</td><td>192</td><td>o-standard-96</td><td>96</td><td>384</td><td>o-highmem-96</td><td>96</td><td>768</td></tr></table>
+
 
 ## High Frequency (C)
 
@@ -57,7 +59,6 @@ The type of the instance.
 - Range of CPU: 1-32, Range of memory: 1-128
 
 - Limit:
-    - Currently not fully support by all `availability_zone`in the `region`, please proceed to [UCloud console](https://console.ucloud.cn/) for more details.
-    - Must set `boot_disk_type` to `cloud_ssd`
+    - Currently not fully support by all `availability_zone`in the `region`, please proceed to [UCloud console](https://console.ucloud.cn/uhost/uhost/create) for more details.
 
 <table><tr><th colspan="1">Category</th><th colspan="3">High CPU（1:1）</th><th colspan="3">Basic（1:2）</th><th colspan="3">Standard（1:4）</th><th colspan="3">High Memory（1:8）</th></tr><tr><th rowspan="8">High Frequency (C)</th><th>InstanceType</th><th>CPU</th><th>Memory</th><th>InstanceType</th><th>CPU</th><th>Memory</th><th>InstanceType</th><th>CPU</th><th>Memory</th><th>InstanceType</th><th>CPU</th><th>Memory</th></tr><tr><td>c-highcpu-1</td><td>1</td><td>1</td><td>c-basic-1</td><td>1</td><td>2</td><td>c-standard-1</td><td>1</td><td>4</td><td>c-highmem-1</td><td>1</td><td>8</td><tr><td>c-highcpu-2</td><td>2</td><td>2</td><td>c-basic-2</td><td>2</td><td>4</td><td>c-standard-2</td><td>2</td><td>8</td><td>c-highmem-2</td><td>2</td><td>16</td><tr><tr><td>o-highcpu-4</td><td>4</td><td>4</td><td>o-basic-4</td><td>4</td><td>8</td><td>o-standard-4</td><td>4</td><td>16</td><td>o-highmem-4</td><td>4</td><td>32</td></tr><tr><td>c-highcpu-8</td><td>8</td><td>8</td><td>c-basic-8</td><td>8</td><td>16</td><td>c-standard-8</td><td>8</td><td>32</td><td>c-highmem-8</td><td>8</td><td>64</td><tr><td>c-highcpu-16</td><td>16</td><td>16</td><td>c-basic-16</td><td>16</td><td>32</td><td>c-standard-16</td><td>16</td><td>64</td><td>c-highmem-16</td><td>16</td><td>128</td></tr><tr><td>c-highcpu-32</td><td>32</td><td>32</td><td>c-basic-32</td><td>32</td><td>64</td><td>c-standard-32</td><td>32</td><td>128</td></tr></table>

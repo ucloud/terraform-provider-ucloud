@@ -3,6 +3,7 @@ package ucloud
 import (
 	"encoding/base64"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
@@ -41,6 +42,7 @@ func resourceUCloudInstance() *schema.Resource {
 			diffValidateChargeTypeWithDuration,
 			diffValidateIsolationGroup,
 			diffValidateDataDisks,
+			diffValidateCPUPlatform,
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -242,6 +244,27 @@ func resourceUCloudInstance() *schema.Resource {
 				ValidateFunc: validation.StringLenBetween(0, 16384),
 			},
 
+			"min_cpu_platform": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"Intel/Auto",
+					"Intel/IvyBridge",
+					"Intel/Haswell",
+					"Intel/Broadwell",
+					"Intel/Skylake",
+					"Intel/Cascadelake",
+					"Amd/Auto",
+					"Amd/Epyc2",
+				}, false),
+			},
+
+			"cpu_platform": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
 			"cpu": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -363,15 +386,6 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 		req.ChargeType = ucloud.String("Month")
 	}
 
-	req.MachineType = ucloud.String("N")
-	req.MinimalCpuPlatform = ucloud.String("Intel/Auto")
-
-	if t.HostType == "o" {
-		req.MachineType = ucloud.String("O")
-	} else if t.HostType == "c" {
-		req.MachineType = ucloud.String("C")
-	}
-
 	if v, ok := d.GetOk("name"); ok {
 		req.Name = ucloud.String(v.(string))
 	} else {
@@ -462,6 +476,13 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 		} else {
 			return fmt.Errorf("error on creating instance, the image %s must have %q feature, got %#v", "CloudInit", imageId, imageResp.Features)
 		}
+	}
+	req.MachineType = ucloud.String(strings.ToUpper(t.HostType))
+
+	if v, ok := d.GetOk("min_cpu_platform"); ok {
+		req.MinimalCpuPlatform = ucloud.String(v.(string))
+	} else {
+		req.MinimalCpuPlatform = ucloud.String("Intel/Auto")
 	}
 
 	resp, err := conn.CreateUHostInstance(req)
@@ -854,6 +875,7 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 	d.Set("auto_renew", boolCamelCvt.unconvert(instance.AutoRenew))
 	d.Set("remark", instance.Remark)
 	d.Set("instance_type", instanceTypeSetFunc(upperCvt.convert(instance.MachineType), cpu, memory/1024))
+	d.Set("cpu_platform", instance.CpuPlatform)
 
 	//in order to be compatible with returns null
 	if notEmptyStringInSet(instance.ChargeType) {
@@ -1149,5 +1171,26 @@ func diffValidateDataDisks(diff *schema.ResourceDiff, meta interface{}) error {
 		}
 	}
 
+	return nil
+}
+
+func diffValidateCPUPlatform(diff *schema.ResourceDiff, meta interface{}) error {
+	t, _ := parseInstanceType(diff.Get("instance_type").(string))
+	if v, ok := diff.GetOk("min_cpu_platform"); ok {
+		supportedCPUForO := []string{"Intel/Auto", "Intel/Cascadelake", "Amd/Auto", "Amd/Epyc2"}
+		if t.HostType == "o" && !isStringIn(v.(string), supportedCPUForO) {
+			return fmt.Errorf("the min_cpu_platform can only be one of %v , when instance_type is OutStanding type(o),  got %q", supportedCPUForO, v.(string))
+		}
+
+		supportedCPUForN := []string{"Intel/Auto", "Intel/IvyBridge", "Intel/Haswell", "Intel/Broadwell", "Intel/Skylake"}
+		if t.HostType == "n" && !isStringIn(v.(string), supportedCPUForN) {
+			return fmt.Errorf("the cpu_platform can only be one of %v , when instance_type is Normal type(n),  got %q", supportedCPUForN, v.(string))
+		}
+
+		supportedCPUForC := []string{"Intel/Auto", "Intel/Skylake"}
+		if t.HostType == "c" && !isStringIn(v.(string), supportedCPUForC) {
+			return fmt.Errorf("the cpu_platform can only be one of %v , when instance_type is High Frequency type(c),  got %q", supportedCPUForC, v.(string))
+		}
+	}
 	return nil
 }
