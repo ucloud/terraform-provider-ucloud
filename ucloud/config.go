@@ -39,7 +39,7 @@ type Config struct {
 	MaxRetries int
 }
 
-type CloudShellCredential struct {
+type cloudShellCredential struct {
 	Cookie    string `json:"cookie"`
 	Profile   string `json:"profile"`
 	CSRFToken string `json:"csrf_token"`
@@ -87,13 +87,13 @@ func (c *Config) Client() (*UCloudClient, error) {
 		cred.PublicKey = c.PublicKey
 		cred.PrivateKey = c.PrivateKey
 	} else if v := os.Getenv("CLOUD_SHELL"); v == "true" {
-		csCred := make([]CloudShellCredential, 0)
+		csCred := make([]cloudShellCredential, 0)
 		// load credential from default cloud shell credential path
 		if err := loadJSONFile(defaultCloudShellCredPath(), &csCred); err != nil {
 			return nil, fmt.Errorf("must set credential about public_key and private_key, %s", err)
 		}
 		// get default cloud shell credential
-		defaultCsCred := &CloudShellCredential{}
+		defaultCsCred := &cloudShellCredential{}
 		for i := 0; i < len(csCred); i++ {
 			if csCred[i].Profile == "default" {
 				defaultCsCred = &csCred[i]
