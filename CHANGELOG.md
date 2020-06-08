@@ -1,9 +1,9 @@
-## 1.20.0 (Unreleased)
+## 1.20.0 (June 08, 2020)
 
 ENHANCEMENTS:
 
-* resource/ucloud_instance: add `min_cpu_platform` to argument[GH-68]
-* resource/ucloud_instance: add `cpu_platform` to attributes[GH-68]
+* resource/ucloud_instance: add `min_cpu_platform` to argument([#68](https://github.com/terraform-providers/terraform-provider-ucloud/issues/68))
+* resource/ucloud_instance: add `cpu_platform` to attributes([#68](https://github.com/terraform-providers/terraform-provider-ucloud/issues/68))
 
 
 ## 1.19.0 (April 15, 2020)
