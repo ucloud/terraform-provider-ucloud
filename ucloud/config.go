@@ -40,23 +40,19 @@ type Config struct {
 }
 
 type CloudShellCredential struct {
-	Active    bool   `json:"active"`
 	Cookie    string `json:"cookie"`
+	Profile   string `json:"profile"`
 	CSRFToken string `json:"csrf_token"`
 }
 
 // Client will returns a client with connections for all product
 func (c *Config) Client() (*UCloudClient, error) {
-	var err error
 	var client UCloudClient
-	var cfg *ucloud.Config
-	var cred *auth.Credential
 
 	client.region = c.Region
 	client.projectId = c.ProjectId
 
-	cfgV := ucloud.NewConfig()
-	cfg = &cfgV
+	cfg := ucloud.NewConfig()
 
 	// set common attributes (region, project id, etc ...)
 	cfg.Region = c.Region
@@ -67,6 +63,8 @@ func (c *Config) Client() (*UCloudClient, error) {
 	cfg.LogLevel = log.PanicLevel
 	cfg.UserAgent = "Terraform-UCloud/1.19.0"
 	cfg.BaseUrl = c.BaseURL
+
+	cred := auth.NewCredential()
 
 	if isAcc() {
 		//set DebugLevel for acceptance test
@@ -79,56 +77,57 @@ func (c *Config) Client() (*UCloudClient, error) {
 	var cloudShellCredHandler ucloud.HttpRequestHandler
 	if len(c.Profile) > 0 {
 		// load public/private key from shared credential file
-		cred, err = external.LoadUCloudCredentialFile(c.SharedCredentialsFile, c.Profile)
+		credV, err := external.LoadUCloudCredentialFile(c.SharedCredentialsFile, c.Profile)
 		if err != nil {
-			return nil, fmt.Errorf("cannot load shared credential file, %s", err)
+			return nil, fmt.Errorf("cannot load shared %q credential file, %s", c.Profile, err)
 		}
+		cred = *credV
 	} else if len(c.PublicKey) > 0 && len(c.PrivateKey) > 0 {
 		// load public/private key from shared credential file
-		credV := auth.NewCredential()
-		cred = &credV
 		cred.PublicKey = c.PublicKey
 		cred.PrivateKey = c.PrivateKey
 	} else if v := os.Getenv("CLOUD_SHELL"); v == "true" {
 		csCred := make([]CloudShellCredential, 0)
 		// load credential from default cloud shell credential path
 		if err := loadJSONFile(defaultCloudShellCredPath(), &csCred); err != nil {
-			if os.IsNotExist(err) {
-				return nil, fmt.Errorf("cloud shell credential file is empty, %s", err)
-			} else {
-				return nil, fmt.Errorf("cannot load cloud shell credential file, %s", err)
-			}
+			return nil, fmt.Errorf("must set credential about public_key and private_key, %s", err)
 		}
 		// get default cloud shell credential
 		defaultCsCred := &CloudShellCredential{}
 		for i := 0; i < len(csCred); i++ {
-			if csCred[i].Active == true {
+			if csCred[i].Profile == "default" {
 				defaultCsCred = &csCred[i]
 				break
 			}
 		}
+		if defaultCsCred == nil || len(defaultCsCred.Cookie) == 0 || len(defaultCsCred.CSRFToken) == 0 {
+			return nil, fmt.Errorf("must set credential about public_key and private_key, default credential is null")
+		}
+
 		// set cloud shell client handler
 		cloudShellCredHandler = func(c *ucloud.Client, req *http.HttpRequest) (*http.HttpRequest, error) {
 			req.SetHeader("Cookie", defaultCsCred.Cookie)
 			req.SetHeader("Csrf-Token", defaultCsCred.CSRFToken)
 			return req, nil
 		}
+	} else {
+		return nil, fmt.Errorf("must set credential about public_key and private_key")
 	}
 
 	// initialize client connections
-	client.uhostconn = uhost.NewClient(cfg, cred)
-	client.unetconn = unet.NewClient(cfg, cred)
-	client.ulbconn = ulb.NewClient(cfg, cred)
-	client.vpcconn = vpc.NewClient(cfg, cred)
-	client.uaccountconn = uaccount.NewClient(cfg, cred)
-	client.udiskconn = udisk.NewClient(cfg, cred)
-	client.udpnconn = udpn.NewClient(cfg, cred)
-	client.udbconn = udb.NewClient(cfg, cred)
-	client.umemconn = umem.NewClient(cfg, cred)
-	client.ipsecvpnClient = ipsecvpn.NewClient(cfg, cred)
+	client.uhostconn = uhost.NewClient(&cfg, &cred)
+	client.unetconn = unet.NewClient(&cfg, &cred)
+	client.ulbconn = ulb.NewClient(&cfg, &cred)
+	client.vpcconn = vpc.NewClient(&cfg, &cred)
+	client.uaccountconn = uaccount.NewClient(&cfg, &cred)
+	client.udiskconn = udisk.NewClient(&cfg, &cred)
+	client.udpnconn = udpn.NewClient(&cfg, &cred)
+	client.udbconn = udb.NewClient(&cfg, &cred)
+	client.umemconn = umem.NewClient(&cfg, &cred)
+	client.ipsecvpnClient = ipsecvpn.NewClient(&cfg, &cred)
 
 	// initialize client connections for private usage
-	client.pumemconn = pumem.NewClient(cfg, cred)
+	client.pumemconn = pumem.NewClient(&cfg, &cred)
 
 	if cloudShellCredHandler != nil {
 		client.uhostconn.AddHttpRequestHandler(cloudShellCredHandler)
@@ -144,8 +143,8 @@ func (c *Config) Client() (*UCloudClient, error) {
 		client.pumemconn.AddHttpRequestHandler(cloudShellCredHandler)
 	}
 
-	client.config = cfg
-	client.credential = cred
+	client.config = &cfg
+	client.credential = &cred
 	return &client, nil
 }
 
