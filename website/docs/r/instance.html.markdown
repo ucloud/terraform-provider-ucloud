@@ -20,20 +20,20 @@ data "ucloud_security_groups" "default" {
   type = "recommend_web"
 }
 
-# Query image
-data "ucloud_images" "default" {
-  availability_zone = "cn-bj2-04"
+# Query normal image
+data "ucloud_images" "normal" {
+  availability_zone = "cn-bj2-03"
   name_regex        = "^CentOS 6.5 64"
   image_type        = "base"
 }
 
-# Create web instance 
-resource "ucloud_instance" "web" {
-  availability_zone = "cn-bj2-04"
-  image_id          = data.ucloud_images.default.images[0].id
+# Create normal instance
+resource "ucloud_instance" "normal" {
+  availability_zone = "cn-bj2-03"
+  image_id          = data.ucloud_images.normal.images[0].id
   instance_type     = "n-basic-2"
   root_password     = "wA1234567"
-  name              = "tf-example-instance"
+  name              = "tf-example-normal-instance"
   tag               = "tf-example"
   boot_disk_type    = "cloud_ssd"
 
@@ -44,6 +44,34 @@ resource "ucloud_instance" "web" {
   data_disks {
     size = 20
     type = "cloud_ssd"
+  }
+  delete_disks_with_instance = true
+}
+
+# Query outstanding image
+data "ucloud_images" "outstanding" {
+  availability_zone = "cn-bj2-03"
+  name_regex        = "^高内核CentOS 7.6 64"
+  image_type        = "base"
+}
+
+# Create outstanding instance
+resource "ucloud_instance" "outstanding" {
+  availability_zone = "cn-bj2-03"
+  image_id          = data.ucloud_images.outstanding.images[0].id
+  instance_type     = "o-basic-4"
+  root_password     = "wA1234567"
+  name              = "tf-example-outstanding-instance"
+  tag               = "tf-example"
+  boot_disk_type    = "cloud_ssd"
+
+  # the default Web Security Group that UCloud recommend to users
+  security_group = data.ucloud_security_groups.default.security_groups[0].id
+
+  # create cloud data disk attached to instance
+  data_disks {
+    size = 20
+    type = "cloud_rssd"
   }
   delete_disks_with_instance = true
 }
@@ -89,7 +117,19 @@ The following arguments are supported:
 * `delete_disks_with_instance` - (Optional, ForceNew, Required when set `data_disks`)  Whether the cloud data disks attached instance should be destroyed on instance termination.
 
  ~> **NOTE:** We recommend set `delete_disks_with_instance` to `true` means delete cloud data disks attached to instance when instance termination. Otherwise, the cloud data disks will be not managed by the terraform after instance termination.
-
+ 
+* `min_cpu_platform` - (Optional) Specifies a minimum CPU platform for the the VM instance. (Default: `Intel/Auto`). You may refer to [min_cpu_platform](https://docs.ucloud.cn/uhost/introduction/uhost/type_new)
+    - The Intel CPU platform:
+        - `Intel/Auto` as the Intel CPU platform version will be selected randomly by system;
+        - `Intel/IvyBridge` as Intel V2, the version of Intel CPU platform selected by system will be `Intel/IvyBridge` and above; 
+        - `Intel/Haswell` as Intel V3,  the version of Intel CPU platform selected by system will be `Intel/Haswell` and above; 
+        - `Intel/Broadwell` as Intel V4, the version of Intel CPU platform selected by system will be `Intel/Broadwell` and above;
+        - `Intel/Skylake` as Intel V5, the version of Intel CPU platform selected by system will be `Intel/Skylake` and above; 
+        - `Intel/Cascadelake` as Intel V6, the version of Intel CPU platform selected by system will be `Intel/Cascadelake`;
+    - The AMD CPU platform:
+        - `Amd/Auto` as the Amd CPU platform version will be selected randomly by system;
+        - `Amd/Epyc2` as the version of Amd CPU platform selected by system will be `Amd/Epyc2` and above;
+        
 ### data_disks
 
 The `data_disks` supports the following:

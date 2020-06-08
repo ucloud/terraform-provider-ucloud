@@ -60,7 +60,7 @@ The following arguments are supported:
 * `backup_date` - (Optional) Specifies whether the backup took place from Sunday to Saturday by displaying 7 digits. 0 stands for backup disabled and 1 stands for backup enabled. The rightmost digit specifies whether the backup took place on Sunday, and the digits from right to left specify whether the backup took place from Monday to Saturday, it's mandatory required to backup twice per week at least. such as: digits "1100000" stands for the backup took place on Saturday and Friday.
 * `backup_black_list` - (Optional) The backup for database such as "test.%" or table such as "city.address" specified in the black lists are not supported.
 * `tag` - (Optional, ForceNew) A tag assigned to database instance, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
-* `parameter_group` - (Optional) The parameter group for database. if not set, the default parameter group will be used.
+* `parameter_group` - (Optional) The parameter group for database. If you not set, the default parameter group will be used. You can select one by the data source [ucloud_db_parameter_groups](https://www.terraform.io/docs/providers/ucloud/d/db_parameter_groups.html).
 * `allow_stopping_for_update` - (Optional) If you try to update the property `parameter_group` which requires restarting the db instance, you must set `allow_stopping_for_update` to `true` in your config to allows Terraform to restart the instance to update its property.
 
 ### Timeouts

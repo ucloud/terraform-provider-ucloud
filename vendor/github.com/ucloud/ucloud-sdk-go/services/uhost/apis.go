@@ -235,15 +235,6 @@ type CreateUHostInstanceParamNetworkInterfaceEIP struct {
 }
 
 /*
-CreateUHostInstanceParamNetworkInterface is request schema for complex param
-*/
-type CreateUHostInstanceParamNetworkInterface struct {
-
-	//
-	EIP *CreateUHostInstanceParamNetworkInterfaceEIP `required:"false"`
-}
-
-/*
 UHostDisk is request schema for complex param
 */
 type UHostDisk struct {
@@ -268,6 +259,15 @@ type UHostDisk struct {
 
 	// 磁盘类型。请参考[[api:uhost-api:disk_type|磁盘类型]]。
 	Type *string `required:"true"`
+}
+
+/*
+CreateUHostInstanceParamNetworkInterface is request schema for complex param
+*/
+type CreateUHostInstanceParamNetworkInterface struct {
+
+	//
+	EIP *CreateUHostInstanceParamNetworkInterfaceEIP `required:"false"`
 }
 
 // CreateUHostInstanceRequest is request schema for CreateUHostInstance action
@@ -659,6 +659,9 @@ type DescribeUHostInstanceRequest struct {
 	// 要查询的业务组名称
 	Tag *string `required:"false"`
 
+	// 要挂载的云盘id，过滤返回能被UDiskId挂载的云主机。目前主要针对rssd云盘使用
+	UDiskIdForAttachment *string `required:"false"`
+
 	// 【数组】UHost主机的资源ID，例如UHostIds.0代表希望获取信息 的主机1，UHostIds.1代表主机2。 如果不传入，则返回当前Region 所有符合条件的UHost实例。
 	UHostIds []string `required:"false"`
 
@@ -730,7 +733,7 @@ type DescribeUHostTagsResponse struct {
 	// 业务组集合见 UHostTagSet
 	TagSet []UHostTagSet
 
-	// 已有主机的业务组总个数
+	// 已有主机的业务组总数
 	TotalCount int
 }
 
@@ -1224,6 +1227,71 @@ func (c *UHostClient) LeaveIsolationGroup(req *LeaveIsolationGroupRequest) (*Lea
 	return &res, nil
 }
 
+// ModifyUHostIPRequest is request schema for ModifyUHostIP action
+type ModifyUHostIPRequest struct {
+	request.CommonBase
+
+	// [公共参数] 项目ID。不填写时为默认项目。请参考[GetProjectList接口](../summary/get_project_list.html)
+	// ProjectId *string `required:"false"`
+
+	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// Region *string `required:"true"`
+
+	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// Zone *string `required:"true"`
+
+	// 需要修改为的 IP 地址。新的IP地址和旧IP地址必须属于统一子网，且和主机内部的配置文件一致。
+	PresentIpAddress *string `required:"true"`
+
+	// 所需修改的原 IP 地址 ，当云主机只有一个IP地址时，此参数不必填写。
+	PreviousIpAddress *string `required:"false"`
+
+	// 指定云主机 ID。
+	UHostId *string `required:"true"`
+}
+
+// ModifyUHostIPResponse is response schema for ModifyUHostIP action
+type ModifyUHostIPResponse struct {
+	response.CommonBase
+
+	// 输出错误的信息
+	Message string
+
+	// 目标云主机 ID
+	UHostId string
+}
+
+// NewModifyUHostIPRequest will create request of ModifyUHostIP action.
+func (c *UHostClient) NewModifyUHostIPRequest() *ModifyUHostIPRequest {
+	req := &ModifyUHostIPRequest{}
+
+	// setup request with client config
+	c.Client.SetupRequest(req)
+
+	// setup retryable with default retry policy (retry for non-create action and common error)
+	req.SetRetryable(true)
+	return req
+}
+
+/*
+API: ModifyUHostIP
+
+修改云主机内网 IP 地址
+*/
+func (c *UHostClient) ModifyUHostIP(req *ModifyUHostIPRequest) (*ModifyUHostIPResponse, error) {
+	var err error
+	var res ModifyUHostIPResponse
+
+	reqCopier := *req
+
+	err = c.Client.InvokeAction("ModifyUHostIP", &reqCopier, &res)
+	if err != nil {
+		return &res, err
+	}
+
+	return &res, nil
+}
+
 // ModifyUHostInstanceNameRequest is request schema for ModifyUHostInstanceName action
 type ModifyUHostInstanceNameRequest struct {
 	request.CommonBase
@@ -1422,7 +1490,7 @@ type PoweroffUHostInstanceRequest struct {
 type PoweroffUHostInstanceResponse struct {
 	response.CommonBase
 
-	// UHost实例ID
+	// UHost的实例ID
 	UhostId string
 }
 
