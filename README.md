@@ -16,17 +16,17 @@ Requirements
 Building The Provider
 ---------------------
 
-Clone repository to: `$GOPATH/src/github.com/terraform-providers/terraform-provider-ucloud`
+Clone repository to: `$GOPATH/src/github.com/ucloud/terraform-provider-ucloud`
 
 ```sh
-$ mkdir -p $GOPATH/src/github.com/terraform-providers; cd $GOPATH/src/github.com/terraform-providers
-$ git clone git@github.com:terraform-providers/terraform-provider-ucloud
+$ mkdir -p $GOPATH/src/github.com/ucloud; cd $GOPATH/src/github.com/ucloud
+$ git clone git@github.com:ucloud/terraform-provider-ucloud
 ```
 
 Enter the provider directory and build the provider
 
 ```sh
-$ cd $GOPATH/src/github.com/terraform-providers/terraform-provider-ucloud
+$ cd $GOPATH/src/github.com/ucloud/terraform-provider-ucloud
 $ make build
 ```
 
@@ -70,7 +70,7 @@ Before making a release, the resources and data sources are tested automatically
 You can run them by entering the following instructions in a terminal:
 
 ```
-cd $GOPATH/src/github.com/terraform-providers/terraform-provider-ucloud
+cd $GOPATH/src/github.com/ucloud/terraform-provider-ucloud
 export UCLOUD_PUBLIC_KEY=xxx
 export UCLOUD_PRIVATE_KEY=xxx
 export UCLOUD_REGION=xxx
