@@ -1,7 +1,10 @@
-## 1.21.0 (Unreleased)
+## 1.22.0 (Unreleased)
+## 1.21.0 (July 27, 2020)
+
 ENHANCEMENTS:
 
 * Update for Terraform 0.13
+* Provider was moved to https://github.com/ucloud/terraform-provider-ucloud
 
 ## 1.20.0 (June 08, 2020)
 
