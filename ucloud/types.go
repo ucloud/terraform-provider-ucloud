@@ -166,7 +166,7 @@ func parseInstanceTypeByCustomize(splited ...string) (*instanceType, error) {
 
 	if (memory/cpu == 1 || memory/cpu == 2 || memory/cpu == 4 || memory/cpu == 8) && memory%cpu == 0 {
 		return nil, fmt.Errorf("instance type is invalid, expected %q like %q,"+
-			"the Type can be highcpu, basic, standard, highmem when the ratio of cpu to memory is 1:1, 1:2, 1:4, 1:8", "n-Type-CPU", "n-standard-1")
+			"the Mode can be highcpu, basic, standard, highmem when the ratio of cpu to memory is 1:1, 1:2, 1:4, 1:8", "n-Mode-CPU", "n-standard-1")
 	}
 
 	if cpu < 1 || 32 < cpu {
@@ -202,7 +202,7 @@ func parseInstanceTypeByNormal(splited ...string) (*instanceType, error) {
 
 	if scale, ok := instanceTypeScaleMap[hostScaleType]; !ok {
 		return nil, fmt.Errorf("instance type is invalid, expected like %q,"+
-			"the Type can be highcpu, basic, standard, highmem when the ratio of cpu to memory is 1:1, 1:2, 1:4, 1:8, got %q ", "n-standard-1", hostScaleType)
+			"the Mode can be highcpu, basic, standard, highmem when the ratio of cpu to memory is 1:1, 1:2, 1:4, 1:8, got %q ", "n-standard-1", hostScaleType)
 	} else {
 		cpu, err := strconv.Atoi(splited[2])
 		if err != nil {
@@ -271,42 +271,63 @@ func parseAssociationInfo(assocId string) (*associationInfo, error) {
 
 type dbInstanceType struct {
 	Engine string
-	Type   string
+	Mode   string
 	Memory int
+	Type   string
 }
 
 var availableDBEngine = []string{"mysql", "percona"}
 var availableDBTypes = []string{"ha"}
 var availableDBMemory = []int{1, 2, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256, 320}
+var availableNVMeDBMemory = []int{2, 4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256, 320}
 
 func parseDBInstanceType(s string) (*dbInstanceType, error) {
 	splited := strings.Split(s, "-")
-	if len(splited) != 3 {
-		return nil, fmt.Errorf("db instance type is invalid, should like xx-xx-1, got %q", s)
+	if len(splited) != 3 && len(splited) != 4 {
+		return nil, fmt.Errorf("db instance type is invalid, should like engine-mode-memory or engine-mode-type-memory, got %q", s)
 	}
 	engine := splited[0]
 	if err := checkStringIn(engine, availableDBEngine); err != nil {
 		return nil, fmt.Errorf("db instance type is invalid, the engine %s", err)
 	}
 
-	dbType := splited[1]
-	if err := checkStringIn(dbType, availableDBTypes); err != nil {
+	dbMode := splited[1]
+	if err := checkStringIn(dbMode, availableDBTypes); err != nil {
 		return nil, fmt.Errorf("db instance type is invalid, the type %s", err)
 	}
 
-	memory, err := strconv.Atoi(splited[2])
-	if err != nil {
-		return nil, fmt.Errorf("db instance type is invalid, the memory %s", err)
+	var memory int
+	var err error
+	var dbType string
+	if len(splited) == 3 {
+		memory, err = strconv.Atoi(splited[2])
+		if err != nil {
+			return nil, fmt.Errorf("db instance type is invalid, the memory %s", err)
+		}
+		if err := checkIntIn(memory, availableDBMemory); err != nil {
+			return nil, fmt.Errorf("db instance type is invalid, memory is out of range for sata ssd db instance, %s", err)
+		}
 	}
 
-	if err := checkIntIn(memory, availableDBMemory); err != nil {
-		return nil, fmt.Errorf("db instance type is invalid, memory is out of range, %s", err)
+	if len(splited) == 4 {
+		dbType = splited[2]
+		if dbType != dbNVMeInstanceType {
+			return nil, fmt.Errorf("db instance type is invalid, the type of the machine architecture must be set %q, got %q", dbNVMeInstanceType, dbType)
+		}
+		memory, err = strconv.Atoi(splited[3])
+		if err != nil {
+			return nil, fmt.Errorf("db instance type is invalid, the memory %s", err)
+		}
+		if err := checkIntIn(memory, availableNVMeDBMemory); err != nil {
+			return nil, fmt.Errorf("db instance type is invalid, memory is out of range for nvme db instance, %s", err)
+		}
 	}
 
 	t := &dbInstanceType{}
 	t.Engine = engine
-	t.Type = dbType
+	t.Mode = dbMode
 	t.Memory = memory
+	t.Type = dbType
 
 	return t, nil
 }

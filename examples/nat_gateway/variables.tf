@@ -1,5 +1,8 @@
 variable "region" {
-  description = "The region to create resources in"
-  default     = "cn-bj2"
+  default = "cn-bj2"
+}
+
+variable "zone" {
+  default = "cn-bj2-05"
 }
 

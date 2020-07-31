@@ -242,18 +242,23 @@ func dataSourceUCloudDBInstancesSave(d *schema.ResourceData, dbInstances []udb.U
 
 	for _, dbInstance := range dbInstances {
 
-		ids = append(ids, string(dbInstance.DBId))
+		ids = append(ids, dbInstance.DBId)
 		backupBlackList := strings.Split(dbInstance.BackupBlacklist, ";")
 		arr := strings.Split(dbInstance.DBTypeId, "-")
 		dbType := dbInstanceType{}
 		dbType.Memory = dbInstance.MemoryLimit / 1000
 		dbType.Engine = arr[0]
-		dbType.Type = dbModeCvt.unconvert(dbInstance.InstanceMode)
+		dbType.Mode = dbModeCvt.unconvert(dbInstance.InstanceMode)
+		dbType.Type = dbTypeCvt.unconvert(dbInstance.InstanceType)
+		instanceType := fmt.Sprintf("%s-%s-%d", dbType.Engine, dbType.Mode, dbType.Memory)
+		if dbType.Type == dbNVMeInstanceType {
+			instanceType = fmt.Sprintf("%s-%s-%s-%d", dbType.Engine, dbType.Mode, dbType.Type, dbType.Memory)
+		}
 
 		data = append(data, map[string]interface{}{
 			"id":                dbInstance.DBId,
 			"availability_zone": dbInstance.Zone,
-			"instance_type":     fmt.Sprintf("%s-%s-%d", dbType.Engine, dbType.Type, dbType.Memory),
+			"instance_type":     instanceType,
 			"standby_zone":      dbInstance.BackupZone,
 			"name":              dbInstance.Name,
 			"vpc_id":            dbInstance.VPCId,

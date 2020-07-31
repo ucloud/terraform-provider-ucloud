@@ -3,20 +3,16 @@ provider "ucloud" {
   region = var.region
 }
 
-# Query availability zone
-data "ucloud_zones" "default" {
-}
-
 # Query image
 data "ucloud_images" "default" {
-  availability_zone = data.ucloud_zones.default.zones[0].id
+  availability_zone = var.zone
   name_regex        = "^CentOS 7.[1-2] 64"
   image_type        = "base"
 }
 
 # Create intranet instances
 resource "ucloud_instance" "intranet" {
-  availability_zone = data.ucloud_zones.default.zones[0].id
+  availability_zone = var.zone
   instance_type     = "n-basic-2"
   image_id          = data.ucloud_images.default.images[0].id
   root_password     = var.instance_password

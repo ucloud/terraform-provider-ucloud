@@ -34,10 +34,8 @@ data "ucloud_security_groups" "foo" {
   type = "recommend_web"
 }
 
-data "ucloud_zones" "default" {}
-
 data "ucloud_images" "default" {
-  availability_zone = data.ucloud_zones.default.zones.0.id
+  availability_zone = var.zone
   name_regex        = "^CentOS 7.[1-2] 64"
   image_type        = "base"
 }
@@ -45,7 +43,7 @@ data "ucloud_images" "default" {
 resource "ucloud_instance" "foo" {
   vpc_id            = ucloud_vpc.foo.id
   subnet_id         = ucloud_subnet.foo.id
-  availability_zone = data.ucloud_zones.default.zones.0.id
+  availability_zone = var.zone
   image_id          = data.ucloud_images.default.images.0.id
   instance_type     = "n-basic-1"
   charge_type       = "dynamic"
@@ -56,7 +54,7 @@ resource "ucloud_instance" "foo" {
 resource "ucloud_instance" "bar" {
   vpc_id            = ucloud_vpc.foo.id
   subnet_id         = ucloud_subnet.bar.id
-  availability_zone = data.ucloud_zones.default.zones.0.id
+  availability_zone = var.zone
   image_id          = data.ucloud_images.default.images.0.id
   instance_type     = "n-basic-1"
   charge_type       = "dynamic"
