@@ -577,7 +577,7 @@ func resourceUCloudDBInstanceDelete(d *schema.ResourceData, meta interface{}) er
 			return resource.NonRetryableError(err)
 		}
 
-		if !isStringIn(db.State, []string{dbStatusShutoff, dbStatusRecoverFail}) {
+		if !isStringIn(db.State, []string{dbStatusShutoff, dbStatusRecoverFail, dbStatusFail}) {
 			if _, err := conn.StopUDBInstance(stopReq); err != nil {
 				return resource.RetryableError(fmt.Errorf("error on stopping db instance when deleting %q, %s", d.Id(), err))
 			}
@@ -742,6 +742,9 @@ func dbInstanceStateRefreshFunc(client *UCloudClient, dbId string, target []stri
 		if !isStringIn(state, target) {
 			if db.State == dbStatusRecoverFail {
 				return nil, "", fmt.Errorf("db instance recover failed, please make sure your %q is correct and matched with the other parameters", "backup_id")
+			}
+			if db.State == dbStatusFail {
+				return nil, "", fmt.Errorf("db instance initialize failed")
 			}
 			state = statusPending
 		}

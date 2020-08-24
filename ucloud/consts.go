@@ -41,6 +41,9 @@ const (
 	// dbStatusRecoverFail is the status when db instance recover failed
 	dbStatusRecoverFail = "RecoverFail"
 
+	// dbStatusFail is the status when db initialize failed
+	dbStatusFail = "Fail"
+
 	// dbNVMeInstanceType is the type of the machine architecture about db instance
 	dbNVMeInstanceType = "nvme"
 

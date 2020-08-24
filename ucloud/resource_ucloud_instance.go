@@ -255,6 +255,7 @@ func resourceUCloudInstance() *schema.Resource {
 					"Intel/Broadwell",
 					"Intel/Skylake",
 					"Intel/Cascadelake",
+					"Intel/CascadelakeR",
 					"Amd/Auto",
 					"Amd/Epyc2",
 				}, false),
@@ -1177,6 +1178,10 @@ func diffValidateDataDisks(diff *schema.ResourceDiff, meta interface{}) error {
 func diffValidateCPUPlatform(diff *schema.ResourceDiff, meta interface{}) error {
 	t, _ := parseInstanceType(diff.Get("instance_type").(string))
 	if v, ok := diff.GetOk("min_cpu_platform"); ok {
+		supportedCPUForOS := []string{"Intel/Auto", "Intel/CascadelakeR"}
+		if t.HostType == "os" && !isStringIn(v.(string), supportedCPUForOS) {
+			return fmt.Errorf("the min_cpu_platform can only be one of %v , when instance_type is OutStanding S type(os),  got %q", supportedCPUForOS, v.(string))
+		}
 		supportedCPUForO := []string{"Intel/Auto", "Intel/Cascadelake", "Amd/Auto", "Amd/Epyc2"}
 		if t.HostType == "o" && !isStringIn(v.(string), supportedCPUForO) {
 			return fmt.Errorf("the min_cpu_platform can only be one of %v , when instance_type is OutStanding type(o),  got %q", supportedCPUForO, v.(string))

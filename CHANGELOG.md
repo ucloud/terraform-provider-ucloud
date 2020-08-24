@@ -3,6 +3,7 @@
 ENHANCEMENTS:
 
 * resource/ucloud_db_instance: update `instance_type` about NVMe SSD DB
+* resource/ucloud_instance: update `instance_type` about OS instance
 
 ## 1.21.0 (July 27, 2020)
 

@@ -185,7 +185,8 @@ func parseInstanceTypeByCustomize(splited ...string) (*instanceType, error) {
 	return t, nil
 }
 
-var availableOutstandingCpu = []int{2, 4, 8, 16, 32, 64, 96}
+var availableOutstandingCpu = []int{1, 2, 4, 8, 16, 32, 64, 96}
+var availableOutstandingSCpu = []int{1, 2, 4, 8, 16, 32, 64}
 
 func parseInstanceTypeByNormal(splited ...string) (*instanceType, error) {
 	if len(splited) != 3 {
@@ -193,16 +194,16 @@ func parseInstanceTypeByNormal(splited ...string) (*instanceType, error) {
 	}
 
 	hostType := splited[0]
-	err := checkStringIn(hostType, []string{"n", "o", "c"})
+	err := checkStringIn(hostType, []string{"n", "o", "c", "os"})
 	if err != nil {
-		return nil, fmt.Errorf("instance type is invalid, the host type of %q must be one of %#v", "instance_type", []string{"n", "o", "c"})
+		return nil, fmt.Errorf("instance type is invalid, the host type of %q must be one of %#v", "instance_type", []string{"n", "o", "c", "os"})
 	}
 
 	hostScaleType := splited[1]
 
 	if scale, ok := instanceTypeScaleMap[hostScaleType]; !ok {
 		return nil, fmt.Errorf("instance type is invalid, expected like %q,"+
-			"the Mode can be highcpu, basic, standard, highmem when the ratio of cpu to memory is 1:1, 1:2, 1:4, 1:8, got %q ", "n-standard-1", hostScaleType)
+			"the Mode can be one of highcpu, basic, standard, highmem when the ratio of cpu to memory is 1:1, 1:2, 1:4, 1:8, got %q ", "n-standard-1", hostScaleType)
 	} else {
 		cpu, err := strconv.Atoi(splited[2])
 		if err != nil {
@@ -215,11 +216,11 @@ func parseInstanceTypeByNormal(splited ...string) (*instanceType, error) {
 
 		if hostType == "o" {
 			if err := checkIntIn(cpu, availableOutstandingCpu); err != nil {
-				return nil, fmt.Errorf("expected cpu of `O` instance type must be one of %#v, got %q", availableOutstandingCpu, cpu)
+				return nil, fmt.Errorf("expected cpu of `o` instance type must be one of %#v, got %q", availableOutstandingCpu, cpu)
 			}
-
-			if hostScaleType == "highmem" && cpu == 64 {
-				return nil, fmt.Errorf("this instance type %q is not supported, please refer to instance type document", "o-highmem-64")
+		} else if hostType == "os" {
+			if err := checkIntIn(cpu, availableOutstandingSCpu); err != nil {
+				return nil, fmt.Errorf("expected cpu of `os` instance type must be one of %#v, got %q", availableOutstandingSCpu, cpu)
 			}
 		} else {
 			if hostScaleType == "highmem" && cpu > 16 {

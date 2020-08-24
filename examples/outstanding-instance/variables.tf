@@ -3,7 +3,7 @@ variable "region" {
 }
 
 variable "zone" {
-  default = "cn-bj2-05"
+  default = "cn-bj2-02"
 }
 
 variable "instance_password" {
