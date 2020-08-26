@@ -2,8 +2,8 @@
 
 ENHANCEMENTS:
 
-* resource/ucloud_db_instance: update `instance_type` about NVMe SSD DB
-* resource/ucloud_instance: update `instance_type` about OS instance
+* resource/ucloud_db_instance: update `instance_type` about NVMe SSD DB [GH-69]
+* resource/ucloud_instance: update `instance_type` about OS instance [GH-69]
 
 ## 1.21.0 (July 27, 2020)
 
