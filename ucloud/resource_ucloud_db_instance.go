@@ -90,7 +90,7 @@ func resourceUCloudDBInstance() *schema.Resource {
 				Type:     schema.TypeInt,
 				Required: true,
 				ValidateFunc: validateAll(
-					validation.IntBetween(20, 4500),
+					validation.IntBetween(20, 32000),
 					validateMod(10),
 				),
 			},
@@ -228,11 +228,12 @@ func resourceUCloudDBInstanceCreate(d *schema.ResourceData, meta interface{}) er
 	req.Zone = ucloud.String(zone)
 	req.DiskSpace = ucloud.Int(d.Get("instance_storage").(int))
 	req.AdminUser = ucloud.String("root")
-	req.InstanceType = ucloud.String("SATA_SSD")
 	req.MemoryLimit = ucloud.Int(dbType.Memory * 1000)
-	req.InstanceMode = ucloud.String(dbModeCvt.convert(dbType.Type))
+	req.InstanceMode = ucloud.String(dbModeCvt.convert(dbType.Mode))
 	req.DBTypeId = ucloud.String(dbTypeId)
 	req.BackupCount = ucloud.Int(d.Get("backup_count").(int))
+	req.InstanceType = ucloud.String(dbTypeCvt.convert(dbType.Type))
+
 	password := fmt.Sprintf("%s%s%s",
 		acctest.RandStringFromCharSet(5, defaultPasswordStr),
 		acctest.RandStringFromCharSet(1, defaultPasswordSpe),
@@ -422,18 +423,21 @@ func resourceUCloudDBInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 	isSizeChanged := false
 	sizeReq := conn.NewResizeUDBInstanceRequest()
 	sizeReq.DBId = ucloud.String(d.Id())
-	dbType, _ := parseDBInstanceType(d.Get("instance_type").(string))
-	memory := dbType.Memory
-	instanceStorage := d.Get("instance_storage").(int)
-
 	if d.HasChange("instance_type") && !d.IsNewResource() {
-		sizeReq.MemoryLimit = ucloud.Int(memory * 1000)
-		isSizeChanged = true
+		oldType, newType := d.GetChange("instance_type")
+		oldDbType, _ := parseDBInstanceType(oldType.(string))
+		newDbType, _ := parseDBInstanceType(newType.(string))
+		if oldDbType.Memory != newDbType.Memory {
+			sizeReq.MemoryLimit = ucloud.Int(newDbType.Memory * 1000)
+			isSizeChanged = true
+		}
 	}
 
 	if d.HasChange("instance_storage") && !d.IsNewResource() {
+		dbType, _ := parseDBInstanceType(d.Get("instance_type").(string))
+		instanceStorage := d.Get("instance_storage").(int)
 		sizeReq.DiskSpace = ucloud.Int(instanceStorage)
-		sizeReq.InstanceType = ucloud.String("SATA_SSD")
+		sizeReq.InstanceType = ucloud.String(dbTypeCvt.convert(dbType.Type))
 		isSizeChanged = true
 	}
 
@@ -521,7 +525,12 @@ func resourceUCloudDBInstanceRead(d *schema.ResourceData, meta interface{}) erro
 	dbType := dbInstanceType{}
 	dbType.Memory = db.MemoryLimit / 1000
 	dbType.Engine = arr[0]
-	dbType.Type = dbModeCvt.unconvert(db.InstanceMode)
+	dbType.Mode = dbModeCvt.unconvert(db.InstanceMode)
+	dbType.Type = dbTypeCvt.unconvert(db.InstanceType)
+	instanceType := fmt.Sprintf("%s-%s-%d", dbType.Engine, dbType.Mode, dbType.Memory)
+	if dbType.Type == dbNVMeInstanceType {
+		instanceType = fmt.Sprintf("%s-%s-%s-%d", dbType.Engine, dbType.Mode, dbType.Type, dbType.Memory)
+	}
 
 	d.Set("name", db.Name)
 	d.Set("engine", arr[0])
@@ -544,7 +553,7 @@ func resourceUCloudDBInstanceRead(d *schema.ResourceData, meta interface{}) erro
 	d.Set("expire_time", timestampToString(db.ExpiredTime))
 	d.Set("modify_time", timestampToString(db.ModifyTime))
 	d.Set("backup_black_list", backupBlackList)
-	d.Set("instance_type", fmt.Sprintf("%s-%s-%d", dbType.Engine, dbType.Type, dbType.Memory))
+	d.Set("instance_type", instanceType)
 	d.Set("parameter_group", strconv.Itoa(db.ParamGroupId))
 
 	return nil
@@ -568,7 +577,7 @@ func resourceUCloudDBInstanceDelete(d *schema.ResourceData, meta interface{}) er
 			return resource.NonRetryableError(err)
 		}
 
-		if !isStringIn(db.State, []string{dbStatusShutoff, dbStatusRecoverFail}) {
+		if !isStringIn(db.State, []string{dbStatusShutoff, dbStatusRecoverFail, dbStatusFail}) {
 			if _, err := conn.StopUDBInstance(stopReq); err != nil {
 				return resource.RetryableError(fmt.Errorf("error on stopping db instance when deleting %q, %s", d.Id(), err))
 			}
@@ -646,8 +655,12 @@ func diffValidateDBInstanceType(old, new, meta interface{}) error {
 	if len(old.(string)) > 0 {
 		oldType, _ := parseDBInstanceType(old.(string))
 		newType, _ := parseDBInstanceType(new.(string))
+		if newType.Mode != oldType.Mode {
+			return fmt.Errorf("update db instance_type about mode: %q to %q of %q not be allowed, please rebuild instance if required", oldType.Mode, newType.Mode, "instance_type")
+		}
+
 		if newType.Type != oldType.Type {
-			return fmt.Errorf("db instance is not supported update the type of %q", "instance_type")
+			return fmt.Errorf("update db instance_type about type: %q to %q of %q not be allowed, please rebuild instance if required", oldType.Type, newType.Type, "instance_type")
 		}
 	}
 
@@ -658,6 +671,12 @@ func diffValidateDBMemoryWithInstanceStorage(diff *schema.ResourceDiff, v interf
 	dbType, _ := parseDBInstanceType(diff.Get("instance_type").(string))
 	memory := dbType.Memory
 	instanceStorage := diff.Get("instance_storage").(int)
+	if dbType.Type == dbNVMeInstanceType {
+		if instanceStorage > 32000 {
+			return fmt.Errorf("the upper limit of %q is 32000 when the type of db instance type is %q", "instance_storage", dbNVMeInstanceType)
+		}
+		return nil
+	}
 
 	if memory <= 6 && instanceStorage > 500 {
 		return fmt.Errorf("the upper limit of %q is 500 when the memory is 6 or less", "instance_storage")
@@ -673,6 +692,10 @@ func diffValidateDBMemoryWithInstanceStorage(diff *schema.ResourceDiff, v interf
 
 	if memory <= 64 && instanceStorage > 3500 {
 		return fmt.Errorf("the upper limit of %q is 3500 when the memory is 48 or 64", "instance_storage")
+	}
+
+	if memory <= 96 && instanceStorage > 4500 {
+		return fmt.Errorf("the upper limit of %q is 3500 when the memory is 96 or more", "instance_storage")
 	}
 
 	return nil
@@ -719,6 +742,9 @@ func dbInstanceStateRefreshFunc(client *UCloudClient, dbId string, target []stri
 		if !isStringIn(state, target) {
 			if db.State == dbStatusRecoverFail {
 				return nil, "", fmt.Errorf("db instance recover failed, please make sure your %q is correct and matched with the other parameters", "backup_id")
+			}
+			if db.State == dbStatusFail {
+				return nil, "", fmt.Errorf("db instance initialize failed")
 			}
 			state = statusPending
 		}

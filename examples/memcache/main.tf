@@ -3,10 +3,6 @@ provider "ucloud" {
   region = var.region
 }
 
-# Query availability zone
-data "ucloud_zones" "default" {
-}
-
 # Create VPC
 resource "ucloud_vpc" "default" {
   name = "tf-example-memcache"
@@ -30,7 +26,7 @@ resource "ucloud_subnet" "default" {
 
 # Create memcache instance
 resource "ucloud_memcache_instance" "master" {
-  availability_zone = data.ucloud_zones.default.zones[0].id
+  availability_zone = var.zone
   name              = "tf-example-memcache"
   instance_type     = "memcache-master-2"
 

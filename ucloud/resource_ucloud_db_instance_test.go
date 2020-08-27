@@ -56,6 +56,36 @@ func TestAccUCloudDBInstance_basic(t *testing.T) {
 	})
 }
 
+func TestAccUCloudDBInstance_nvme(t *testing.T) {
+	var db udb.UDBInstanceSet
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		IDRefreshName: "ucloud_db_instance.foo",
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckDBInstanceDestroy,
+
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDBInstanceNVMeConfig,
+
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDBInstanceExists("ucloud_db_instance.foo", &db),
+					testAccCheckDBInstanceAttributes(&db),
+					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "name", "tf-acc-db-instance-basic"),
+					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "instance_storage", "20"),
+					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "instance_type", "mysql-ha-nvme-2"),
+					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "engine", "mysql"),
+					resource.TestCheckResourceAttr("ucloud_db_instance.foo", "engine_version", "5.7"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccUCloudDBInstance_parameter_group(t *testing.T) {
 	var db udb.UDBInstanceSet
 
@@ -197,6 +227,21 @@ func testAccCheckDBInstanceDestroy(s *terraform.State) error {
 
 	return nil
 }
+
+const testAccDBInstanceNVMeConfig = `
+data "ucloud_zones" "default" {
+}
+
+resource "ucloud_db_instance" "foo" {
+	availability_zone = "${data.ucloud_zones.default.zones.3.id}"
+	name 			  = "tf-acc-db-instance-basic"
+	instance_storage  = 20
+	instance_type	  = "mysql-ha-nvme-2"
+	engine			  = "mysql"
+	engine_version 	  = "5.7"
+	password 		  = "2018_UClou"
+}
+`
 
 const testAccDBInstanceConfig = `
 data "ucloud_zones" "default" {

@@ -3,10 +3,6 @@ provider "ucloud" {
   region = var.region
 }
 
-# Query availability zone
-data "ucloud_zones" "default" {
-}
-
 # Create VPC
 resource "ucloud_vpc" "default" {
   name = "tf-example-redis"
@@ -30,7 +26,7 @@ resource "ucloud_subnet" "default" {
 
 # Create redis instance
 resource "ucloud_redis_instance" "master" {
-  availability_zone = data.ucloud_zones.default.zones[0].id
+  availability_zone = var.zone
   engine_version    = "4.0"
   instance_type     = "redis-master-2"
   password          = var.redis_password

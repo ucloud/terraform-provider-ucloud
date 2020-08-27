@@ -41,6 +41,12 @@ const (
 	// dbStatusRecoverFail is the status when db instance recover failed
 	dbStatusRecoverFail = "RecoverFail"
 
+	// dbStatusFail is the status when db initialize failed
+	dbStatusFail = "Fail"
+
+	// dbNVMeInstanceType is the type of the machine architecture about db instance
+	dbNVMeInstanceType = "nvme"
+
 	// diskStatusAvailable is the status when disk is available
 	diskStatusAvailable = "Available"
 
@@ -104,6 +110,12 @@ var titleCaseProdCvt = newStringConverter(map[string]string{
 var dbModeCvt = newStringConverter(map[string]string{
 	"basic": "Normal",
 	"ha":    "HA",
+})
+
+// dbTypeCvt is used to covert nvme to NVMe_SSD and covert "" to SATA_SSD
+var dbTypeCvt = newStringConverter(map[string]string{
+	"nvme": "NVMe_SSD",
+	"":     "SATA_SSD",
 })
 
 // backupTypeCvt is used to transform string to int for backup type when read db backups

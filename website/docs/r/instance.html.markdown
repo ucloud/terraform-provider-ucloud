@@ -126,6 +126,7 @@ The following arguments are supported:
         - `Intel/Broadwell` as Intel V4, the version of Intel CPU platform selected by system will be `Intel/Broadwell` and above;
         - `Intel/Skylake` as Intel V5, the version of Intel CPU platform selected by system will be `Intel/Skylake` and above; 
         - `Intel/Cascadelake` as Intel V6, the version of Intel CPU platform selected by system will be `Intel/Cascadelake`;
+        - `Intel/CascadelakeR` as the version of Intel CPU platform, currently can only support by the `os` instance type;
     - The AMD CPU platform:
         - `Amd/Auto` as the Amd CPU platform version will be selected randomly by system;
         - `Amd/Epyc2` as the version of Amd CPU platform selected by system will be `Amd/Epyc2` and above;

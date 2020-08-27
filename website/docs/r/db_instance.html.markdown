@@ -38,7 +38,7 @@ The following arguments are supported:
 * `engine_version` - (Required, ForceNew) The database engine version, possible values are: "5.5", "5.6", "5.7".
     - 5.5/5.6/5.7 for mysql and percona engine. 
 * `name` - (Optional) The name of database instance, which contains 6-63 characters and only support Chinese, English, numbers, '-', '_', '.', ',', '[', ']', ':'. If not specified, terraform will auto-generate a name beginning with `tf-db-instance`.
-* `instance_storage` - (Required) Specifies the allocated storage size in gigabytes (GB), range from 20 to 4500GB. The volume adjustment must be a multiple of 10 GB. The maximum disk volume for SSD type are：
+* `instance_storage` - (Required) Specifies the allocated storage size in gigabytes (GB), range from 20 to 32000GB. The volume adjustment must be a multiple of 10 GB. The maximum disk volume for Highly Availability NVMe SSD is range 20 to 32000GB; The maximum disk volume for Highly Availability SATA SSD type are：
     - 500GB if the memory chosen is equal or less than 6GB;
     - 1000GB if the memory chosen is from 8 to 16GB;
     - 2000GB if the memory chosen is 24GB or 32GB;
@@ -52,7 +52,7 @@ The following arguments are supported:
 * `password` - (Optional) The password for the database instance which should have 8-30 characters. It must contain at least 3 items of Capital letters, small letter, numbers and special characters. The special characters include `-_`. If not specified, terraform will auto-generate a password.
 * `port` - (Optional) The port on which the database accepts connections, the default port is 3306 for mysql and percona.
 * `charge_type` - (Optional, ForceNew) The charge type of db instance, possible values are: `year`, `month` and `dynamic` as pay by hour (specific permission required). (Default: `month`).
-* `duration` - (Optional, ForceNew) The duration that you will buy the db instance (Default: `1`). The value is `0` when pay by month and the instance will be vaild till the last day of that month. It is not required when `dynamic` (pay by hour).
+* `duration` - (Optional, ForceNew) The duration that you will buy the db instance (Default: `1`). The value is `0` when pay by month and the instance will be valid till the last day of that month. It is not required when `dynamic` (pay by hour).
 * `vpc_id` - (Optional, ForceNew) The ID of VPC linked to the database instances.
 * `subnet_id` - (Optional, ForceNew) The ID of subnet.
 * `backup_count` - (Optional, ForceNew) Specifies the number of backup saved per week, it is 7 backups saved per week by default.

@@ -3,16 +3,12 @@ provider "ucloud" {
   region = var.region
 }
 
-# Query availability zone
-data "ucloud_zones" "default" {
-}
-
 # Create database instance
 resource "ucloud_db_instance" "master" {
-  availability_zone = data.ucloud_zones.default.zones[0].id
+  availability_zone = var.zone
   name              = "tf-example-db"
   instance_storage  = 20
-  instance_type     = "mysql-ha-1"
+  instance_type     = "mysql-ha-nvme-2"
   engine            = "mysql"
   engine_version    = "5.7"
   password          = var.db_password
