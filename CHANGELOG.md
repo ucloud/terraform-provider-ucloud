@@ -1,9 +1,10 @@
-## 1.22.0 (Unreleased)
+## 1.23.0 (Unreleased)
+## 1.22.0 (2020-08-27)
 
 ENHANCEMENTS:
 
-* resource/ucloud_db_instance: update `instance_type` about NVMe SSD DB [GH-69]
-* resource/ucloud_instance: update `instance_type` about OS instance [GH-69]
+* resource/ucloud_db_instance: update `instance_type` about NVMe SSD DB [#69](https://github.com/ucloud/terraform-provider-ucloud/issues/69)
+* resource/ucloud_instance: update `instance_type` about OS instance [#69](https://github.com/ucloud/terraform-provider-ucloud/issues/69)
 
 ## 1.21.0 (July 27, 2020)
 
