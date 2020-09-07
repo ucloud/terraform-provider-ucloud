@@ -19,6 +19,16 @@ Use the navigation to the left to read about the available resources.
 ## Example Usage
 
 ```hcl
+# Configure the terraform provider
+terraform {
+  required_providers {
+    ucloud = {
+      source = "ucloud/ucloud"
+      version = "~>1.22.0"
+    }
+  }
+}
+
 # Configure the UCloud Provider
 provider "ucloud" {
   public_key  = var.ucloud_public_key
@@ -78,6 +88,15 @@ UCloud provider block:
 Usage:
 
 ```hcl
+terraform {
+  required_providers {
+    ucloud = {
+      source = "ucloud/ucloud"
+      version = "~>1.22.0"
+    }
+  }
+}
+
 provider "ucloud" {
   public_key  = "your_public_key"
   private_key = "your_private_key"

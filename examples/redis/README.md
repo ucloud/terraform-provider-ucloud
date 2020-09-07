@@ -6,7 +6,7 @@ To run, configure your UCloud provider as described in https://www.terraform.io/
 
 ## Requirements
 
-- [Terraform](https://www.terraform.io/downloads.html) 0.12.xs
+- [Terraform](https://www.terraform.io/downloads.html) 0.13.x
 
 ## Setup Environment
 

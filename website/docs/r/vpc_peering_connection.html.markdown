@@ -41,3 +41,4 @@ The following arguments are supported:
 - - -
 
 * `peer_project_id` - (Optional, ForceNew) The ID of accepter project of the specific VPC Peering Connection to retrieve.
+* `peer_region` - (Optional, ForceNew) The region of the specific VPC Peering Connection to retrieve.

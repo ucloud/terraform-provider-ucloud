@@ -1,4 +1,10 @@
 ## 1.23.0 (Unreleased)
+
+ENHANCEMENTS:
+
+* resource/ucloud_vpc_peering_connection: add `peer_region` to argument in order to support vpc intercommunication in different regions
+
+
 ## 1.22.0 (2020-08-27)
 
 ENHANCEMENTS:
