@@ -2,8 +2,7 @@
 
 ENHANCEMENTS:
 
-* resource/ucloud_vpc_peering_connection: add `peer_region` to argument in order to support vpc intercommunication in different regions
-
+* resource/ucloud_vpc_peering_connection: add `peer_region` to argument in order to support vpc intercommunication in different regions([GH-83])
 
 ## 1.22.0 (2020-08-27)
 
