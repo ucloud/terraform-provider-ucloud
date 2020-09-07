@@ -1,7 +1,7 @@
 ---
+subcategory: "UDPN"
 layout: "ucloud"
 page_title: "UCloud: ucloud_udpn_connection"
-sidebar_current: "docs-ucloud-resource-udpn-connection"
 description: |-
   Provides an UDPN Connection resource.
 ---

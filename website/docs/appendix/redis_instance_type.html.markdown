@@ -1,7 +1,7 @@
 ---
+subcategory: ""
 layout: "ucloud"
 page_title: "UCloud: redis_instance_type"
-sidebar_current: "docs-ucloud-appendix-redis-instance-type"
 description: |-
    The instance type of redis instance.
 ---

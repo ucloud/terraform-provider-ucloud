@@ -1,7 +1,7 @@
 ---
+subcategory: "VPC"
 layout: "ucloud"
 page_title: "UCloud: ucloud_vpcs"
-sidebar_current: "docs-ucloud-datasource-vpcs"
 description: |-
   Provides a list of VPC resources in the current region.
 ---

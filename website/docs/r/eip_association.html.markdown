@@ -1,7 +1,7 @@
 ---
+subcategory: "UNet"
 layout: "ucloud"
 page_title: "UCloud: ucloud_eip_association"
-sidebar_current: "docs-ucloud-resource-eip-association"
 description: |-
   Provides an EIP Association resource for associating Elastic IP to UHost Instance, Load Balancer, etc..
 ---

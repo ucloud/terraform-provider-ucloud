@@ -1,7 +1,7 @@
 ---
+subcategory: "UNet"
 layout: "ucloud"
 page_title: "UCloud: ucloud_eips"
-sidebar_current: "docs-ucloud-datasource-eips"
 description: |-
   Provides a list of EIP resources in the current region.
 ---

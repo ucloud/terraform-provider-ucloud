@@ -1,7 +1,7 @@
 ---
+subcategory: "ULB"
 layout: "ucloud"
 page_title: "UCloud: ucloud_lb_ssl_attachment"
-sidebar_current: "docs-ucloud-resource-lb-ssl-attachment"
 description: |-
   Provides a Load Balancer SSL attachment resource for attaching SSL certificate to Load Balancer Listener.
 ---

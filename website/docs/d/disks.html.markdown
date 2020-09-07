@@ -1,7 +1,7 @@
 ---
+subcategory: "UHost"
 layout: "ucloud"
 page_title: "UCloud: ucloud_disks"
-sidebar_current: "docs-ucloud-datasource-disks"
 description: |-
   Provides a list of Disk resources in the current region.
 ---

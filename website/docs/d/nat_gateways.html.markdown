@@ -1,7 +1,7 @@
 ---
+subcategory: "VPC"
 layout: "ucloud"
 page_title: "UCloud: ucloud_nat_gateways"
-sidebar_current: "docs-ucloud-datasource-nat-gateways"
 description: |-
   Provides a list of Nat Gateway resources in the current region.
 ---

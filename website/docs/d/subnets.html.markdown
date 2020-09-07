@@ -1,7 +1,7 @@
 ---
+subcategory: "VPC"
 layout: "ucloud"
 page_title: "UCloud: ucloud_subnets"
-sidebar_current: "docs-ucloud-datasource-subnets"
 description: |-
   Provides a list of Subnet resources in the current region.
 ---

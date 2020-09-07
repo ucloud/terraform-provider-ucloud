@@ -1,7 +1,7 @@
 ---
+subcategory: "ULB"
 layout: "ucloud"
 page_title: "UCloud: ucloud_lb_listener"
-sidebar_current: "docs-ucloud-resource-lb-listener"
 description: |-
   Provides a Load Balancer Listener resource.
 ---

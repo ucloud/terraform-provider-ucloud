@@ -1,7 +1,7 @@
 ---
+subcategory: "IPSec VPN"
 layout: "ucloud"
 page_title: "UCloud: ucloud_vpn_customer_gateway"
-sidebar_current: "docs-ucloud-resource-vpn-customer-gateway"
 description: |-
   Provides a VPN Customer Gateway resource.
 ---

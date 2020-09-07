@@ -1,7 +1,7 @@
 ---
+subcategory: "UDB"
 layout: "ucloud"
 page_title: "UCloud: ucloud_db_parameter_groups"
-sidebar_current: "docs-ucloud-datasource-db-parameter-group"
 description: |-
   Provides a list of db parameter group resources in the current region.
 ---

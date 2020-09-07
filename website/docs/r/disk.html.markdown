@@ -1,7 +1,7 @@
 ---
+subcategory: "UHost"
 layout: "ucloud"
 page_title: "UCloud: ucloud_disk"
-sidebar_current: "docs-ucloud-resource-disk"
 description: |-
   Provides a Cloud Disk resource.
 ---

@@ -1,7 +1,7 @@
 ---
+subcategory: "UNet"
 layout: "ucloud"
 page_title: "UCloud: ucloud_security_groups"
-sidebar_current: "docs-ucloud-datasource-security-groups"
 description: |-
   Provides a list of Security Group resources in the current region.
 ---

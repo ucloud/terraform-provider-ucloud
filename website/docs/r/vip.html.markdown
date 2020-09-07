@@ -1,7 +1,7 @@
 ---
+subcategory: "VPC"
 layout: "ucloud"
 page_title: "UCloud: ucloud_vip"
-sidebar_current: "docs-ucloud-resource-vip"
 description: |-
   Provides a VIP resource.
 ---

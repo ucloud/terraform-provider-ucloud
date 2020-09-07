@@ -1,7 +1,7 @@
 ---
+subcategory: "ULB"
 layout: "ucloud"
 page_title: "UCloud: ucloud_lb"
-sidebar_current: "docs-ucloud-resource-lb"
 description: |-
   Provides a Load Balancer resource.
 ---

@@ -1,7 +1,7 @@
 ---
+subcategory: "ULB"
 layout: "ucloud"
 page_title: "UCloud: ucloud_lb_rule"
-sidebar_current: "docs-ucloud-resource-lb-rule"
 description: |-
   Provides a Load Balancer Rule resource to add content forwarding policies for Load Balancer backend resource.
 ---

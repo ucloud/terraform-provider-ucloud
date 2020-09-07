@@ -1,7 +1,7 @@
 ---
+subcategory: "ULB"
 layout: "ucloud"
 page_title: "UCloud: ucloud_lb_listeners"
-sidebar_current: "docs-ucloud-datasource-lb-listeners"
 description: |-
   Provides a list of Load Balancer Listener resources in the current region.
 ---

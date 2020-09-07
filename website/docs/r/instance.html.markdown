@@ -1,7 +1,7 @@
 ---
+subcategory: "UHost"
 layout: "ucloud"
 page_title: "UCloud: ucloud_instance"
-sidebar_current: "docs-ucloud-resource-instance"
 description: |-
   Provides an UHost Instance resource.
 ---
@@ -83,7 +83,7 @@ The following arguments are supported:
 
 * `availability_zone` - (Required, ForceNew) Availability zone where instance is located. such as: `cn-bj2-02`. You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
 * `image_id` - (Required) The ID for the image to use for the instance.
-* `instance_type` - (Required) The type of instance, please visit the [instance type table](https://www.terraform.io/docs/providers/ucloud/appendix/instance_type.html)
+* `instance_type` - (Required) The type of instance, please visit the [instance type table](https://registry.terraform.io/providers/ucloud/ucloud/latest/docs/appendix/instance_type.html)
 
     ~> **Note** If you want to update this value, you must set `allow_stopping_for_update`to `true`.
 

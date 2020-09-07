@@ -1,7 +1,7 @@
 ---
+subcategory: "ULB"
 layout: "ucloud"
 page_title: "UCloud: ucloud_lb_ssls"
-sidebar_current: "docs-ucloud-datasource-lb-ssls"
 description: |-
   Provides a list of Load Balancer SSL certificate resources.
 ---

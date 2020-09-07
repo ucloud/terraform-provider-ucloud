@@ -1,7 +1,7 @@
 ---
+subcategory: ""
 layout: "ucloud"
 page_title: "UCloud: db_instance_type"
-sidebar_current: "docs-ucloud-appendix-db-instance-type"
 description: |-
    The instance type of DB instance.
 ---

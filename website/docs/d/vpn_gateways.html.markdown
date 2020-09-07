@@ -1,7 +1,7 @@
 ---
+subcategory: "IPSec VPN"
 layout: "ucloud"
 page_title: "UCloud: ucloud_vpn_gateways"
-sidebar_current: "docs-ucloud-datasource-vpn-gateways"
 description: |-
   Provides a list of VPN Gateway resources in the current region.
 ---

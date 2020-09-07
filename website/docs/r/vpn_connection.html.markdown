@@ -1,7 +1,7 @@
 ---
+subcategory: "IPSec VPN"
 layout: "ucloud"
 page_title: "UCloud: ucloud_vpn_connection"
-sidebar_current: "docs-ucloud-resource-vpn-connection"
 description: |-
   Provides a IPSec VPN Gateway Connection resource.
 ---

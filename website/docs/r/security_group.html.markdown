@@ -1,7 +1,7 @@
 ---
+subcategory: "UNet"
 layout: "ucloud"
 page_title: "UCloud: ucloud_security_group"
-sidebar_current: "docs-ucloud-resource-security-group"
 description: |-
   Provides a Security Group resource.
 ---

@@ -1,7 +1,6 @@
 ---
 layout: "ucloud"
 page_title: "Provider: UCloud"
-sidebar_current: "docs-ucloud-index"
 description: |-
   The UCloud provider is used to interact with many resources supported by UCloud. The provider needs to be configured with the proper credentials before it can be used.
 ---
