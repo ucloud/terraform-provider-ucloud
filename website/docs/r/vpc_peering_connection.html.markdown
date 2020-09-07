@@ -1,7 +1,7 @@
 ---
+subcategory: "VPC"
 layout: "ucloud"
 page_title: "UCloud: ucloud_vpc_peering_connection"
-sidebar_current: "docs-ucloud-resource-vpc-peering-connection"
 description: |-
   Provides an VPC Peering Connection for establishing a connection between multiple VPC.
 ---
@@ -41,3 +41,4 @@ The following arguments are supported:
 - - -
 
 * `peer_project_id` - (Optional, ForceNew) The ID of accepter project of the specific VPC Peering Connection to retrieve.
+* `peer_region` - (Optional, ForceNew) The region of the specific VPC Peering Connection to retrieve.

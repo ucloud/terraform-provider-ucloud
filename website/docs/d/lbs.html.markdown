@@ -1,7 +1,7 @@
 ---
+subcategory: "ULB"
 layout: "ucloud"
 page_title: "UCloud: ucloud_lbs"
-sidebar_current: "docs-ucloud-datasource-lbs"
 description: |-
   Provides a list of Load Balancer resources in the current region.
 ---

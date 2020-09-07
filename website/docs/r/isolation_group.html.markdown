@@ -1,7 +1,7 @@
 ---
+subcategory: "UHost"
 layout: "ucloud"
 page_title: "UCloud: ucloud_isolation_group"
-sidebar_current: "docs-ucloud-resource-isolation-group"
 description: |-
   Provides an Isolation Group resource.
 ---

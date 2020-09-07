@@ -1,7 +1,7 @@
 ---
+subcategory: ""
 layout: "ucloud"
 page_title: "UCloud: memcache_instance_type"
-sidebar_current: "docs-ucloud-appendix-memcache-instance-type"
 description: |-
    The instance type of Memcache instance.
 ---

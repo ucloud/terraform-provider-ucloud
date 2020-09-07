@@ -1,7 +1,7 @@
 ---
+subcategory: "VPC"
 layout: "ucloud"
 page_title: "UCloud: ucloud_nat_gateway_rule"
-sidebar_current: "docs-ucloud-resource-nat-gateway-rule"
 description: |-
   Provides a Nat Gateway Rule resource.
 ---

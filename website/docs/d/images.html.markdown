@@ -1,7 +1,7 @@
 ---
+subcategory: "UHost"
 layout: "ucloud"
 page_title: "UCloud: ucloud_images"
-sidebar_current: "docs-ucloud-datasource-images"
 description: |-
   Provides a list of available image resources in the current region.
 ---

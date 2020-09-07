@@ -1,7 +1,7 @@
 ---
+subcategory: "VPC"
 layout: "ucloud"
 page_title: "UCloud: ucloud_subnet"
-sidebar_current: "docs-ucloud-resource-subnet"
 description: |-
   Provides a Subnet resource under VPC resource.
 ---

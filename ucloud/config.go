@@ -3,6 +3,11 @@ package ucloud
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"runtime"
+
 	"github.com/ucloud/ucloud-sdk-go/external"
 	"github.com/ucloud/ucloud-sdk-go/private/protocol/http"
 	pumem "github.com/ucloud/ucloud-sdk-go/private/services/umem"
@@ -19,10 +24,6 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 	"github.com/ucloud/ucloud-sdk-go/ucloud/auth"
 	"github.com/ucloud/ucloud-sdk-go/ucloud/log"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"runtime"
 )
 
 // Config is the configuration of ucloud meta data
@@ -61,7 +62,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 	// enable auto retry with http/connection error
 	cfg.MaxRetries = c.MaxRetries
 	cfg.LogLevel = log.PanicLevel
-	cfg.UserAgent = "Terraform-UCloud/1.22.0"
+	cfg.UserAgent = "Terraform-UCloud/1.23.0"
 	cfg.BaseUrl = c.BaseURL
 
 	cred := auth.NewCredential()

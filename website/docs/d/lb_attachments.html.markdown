@@ -1,7 +1,7 @@
 ---
+subcategory: "ULB"
 layout: "ucloud"
 page_title: "UCloud: ucloud_lb_attachments"
-sidebar_current: "docs-ucloud-datasource-lb-attachments"
 description: |-
   Provides a list of Load Balancer Attachment resources under the Load Balancer listener.
 ---

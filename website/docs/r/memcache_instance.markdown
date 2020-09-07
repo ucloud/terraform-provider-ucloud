@@ -1,7 +1,7 @@
 ---
+subcategory: "UMem"
 layout: "ucloud"
 page_title: "UCloud: ucloud_memcache_instance"
-sidebar_current: "docs-ucloud-resource-memcache-instance"
 description: |-
   Provides a Memcache instance resource.
 ---
@@ -29,7 +29,7 @@ resource "ucloud_memcache_instance" "master" {
 The following arguments are supported:
 
 * `availability_zone` - (Required, ForceNew) Availability zone where Memcache instance is located. Such as: "cn-bj2-02". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
-* `instance_type` - (Required) The type of Memcache instance, please visit the [instance type table](https://www.terraform.io/docs/providers/ucloud/appendix/memcache_instance_type.html) for more details.
+* `instance_type` - (Required) The type of Memcache instance, please visit the [instance type table](https://registry.terraform.io/providers/ucloud/ucloud/latest/docs/appendix/memcache_instance_type.html) for more details.
 
 - - -
 

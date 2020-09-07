@@ -1,7 +1,7 @@
 ---
+subcategory: "UNet"
 layout: "ucloud"
 page_title: "UCloud: ucloud_eip"
-sidebar_current: "docs-ucloud-resource-eip"
 description: |-
   Provides an Elastic IP resource.
 ---

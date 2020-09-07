@@ -1,7 +1,7 @@
 ---
+subcategory: "UDB"
 layout: "ucloud"
 page_title: "UCloud: ucloud_db_instances"
-sidebar_current: "docs-ucloud-datasource-db-instances"
 description: |-
   Provides a list of database instance resources in the current region.
 ---

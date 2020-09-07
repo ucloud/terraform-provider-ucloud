@@ -1,7 +1,7 @@
 ---
+subcategory: "Provider Data Sources"
 layout: "ucloud"
 page_title: "UCloud: ucloud_projects"
-sidebar_current: "docs-ucloud-datasource-projects"
 description: |-
   Provides a list of projects owned by the user.
 ---

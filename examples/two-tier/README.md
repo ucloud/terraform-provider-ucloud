@@ -5,7 +5,7 @@ an ULB serving traffic.
 
 ## Requirements
 
-- [Terraform](https://www.terraform.io/downloads.html) 0.12.x
+- [Terraform](https://www.terraform.io/downloads.html) 0.13.x
 
 ## Setup Environment
 

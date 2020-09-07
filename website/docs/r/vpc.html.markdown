@@ -1,7 +1,7 @@
 ---
+subcategory: "VPC"
 layout: "ucloud"
 page_title: "UCloud: ucloud_vpc"
-sidebar_current: "docs-ucloud-resource-vpc"
 description: |-
   Provides a VPC resource.
 ---

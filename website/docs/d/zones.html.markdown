@@ -1,7 +1,7 @@
 ---
+subcategory: "Provider Data Sources"
 layout: "ucloud"
 page_title: "UCloud: ucloud_zones"
-sidebar_current: "docs-ucloud-datasource-zones"
 description: |-
   Provides a list of available zones in the current region.
 ---

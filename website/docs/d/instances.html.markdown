@@ -1,7 +1,7 @@
 ---
+subcategory: "UHost"
 layout: "ucloud"
 page_title: "UCloud: ucloud_instances"
-sidebar_current: "docs-ucloud-datasource-instances"
 description: |-
   Provides a list of UHost instance resources in the current region.
 ---

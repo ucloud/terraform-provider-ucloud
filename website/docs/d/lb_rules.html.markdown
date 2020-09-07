@@ -1,7 +1,7 @@
 ---
+subcategory: "ULB"
 layout: "ucloud"
 page_title: "UCloud: ucloud_lb_rules"
-sidebar_current: "docs-ucloud-datasource-lb-rules"
 description: |-
   Provides a list of Load Balancer Rule resources belong to the Load Balancer listener.
 ---

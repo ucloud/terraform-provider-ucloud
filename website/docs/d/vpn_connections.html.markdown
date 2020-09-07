@@ -1,7 +1,7 @@
 ---
+subcategory: "IPSec VPN"
 layout: "ucloud"
 page_title: "UCloud: ucloud_vpn_connections"
-sidebar_current: "docs-ucloud-datasource-vpn-connections"
 description: |-
   Provides a list of VPN Connection resources in the current region.
 ---
