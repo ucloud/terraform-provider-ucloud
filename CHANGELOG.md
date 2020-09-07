@@ -1,8 +1,9 @@
-## 1.23.0 (Unreleased)
+## 1.24.0 (Unreleased)
+## 1.23.0 (2020-09-07)
 
 ENHANCEMENTS:
 
-* resource/ucloud_vpc_peering_connection: add `peer_region` to argument in order to support vpc intercommunication in different regions([GH-83])
+* resource/ucloud_vpc_peering_connection: add `peer_region` to argument in order to support vpc intercommunication in different regions(([#83](https://github.com/ucloud/terraform-provider-ucloud/issues/83)))
 
 ## 1.22.0 (2020-08-27)
 
