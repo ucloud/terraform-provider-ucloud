@@ -1,5 +1,5 @@
 ---
-subcategory: ""
+subcategory: "Appendix"
 layout: "ucloud"
 page_title: "UCloud: memcache_instance_type"
 description: |-
