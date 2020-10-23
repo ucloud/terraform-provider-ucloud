@@ -39,7 +39,7 @@ resource "ucloud_redis_instance" "distributed" {
 The following arguments are supported:
 
 * `availability_zone` - (Required, ForceNew) Availability zone where Redis instance is located. Such as: "cn-bj2-02". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
-* `instance_type` - (Required) The type of Redis instance, please visit the [instance type table](https://registry.terraform.io/providers/ucloud/ucloud/latest/docs/appendix/redis_instance_type.html) for more details.
+* `instance_type` - (Required) The type of Redis instance, please visit the [instance type table](https://docs.ucloud.cn/terraform/specification/umem_instance?id=redis) for more details.
 
 - - -
 

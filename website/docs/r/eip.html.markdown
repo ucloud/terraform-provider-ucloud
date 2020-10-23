@@ -33,7 +33,7 @@ The following arguments are supported:
 * `bandwidth` - (Optional) Maximum bandwidth to the elastic public network, measured in Mbps (Mega bit per second). The ranges for bandwidth are: 1-200 for pay by traffic, 1-800 for pay by bandwidth. (Default: `1`).
 * `share_bandwidth_package_id` - (Optional) The￿ Id of Share Bandwidth Package. If it is filled in, the `charge_mode` can only be set with `share_bandwidth`.
 * `duration` - (Optional, ForceNew) The duration that you will buy the resource. (Default: `1`). It is not required when `dynamic` (pay by hour), the value is `0` when `month`(pay by month) and the instance will be valid till the last day of that month.
-* `charge_mode` -(Optional) Elastic IP charge mode. Possible values are: `traffic` as pay by traffic, `bandwidth` as pay by bandwidth, `share_bandwidth` as share bandwidth mode. (Default: `bandwidth`for the Elastic IP, `share_bandwidth` for the Elastic IP with share bandwidth mode).
+* `charge_mode` -(Optional) Elastic IP charge mode. Possible values are: `traffic` as pay by traffic, `bandwidth` as pay by bandwidth mode. (Default: `bandwidth`for the Elastic IP).
 * `charge_type` - (Optional, ForceNew) Elastic IP charge type. Possible values are: `year` as pay by year, `month` as pay by month, `dynamic` as pay by hour (specific permission required). (Default: `month`).
 * `name` - (Optional) The name of the EIP, which contains 1-63 characters and only support Chinese, English, numbers, '-', '_', '.'. If not specified, terraform will auto-generate a name beginning with `tf-eip`.
 * `remark` - (Optional) The remarks of the EIP. (Default: `""`).

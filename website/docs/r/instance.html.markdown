@@ -63,7 +63,7 @@ resource "ucloud_instance" "outstanding" {
   root_password     = "wA1234567"
   name              = "tf-example-outstanding-instance"
   tag               = "tf-example"
-  boot_disk_type    = "cloud_ssd"
+  boot_disk_type    = "cloud_rssd"
 
   # the default Web Security Group that UCloud recommend to users
   security_group = data.ucloud_security_groups.default.security_groups[0].id
@@ -83,7 +83,7 @@ The following arguments are supported:
 
 * `availability_zone` - (Required, ForceNew) Availability zone where instance is located. such as: `cn-bj2-02`. You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
 * `image_id` - (Required) The ID for the image to use for the instance.
-* `instance_type` - (Required) The type of instance, please visit the [instance type table](https://registry.terraform.io/providers/ucloud/ucloud/latest/docs/appendix/instance_type.html)
+* `instance_type` - (Required) The type of instance, please visit the [instance type table](https://docs.ucloud.cn/terraform/specification/instance)
 
     ~> **Note** If you want to update this value, you must set `allow_stopping_for_update`to `true`.
 
@@ -118,6 +118,9 @@ The following arguments are supported:
 
  ~> **NOTE:** We recommend set `delete_disks_with_instance` to `true` means delete cloud data disks attached to instance when instance termination. Otherwise, the cloud data disks will be not managed by the terraform after instance termination.
  
+ * `network_interface` - (Optional, ForceNew) Additional network interface eips to attach to the instance. `network_interface` configurations only apply on resource creation. The count of `network_interface` can only be one. See [network_interface](#network_interface) below for details on attributes. When set `network_interface`, the argument `delete_eips_with_instance` must bet set.
+ * `delete_eips_with_instance` - (Optional, ForceNew, Required when set `network_interface`)  Whether the network interface eips associated instance should be destroyed on instance termination.
+ 
 * `min_cpu_platform` - (Optional) Specifies a minimum CPU platform for the the VM instance. (Default: `Intel/Auto`). You may refer to [min_cpu_platform](https://docs.ucloud.cn/uhost/introduction/uhost/type_new)
     - The Intel CPU platform:
         - `Intel/Auto` as the Intel CPU platform version will be selected randomly by system;
@@ -135,10 +138,20 @@ The following arguments are supported:
 
 The `data_disks` supports the following:
 
-* `size` - (Required) The size of the cloud data disk, range 20-8000, measured in GB (GigaByte).
-* `type` - (Required) The type of the cloud data disk. Possible values are: `cloud_normal` and `cloud_ssd` for local boot disk, `cloud_ssd` for cloud SSD boot disk. 
+* `size` - (Required, ForceNew) The size of the cloud data disk, range 20-8000, measured in GB (GigaByte).
+* `type` - (Required, ForceNew) The type of the cloud data disk. Possible values are: `cloud_normal` and `cloud_ssd` for local boot disk, `cloud_ssd` for cloud SSD boot disk. 
 
-~> **NOTE:** Currently, changes to the `data_disks` configuration of _existing_ resources cannot be automatically detected by Terraform. To manage changes and attachments of an cloud data disk to an instance, use the `ucloud_disk` and `ucloud_disk_attachment` resources instead. `data_disks` cannot be mixed with external `ucloud_disk` and `ucloud_disk_attachment` resources for a given instance.  Recently, we recommend using `data_disks` to allocate cloud data disk attached to instance.
+~> **NOTE:** Currently, changes to the `data_disks` configuration of _existing_ resources cannot be automatically detected by Terraform. To manage changes and attachments of a cloud data disk to an instance, use the `ucloud_disk` and `ucloud_disk_attachment` resources instead. `data_disks` cannot be mixed with external `ucloud_disk` and `ucloud_disk_attachment` resources for a given instance.  Recently, we recommend using `data_disks` to allocate cloud data disk attached to instance.
+
+### network_interface
+
+The `network_interface` supports the following:
+
+* `eip_bandwidth` - (Required, ForceNew) Maximum bandwidth to the elastic public network, measured in Mbps (Mega bit per second). The ranges for bandwidth are: 1-200 for pay by traffic, 1-800 for pay by bandwidth. 
+* `eip_internet_type` - (Required, ForceNew) Type of Elastic IP routes. Possible values are: `international` as international BGP IP and `bgp` as china mainland BGP IP.
+* `eip_charge_mode` - (Required, ForceNew) Elastic IP charge mode. Possible values are: `traffic` as pay by traffic, `bandwidth` as pay by bandwidth mode.
+
+~> **NOTE:** Currently, changes to the `network_interface` configuration of _existing_ resources cannot be automatically detected by Terraform. To manage changes and associations of an Elastic IP to an instance, use the `ucloud_eip` and `ucloud_eip_association` resources instead. `network_interface` cannot be mixed with external `ucloud_eip` and `ucloud_eip_association` resources for a given instance.  Recently, we recommend using `network_interface` to allocate cloud data disk attached to instance.
 
 ### Timeouts
 

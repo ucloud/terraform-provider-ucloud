@@ -29,7 +29,7 @@ resource "ucloud_memcache_instance" "master" {
 The following arguments are supported:
 
 * `availability_zone` - (Required, ForceNew) Availability zone where Memcache instance is located. Such as: "cn-bj2-02". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
-* `instance_type` - (Required) The type of Memcache instance, please visit the [instance type table](https://registry.terraform.io/providers/ucloud/ucloud/latest/docs/appendix/memcache_instance_type.html) for more details.
+* `instance_type` - (Required) The type of Memcache instance, please visit the [instance type table](https://docs.ucloud.cn/terraform/specification/umem_instance?id=memcache) for more details.
 
 - - -
 

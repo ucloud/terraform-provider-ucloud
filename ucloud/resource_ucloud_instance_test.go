@@ -54,6 +54,32 @@ func TestAccUCloudInstance_basic(t *testing.T) {
 	})
 }
 
+func TestAccUCloudInstance_EIP(t *testing.T) {
+	var instance uhost.UHostInstanceSet
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		IDRefreshName: "ucloud_instance.foo",
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckInstanceDestroy,
+
+		Steps: []resource.TestStep{
+			{
+				Config: testAccInstanceConfigEIP,
+
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckInstanceExists("ucloud_instance.foo", &instance),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "name", "tf-acc-instance-eip"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "tag", "tf-acc"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccUCloudInstance_outstanding(t *testing.T) {
 	var instance uhost.UHostInstanceSet
 
@@ -668,5 +694,36 @@ resource "ucloud_instance" "foo" {
   instance_type     = "n-basic-1"
   root_password     = "wA1234567"
   security_group = "${data.ucloud_security_groups.default.security_groups.0.id}"
+}
+`
+
+const testAccInstanceConfigEIP = `
+data "ucloud_zones" "default" {
+}
+
+data "ucloud_security_groups" "default" {
+  type = "recommend_web"
+}
+
+data "ucloud_images" "default" {
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  name_regex        = "^CentOS 7.6 64"
+  image_type        = "base"
+}
+
+resource "ucloud_instance" "foo" {
+  name              = "tf-acc-instance-eip"
+  tag               = "tf-acc"
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  image_id          = "${data.ucloud_images.default.images.0.id}"
+  instance_type     = "n-basic-1"
+  root_password     = "wA1234567"
+  security_group = "${data.ucloud_security_groups.default.security_groups.0.id}"
+  network_interface {
+	  eip_bandwidth     = 2
+	  eip_charge_mode   = "bandwidth"
+	  eip_internet_type = "bgp"
+  }
+  delete_eips_with_instance = true
 }
 `

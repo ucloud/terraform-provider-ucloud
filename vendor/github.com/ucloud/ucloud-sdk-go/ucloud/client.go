@@ -62,7 +62,9 @@ func NewClient(config *Config, credential *auth.Credential) *Client {
 	client.httpResponseHandlers = append(client.httpResponseHandlers, defaultHttpResponseHandlers...)
 
 	client.logger = log.New()
-	client.logger.SetLevel(config.LogLevel)
+	if config != nil {
+		client.logger.SetLevel(config.LogLevel)
+	}
 
 	return &client
 }
@@ -116,6 +118,20 @@ func (c *Client) InvokeActionWithPatcher(action string, req request.Common, resp
 	req.SetRequestTime(time.Now())
 	resp.SetRequest(req)
 
+	if c.GetCredential() == nil {
+		return uerr.NewClientError(
+			uerr.ErrNullCredential,
+			fmt.Errorf("null credential error, please set it before request"),
+		)
+	}
+
+	if c.GetConfig() == nil {
+		return uerr.NewClientError(
+			uerr.ErrNullConfig,
+			fmt.Errorf("null config error, please set it before request"),
+		)
+	}
+
 	if c.credential.CanExpire && c.credential.IsExpired() {
 		return uerr.NewClientError(
 			uerr.ErrCredentialExpired,
@@ -165,9 +181,11 @@ func (c *Client) InvokeActionWithPatcher(action string, req request.Common, resp
 		}
 
 		err = c.unmarshalHTTPResponse(body, resp)
-
-		uuid := httpResp.GetHeaders().Get(headerKeyRequestUUID)
-		resp.SetRequestUUID(uuid)
+	}
+	// try to get request uuid
+	if httpResp != nil {
+		requestUUID := httpResp.GetHeaders().Get(headerKeyRequestUUID)
+		resp.SetRequestUUID(requestUUID)
 	}
 
 	// use response middle to build and convert response when response has been created.
