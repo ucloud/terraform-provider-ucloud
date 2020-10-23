@@ -1,8 +1,9 @@
-## 1.24.0 (Unreleased)
+## 1.25.0 (Unreleased)
+## 1.24.0 (2020-10-23)
 
 ENHANCEMENTS:
 
-* resource/ucloud_instance:  add `network_interface` to the argument in order to create and associate `eip` with the instance.[GH-85]
+* resource/ucloud_instance:  add `network_interface` to the argument in order to create and associate `eip` with the instance.([#85](https://github.com/ucloud/terraform-provider-ucloud/issues/85))
 
 ## 1.23.0 (2020-09-07)
 
