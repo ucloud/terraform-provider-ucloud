@@ -2,7 +2,7 @@
 
 ENHANCEMENTS:
 
-* resource/ucloud_instance: add `network_interface` to argument in order to create and associate eip with instance.
+* resource/ucloud_instance:  add `network_interface` to the argument in order to create and associate `eip` with the instance.[GH-85]
 
 ## 1.23.0 (2020-09-07)
 
