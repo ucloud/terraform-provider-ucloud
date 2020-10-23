@@ -6,6 +6,8 @@ import (
 	"runtime"
 	"strings"
 
+	uerr "github.com/ucloud/ucloud-sdk-go/ucloud/error"
+
 	"github.com/pkg/errors"
 
 	"github.com/ucloud/ucloud-sdk-go/private/protocol/http"
@@ -16,9 +18,11 @@ import (
 
 // SetupRequest will init request by client configuration
 func (c *Client) SetupRequest(req request.Common) request.Common {
-	cfg := c.GetConfig()
-
 	req.SetRetryable(true)
+	cfg := c.GetConfig()
+	if cfg == nil {
+		return req
+	}
 
 	// set optional client level variables
 	if len(req.GetRegion()) == 0 && len(cfg.Region) > 0 {
@@ -51,12 +55,7 @@ func (c *Client) buildHTTPRequest(req request.Common) (*http.HttpRequest, error)
 		return nil, errors.Errorf("convert request to map failed, %s", err)
 	}
 
-	// check credential information is available
 	credential := c.GetCredential()
-	if credential == nil {
-		return nil, errors.Errorf("invalid credential information, please set it before request.")
-	}
-
 	config := c.GetConfig()
 	httpReq := http.NewHttpRequest()
 	httpReq.SetURL(config.BaseUrl)
@@ -77,18 +76,22 @@ func (c *Client) buildHTTPRequest(req request.Common) (*http.HttpRequest, error)
 // unmarshalHTTPResponse will get body from http response and unmarshal it's data into response struct
 func (c *Client) unmarshalHTTPResponse(body []byte, resp response.Common) error {
 	if len(body) == 0 {
-		return nil
+		return uerr.NewEmptyResponseBodyError()
 	}
 
 	if r, ok := resp.(response.GenericResponse); ok {
 		m := make(map[string]interface{})
 		if err := json.Unmarshal(body, &m); err != nil {
-			return err
+			return uerr.NewResponseBodyError(err, string(body))
 		}
 		if err := r.SetPayload(m); err != nil {
-			return err
+			return uerr.NewResponseBodyError(err, string(body))
 		}
 	}
 
-	return json.Unmarshal(body, &resp)
+	if err := json.Unmarshal(body, &resp); err != nil {
+		return uerr.NewResponseBodyError(err, string(body))
+	}
+
+	return nil
 }

@@ -42,7 +42,9 @@ func resourceUCloudInstance() *schema.Resource {
 			diffValidateChargeTypeWithDuration,
 			diffValidateIsolationGroup,
 			diffValidateDataDisks,
+			diffValidateNetworkInterface,
 			diffValidateCPUPlatform,
+			diffValidateBootDiskTypeWithDataDisks,
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -176,6 +178,49 @@ func resourceUCloudInstance() *schema.Resource {
 						},
 					},
 				},
+			},
+
+			"network_interface": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MinItems: 1,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"eip_bandwidth": {
+							Type:         schema.TypeInt,
+							Required:     true,
+							ForceNew:     true,
+							ValidateFunc: validation.IntBetween(1, 800),
+						},
+
+						"eip_internet_type": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"bgp",
+								"international",
+							}, false),
+						},
+
+						"eip_charge_mode": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"traffic",
+								"bandwidth",
+							}, false),
+						},
+					},
+				},
+			},
+
+			"delete_eips_with_instance": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
 			},
 
 			"delete_disks_with_instance": {
@@ -439,12 +484,31 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 
 	if v, ok := d.GetOk("data_disks"); ok {
 		for _, item := range v.([]interface{}) {
+			disk, ok := item.(map[string]interface{})
+			if !ok {
+				return fmt.Errorf("error on parse data_disks when creating instance")
+			}
 			dataDisk := uhost.UHostDisk{}
 			dataDisk.IsBoot = ucloud.String("false")
-			disk := item.(map[string]interface{})
 			dataDisk.Size = ucloud.Int(disk["size"].(int))
 			dataDisk.Type = ucloud.String(upperCvt.unconvert(disk["type"].(string)))
 			req.Disks = append(req.Disks, dataDisk)
+		}
+	}
+
+	if v, ok := d.GetOk("network_interface"); ok {
+		for _, item := range v.([]interface{}) {
+			netIp, ok := item.(map[string]interface{})
+			if !ok {
+				return fmt.Errorf("error on parse network_interface when creating instance")
+			}
+			eip := uhost.CreateUHostInstanceParamNetworkInterface{}
+			eip.EIP = &uhost.CreateUHostInstanceParamNetworkInterfaceEIP{
+				Bandwidth:    ucloud.Int(netIp["eip_bandwidth"].(int)),
+				OperatorName: ucloud.String(upperCamelCvt.unconvert(netIp["eip_internet_type"].(string))),
+				PayMode:      ucloud.String(upperCamelCvt.unconvert(netIp["eip_charge_mode"].(string))),
+			}
+			req.NetworkInterface = append(req.NetworkInterface, eip)
 		}
 	}
 
@@ -475,7 +539,7 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 		if isStringIn("CloudInit", imageResp.Features) {
 			req.UserData = ucloud.String(base64.StdEncoding.EncodeToString([]byte(v.(string))))
 		} else {
-			return fmt.Errorf("error on creating instance, the image %s must have %q feature, got %#v", "CloudInit", imageId, imageResp.Features)
+			return fmt.Errorf("error on creating instance, the image %s must have %q feature, got %#v", imageId, "CloudInit", imageResp.Features)
 		}
 	}
 	req.MachineType = ucloud.String(strings.ToUpper(t.HostType))
@@ -864,6 +928,9 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 	memory := instance.Memory
 	cpu := instance.CPU
 
+	if cpu != 0 {
+		d.Set("instance_type", instanceTypeSetFunc(upperCvt.convert(instance.MachineType), cpu, memory/1024))
+	}
 	d.Set("root_password", d.Get("root_password"))
 	d.Set("isolation_group", instance.IsolationGroup)
 	d.Set("name", instance.Name)
@@ -875,7 +942,6 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 	d.Set("expire_time", timestampToString(instance.ExpireTime))
 	d.Set("auto_renew", boolCamelCvt.unconvert(instance.AutoRenew))
 	d.Set("remark", instance.Remark)
-	d.Set("instance_type", instanceTypeSetFunc(upperCvt.convert(instance.MachineType), cpu, memory/1024))
 	d.Set("cpu_platform", instance.CpuPlatform)
 
 	//in order to be compatible with returns null
@@ -957,6 +1023,9 @@ func resourceUCloudInstanceDelete(d *schema.ResourceData, meta interface{}) erro
 	deleReq.UHostId = ucloud.String(d.Id())
 	if v, ok := d.GetOkExists("delete_disks_with_instance"); ok {
 		deleReq.ReleaseUDisk = ucloud.Bool(v.(bool))
+	}
+	if v, ok := d.GetOkExists("delete_eips_with_instance"); ok {
+		deleReq.ReleaseEIP = ucloud.Bool(v.(bool))
 	}
 
 	return resource.Retry(15*time.Minute, func() *resource.RetryError {
@@ -1133,6 +1202,24 @@ func diffValidateBootDiskTypeWithDataDiskType(diff *schema.ResourceDiff, meta in
 	return nil
 }
 
+func diffValidateBootDiskTypeWithDataDisks(diff *schema.ResourceDiff, meta interface{}) error {
+	var bootDiskType string
+
+	if v, ok := diff.GetOk("boot_disk_type"); ok {
+		bootDiskType = v.(string)
+	} else {
+		bootDiskType = "local_normal"
+	}
+
+	if _, ok := diff.GetOk("data_disks"); ok {
+		if isStringIn(bootDiskType, []string{"local_normal", "local_ssd"}) {
+			return fmt.Errorf("the %q cannot be local data disk, when set %q, got %q", "boot_disk_type", "data_disks", bootDiskType)
+		}
+	}
+
+	return nil
+}
+
 func diffValidateChargeTypeWithDuration(diff *schema.ResourceDiff, meta interface{}) error {
 	if v, ok := diff.GetOkExists("duration"); ok && v.(int) == 0 {
 		chargeType := diff.Get("charge_type").(string)
@@ -1175,8 +1262,21 @@ func diffValidateDataDisks(diff *schema.ResourceDiff, meta interface{}) error {
 	return nil
 }
 
+func diffValidateNetworkInterface(diff *schema.ResourceDiff, meta interface{}) error {
+	if _, ok := diff.GetOk("network_interface"); ok {
+		if _, ok1 := diff.GetOkExists("delete_eips_with_instance"); !ok1 {
+			return fmt.Errorf("the argument %q is required when set %q", "delete_eips_with_instance", "network_interface")
+		}
+	}
+
+	return nil
+}
+
 func diffValidateCPUPlatform(diff *schema.ResourceDiff, meta interface{}) error {
-	t, _ := parseInstanceType(diff.Get("instance_type").(string))
+	t, err := parseInstanceType(diff.Get("instance_type").(string))
+	if err != nil {
+		return err
+	}
 	if v, ok := diff.GetOk("min_cpu_platform"); ok {
 		supportedCPUForOS := []string{"Intel/Auto", "Intel/CascadelakeR"}
 		if t.HostType == "os" && !isStringIn(v.(string), supportedCPUForOS) {

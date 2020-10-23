@@ -129,36 +129,9 @@ type PolicyBackendSet struct {
 
 	// 后端资源的实例名称
 	ResourceName string
-}
 
-/*
-ULBPolicySet - 内容转发详细列表
-*/
-type ULBPolicySet struct {
-
-	// 内容转发下rs的详细信息，参考PolicyBackendSet
-	BackendSet []PolicyBackendSet
-
-	// 内容转发匹配字段;默认内容转发类型下为空。
-	Match string
-
-	// 内容转发Id，默认内容转发类型下为空。
-	PolicyId string
-
-	// 内容转发优先级，范围[1,9999]，数字越大优先级越高。默认内容转发规则下为0。
-	PolicyPriority int
-
-	// 内容类型，枚举值：Custom -> 客户自定义；Default -> 默认内容转发
-	PolicyType string
-
-	// 默认内容转发类型下返回当前rs总数
-	TotalCount int
-
-	// 内容转发匹配字段的类型，枚举值：Domain -> 域名；Path -> 路径； 默认内容转发类型下为空
-	Type string
-
-	// 所属VServerId
-	VServerId string
+	// 所添加的后端资源的类型，枚举值：UHost -> 云主机；UPM -> 物理云主机； UDHost -> 私有专区主机；UDocker -> 容器；UHybrid->混合云主机；CUBE->Cube
+	ResourceType string
 }
 
 /*
@@ -171,6 +144,9 @@ type ULBBackendSet struct {
 
 	// 后端提供服务的实例启用与否，枚举值：0 禁用 1 启用
 	Enabled int
+
+	// 是否为backup，只有当vserver的Backup属性为1时才会有此字段，说明：0：主rs1：备rs
+	IsBackup int
 
 	// 后端提供服务的端口
 	Port int
@@ -207,24 +183,33 @@ type ULBBackendSet struct {
 }
 
 /*
-ULBIPSet - DescribeULB
+ULBPolicySet - 内容转发详细列表
 */
-type ULBIPSet struct {
+type ULBPolicySet struct {
 
-	// 弹性IP的带宽值（暂未对外开放）
-	Bandwidth int
+	// 内容转发下rs的详细信息，参考PolicyBackendSet
+	BackendSet []PolicyBackendSet
 
-	// 弹性IP的带宽类型，枚举值：1 表示是共享带宽，0 普通带宽类型（暂未对外开放）
-	BandwidthType int
+	// 内容转发匹配字段;默认内容转发类型下为空。
+	Match string
 
-	// 弹性IP地址
-	EIP string
+	// 内容转发Id，默认内容转发类型下为空。
+	PolicyId string
 
-	// 弹性IP的ID
-	EIPId string
+	// 内容转发优先级，范围[1,9999]，数字越大优先级越高。默认内容转发规则下为0。
+	PolicyPriority int
 
-	// 弹性IP的运营商信息，枚举值为：  Bgp：BGP IP International：国际IP
-	OperatorName string
+	// 内容类型，枚举值：Custom -> 客户自定义；Default -> 默认内容转发
+	PolicyType string
+
+	// 默认内容转发类型下返回当前rs总数
+	TotalCount int
+
+	// 内容转发匹配字段的类型，枚举值：Domain -> 域名；Path -> 路径； 默认内容转发类型下为空
+	Type string
+
+	// 所属VServerId
+	VServerId string
 }
 
 /*
@@ -250,7 +235,7 @@ type ULBVServerSet struct {
 	// VServer负载均衡的模式，枚举值：Roundrobin -> 轮询;Source -> 源地址；ConsistentHash -> 一致性哈希；SourcePort -> 源地址（计算端口）；ConsistentHashPort -> 一致性哈希（计算端口）。
 	Method string
 
-	// 健康检查类型，枚举值：Port -> 端口检查；Path -> 路径检查；
+	// 健康检查类型，枚举值：Port -> 端口检查；Path -> 路径检查；Ping -> Ping探测， 请求代理型默认值为Port，其中TCP协议仅支持Port，其他协议支持Port和Path; 报文转发型TCP协议仅支持Port，UDP协议支持Ping和Port
 	MonitorType string
 
 	// 根据MonitorType确认； 当MonitorType为Port时，此字段无意义。当MonitorType为Path时，代表HTTP检查路径
@@ -282,6 +267,54 @@ type ULBVServerSet struct {
 }
 
 /*
+LoggerSet - ulb日志信息
+*/
+type LoggerSet struct {
+
+	// ulb日志上传的bucket
+	BucketName string
+
+	// 上传到bucket使用的token的tokenid
+	TokenID string
+
+	// bucket的token名称
+	TokenName string
+}
+
+/*
+ULBIPSet - DescribeULB
+*/
+type ULBIPSet struct {
+
+	// 弹性IP的带宽值（暂未对外开放）
+	Bandwidth int
+
+	// 弹性IP的带宽类型，枚举值：1 表示是共享带宽，0 普通带宽类型（暂未对外开放）
+	BandwidthType int
+
+	// 弹性IP地址
+	EIP string
+
+	// 弹性IP的ID
+	EIPId string
+
+	// 弹性IP的运营商信息，枚举值为：  Bgp：BGP IP International：国际IP
+	OperatorName string
+}
+
+/*
+FirewallSet - ulb防火墙信息
+*/
+type FirewallSet struct {
+
+	// 防火墙ID
+	FirewallId string
+
+	// 防火墙名称
+	FirewallName string
+}
+
+/*
 ULBSet - DescribeULB
 */
 type ULBSet struct {
@@ -298,11 +331,26 @@ type ULBSet struct {
 	// ULB的创建时间，格式为Unix Timestamp
 	CreateTime int
 
+	// ULB是否开启日志功能。0，关闭；1，开启
+	EnableLog int
+
 	// ULB的到期时间，格式为Unix Timestamp
 	ExpireTime int
 
+	// 防火墙信息，具体结构见下方 FirewallSet
+	FirewallSet []FirewallSet
+
 	// ULB的详细信息列表，具体结构见下方 ULBIPSet
 	IPSet []ULBIPSet
+
+	// ULB ip类型，枚举值：IPv6 / IPv4 （内部测试，暂未对外开放）
+	IPVersion string
+
+	// ULB 监听器类型，枚举值：RequestProxy，请求代理； PacketsTransmit ，报文转发；Comprehensive，兼容型；Pending，未定型
+	ListenType string
+
+	// 日志功能相关信息，仅当EnableLog为true时会返回，具体结构见下方 LoggerSet
+	LogSet LoggerSet
 
 	// 负载均衡的资源名称
 	Name string
@@ -336,4 +384,67 @@ type ULBSet struct {
 
 	// 负载均衡实例中存在的VServer实例列表，具体结构见下方 ULBVServerSet
 	VServerSet []ULBVServerSet
+}
+
+/*
+ULBSimpleSet - ulb简明信息
+*/
+type ULBSimpleSet struct {
+
+	// 带宽
+	Bandwidth int
+
+	// 带宽类型，枚举值为： 0，非共享带宽； 1，共享带宽
+	BandwidthType int
+
+	// ULB 所属的业务组ID
+	BusinessId string
+
+	// ULB的创建时间，格式为Unix Timestamp
+	CreateTime int
+
+	// ULB是否开启日志功能。0，关闭；1，开启
+	EnableLog int
+
+	// 防火墙信息，具体结构见下方 FirewallSet
+	FirewallSet []FirewallSet
+
+	// ULB的详细信息列表，具体结构见下方 ULBIPSet
+	IPSet []ULBIPSet
+
+	// ULB提供服务的IP类型。枚举值，“IPv4”,"IPv6"。默认为“IPv4”
+	IPVersion string
+
+	// ULB 监听器类型，枚举值：RequestProxy，请求代理； PacketsTransmit ，报文转发；Comprehensive，兼容型；Pending，未定型
+	ListenType string
+
+	// 日志功能相关信息，仅当EnableLog为true时会返回，具体结构见下方 LoggerSet
+	LogSet LoggerSet
+
+	// 负载均衡的资源名称
+	Name string
+
+	// ULB的内网IP，当ULBType为OuterMode时，该值为空
+	PrivateIP string
+
+	// 负载均衡的备注
+	Remark string
+
+	// ULB 为 InnerMode 时，ULB 所属的子网ID
+	SubnetId string
+
+	// 负载均衡的业务组名称
+	Tag string
+
+	// 负载均衡的资源ID
+	ULBId string
+
+	// ULB 的类型（InnerMode or OuterMode）
+	ULBType string
+
+	// ULB所在的VPC的ID
+	VPCId string
+
+	// ulb下vserver数量
+	VServerCount int
 }

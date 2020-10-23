@@ -287,13 +287,12 @@ func dataSourceUCloudInstancesSave(d *schema.ResourceData, instances []uhost.UHo
 		}
 		memory := instance.Memory
 		cpu := instance.CPU
-		data = append(data, map[string]interface{}{
+		dataMap := map[string]interface{}{
 			"availability_zone": instance.Zone,
 			"id":                instance.UHostId,
 			"name":              instance.Name,
 			"cpu":               cpu,
 			"memory":            memory / 1024,
-			"instance_type":     instanceTypeSetFunc(upperCvt.convert(instance.MachineType), cpu, memory/1024),
 			"create_time":       timestampToString(instance.CreateTime),
 			"expire_time":       timestampToString(instance.ExpireTime),
 			"auto_renew":        boolCamelCvt.unconvert(instance.AutoRenew),
@@ -306,7 +305,13 @@ func dataSourceUCloudInstancesSave(d *schema.ResourceData, instances []uhost.UHo
 			"private_ip":        privateIp,
 			"vpc_id":            vpcId,
 			"subnet_id":         subnetId,
-		})
+		}
+
+		if cpu != 0 {
+			dataMap["instance_type"] = instanceTypeSetFunc(upperCvt.convert(instance.MachineType), cpu, memory/1024)
+		}
+
+		data = append(data, dataMap)
 	}
 
 	d.SetId(hashStringArray(ids))
