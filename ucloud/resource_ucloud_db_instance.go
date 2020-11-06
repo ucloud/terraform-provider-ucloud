@@ -429,15 +429,16 @@ func resourceUCloudDBInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 		newDbType, _ := parseDBInstanceType(newType.(string))
 		if oldDbType.Memory != newDbType.Memory {
 			sizeReq.MemoryLimit = ucloud.Int(newDbType.Memory * 1000)
+			sizeReq.DiskSpace = ucloud.Int(d.Get("instance_storage").(int))
 			isSizeChanged = true
 		}
 	}
 
 	if d.HasChange("instance_storage") && !d.IsNewResource() {
 		dbType, _ := parseDBInstanceType(d.Get("instance_type").(string))
-		instanceStorage := d.Get("instance_storage").(int)
-		sizeReq.DiskSpace = ucloud.Int(instanceStorage)
+		sizeReq.DiskSpace = ucloud.Int(d.Get("instance_storage").(int))
 		sizeReq.InstanceType = ucloud.String(dbTypeCvt.convert(dbType.Type))
+		sizeReq.MemoryLimit = ucloud.Int(dbType.Memory * 1000)
 		isSizeChanged = true
 	}
 
