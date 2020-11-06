@@ -1,4 +1,9 @@
-## 1.25.0 (Unreleased)
+## 1.24.1 (Unreleased)
+
+BUG FIXES:
+
+* resource/ucloud_db_instance: Fix the error about updating only one of `instance_storage` and `instance_type`. [GH-86]
+
 ## 1.24.0 (2020-10-23)
 
 ENHANCEMENTS:
