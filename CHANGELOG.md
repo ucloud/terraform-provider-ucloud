@@ -1,8 +1,9 @@
-## 1.24.1 (Unreleased)
+## 1.25.0 (Unreleased)
+## 1.24.1 (2020-11-06)
 
 BUG FIXES:
 
-* resource/ucloud_db_instance: Fix the error about updating only one of `instance_storage` and `instance_type`. [GH-86]
+* resource/ucloud_db_instance: Fix the error about updating only one of `instance_storage` and `instance_type`. ([#86](https://github.com/ucloud/terraform-provider-ucloud/issues/86))
 
 ## 1.24.0 (2020-10-23)
 
