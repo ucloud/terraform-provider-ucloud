@@ -154,6 +154,9 @@ func resourceUCloudLBListenerCreate(d *schema.ResourceData, meta interface{}) er
 
 	req := conn.NewCreateVServerRequest()
 	if v, ok := d.GetOk("listen_type"); ok {
+		if isStringIn(upperCamelCvt.convert(lbSet.ListenType), []string{"request_proxy", "packets_transmit"}) && upperCamelCvt.convert(lbSet.ListenType) != v.(string) {
+			return fmt.Errorf("the %q of lb listenr must be same as the lb's %q, got %q", "listen_type", upperCamelCvt.convert(lbSet.ListenType), v.(string))
+		}
 		err := availableLBChoices.validate(lbSet.ULBType, protocol, v.(string))
 		if err != nil {
 			return err
@@ -161,9 +164,13 @@ func resourceUCloudLBListenerCreate(d *schema.ResourceData, meta interface{}) er
 		req.ListenType = ucloud.String(upperCamelCvt.unconvert(v.(string)))
 	} else {
 		if choices := availableLBChoices.availableChoices(lbSet.ULBType, protocol); len(choices) == 0 {
-			return fmt.Errorf("The protocol can only be one of %q, %q when lb is intranet, got %q", "tcp", "udp", protocol)
+			return fmt.Errorf("the protocol can only be one of %q, %q when lb is intranet, got %q", "tcp", "udp", protocol)
 		} else {
-			req.ListenType = ucloud.String(upperCamelCvt.unconvert(choices[0]))
+			if isStringIn(upperCamelCvt.convert(lbSet.ListenType), []string{"request_proxy", "packets_transmit"}) {
+				req.ListenType = ucloud.String(lbSet.ListenType)
+			} else {
+				req.ListenType = ucloud.String(upperCamelCvt.unconvert(choices[0]))
+			}
 		}
 	}
 

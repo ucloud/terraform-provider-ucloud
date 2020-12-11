@@ -1,4 +1,10 @@
 ## 1.25.0 (Unreleased)
+
+ENHANCEMENTS:
+
+* resource/ucloud_lb: add `listen_type` to the argument. [GH-88]
+* datasource/ucloud_subnets: add `vpc_id` to the attributes. [GH-88]
+
 ## 1.24.1 (2020-11-06)
 
 BUG FIXES:

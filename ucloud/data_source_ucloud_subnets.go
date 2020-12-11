@@ -57,7 +57,6 @@ func dataSourceUCloudSubnets() *schema.Resource {
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-
 						"id": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -84,6 +83,11 @@ func dataSourceUCloudSubnets() *schema.Resource {
 						},
 
 						"create_time": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
+						"vpc_id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -158,11 +162,11 @@ func dataSourceUCloudSubnetsRead(d *schema.ResourceData, meta interface{}) error
 }
 
 func dataSourceUCloudSubnetsSave(d *schema.ResourceData, subnets []vpc.VPCSubnetInfoSet) error {
-	ids := []string{}
-	data := []map[string]interface{}{}
+	ids := make([]string, 0)
+	data := make([]map[string]interface{}, 0)
 
 	for _, subnet := range subnets {
-		ids = append(ids, string(subnet.SubnetId))
+		ids = append(ids, subnet.SubnetId)
 
 		data = append(data, map[string]interface{}{
 			"id":          subnet.SubnetId,
@@ -171,6 +175,7 @@ func dataSourceUCloudSubnetsSave(d *schema.ResourceData, subnets []vpc.VPCSubnet
 			"remark":      subnet.Remark,
 			"tag":         subnet.Tag,
 			"cidr_block":  fmt.Sprintf("%s/%s", subnet.Subnet, subnet.Netmask),
+			"vpc_id":      subnet.VPCId,
 		})
 	}
 
@@ -182,7 +187,9 @@ func dataSourceUCloudSubnetsSave(d *schema.ResourceData, subnets []vpc.VPCSubnet
 	}
 
 	if outputFile, ok := d.GetOk("output_file"); ok && outputFile.(string) != "" {
-		writeToFile(outputFile.(string), data)
+		if err := writeToFile(outputFile.(string), data); err != nil {
+			return err
+		}
 	}
 
 	return nil

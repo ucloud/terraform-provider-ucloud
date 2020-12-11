@@ -581,7 +581,7 @@ func (c *UCloudClient) waitActiveStandbyRedisRunning(id string) error {
 		}
 
 		if resp.State != statusRunning {
-			return nil, statusPending, nil
+			return resp, statusPending, nil
 		}
 		return resp, statusInitialized, nil
 	}
@@ -600,7 +600,7 @@ func (c *UCloudClient) waitDistributedRedisRunning(id string) error {
 		}
 
 		if resp.State != statusRunning {
-			return nil, statusPending, nil
+			return resp, statusPending, nil
 		}
 		return resp, statusInitialized, nil
 	}

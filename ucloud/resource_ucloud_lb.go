@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -19,6 +21,9 @@ func resourceUCloudLB() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
+		CustomizeDiff: customdiff.All(
+			diffValidateInternalWithSubnetId,
+		),
 
 		Schema: map[string]*schema.Schema{
 			"internal": {
@@ -81,6 +86,17 @@ func resourceUCloudLB() *schema.Resource {
 				Computed: true,
 			},
 
+			"listen_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"request_proxy",
+					"packets_transmit",
+				}, false),
+			},
+
 			"ip_set": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -123,6 +139,10 @@ func resourceUCloudLBCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := client.ulbconn
 
 	req := conn.NewCreateULBRequest()
+
+	if v, ok := d.GetOk("listen_type"); ok {
+		req.ListenType = ucloud.String(upperCamelCvt.unconvert(v.(string)))
+	}
 
 	if v, ok := d.GetOk("name"); ok {
 		req.ULBName = ucloud.String(v.(string))
@@ -265,6 +285,11 @@ func resourceUCloudLBRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("error on reading lb %q, %s", d.Id(), err)
 	}
 
+	listenType := upperCamelCvt.convert(lbSet.ListenType)
+	if listenType == "request_proxy" || listenType == "packets_transmit" {
+		d.Set("listen_type", listenType)
+	}
+
 	d.Set("name", lbSet.Name)
 	d.Set("tag", lbSet.Tag)
 	d.Set("remark", lbSet.Remark)
@@ -350,4 +375,22 @@ func lbWaitForState(client *UCloudClient, id string) *resource.StateChangeConf {
 			return eip, statusInitialized, nil
 		},
 	}
+}
+
+func diffValidateInternalWithSubnetId(diff *schema.ResourceDiff, meta interface{}) error {
+	var internal bool
+	var subnetId string
+
+	if v, ok := diff.GetOk("internal"); ok {
+		internal = v.(bool)
+	}
+	if v, ok := diff.GetOk("subnet_id"); ok {
+		subnetId = v.(string)
+	}
+
+	if !internal && subnetId != "" {
+		return fmt.Errorf("the lb instance cannot set %q, When the %q is true", "subnet_id", "internal")
+	}
+
+	return nil
 }

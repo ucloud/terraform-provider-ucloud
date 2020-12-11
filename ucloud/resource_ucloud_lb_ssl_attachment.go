@@ -65,7 +65,7 @@ func resourceUCloudLBSSLAttachmentCreate(d *schema.ResourceData, meta interface{
 			sslSet, err := client.describeLBSSLAttachmentById(sslId, lbId, listenerId)
 			if err != nil {
 				if isNotFoundError(err) {
-					return sslSet, statusPending, nil
+					return nil, statusPending, nil
 				}
 				return nil, "", err
 			}
