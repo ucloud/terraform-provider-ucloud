@@ -1,9 +1,10 @@
-## 1.25.0 (Unreleased)
+## 1.26.0 (Unreleased)
+## 1.25.0 (2020-12-11)
 
 ENHANCEMENTS:
 
-* resource/ucloud_lb: add `listen_type` to the argument. [GH-88]
-* datasource/ucloud_subnets: add `vpc_id` to the attributes. [GH-88]
+* resource/ucloud_lb: add `listen_type` to the argument. ([#88](https://github.com/ucloud/terraform-provider-ucloud/issues/88))
+* datasource/ucloud_subnets: add `vpc_id` to the attributes. ([#88](https://github.com/ucloud/terraform-provider-ucloud/issues/88))
 
 ## 1.24.1 (2020-11-06)
 
