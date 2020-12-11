@@ -31,6 +31,7 @@ The following arguments are supported:
 * `tag` - (Optional) A tag assigned to load balancer, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
 * `remark` - (Optional) The remarks of the load balancer. (Default: `""`).
 * `security_group` - (Optional) The ID of the associated security group. The security_group only takes effect for ULB instances of request_proxy mode and extranet mode at present.
+* `listen_type` - (Optional, ForceNew) The type of listener. Possible values are `request_proxy` and `packets_transmit`. When `packets_transmit` was specified, you need to config the instances by yourself if the instances attach to the load balancer. You may refer to [configuration instruction](https://docs.ucloud.cn/network/ulb/fast/createulb/vservertype).
 
 ## Attributes Reference
 

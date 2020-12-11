@@ -48,3 +48,4 @@ The attribute (`subnets`) support the following:
 * `create_time` - The time of creation of Subnet, formatted in RFC3339 time string.
 * `remark` - The remark of the Subnet.
 * `tag` - A tag assigned to Subnet.
+* `vpc_id` - The id of the VPC that the desired Subnet belongs to.

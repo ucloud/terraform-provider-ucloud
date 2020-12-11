@@ -74,9 +74,9 @@ func (c *UCloudClient) describeActiveStandbyMemcacheById(id string) (*pumem.UMem
 
 func waitForMemoryInstance(refresh func() (interface{}, string, error)) error {
 	conf := resource.StateChangeConf{
-		Timeout:    5 * time.Minute,
-		Delay:      2 * time.Second,
-		MinTimeout: 1 * time.Second,
+		Timeout:    10 * time.Minute,
+		Delay:      3 * time.Second,
+		MinTimeout: 2 * time.Second,
 		Target:     []string{statusInitialized},
 		Pending:    []string{statusPending},
 		Refresh:    refresh,

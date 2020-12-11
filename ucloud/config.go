@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"time"
 
 	"github.com/ucloud/ucloud-sdk-go/external"
 	"github.com/ucloud/ucloud-sdk-go/private/protocol/http"
@@ -62,7 +63,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 	// enable auto retry with http/connection error
 	cfg.MaxRetries = c.MaxRetries
 	cfg.LogLevel = log.PanicLevel
-	cfg.UserAgent = "Terraform-UCloud/1.24.1"
+	cfg.UserAgent = "Terraform-UCloud/1.25.0"
 	cfg.BaseUrl = c.BaseURL
 
 	cred := auth.NewCredential()
@@ -116,19 +117,22 @@ func (c *Config) Client() (*UCloudClient, error) {
 	}
 
 	// initialize client connections
-	client.uhostconn = uhost.NewClient(&cfg, &cred)
 	client.unetconn = unet.NewClient(&cfg, &cred)
 	client.ulbconn = ulb.NewClient(&cfg, &cred)
 	client.vpcconn = vpc.NewClient(&cfg, &cred)
 	client.uaccountconn = uaccount.NewClient(&cfg, &cred)
 	client.udiskconn = udisk.NewClient(&cfg, &cred)
 	client.udpnconn = udpn.NewClient(&cfg, &cred)
-	client.udbconn = udb.NewClient(&cfg, &cred)
 	client.umemconn = umem.NewClient(&cfg, &cred)
 	client.ipsecvpnClient = ipsecvpn.NewClient(&cfg, &cred)
 
 	// initialize client connections for private usage
 	client.pumemconn = pumem.NewClient(&cfg, &cred)
+
+	longtimeCfg := cfg
+	longtimeCfg.Timeout = 60 * time.Second
+	client.udbconn = udb.NewClient(&longtimeCfg, &cred)
+	client.uhostconn = uhost.NewClient(&longtimeCfg, &cred)
 
 	if cloudShellCredHandler != nil {
 		client.uhostconn.AddHttpRequestHandler(cloudShellCredHandler)

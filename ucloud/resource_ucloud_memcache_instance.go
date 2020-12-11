@@ -311,7 +311,7 @@ func (c *UCloudClient) waitActiveStandbyMemcacheRunning(id string) error {
 		}
 
 		if resp.State != statusRunning {
-			return nil, statusPending, nil
+			return resp, statusPending, nil
 		}
 		return resp, statusInitialized, nil
 	}
