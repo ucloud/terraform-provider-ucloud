@@ -389,7 +389,7 @@ func diffValidateInternalWithSubnetId(diff *schema.ResourceDiff, meta interface{
 	}
 
 	if !internal && subnetId != "" {
-		return fmt.Errorf("the lb instance cannot set %q, When the %q is true", "subnet_id", "internal")
+		return fmt.Errorf("the lb instance cannot set %q, When the %q is false as default", "subnet_id", "internal")
 	}
 
 	return nil
