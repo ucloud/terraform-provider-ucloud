@@ -1,4 +1,10 @@
-## 1.26.0 (Unreleased)
+## 1.25.1 (Unreleased)
+
+BUG FIXES:
+
+* resource/ucloud_lb: Fix the validation about `internal` and `subnet_id`. [GH-90]
+* resource/ucloud_redis_instance: Fix the validation about `engine_version`.[GH-90]
+
 ## 1.25.0 (2020-12-11)
 
 ENHANCEMENTS:
