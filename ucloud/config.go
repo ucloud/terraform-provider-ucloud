@@ -9,6 +9,8 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/ucloud/ucloud-sdk-go/services/udpn"
+
 	"github.com/ucloud/ucloud-sdk-go/external"
 	"github.com/ucloud/ucloud-sdk-go/private/protocol/http"
 	pumem "github.com/ucloud/ucloud-sdk-go/private/services/umem"
@@ -16,7 +18,6 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/services/uaccount"
 	"github.com/ucloud/ucloud-sdk-go/services/udb"
 	"github.com/ucloud/ucloud-sdk-go/services/udisk"
-	"github.com/ucloud/ucloud-sdk-go/services/udpn"
 	"github.com/ucloud/ucloud-sdk-go/services/uhost"
 	"github.com/ucloud/ucloud-sdk-go/services/ulb"
 	"github.com/ucloud/ucloud-sdk-go/services/umem"
@@ -122,7 +123,6 @@ func (c *Config) Client() (*UCloudClient, error) {
 	client.vpcconn = vpc.NewClient(&cfg, &cred)
 	client.uaccountconn = uaccount.NewClient(&cfg, &cred)
 	client.udiskconn = udisk.NewClient(&cfg, &cred)
-	client.udpnconn = udpn.NewClient(&cfg, &cred)
 	client.umemconn = umem.NewClient(&cfg, &cred)
 	client.ipsecvpnClient = ipsecvpn.NewClient(&cfg, &cred)
 
@@ -133,6 +133,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 	longtimeCfg.Timeout = 60 * time.Second
 	client.udbconn = udb.NewClient(&longtimeCfg, &cred)
 	client.uhostconn = uhost.NewClient(&longtimeCfg, &cred)
+	client.udpnconn = udpn.NewClient(&longtimeCfg, &cred)
 
 	if cloudShellCredHandler != nil {
 		client.uhostconn.AddHttpRequestHandler(cloudShellCredHandler)

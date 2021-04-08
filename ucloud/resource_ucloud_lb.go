@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -21,10 +19,6 @@ func resourceUCloudLB() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
-		CustomizeDiff: customdiff.All(
-			diffValidateInternalWithSubnetId,
-		),
-
 		Schema: map[string]*schema.Schema{
 			"internal": {
 				Type:     schema.TypeBool,
@@ -375,22 +369,4 @@ func lbWaitForState(client *UCloudClient, id string) *resource.StateChangeConf {
 			return eip, statusInitialized, nil
 		},
 	}
-}
-
-func diffValidateInternalWithSubnetId(diff *schema.ResourceDiff, meta interface{}) error {
-	var internal bool
-	var subnetId string
-
-	if v, ok := diff.GetOk("internal"); ok {
-		internal = v.(bool)
-	}
-	if v, ok := diff.GetOk("subnet_id"); ok {
-		subnetId = v.(string)
-	}
-
-	if !internal && subnetId != "" {
-		return fmt.Errorf("the lb instance cannot set %q, When the %q is true", "subnet_id", "internal")
-	}
-
-	return nil
 }
