@@ -2,7 +2,7 @@
 
 ENHANCEMENTS:
 
-* Update for go Version 0.16. [GH-92]
+* Update for go Version 1.16. [GH-92]
 * the release support `darwin_arm64`. [GH-92]
 
 ## 1.25.1 (2021-04-08)
