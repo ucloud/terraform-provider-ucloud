@@ -22,7 +22,6 @@ func resourceUCloudDisk() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
-			diffValidateDiskTypeWithZone,
 			customdiff.ValidateChange("disk_size", diffValidateDiskSize),
 		),
 
@@ -362,17 +361,6 @@ func diskWaitForState(client *UCloudClient, diskId string) *resource.StateChange
 			return diskSet, state, nil
 		},
 	}
-}
-
-func diffValidateDiskTypeWithZone(diff *schema.ResourceDiff, v interface{}) error {
-	diskType := diff.Get("disk_type").(string)
-	zone := diff.Get("availability_zone").(string)
-
-	if diskType == "rssd_data_disk" && zone != "cn-bj2-05" {
-		return fmt.Errorf("the disk type about %q only be supported in %q, got %q", "rssd_data_disk", "cn-bj2-05", zone)
-	}
-
-	return nil
 }
 
 func diffValidateDiskSize(old, new, meta interface{}) error {

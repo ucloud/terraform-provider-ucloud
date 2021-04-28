@@ -127,18 +127,12 @@ var instanceTypeScaleMap = map[string]int{
 	"highmem":  8 * 1024,
 }
 
-var availableHostTypes = []string{"n"}
-
 func parseInstanceTypeByCustomize(splited ...string) (*instanceType, error) {
 	if len(splited) != 4 {
 		return nil, fmt.Errorf("instance type is invalid, expected like n-customized-1-2")
 	}
 
 	hostType := splited[0]
-	err := checkStringIn(hostType, availableHostTypes)
-	if err != nil {
-		return nil, fmt.Errorf("instance type is invalid, the host type of customized %q can only be %q", "instance_type", "n")
-	}
 
 	hostScaleType := splited[1]
 
@@ -169,14 +163,6 @@ func parseInstanceTypeByCustomize(splited ...string) (*instanceType, error) {
 			"the Mode can be highcpu, basic, standard, highmem when the ratio of cpu to memory is 1:1, 1:2, 1:4, 1:8", "n-Mode-CPU", "n-standard-1")
 	}
 
-	if cpu < 1 || 32 < cpu {
-		return nil, fmt.Errorf("expected cpu to be in the range (1 - 32), got %d", cpu)
-	}
-
-	if memory < 1 || 128 < memory {
-		return nil, fmt.Errorf("expected memory to be in the range (1 - 128),got %d", memory)
-	}
-
 	t := &instanceType{}
 	t.HostType = hostType
 	t.HostScaleType = hostScaleType
@@ -185,20 +171,12 @@ func parseInstanceTypeByCustomize(splited ...string) (*instanceType, error) {
 	return t, nil
 }
 
-var availableOutstandingCpu = []int{1, 2, 4, 8, 16, 32, 64, 96}
-var availableOutstandingSCpu = []int{1, 2, 4, 8, 16, 32, 64}
-
 func parseInstanceTypeByNormal(splited ...string) (*instanceType, error) {
 	if len(splited) != 3 {
 		return nil, fmt.Errorf("instance type is invalid, expected like n-standard-1")
 	}
 
 	hostType := splited[0]
-	err := checkStringIn(hostType, []string{"n", "o", "c", "os"})
-	if err != nil {
-		return nil, fmt.Errorf("instance type is invalid, the host type of %q must be one of %#v", "instance_type", []string{"n", "o", "c", "os"})
-	}
-
 	hostScaleType := splited[1]
 
 	if scale, ok := instanceTypeScaleMap[hostScaleType]; !ok {
@@ -212,24 +190,6 @@ func parseInstanceTypeByNormal(splited ...string) (*instanceType, error) {
 
 		if cpu != 1 && (cpu%2) != 0 {
 			return nil, fmt.Errorf("expected the number of cores of cpu must be divisible by 2 without a remainder (except single core), got %d", cpu)
-		}
-
-		if hostType == "o" {
-			if err := checkIntIn(cpu, availableOutstandingCpu); err != nil {
-				return nil, fmt.Errorf("expected cpu of `o` instance type must be one of %#v, got %q", availableOutstandingCpu, cpu)
-			}
-		} else if hostType == "os" {
-			if err := checkIntIn(cpu, availableOutstandingSCpu); err != nil {
-				return nil, fmt.Errorf("expected cpu of `os` instance type must be one of %#v, got %q", availableOutstandingSCpu, cpu)
-			}
-		} else {
-			if hostScaleType == "highmem" && cpu > 16 {
-				return nil, fmt.Errorf("expected cpu to be in the range (1 - 16) for `N` and `C` highmem instance type, got %d", cpu)
-			}
-
-			if cpu < 1 || 32 < cpu {
-				return nil, fmt.Errorf("expected cpu to be in the range (1 - 32) for `N` and `C` instance type, got %d", cpu)
-			}
 		}
 
 		memory := cpu * scale
@@ -279,8 +239,6 @@ type dbInstanceType struct {
 
 var availableDBEngine = []string{"mysql", "percona"}
 var availableDBTypes = []string{"ha"}
-var availableDBMemory = []int{1, 2, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256, 320}
-var availableNVMeDBMemory = []int{2, 4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256, 320}
 
 func parseDBInstanceType(s string) (*dbInstanceType, error) {
 	splited := strings.Split(s, "-")
@@ -305,9 +263,6 @@ func parseDBInstanceType(s string) (*dbInstanceType, error) {
 		if err != nil {
 			return nil, fmt.Errorf("db instance type is invalid, the memory %s", err)
 		}
-		if err := checkIntIn(memory, availableDBMemory); err != nil {
-			return nil, fmt.Errorf("db instance type is invalid, memory is out of range for sata ssd db instance, %s", err)
-		}
 	}
 
 	if len(splited) == 4 {
@@ -318,9 +273,6 @@ func parseDBInstanceType(s string) (*dbInstanceType, error) {
 		memory, err = strconv.Atoi(splited[3])
 		if err != nil {
 			return nil, fmt.Errorf("db instance type is invalid, the memory %s", err)
-		}
-		if err := checkIntIn(memory, availableNVMeDBMemory); err != nil {
-			return nil, fmt.Errorf("db instance type is invalid, memory is out of range for nvme db instance, %s", err)
 		}
 	}
 
@@ -340,7 +292,6 @@ type redisInstanceType struct {
 }
 
 var availableRedisType = []string{"master", "distributed"}
-var availableMasterRedisMemory = []int{1, 2, 4, 6, 8, 12, 16, 24, 32, 40, 52, 64}
 
 func parseRedisInstanceType(s string) (*redisInstanceType, error) {
 	splited := strings.Split(s, "-")
@@ -363,22 +314,6 @@ func parseRedisInstanceType(s string) (*redisInstanceType, error) {
 		return nil, fmt.Errorf("redis instance type is invalid, the memory of instance type %s", err)
 	}
 
-	if engine == "redis" && t == "master" {
-		if err := checkIntIn(memory, availableMasterRedisMemory); err != nil {
-			return nil, fmt.Errorf("redis instance type is invalid, memory of instance type is out of range, %s", err)
-		}
-	} else if engine == "redis" && t == "distributed" {
-		if memory < 16 || 1000 < memory {
-			return nil, fmt.Errorf("redis instance type is invalid, memory of instance type should between 16-1000, got %v", memory)
-		}
-
-		if memory%4 != 0 {
-			return nil, fmt.Errorf("redis instance type is invalid, memory of instance type should multiple of 4, got %v", memory)
-		}
-	} else {
-		return nil, fmt.Errorf("redis instance type is invalid, excepted redis.master/redis.distributed, got %q", fmt.Sprintf("%s.%s", engine, t))
-	}
-
 	return &redisInstanceType{
 		Engine: engine,
 		Type:   t,
@@ -391,8 +326,6 @@ type memcacheInstanceType struct {
 	Type   string
 	Memory int
 }
-
-var availableMasterMemcacheMemory = []int{1, 2, 4, 8, 16, 24, 32}
 
 func parseMemcacheInstanceType(s string) (*memcacheInstanceType, error) {
 	splited := strings.Split(s, "-")
@@ -413,10 +346,6 @@ func parseMemcacheInstanceType(s string) (*memcacheInstanceType, error) {
 	memory, err := strconv.Atoi(splited[2])
 	if err != nil {
 		return nil, fmt.Errorf("memcache instance type is invalid, the memory of instance type %s", err)
-	}
-
-	if err := checkIntIn(memory, availableMasterMemcacheMemory); err != nil {
-		return nil, fmt.Errorf("memcache instance type is invalid, memory of instance type is out of range, %s", err)
 	}
 
 	return &memcacheInstanceType{

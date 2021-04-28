@@ -4,6 +4,8 @@ ENHANCEMENTS:
 
 * Update for go Version 1.16. [GH-92]
 * the release support `darwin_arm64`. [GH-92]
+* resource/ucloud_redis_instance: add the version `6.0` of the `engine_version` supported. [GH-93]
+* resource/ucloud_disk: open the usage restrictions of `rssd_data_disk`. [GH-93]
 
 ## 1.25.1 (2021-04-08)
 

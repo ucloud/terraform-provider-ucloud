@@ -32,7 +32,6 @@ func resourceUCloudDBInstance() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
-			diffValidateDBMemoryWithInstanceStorage,
 			diffValidateDBEngineAndEngineVersion,
 			diffValidateDBStandbyZone,
 			customdiff.ValidateChange("instance_type", diffValidateDBInstanceType),
@@ -663,40 +662,6 @@ func diffValidateDBInstanceType(old, new, meta interface{}) error {
 		if newType.Type != oldType.Type {
 			return fmt.Errorf("update db instance_type about type: %q to %q of %q not be allowed, please rebuild instance if required", oldType.Type, newType.Type, "instance_type")
 		}
-	}
-
-	return nil
-}
-
-func diffValidateDBMemoryWithInstanceStorage(diff *schema.ResourceDiff, v interface{}) error {
-	dbType, _ := parseDBInstanceType(diff.Get("instance_type").(string))
-	memory := dbType.Memory
-	instanceStorage := diff.Get("instance_storage").(int)
-	if dbType.Type == dbNVMeInstanceType {
-		if instanceStorage > 32000 {
-			return fmt.Errorf("the upper limit of %q is 32000 when the type of db instance type is %q", "instance_storage", dbNVMeInstanceType)
-		}
-		return nil
-	}
-
-	if memory <= 6 && instanceStorage > 500 {
-		return fmt.Errorf("the upper limit of %q is 500 when the memory is 6 or less", "instance_storage")
-	}
-
-	if memory <= 16 && instanceStorage > 1000 {
-		return fmt.Errorf("the upper limit of %q is 1000 when the memory between 8 and 16", "instance_storage")
-	}
-
-	if memory <= 32 && instanceStorage > 2000 {
-		return fmt.Errorf("the upper limit of %q is 2000 when the memory is 24 or 32", "instance_storage")
-	}
-
-	if memory <= 64 && instanceStorage > 3500 {
-		return fmt.Errorf("the upper limit of %q is 3500 when the memory is 48 or 64", "instance_storage")
-	}
-
-	if memory <= 96 && instanceStorage > 4500 {
-		return fmt.Errorf("the upper limit of %q is 3500 when the memory is 96 or more", "instance_storage")
 	}
 
 	return nil

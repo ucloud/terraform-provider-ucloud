@@ -40,10 +40,8 @@ func resourceUCloudInstance() *schema.Resource {
 			customdiff.ValidateChange("instance_type", diffValidateInstanceType),
 			diffValidateBootDiskTypeWithDataDiskType,
 			diffValidateChargeTypeWithDuration,
-			diffValidateIsolationGroup,
 			diffValidateDataDisks,
 			diffValidateNetworkInterface,
-			diffValidateCPUPlatform,
 			diffValidateBootDiskTypeWithDataDisks,
 		),
 
@@ -1231,27 +1229,6 @@ func diffValidateChargeTypeWithDuration(diff *schema.ResourceDiff, meta interfac
 	return nil
 }
 
-func diffValidateIsolationGroup(diff *schema.ResourceDiff, meta interface{}) error {
-	client := meta.(*UCloudClient)
-
-	if v, ok := diff.GetOk("isolation_group"); ok {
-		zone := diff.Get("availability_zone").(string)
-		igSet, err := client.describeIsolationGroupById(v.(string))
-		if err != nil {
-			return fmt.Errorf("error on reading isolation group %q before creating instance, %s", v.(string), err)
-		}
-		for _, val := range igSet.SpreadInfoSet {
-			if val.Zone == zone && val.UHostCount >= 7 {
-				return fmt.Errorf("%q is invalid, "+
-					"up to seven instance can be added to the isolation group %q in availability_zone %q",
-					"isolation_group", v.(string), zone)
-			}
-		}
-	}
-
-	return nil
-}
-
 func diffValidateDataDisks(diff *schema.ResourceDiff, meta interface{}) error {
 	if _, ok := diff.GetOk("data_disks"); ok {
 		if _, ok1 := diff.GetOkExists("delete_disks_with_instance"); !ok1 {
@@ -1269,33 +1246,5 @@ func diffValidateNetworkInterface(diff *schema.ResourceDiff, meta interface{}) e
 		}
 	}
 
-	return nil
-}
-
-func diffValidateCPUPlatform(diff *schema.ResourceDiff, meta interface{}) error {
-	t, err := parseInstanceType(diff.Get("instance_type").(string))
-	if err != nil {
-		return err
-	}
-	if v, ok := diff.GetOk("min_cpu_platform"); ok {
-		supportedCPUForOS := []string{"Intel/Auto", "Intel/CascadelakeR"}
-		if t.HostType == "os" && !isStringIn(v.(string), supportedCPUForOS) {
-			return fmt.Errorf("the min_cpu_platform can only be one of %v , when instance_type is OutStanding S type(os),  got %q", supportedCPUForOS, v.(string))
-		}
-		supportedCPUForO := []string{"Intel/Auto", "Intel/Cascadelake", "Amd/Auto", "Amd/Epyc2"}
-		if t.HostType == "o" && !isStringIn(v.(string), supportedCPUForO) {
-			return fmt.Errorf("the min_cpu_platform can only be one of %v , when instance_type is OutStanding type(o),  got %q", supportedCPUForO, v.(string))
-		}
-
-		supportedCPUForN := []string{"Intel/Auto", "Intel/IvyBridge", "Intel/Haswell", "Intel/Broadwell", "Intel/Skylake"}
-		if t.HostType == "n" && !isStringIn(v.(string), supportedCPUForN) {
-			return fmt.Errorf("the cpu_platform can only be one of %v , when instance_type is Normal type(n),  got %q", supportedCPUForN, v.(string))
-		}
-
-		supportedCPUForC := []string{"Intel/Auto", "Intel/Skylake"}
-		if t.HostType == "c" && !isStringIn(v.(string), supportedCPUForC) {
-			return fmt.Errorf("the cpu_platform can only be one of %v , when instance_type is High Frequency type(c),  got %q", supportedCPUForC, v.(string))
-		}
-	}
 	return nil
 }
