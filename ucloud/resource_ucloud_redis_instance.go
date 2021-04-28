@@ -53,6 +53,7 @@ func resourceUCloudRedisInstance() *schema.Resource {
 					"3.2",
 					"4.0",
 					"5.0",
+					"6.0",
 				}, false),
 			},
 
@@ -144,8 +145,8 @@ func resourceUCloudRedisInstanceCreate(d *schema.ResourceData, meta interface{})
 	t, _ := parseRedisInstanceType(d.Get("instance_type").(string))
 
 	if v, ok := d.GetOk("engine_version"); ok {
-		if !isStringIn(v.(string), []string{"4.0", "5.0"}) {
-			return fmt.Errorf("the %q of engine_version is not supported currently, please try one of %v", v.(string), []string{"4.0", "5.0"})
+		if !isStringIn(v.(string), []string{"4.0", "5.0", "6.0"}) {
+			return fmt.Errorf("the %q of engine_version is not supported currently, please try one of %v", v.(string), []string{"4.0", "5.0", "6.0"})
 		}
 	}
 
