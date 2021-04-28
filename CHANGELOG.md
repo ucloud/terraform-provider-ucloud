@@ -1,11 +1,12 @@
-## 1.26.0 (Unreleased)
+## 1.27.0 (Unreleased)
+## 1.26.0 (2021-04-28)
 
 ENHANCEMENTS:
 
-* Update for go Version 1.16. [GH-92]
-* the release support `darwin_arm64`. [GH-92]
-* resource/ucloud_redis_instance: add the version `6.0` of the `engine_version` supported. [GH-93]
-* resource/ucloud_disk: open the usage restrictions of `rssd_data_disk`. [GH-93]
+* Update for go Version 1.16. ([#92](https://github.com/ucloud/terraform-provider-ucloud/issues/92))
+* the release support `darwin_arm64`. ([#92](https://github.com/ucloud/terraform-provider-ucloud/issues/92))
+* resource/ucloud_redis_instance: add the version `6.0` of the `engine_version` supported. ([#93](https://github.com/ucloud/terraform-provider-ucloud/issues/93))
+* resource/ucloud_disk: open the usage restrictions of `rssd_data_disk`. ([#93](https://github.com/ucloud/terraform-provider-ucloud/issues/93))
 
 ## 1.25.1 (2021-04-08)
 
