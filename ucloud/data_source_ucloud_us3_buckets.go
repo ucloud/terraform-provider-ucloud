@@ -52,7 +52,7 @@ func dataSourceUCloudUS3Buckets() *schema.Resource {
 							Computed: true,
 						},
 
-						"src_domain_names": {
+						"source_domain_names": {
 							Type:     schema.TypeList,
 							Computed: true,
 							Elem: &schema.Schema{
@@ -138,11 +138,11 @@ func dataSourceUCloudUS3BucketsSave(d *schema.ResourceData, us3Buckets []ufile.U
 		ids = append(ids, item.BucketName)
 
 		data = append(data, map[string]interface{}{
-			"type":             item.Type,
-			"name":             item.BucketName,
-			"tag":              item.Tag,
-			"create_time":      timestampToString(item.CreateTime),
-			"src_domain_names": item.Domain.Src,
+			"type":                item.Type,
+			"name":                item.BucketName,
+			"tag":                 item.Tag,
+			"create_time":         timestampToString(item.CreateTime),
+			"source_domain_names": item.Domain.Src,
 		})
 	}
 

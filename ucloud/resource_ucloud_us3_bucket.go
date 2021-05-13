@@ -46,7 +46,7 @@ func resourceUCloudUS3Bucket() *schema.Resource {
 			//	StateFunc:    stateFuncTag,
 			//},
 
-			"src_domain_names": {
+			"source_domain_names": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Schema{
@@ -125,7 +125,7 @@ func resourceUCloudUS3BucketRead(d *schema.ResourceData, meta interface{}) error
 	d.Set("name", instance.BucketName)
 	d.Set("tag", instance.Tag)
 	d.Set("create_time", timestampToString(instance.CreateTime))
-	d.Set("src_domain_names", instance.Domain.Src)
+	d.Set("source_domain_names", instance.Domain.Src)
 
 	return nil
 }

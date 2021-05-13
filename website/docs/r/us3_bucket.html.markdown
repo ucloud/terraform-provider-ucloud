@@ -36,4 +36,4 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of the resource US3 bucket.
 * `create_time` - The time of creation of US3 bucket, formatted in RFC3339 time string.
-* `src_domain_names` - The list of src domain name.
+* `source_domain_names` - The list of source domain name.

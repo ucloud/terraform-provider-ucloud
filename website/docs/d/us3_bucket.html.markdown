@@ -42,4 +42,4 @@ The attribute (`us3_buckets`) support the following:
 * `tag` - A tag assigned to US3 Bucket.
 * `type` - (Required) The type of the US3 bucket.
 * `create_time` - The creation time of US3 Bucket, formatted in RFC3339 time string.
-* `src_domain_names` - The list of src domain name.
+* `source_domain_names` - The list of source domain name.
