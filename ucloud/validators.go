@@ -167,6 +167,26 @@ var validateVPNPreSharedKey = validation.StringMatch(
 	"expected value to be 1 - 128 characters and only support english, numbers, !@#$%^&*()_+-=[]:,./'~",
 )
 
+var validateUS3BucketName1 = validation.StringMatch(
+	regexp.MustCompile(`^[a-z0-9][a-z0-9-]{4,62}[a-z0-9]$`),
+	"expected value to be 3 - 63 characters and only support lowercase-letters, numbers, '-', and can not prefix with '-' or suffix with '-'",
+)
+
+var validateUS3BucketName2 = validation.StringDoesNotMatch(
+	regexp.MustCompile(`^(www).*`),
+	"expected value not prefix with 'www'",
+)
+
+var validateUS3BucketName3 = validation.StringDoesNotMatch(
+	regexp.MustCompile(`^(cn-bj).*`),
+	"expected value not prefix with 'cn-bj'",
+)
+
+var validateUS3BucketName4 = validation.StringDoesNotMatch(
+	regexp.MustCompile(`^(hk).*`),
+	"expected value not prefix with 'hk'",
+)
+
 func validateDBInstanceType(v interface{}, k string) (ws []string, errors []error) {
 	dbInstanceType := v.(string)
 

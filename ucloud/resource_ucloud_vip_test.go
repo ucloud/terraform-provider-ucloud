@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/ucloud/ucloud-sdk-go/services/unet"
+	"github.com/ucloud/ucloud-sdk-go/services/vpc"
 	"log"
 	"testing"
 )
 
 func TestAccUCloudVIP_basic(t *testing.T) {
-	var vipSet unet.VIPDetailSet
+	var vipSet vpc.VIPDetailSet
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -46,7 +46,7 @@ func TestAccUCloudVIP_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckVIPExists(n string, vipSet *unet.VIPDetailSet) resource.TestCheckFunc {
+func testAccCheckVIPExists(n string, vipSet *vpc.VIPDetailSet) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 
@@ -72,7 +72,7 @@ func testAccCheckVIPExists(n string, vipSet *unet.VIPDetailSet) resource.TestChe
 	}
 }
 
-func testAccCheckVIPAttributes(vipSet *unet.VIPDetailSet) resource.TestCheckFunc {
+func testAccCheckVIPAttributes(vipSet *vpc.VIPDetailSet) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if vipSet.VIPId == "" {
 			return fmt.Errorf("vip id is empty")

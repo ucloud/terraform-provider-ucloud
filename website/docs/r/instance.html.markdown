@@ -133,6 +133,8 @@ The following arguments are supported:
     - The AMD CPU platform:
         - `Amd/Auto` as the Amd CPU platform version will be selected randomly by system;
         - `Amd/Epyc2` as the version of Amd CPU platform selected by system will be `Amd/Epyc2` and above;
+    - The Ampere CPU platform:
+        - `Ampere/Altra` as the version of Ampere CPU platform selected by system will be `Ampere/Altra` and above.
         
 ### data_disks
 

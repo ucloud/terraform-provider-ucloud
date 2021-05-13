@@ -67,11 +67,12 @@ const (
 )
 
 const (
-	lbResourceTypeUHost  = "UHost"
-	lbMatchTypePath      = "Path"
-	lbMatchTypeDomain    = "Domain"
-	eipResourceTypeULB   = "ulb"
-	eipResourceTypeUHost = "uhost"
+	lbResourceTypeUHost       = "UHost"
+	lbMatchTypePath           = "Path"
+	lbMatchTypeDomain         = "Domain"
+	eipResourceTypeULB        = "ulb"
+	eipResourceTypeUHost      = "uhost"
+	eipResourceTypeNatGateway = "natgw"
 )
 
 const (

@@ -3,6 +3,8 @@ package ucloud
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/ucloud/ucloud-sdk-go/services/ufile"
+	"github.com/ucloud/ucloud-sdk-go/services/ufs"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -125,6 +127,8 @@ func (c *Config) Client() (*UCloudClient, error) {
 	client.udiskconn = udisk.NewClient(&cfg, &cred)
 	client.umemconn = umem.NewClient(&cfg, &cred)
 	client.ipsecvpnClient = ipsecvpn.NewClient(&cfg, &cred)
+	client.ufsconn = ufs.NewClient(&cfg, &cred)
+	client.us3conn = ufile.NewClient(&cfg, &cred)
 
 	// initialize client connections for private usage
 	client.pumemconn = pumem.NewClient(&cfg, &cred)
@@ -147,6 +151,8 @@ func (c *Config) Client() (*UCloudClient, error) {
 		client.umemconn.AddHttpRequestHandler(cloudShellCredHandler)
 		client.ipsecvpnClient.AddHttpRequestHandler(cloudShellCredHandler)
 		client.pumemconn.AddHttpRequestHandler(cloudShellCredHandler)
+		client.ufsconn.AddHttpRequestHandler(cloudShellCredHandler)
+		client.us3conn.AddHttpRequestHandler(cloudShellCredHandler)
 	}
 
 	client.config = &cfg

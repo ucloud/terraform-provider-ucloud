@@ -115,8 +115,8 @@ func dataSourceUCloudSubnetsRead(d *schema.ResourceData, meta interface{}) error
 		req.Tag = ucloud.String(v.(string))
 	}
 
-	var allSubnets []vpc.VPCSubnetInfoSet
-	var subnets []vpc.VPCSubnetInfoSet
+	var allSubnets []vpc.SubnetInfo
+	var subnets []vpc.SubnetInfo
 	var limit int = 100
 	var offset int
 	for {
@@ -143,7 +143,7 @@ func dataSourceUCloudSubnetsRead(d *schema.ResourceData, meta interface{}) error
 	if nameRegex, ok := d.GetOk("name_regex"); ok {
 		r := regexp.MustCompile(nameRegex.(string))
 		for _, v := range allSubnets {
-			if r != nil && !r.MatchString(v.Name) {
+			if r != nil && !r.MatchString(v.SubnetName) {
 				continue
 			}
 
@@ -161,7 +161,7 @@ func dataSourceUCloudSubnetsRead(d *schema.ResourceData, meta interface{}) error
 	return nil
 }
 
-func dataSourceUCloudSubnetsSave(d *schema.ResourceData, subnets []vpc.VPCSubnetInfoSet) error {
+func dataSourceUCloudSubnetsSave(d *schema.ResourceData, subnets []vpc.SubnetInfo) error {
 	ids := make([]string, 0)
 	data := make([]map[string]interface{}, 0)
 

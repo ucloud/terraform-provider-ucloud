@@ -44,13 +44,16 @@ The following arguments are supported:
 - - -
 
 * `name` - (Optional) The name of Redis instance, which contains 6-63 characters and only support English, numbers, '-', '_'. If not specified, terraform will auto-generate a name beginning with `tf-redis-instance`.
+* `standby_zone` - (Optional, ForceNew) Availability zone where the standby Redis instance is located for the high availability Redis instance with multiple zone; only be supported for Active-Standby Redis, not be supported for Distributed Redis.
 * `charge_type` - (Optional, ForceNew) The charge type of Redis instance, possible values are: `year`, `month` and `dynamic` as pay by hour (specific permission required). (Default: `month`).
 * `duration` - (Optional, ForceNew) The duration that you will buy the Redis instance (Default: `1`). The value is `0` when pay by month and the instance will be valid till the last day of that month. It is not required when `dynamic` (pay by hour).
 * `tag` - (Optional, ForceNew) A tag assigned to Redis instance, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or an empty string is filled in, then default tag will be assigned. (Default: `Default`).
 * `vpc_id` - (Optional, ForceNew) The ID of VPC linked to the Redis instance.
 * `subnet_id` - (Optional, ForceNew) The ID of subnet linked to the Redis instance.
 * `engine_version` - (active-standby Redis Required, ForceNew) The version of engine of active-standby Redis. Possible values are: 4.0, 5.0 and 6.0.
-* `password` - (Optional) The password for  active-standby Redis instance which should have 6-36 characters. It must contain at least 3 items of Capital letters, small letter, numbers and special characters. The special characters include `-_`. 
+* `password` - (Optional) The password for  active-standby Redis instance which should have 6-36 characters. It must contain at least 3 items of Capital letters, small letter, numbers and special characters. The special characters include `-_`.
+* `auto_backup` - (Optional) Enable or not start auto backup of Redis instance, possible values are: `enable`, `disable`.
+* `backup_begin_time` - (Optional) Specifies when the backup starts, measured in hour, it starts at one o'clock of 1, 2, 3, 4 in the morning by default.
 
 ~> **Note** The active-standby Redis doesn't support to be created on multiple zones with Terraform.
 

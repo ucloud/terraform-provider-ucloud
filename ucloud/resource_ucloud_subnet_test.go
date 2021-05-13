@@ -11,7 +11,7 @@ import (
 )
 
 func TestAccUCloudSubnet_basic(t *testing.T) {
-	var val vpc.VPCSubnetInfoSet
+	var val vpc.SubnetInfo
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -51,7 +51,7 @@ func TestAccUCloudSubnet_basic(t *testing.T) {
 
 }
 
-func testAccCheckSubnetExists(n string, val *vpc.VPCSubnetInfoSet) resource.TestCheckFunc {
+func testAccCheckSubnetExists(n string, val *vpc.SubnetInfo) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 
@@ -77,7 +77,7 @@ func testAccCheckSubnetExists(n string, val *vpc.VPCSubnetInfoSet) resource.Test
 	}
 }
 
-func testAccCheckSubnetAttributes(val *vpc.VPCSubnetInfoSet) resource.TestCheckFunc {
+func testAccCheckSubnetAttributes(val *vpc.SubnetInfo) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if val.SubnetId == "" {
 			return fmt.Errorf("subnet id is empty")

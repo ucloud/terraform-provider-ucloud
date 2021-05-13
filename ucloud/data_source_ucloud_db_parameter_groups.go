@@ -35,6 +35,12 @@ func dataSourceUCloudDBParameterGroups() *schema.Resource {
 				ValidateFunc: validation.ValidateRegexp,
 			},
 
+			"class_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"sql", "postgresql"}, false),
+			},
+
 			"output_file": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -91,7 +97,10 @@ func dataSourceUCloudDBParameterGroupsRead(d *schema.ResourceData, meta interfac
 	conn := client.udbconn
 
 	req := conn.NewDescribeUDBParamGroupRequest()
-	req.ClassType = ucloud.String("sql")
+	if val, ok := d.GetOkExists("class_type"); ok {
+		req.ClassType = ucloud.String(val.(string))
+	}
+
 	if val, ok := d.GetOk("availability_zone"); ok {
 		req.Zone = ucloud.String(val.(string))
 	}

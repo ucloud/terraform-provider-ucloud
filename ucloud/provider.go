@@ -96,6 +96,8 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_vpn_customer_gateways": dateSourceUCloudVPNCustomerGateways(),
 			"ucloud_vpn_connections":       dateSourceUCloudVPNConnections(),
 			"ucloud_db_parameter_groups":   dataSourceUCloudDBParameterGroups(),
+			"ucloud_ufss":                  dataSourceUCloudUFSs(),
+			"ucloud_us3_buckets":           dataSourceUCloudUS3Buckets(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -125,6 +127,8 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_vpn_gateway":            resourceUCloudVPNGateway(),
 			"ucloud_vpn_customer_gateway":   resourceUCloudVPNCustomerGateway(),
 			"ucloud_vpn_connection":         resourceUCloudVPNConnection(),
+			"ucloud_ufs":                    resourceUCloudUFS(),
+			"ucloud_us3_bucket":             resourceUCloudUS3Bucket(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

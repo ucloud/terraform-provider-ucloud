@@ -34,9 +34,10 @@ resource "ucloud_db_instance" "master" {
 The following arguments are supported:
 
 * `availability_zone` - (Required, ForceNew) Availability zone where database instance is located. Such as: "cn-bj2-02". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
-* `engine` - (Required, ForceNew) The type of database engine, possible values are: "mysql", "percona".
-* `engine_version` - (Required, ForceNew) The database engine version, possible values are: "5.5", "5.6", "5.7".
+* `engine` - (Required, ForceNew) The type of database engine, possible values are: "mysql", "percona", "postgresql".
+* `engine_version` - (Required, ForceNew) The database engine version, possible values are: "5.5", "5.6", "5.7", "9.4", "9.6", "10.4".
     - 5.5/5.6/5.7 for mysql and percona engine. 
+    - 9.4/9.6/10.4 for postgresql engine.
 * `name` - (Optional) The name of database instance, which contains 6-63 characters and only support Chinese, English, numbers, '-', '_', '.', ',', '[', ']', ':'. If not specified, terraform will auto-generate a name beginning with `tf-db-instance`.
 * `instance_storage` - (Required) Specifies the allocated storage size in gigabytes (GB), range from 20 to 32000GB. The volume adjustment must be a multiple of 10 GB. The maximum disk volume for Highly Availability NVMe SSD is range 20 to 32000GB; The maximum disk volume for Highly Availability SATA SSD type are：
     - 500GB if the memory chosen is equal or less than 6GB;

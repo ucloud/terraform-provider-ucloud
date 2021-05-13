@@ -66,14 +66,14 @@ func resourceUCloudDBInstance() *schema.Resource {
 
 			"engine": {
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"mysql", "percona"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"mysql", "percona", "postgresql"}, false),
 				ForceNew:     true,
 				Required:     true,
 			},
 
 			"engine_version": {
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"5.5", "5.6", "5.7"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"5.5", "5.6", "5.7", "9.4", "9.6", "10.4"}, false),
 				ForceNew:     true,
 				Required:     true,
 			},
@@ -274,6 +274,9 @@ func resourceUCloudDBInstanceCreate(d *schema.ResourceData, meta interface{}) er
 		if engine == "mysql" || engine == "percona" {
 			req.Port = ucloud.Int(3306)
 		}
+		if engine == "postgresql" {
+			req.Port = ucloud.Int(5432)
+		}
 	}
 
 	if val, ok := d.GetOk("standby_zone"); ok {
@@ -353,22 +356,15 @@ func resourceUCloudDBInstanceUpdate(d *schema.ResourceData, meta interface{}) er
 			}
 		}
 
-		req := conn.NewGenericRequest()
+		req := conn.NewChangeUDBParamGroupRequest()
 		parameterGroup, err := strconv.Atoi(d.Get("parameter_group").(string))
 		if err != nil {
 			return fmt.Errorf("error on setting the parameter_group %s when updating %q, %s", d.Get("parameter_group").(string), d.Id(), err)
 		}
 
-		err = req.SetPayload(map[string]interface{}{
-			"Action":  "ChangeUDBParamGroup",
-			"DBId":    d.Id(),
-			"GroupId": parameterGroup,
-		})
-		if err != nil {
-			return fmt.Errorf("error on setting request about %s to db instance %q, %s", "ChangeUDBParamGroup", d.Id(), err)
-		}
-
-		_, err = conn.GenericInvoke(req)
+		req.DBId = ucloud.String(d.Id())
+		req.GroupId = ucloud.String(strconv.Itoa(parameterGroup))
+		_, err = conn.ChangeUDBParamGroup(req)
 		if err != nil {
 			return fmt.Errorf("error on %s to db instance %q, %s", "ChangeUDBParamGroup", d.Id(), err)
 		}
@@ -673,7 +669,11 @@ func diffValidateDBEngineAndEngineVersion(diff *schema.ResourceDiff, v interface
 	dbType, _ := parseDBInstanceType(diff.Get("instance_type").(string))
 
 	if err := checkStringIn(engineVersion, []string{"5.5", "5.6", "5.7"}); err != nil && (engine == "mysql" || engine == "percona") {
-		return fmt.Errorf("the current engine version %q is not supported, %s", engineVersion, err)
+		return fmt.Errorf("the current engine version %q is not supported for %s, %s", engineVersion, engine, err)
+	}
+
+	if err := checkStringIn(engineVersion, []string{"9.4", "9.6", "10.4"}); err != nil && engine == "postgresql" {
+		return fmt.Errorf("the current engine version %q is not supported for %s, %s", engineVersion, engine, err)
 	}
 
 	if dbType.Engine != engine {

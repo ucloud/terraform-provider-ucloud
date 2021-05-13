@@ -78,6 +78,11 @@ mac:
 	chmod +x bin/terraform-provider-ucloud
 	cd bin/ && tar czvf ./terraform-provider-ucloud_darwin-amd64.tgz ./terraform-provider-ucloud
 	rm -rf ./bin/terraform-provider-ucloud
+mac-arm:
+	GOOS=darwin GOARCH=arm64 go build -o bin/terraform-provider-ucloud
+	chmod +x bin/terraform-provider-ucloud
+	cd bin/ && tar czvf ./terraform-provider-ucloud_darwin-arm64.tgz ./terraform-provider-ucloud
+	rm -rf ./bin/terraform-provider-ucloud
 
 windows:
 	GOOS=windows GOARCH=amd64 go build -o bin/terraform-provider-ucloud.exe

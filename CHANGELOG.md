@@ -1,4 +1,20 @@
 ## 1.27.0 (Unreleased)
+
+FEATURES:
+
+* **New Datasource:** `ucloud_ufss`.
+* **New Resource:** `ucloud_ufs`.
+* **New Datasource:** `ucloud_us3_buckets`.
+* **New Resource:** `ucloud_us3_bucket`.
+
+ENHANCEMENTS:
+
+* datasource/ucloud_db_parameter_groups: add `class_type` to argument.
+* resource/ucloud_db_instance: add `postgresql` enum value to `engine`.
+* resource/ucloud_instance: add `Ampere/Altra` enum value to `min_cpu_platform`.
+* resource/ucloud_nat_gateway: support update `security_group`.
+* resource/ucloud_redis_instance: support arguments about backup Redis instance and `standby_zone` for Active-Standby Redis.
+
 ## 1.26.0 (2021-04-28)
 
 ENHANCEMENTS:
