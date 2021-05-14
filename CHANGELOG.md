@@ -3,9 +3,13 @@
 FEATURES:
 
 * **New Datasource:** `ucloud_ufss`.
-* **New Resource:** `ucloud_ufs`.
 * **New Datasource:** `ucloud_us3_buckets`.
+* **New Datasource:** `ucloud_repository_images`.
+* **New Datasource:** `ucloud_repository_image_tags`.
+
+* **New Resource:** `ucloud_ufs`.
 * **New Resource:** `ucloud_us3_bucket`.
+* **New Resource:** `ucloud_cube_pod`.
 
 ENHANCEMENTS:
 

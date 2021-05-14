@@ -64,6 +64,9 @@ const (
 
 	// eipStatusUsed is the status when eip is used
 	eipStatusUsed = "used"
+
+	// CrashLoopBackOff is the status when cube pod initialize failed
+	cubePodStatusCrashLoopBackOff = "CrashLoopBackOff"
 )
 
 const (
@@ -72,6 +75,7 @@ const (
 	lbMatchTypeDomain         = "Domain"
 	eipResourceTypeULB        = "ulb"
 	eipResourceTypeUHost      = "uhost"
+	eipResourceTypeCube       = "cube"
 	eipResourceTypeNatGateway = "natgw"
 )
 

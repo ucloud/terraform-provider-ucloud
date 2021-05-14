@@ -1,4 +1,5 @@
 # Specify the provider and access details
+
 provider "ucloud" {
   region = var.region
 }
@@ -27,13 +28,15 @@ resource "ucloud_subnet" "default" {
 # Create redis instance
 resource "ucloud_redis_instance" "master" {
   availability_zone = var.zone
-  engine_version    = "4.0"
-  instance_type     = "redis-master-2"
+//  engine_version    = "4.0"
+  instance_type     = "redis-distributed-8"
   password          = var.redis_password
   name              = "tf-example-redis"
   tag               = "tf-example"
 
   vpc_id    = ucloud_vpc.default.id
   subnet_id = ucloud_subnet.default.id
+  backup_begin_time = 3
+  auto_backup = "disable"
 }
 

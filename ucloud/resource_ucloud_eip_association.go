@@ -56,6 +56,14 @@ func resourceUCloudEIPAssociationCreate(d *schema.ResourceData, meta interface{}
 		resourceType = eipResourceTypeULB
 	}
 
+	if strings.HasPrefix(resourceId, "cube-") {
+		resourceType = eipResourceTypeCube
+	}
+
+	if strings.HasPrefix(resourceId, "natgw-") {
+		resourceType = eipResourceTypeNatGateway
+	}
+
 	req := conn.NewBindEIPRequest()
 	req.EIPId = ucloud.String(eipId)
 	req.ResourceType = ucloud.String(resourceType)
@@ -112,7 +120,7 @@ func resourceUCloudEIPAssociationRead(d *schema.ResourceData, meta interface{}) 
 
 	// remote api has not returned eip
 	d.Set("eip_id", d.Get("eip_id"))
-	d.Set("resource_id", resource.ResourceId)
+	d.Set("resource_id", resource.ResourceID)
 	d.Set("resource_type", lowerCaseProdCvt.unconvert(resource.ResourceType))
 
 	return nil

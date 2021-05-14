@@ -1,0 +1,13 @@
+apiVersion: v1beta1
+kind: Pod
+spec:
+  containers:
+    - name: cube01
+      image: 'uhub.service.ucloud.cn/library/nginx:1.18.0'
+      resources:
+        limits:
+          memory: 1024Mi
+          cpu: 1000m
+      volumeMounts: []
+  volumes: []
+  restartPolicy: Always

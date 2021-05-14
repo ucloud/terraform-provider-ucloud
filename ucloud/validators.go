@@ -187,6 +187,16 @@ var validateUS3BucketName4 = validation.StringDoesNotMatch(
 	"expected value not prefix with 'hk'",
 )
 
+var validateCubePodName = validation.StringMatch(
+	regexp.MustCompile(`^[A-Za-z0-9\p{Han}-_.]{1,32}$`),
+	"expected value to be 1 - 32 characters and only support chinese, english, numbers, '-', '_', '.'",
+)
+
+var validateUFSName = validation.StringMatch(
+	regexp.MustCompile(`^[A-Za-z0-9_][A-Za-z0-9-_]{7,63}$`),
+	"expected value to be 6 - 63 characters and only support english, numbers, '-', '_', and can not prefix with '-'",
+)
+
 func validateDBInstanceType(v interface{}, k string) (ws []string, errors []error) {
 	dbInstanceType := v.(string)
 

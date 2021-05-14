@@ -30,6 +30,10 @@ The following arguments are supported:
     - not suffix with '-'.
 * `type` - (Required) The type of the US3 bucket. Possible values are: `public`, `private`.
 
+- - -
+
+* `tag` - (Optional, ForceNew) A tag assigned to UFS, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
+
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:

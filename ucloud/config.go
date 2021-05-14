@@ -3,6 +3,7 @@ package ucloud
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/ucloud/ucloud-sdk-go/services/cube"
 	"github.com/ucloud/ucloud-sdk-go/services/ufile"
 	"github.com/ucloud/ucloud-sdk-go/services/ufs"
 	"io/ioutil"
@@ -66,7 +67,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 	// enable auto retry with http/connection error
 	cfg.MaxRetries = c.MaxRetries
 	cfg.LogLevel = log.PanicLevel
-	cfg.UserAgent = "Terraform-UCloud/1.26.0"
+	cfg.UserAgent = "Terraform-UCloud/1.27.0"
 	cfg.BaseUrl = c.BaseURL
 
 	cred := auth.NewCredential()
@@ -129,6 +130,8 @@ func (c *Config) Client() (*UCloudClient, error) {
 	client.ipsecvpnClient = ipsecvpn.NewClient(&cfg, &cred)
 	client.ufsconn = ufs.NewClient(&cfg, &cred)
 	client.us3conn = ufile.NewClient(&cfg, &cred)
+	client.cubeconn = cube.NewClient(&cfg, &cred)
+	client.genericconn = ucloud.NewClient(&cfg, &cred)
 
 	// initialize client connections for private usage
 	client.pumemconn = pumem.NewClient(&cfg, &cred)
@@ -153,6 +156,8 @@ func (c *Config) Client() (*UCloudClient, error) {
 		client.pumemconn.AddHttpRequestHandler(cloudShellCredHandler)
 		client.ufsconn.AddHttpRequestHandler(cloudShellCredHandler)
 		client.us3conn.AddHttpRequestHandler(cloudShellCredHandler)
+		client.cubeconn.AddHttpRequestHandler(cloudShellCredHandler)
+		client.genericconn.AddHttpRequestHandler(cloudShellCredHandler)
 	}
 
 	client.config = &cfg

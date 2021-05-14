@@ -46,7 +46,7 @@ func resourceUCloudUFS() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				Computed:     true,
-				ValidateFunc: validateName,
+				ValidateFunc: validateUFSName,
 			},
 
 			"charge_type": {

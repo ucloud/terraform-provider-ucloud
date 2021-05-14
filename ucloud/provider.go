@@ -98,6 +98,8 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_db_parameter_groups":   dataSourceUCloudDBParameterGroups(),
 			"ucloud_ufss":                  dataSourceUCloudUFSs(),
 			"ucloud_us3_buckets":           dataSourceUCloudUS3Buckets(),
+			"ucloud_repository_image_tags": dataSourceUCloudRepositoryImageTags(),
+			"ucloud_repository_images":     dataSourceUCloudRepositoryImages(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -129,6 +131,7 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_vpn_connection":         resourceUCloudVPNConnection(),
 			"ucloud_ufs":                    resourceUCloudUFS(),
 			"ucloud_us3_bucket":             resourceUCloudUS3Bucket(),
+			"ucloud_cube_pod":               resourceUCloudCubePod(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

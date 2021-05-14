@@ -35,7 +35,7 @@ The following arguments are supported:
 
 * `charge_type` - (Optional, ForceNew) The charge type of instance, possible values are: `year`, `month` and `dynamic` as pay by hour (specific permission required). (Default: `month`).
 * `duration` - (Optional, ForceNew) The duration that you will buy the instance (Default: `1`). The value is `0` when pay by month and the instance will be valid till the last day of that month. It is not required when `dynamic` (pay by hour).
-* `name` - (Optional, ForceNew) The name of instance, which contains 1-63 characters and only support Chinese, English, numbers, '-', '_', '.'. If not specified, terraform will auto-generate a name beginning with `tf-instance`.
+* `name` - (Optional, ForceNew) The name of instance, expected value to be 6 - 63 characters and only support english, numbers, '-', '_', and can not prefix with '-'. If not specified, terraform will auto-generate a name beginning with `tf-ufs`.
 * `tag` - (Optional, ForceNew) A tag assigned to UFS, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
 * `remark` - (Optional, ForceNew) The remarks of instance. (Default: `""`).
 

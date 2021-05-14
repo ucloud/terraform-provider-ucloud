@@ -47,7 +47,7 @@ func (c *UCloudClient) describeEIPResourceById(eipId, resourceId string) (*unet.
 
 	for i := 0; i < len(resp.EIPSet); i++ {
 		eip := resp.EIPSet[i]
-		if eip.Resource.ResourceId == resourceId {
+		if eip.Resource.ResourceID == resourceId {
 			return &eip.Resource, nil
 		}
 	}

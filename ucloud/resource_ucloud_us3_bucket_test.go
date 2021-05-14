@@ -29,7 +29,7 @@ func TestAccUCloudUS3Bucket_basic(t *testing.T) {
 					testAccCheckUS3BucketExists("ucloud_us3_bucket.foo", &us3BucketSet),
 					testAccCheckUS3BucketAttributes(&us3BucketSet),
 					resource.TestCheckResourceAttr("ucloud_us3_bucket.foo", "name", "tf-acc-us3-bucket-basic"),
-					resource.TestCheckResourceAttr("ucloud_us3_bucket.foo", "type", "private"),
+					resource.TestCheckResourceAttr("ucloud_us3_bucket.foo", "tag", "tf-acc"),
 				),
 			},
 			{
@@ -40,6 +40,7 @@ func TestAccUCloudUS3Bucket_basic(t *testing.T) {
 					testAccCheckUS3BucketAttributes(&us3BucketSet),
 					resource.TestCheckResourceAttr("ucloud_us3_bucket.foo", "name", "tf-acc-us3-bucket-basic"),
 					resource.TestCheckResourceAttr("ucloud_us3_bucket.foo", "type", "public"),
+					resource.TestCheckResourceAttr("ucloud_us3_bucket.foo", "tag", "tf-acc"),
 				),
 			},
 		},
@@ -109,6 +110,7 @@ const testAccUS3BucketConfig = `
 resource "ucloud_us3_bucket" "foo" {
 	name  	 	  = "tf-acc-us3-bucket-basic"
 	type      	  = "private"
+	tag           = "tf-acc"
 }
 `
 
@@ -116,5 +118,6 @@ const testAccUS3BucketConfigUpdate = `
 resource "ucloud_us3_bucket" "foo" {
 	name  	 	  = "tf-acc-us3-bucket-basic"
 	type      	  = "public"
+	tag           = "tf-acc"
 }
 `

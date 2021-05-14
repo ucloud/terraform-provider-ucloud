@@ -37,14 +37,14 @@ func resourceUCloudUS3Bucket() *schema.Resource {
 				),
 			},
 
-			//"tag": {
-			//	Type:         schema.TypeString,
-			//	Optional:     true,
-			//	ForceNew:     true,
-			//	Default:      defaultTag,
-			//	ValidateFunc: validateTag,
-			//	StateFunc:    stateFuncTag,
-			//},
+			"tag": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      defaultTag,
+				ValidateFunc: validateTag,
+				StateFunc:    stateFuncTag,
+			},
 
 			"source_domain_names": {
 				Type:     schema.TypeList,
@@ -65,9 +65,37 @@ func resourceUCloudUS3Bucket() *schema.Resource {
 func resourceUCloudUS3BucketCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
 	conn := client.us3conn
-	req := conn.NewCreateBucketRequest()
-	req.Type = ucloud.String(d.Get("type").(string))
-	req.BucketName = ucloud.String(d.Get("name").(string))
+
+	var tag string
+	//if tag is empty string, use default tag
+	if v, ok := d.GetOk("tag"); ok {
+		tag = v.(string)
+	} else {
+		tag = defaultTag
+	}
+	req := conn.NewGenericRequest()
+	err := req.SetPayload(map[string]interface{}{
+		"Action":     "CreateBucket",
+		"Type":       d.Get("type").(string),
+		"BucketName": d.Get("name").(string),
+		"Tag":        tag,
+	})
+	if err != nil {
+		return fmt.Errorf("error on setting request when creating us3 bucket, %s", err)
+	}
+
+	resp, err := conn.GenericInvoke(req)
+	if err != nil {
+		return fmt.Errorf("error on creating us3 bucket, %s", err)
+	}
+	type createBucketResponse struct {
+		BucketName string
+	}
+
+	var respObj createBucketResponse
+	if err := resp.Unmarshal(&respObj); err != nil {
+		return fmt.Errorf("error on creating us3 bucket when parse resp, %s", err)
+	}
 
 	// if tag is empty string, use default tag
 	//if v, ok := d.GetOk("tag"); ok {
@@ -75,12 +103,15 @@ func resourceUCloudUS3BucketCreate(d *schema.ResourceData, meta interface{}) err
 	//} else {
 	//	req.Tag = ucloud.String(defaultTag)
 	//}
-	resp, err := conn.CreateBucket(req)
-	if err != nil {
-		return fmt.Errorf("error on creating us3 bucket, %s", err)
-	}
+	//req.Type = ucloud.String(d.Get("type").(string))
+	//req.BucketName = ucloud.String(d.Get("name").(string))
+	//
+	//resp, err := conn.CreateBucket(req)
+	//if err != nil {
+	//	return fmt.Errorf("error on creating us3 bucket, %s", err)
+	//}
 
-	d.SetId(resp.BucketName)
+	d.SetId(respObj.BucketName)
 
 	return resourceUCloudUS3BucketRead(d, meta)
 }
