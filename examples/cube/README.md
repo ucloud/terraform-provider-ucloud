@@ -1,6 +1,6 @@
 # Cube Pod Example
 
-The cube example launches a cube pod.
+The cube example launches a cube pod and bind eip.
 
 To run, configure your UCloud provider as described in https://www.terraform.io/docs/providers/ucloud/index.html
 

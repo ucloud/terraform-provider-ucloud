@@ -9,7 +9,7 @@ import (
 
 type provider struct {
 	ChargeType     string `yaml:"chargeType"`
-	ContainerCount int    `yaml:"containerCount"`
+	ContainerCount string `yaml:"containerCount"`
 	CpuPlatform    string `yaml:"cpuPlatform"`
 	Region         string `yaml:"region"`
 	SubnetId       string `yaml:"subnetId"`

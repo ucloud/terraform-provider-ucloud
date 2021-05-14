@@ -54,3 +54,4 @@ In addition to all arguments above, the following attributes are exported:
 * `create_time` - The time of creation of Cube Pod, formatted in RFC3339 time string.
 * `expire_time` - The expiration time of Cube Pod, formatted in RFC3339 time string.
 * `status` - The Cube Pod current status. 
+* `pod_ip` - The private ip of pod.
