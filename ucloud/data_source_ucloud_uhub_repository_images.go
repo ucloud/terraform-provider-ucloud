@@ -7,9 +7,9 @@ import (
 	"regexp"
 )
 
-func dataSourceUCloudRepositoryImages() *schema.Resource {
+func dataSourceUCloudUHubRepositoryImages() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceUCloudRepositoryImagesRead,
+		Read: dataSourceUCloudUHubRepositoryImagesRead,
 		Schema: map[string]*schema.Schema{
 			"name_regex": {
 				Type:         schema.TypeString,
@@ -73,7 +73,7 @@ type getRepoImageResponse struct {
 	ImageSet []repositoryImageSet `required:"true"`
 }
 
-func dataSourceUCloudRepositoryImagesRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceUCloudUHubRepositoryImagesRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*UCloudClient).genericconn
 
 	var allRepositoryImages []repositoryImageSet

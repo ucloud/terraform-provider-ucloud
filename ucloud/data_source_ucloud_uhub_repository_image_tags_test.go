@@ -16,9 +16,9 @@ func TestAccUCloudRepositoryImageTagsDataSource_basic(t *testing.T) {
 			{
 				Config: testAccDataRepositoryImageTagsConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIDExists("data.ucloud_repository_image_tags.foo"),
-					resource.TestCheckResourceAttrSet("data.ucloud_repository_image_tags.foo", "repository_image_tags.#"),
-					resource.TestCheckResourceAttr("data.ucloud_repository_image_tags.foo", "repository_image_tags.0.name", "latest"),
+					testAccCheckIDExists("data.ucloud_uhub_repository_image_tags.foo"),
+					resource.TestCheckResourceAttrSet("data.ucloud_uhub_repository_image_tags.foo", "repository_image_tags.#"),
+					resource.TestCheckResourceAttr("data.ucloud_uhub_repository_image_tags.foo", "repository_image_tags.0.name", "latest"),
 				),
 			},
 		},
@@ -26,7 +26,7 @@ func TestAccUCloudRepositoryImageTagsDataSource_basic(t *testing.T) {
 }
 
 const testAccDataRepositoryImageTagsConfig = `
-data "ucloud_repository_image_tags" "foo" {
+data "ucloud_uhub_repository_image_tags" "foo" {
 	repository_name  = "ucloud"
 	image_name = "nginx"
 }

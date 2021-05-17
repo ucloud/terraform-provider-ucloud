@@ -5,7 +5,7 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 )
 
-func (client *UCloudClient) describeUFSById(instanceId string) (*ufs.UFSVolumeInfo2, error) {
+func (client *UCloudClient) describeUFSVolumeById(instanceId string) (*ufs.UFSVolumeInfo2, error) {
 	if instanceId == "" {
 		return nil, newNotFoundError(getNotFoundMessage("ufs", instanceId))
 	}

@@ -9,12 +9,12 @@ import (
 	"time"
 )
 
-func resourceUCloudUFS() *schema.Resource {
+func resourceUCloudUFSVolume() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceUCloudUFSCreate,
-		Read:   resourceUCloudUFSRead,
-		Update: resourceUCloudUFSUpdate,
-		Delete: resourceUCloudUFSDelete,
+		Create: resourceUCloudUFSVolumeCreate,
+		Read:   resourceUCloudUFSVolumeRead,
+		Update: resourceUCloudUFSVolumeUpdate,
+		Delete: resourceUCloudUFSVolumeDelete,
 		Schema: map[string]*schema.Schema{
 			"size": {
 				Type:     schema.TypeInt,
@@ -46,7 +46,7 @@ func resourceUCloudUFS() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				Computed:     true,
-				ValidateFunc: validateUFSName,
+				ValidateFunc: validateUFSVolumeName,
 			},
 
 			"charge_type": {
@@ -97,7 +97,7 @@ func resourceUCloudUFS() *schema.Resource {
 	}
 }
 
-func resourceUCloudUFSCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceUCloudUFSVolumeCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
 	conn := client.ufsconn
 	req := conn.NewCreateUFSVolumeRequest()
@@ -119,7 +119,7 @@ func resourceUCloudUFSCreate(d *schema.ResourceData, meta interface{}) error {
 	if v, ok := d.GetOk("name"); ok {
 		req.VolumeName = ucloud.String(v.(string))
 	} else {
-		req.VolumeName = ucloud.String(resource.PrefixedUniqueId("tf-ufs-"))
+		req.VolumeName = ucloud.String(resource.PrefixedUniqueId("tf-ufs-volume-"))
 	}
 
 	// if tag is empty string, use default tag
@@ -134,15 +134,15 @@ func resourceUCloudUFSCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 	resp, err := conn.CreateUFSVolume(req)
 	if err != nil {
-		return fmt.Errorf("error on creating ufs, %s", err)
+		return fmt.Errorf("error on creating ufs volume, %s", err)
 	}
 
 	d.SetId(resp.VolumeId)
 
-	return resourceUCloudUFSRead(d, meta)
+	return resourceUCloudUFSVolumeRead(d, meta)
 }
 
-func resourceUCloudUFSUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceUCloudUFSVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
 	conn := client.ufsconn
 
@@ -155,7 +155,7 @@ func resourceUCloudUFSUpdate(d *schema.ResourceData, meta interface{}) error {
 
 		_, err := conn.ExtendUFSVolume(reqBand)
 		if err != nil {
-			return fmt.Errorf("error on %s to ufs %q, %s", "ExtendUFSVolume", d.Id(), err)
+			return fmt.Errorf("error on %s to ufs volume %q, %s", "ExtendUFSVolume", d.Id(), err)
 		}
 
 		d.SetPartial("size")
@@ -166,16 +166,16 @@ func resourceUCloudUFSUpdate(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceUCloudUFSRead(d *schema.ResourceData, meta interface{}) error {
+func resourceUCloudUFSVolumeRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
-	instance, err := client.describeUFSById(d.Id())
+	instance, err := client.describeUFSVolumeById(d.Id())
 
 	if err != nil {
 		if isNotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error on reading ufs %q, %s", d.Id(), err)
+		return fmt.Errorf("error on reading ufs volume %q, %s", d.Id(), err)
 	}
 
 	d.Set("size", instance.Size)
@@ -190,7 +190,7 @@ func resourceUCloudUFSRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceUCloudUFSDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceUCloudUFSVolumeDelete(d *schema.ResourceData, meta interface{}) error {
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		client := meta.(*UCloudClient)
 		conn := client.ufsconn
@@ -198,16 +198,16 @@ func resourceUCloudUFSDelete(d *schema.ResourceData, meta interface{}) error {
 		req := conn.NewRemoveUFSVolumeRequest()
 		req.VolumeId = ucloud.String(d.Id())
 		if _, err := conn.RemoveUFSVolume(req); err != nil {
-			return resource.NonRetryableError(fmt.Errorf("error on deleting ufs %q, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on deleting ufs volume %q, %s", d.Id(), err))
 		}
 
-		_, err := client.describeUFSById(d.Id())
+		_, err := client.describeUFSVolumeById(d.Id())
 		if err != nil {
 			if isNotFoundError(err) {
 				return nil
 			}
-			return resource.NonRetryableError(fmt.Errorf("error on reading ufs when deleting %q, %s", d.Id(), err))
+			return resource.NonRetryableError(fmt.Errorf("error on reading ufs volume when deleting %q, %s", d.Id(), err))
 		}
-		return resource.RetryableError(fmt.Errorf("the specified ufs %q has not been deleted due to unknown error", d.Id()))
+		return resource.RetryableError(fmt.Errorf("the specified ufs volume %q has not been deleted due to unknown error", d.Id()))
 	})
 }

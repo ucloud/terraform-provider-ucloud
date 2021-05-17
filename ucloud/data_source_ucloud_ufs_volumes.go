@@ -11,9 +11,9 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 )
 
-func dataSourceUCloudUFSs() *schema.Resource {
+func dataSourceUCloudUFSVolumes() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceUCloudUFSsRead,
+		Read: dataSourceUCloudUFSVolumesRead,
 
 		Schema: map[string]*schema.Schema{
 			"ids": {
@@ -42,7 +42,7 @@ func dataSourceUCloudUFSs() *schema.Resource {
 				Computed: true,
 			},
 
-			"ufss": {
+			"ufs_volumes": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
@@ -98,7 +98,7 @@ func dataSourceUCloudUFSs() *schema.Resource {
 	}
 }
 
-func dataSourceUCloudUFSsRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceUCloudUFSVolumesRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*UCloudClient).ufsconn
 	var allUFSs []ufs.UFSVolumeInfo2
 	var ufss []ufs.UFSVolumeInfo2
@@ -149,7 +149,7 @@ func dataSourceUCloudUFSsRead(d *schema.ResourceData, meta interface{}) error {
 		ufss = allUFSs
 	}
 
-	err := dataSourceUCloudUFSsSave(d, ufss)
+	err := dataSourceUCloudUFSVolumesSave(d, ufss)
 	if err != nil {
 		return fmt.Errorf("error on reading ufs list, %s", err)
 	}
@@ -157,7 +157,7 @@ func dataSourceUCloudUFSsRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func dataSourceUCloudUFSsSave(d *schema.ResourceData, ufss []ufs.UFSVolumeInfo2) error {
+func dataSourceUCloudUFSVolumesSave(d *schema.ResourceData, ufss []ufs.UFSVolumeInfo2) error {
 	ids := []string{}
 	data := []map[string]interface{}{}
 
@@ -180,7 +180,7 @@ func dataSourceUCloudUFSsSave(d *schema.ResourceData, ufss []ufs.UFSVolumeInfo2)
 	d.SetId(hashStringArray(ids))
 	d.Set("total_count", len(data))
 	d.Set("ids", ids)
-	if err := d.Set("ufss", data); err != nil {
+	if err := d.Set("ufs_volumes", data); err != nil {
 		return err
 	}
 

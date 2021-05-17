@@ -5,9 +5,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
-func dataSourceUCloudRepositoryImageTags() *schema.Resource {
+func dataSourceUCloudUHubRepositoryImageTags() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceUCloudRepositoryImageTagsRead,
+		Read: dataSourceUCloudUHubRepositoryImageTagsRead,
 		Schema: map[string]*schema.Schema{
 			"repository_name": {
 				Type:     schema.TypeString,
@@ -70,7 +70,7 @@ type GetImageTagResponse struct {
 	TagSet []tagSet `required:"true"`
 }
 
-func dataSourceUCloudRepositoryImageTagsRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceUCloudUHubRepositoryImageTagsRead(d *schema.ResourceData, meta interface{}) error {
 	conn := meta.(*UCloudClient).genericconn
 
 	var allRepositoryImageTags []tagSet

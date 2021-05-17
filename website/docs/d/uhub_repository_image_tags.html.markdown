@@ -1,24 +1,24 @@
 ---
 subcategory: "Cube"
 layout: "ucloud"
-page_title: "UCloud: ucloud_repository_image_tags"
+page_title: "UCloud: ucloud_uhub_repository_image_tags"
 description: |-
-  Provides a list of Repository Image tags.
+  Provides a list of UHub Repository Image tags.
 ---
 
 # ucloud_repo_images
 
-This data source provides a list of Repository Image tags according to repository name and image name.
+This data source provides a list of UHub Repository Image tags according to repository name and image name.
 
 ## Example Usage
 
 ```hcl
-data "ucloud_repository_image_tags" "foo" {
+data "ucloud_uhub_repository_image_tags" "foo" {
   repository_name   = "ucloud"
 }
 
 output "first" {
-  value = data.ucloud_repository_image_tags.example.repository_image_tags[0].name
+  value = data.ucloud_uhub_repository_image_tags.example.repository_image_tags[0].name
 }
 ```
 

@@ -3,7 +3,7 @@ provider "ucloud" {
   region = var.region
 }
 
-resource "ucloud_ufs" "foo" {
+resource "ucloud_ufs_volume" "foo" {
   name          = "tf-acc-ufs-basic"
   remark        = "test"
   tag           = "tf-acc"
