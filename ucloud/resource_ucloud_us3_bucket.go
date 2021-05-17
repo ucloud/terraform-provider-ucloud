@@ -97,20 +97,6 @@ func resourceUCloudUS3BucketCreate(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("error on creating us3 bucket when parse resp, %s", err)
 	}
 
-	// if tag is empty string, use default tag
-	//if v, ok := d.GetOk("tag"); ok {
-	//	req.Tag = ucloud.String(v.(string))
-	//} else {
-	//	req.Tag = ucloud.String(defaultTag)
-	//}
-	//req.Type = ucloud.String(d.Get("type").(string))
-	//req.BucketName = ucloud.String(d.Get("name").(string))
-	//
-	//resp, err := conn.CreateBucket(req)
-	//if err != nil {
-	//	return fmt.Errorf("error on creating us3 bucket, %s", err)
-	//}
-
 	d.SetId(respObj.BucketName)
 
 	return resourceUCloudUS3BucketRead(d, meta)
