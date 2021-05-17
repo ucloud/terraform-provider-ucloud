@@ -131,7 +131,6 @@ func (c *Config) Client() (*UCloudClient, error) {
 	client.ufsconn = ufs.NewClient(&cfg, &cred)
 	client.us3conn = ufile.NewClient(&cfg, &cred)
 	client.cubeconn = cube.NewClient(&cfg, &cred)
-	client.genericconn = ucloud.NewClient(&cfg, &cred)
 
 	// initialize client connections for private usage
 	client.pumemconn = pumem.NewClient(&cfg, &cred)
@@ -157,7 +156,6 @@ func (c *Config) Client() (*UCloudClient, error) {
 		client.ufsconn.AddHttpRequestHandler(cloudShellCredHandler)
 		client.us3conn.AddHttpRequestHandler(cloudShellCredHandler)
 		client.cubeconn.AddHttpRequestHandler(cloudShellCredHandler)
-		client.genericconn.AddHttpRequestHandler(cloudShellCredHandler)
 	}
 
 	client.config = &cfg

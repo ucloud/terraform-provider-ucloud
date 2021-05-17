@@ -98,8 +98,6 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_db_parameter_groups":        dataSourceUCloudDBParameterGroups(),
 			"ucloud_ufs_volumes":                dataSourceUCloudUFSVolumes(),
 			"ucloud_us3_buckets":                dataSourceUCloudUS3Buckets(),
-			"ucloud_uhub_repository_image_tags": dataSourceUCloudUHubRepositoryImageTags(),
-			"ucloud_uhub_repository_images":     dataSourceUCloudUHubRepositoryImages(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
