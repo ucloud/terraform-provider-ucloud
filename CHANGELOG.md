@@ -4,9 +4,6 @@ FEATURES:
 
 * **New Datasource:** `ucloud_ufs_volumes`. [GH-95]
 * **New Datasource:** `ucloud_us3_buckets`. [GH-95]
-* **New Datasource:** `ucloud_uhub_repository_images`. [GH-95]
-* **New Datasource:** `ucloud_uhub_repository_image_tags`. [GH-95]
-
 * **New Resource:** `ucloud_ufs_volume`. [GH-95]
 * **New Resource:** `ucloud_us3_bucket`. [GH-95]
 * **New Resource:** `ucloud_cube_pod`. [GH-95]

@@ -40,7 +40,6 @@ type UCloudClient struct {
 	ufsconn        *ufs.UFSClient
 	us3conn        *ufile.UFileClient
 	cubeconn       *cube.CubeClient
-	genericconn    *ucloud.Client
 
 	// private services
 	pumemconn *pumem.UMemClient
