@@ -72,9 +72,11 @@ func dataSourceUCloudUS3Buckets() *schema.Resource {
 }
 
 func dataSourceUCloudUS3BucketsRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*UCloudClient).us3conn
+	client := meta.(*UCloudClient)
+	conn := client.us3conn
 	var allUS3Buckets []ufile.UFileBucketSet
 	var us3Buckets []ufile.UFileBucketSet
+	var us3BucketDetails []ufile.UFileBucketSet
 	var limit int = 100
 	var offset int
 
@@ -85,7 +87,7 @@ func dataSourceUCloudUS3BucketsRead(d *schema.ResourceData, meta interface{}) er
 
 		resp, err := conn.DescribeBucket(req)
 		if err != nil {
-			return fmt.Errorf("error on reading ufs list, %s", err)
+			return fmt.Errorf("error on reading us3 bucket list, %s", err)
 		}
 
 		if resp == nil || len(resp.DataSet) < 1 {
@@ -122,9 +124,17 @@ func dataSourceUCloudUS3BucketsRead(d *schema.ResourceData, meta interface{}) er
 		us3Buckets = allUS3Buckets
 	}
 
-	err := dataSourceUCloudUS3BucketsSave(d, us3Buckets)
+	for _, v := range us3Buckets {
+		instance, err := client.describeUS3BucketById(v.BucketName)
+		if err != nil {
+			return fmt.Errorf("error on reading us3 bucket %q, %s", v.BucketName, err)
+		}
+		us3BucketDetails = append(us3BucketDetails, *instance)
+	}
+
+	err := dataSourceUCloudUS3BucketsSave(d, us3BucketDetails)
 	if err != nil {
-		return fmt.Errorf("error on reading ufs list, %s", err)
+		return fmt.Errorf("error on reading us3 bucket list, %s", err)
 	}
 
 	return nil
