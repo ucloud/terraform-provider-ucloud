@@ -2,22 +2,22 @@
 
 FEATURES:
 
-* **New Datasource:** `ucloud_ufss`.
-* **New Datasource:** `ucloud_us3_buckets`.
-* **New Datasource:** `ucloud_repository_images`.
-* **New Datasource:** `ucloud_repository_image_tags`.
+* **New Datasource:** `ucloud_ufss`. [GH-95]
+* **New Datasource:** `ucloud_us3_buckets`. [GH-95]
+* **New Datasource:** `ucloud_repository_images`. [GH-95]
+* **New Datasource:** `ucloud_repository_image_tags`. [GH-95]
 
-* **New Resource:** `ucloud_ufs`.
-* **New Resource:** `ucloud_us3_bucket`.
-* **New Resource:** `ucloud_cube_pod`.
+* **New Resource:** `ucloud_ufs`. [GH-95]
+* **New Resource:** `ucloud_us3_bucket`. [GH-95]
+* **New Resource:** `ucloud_cube_pod`. [GH-95]
 
 ENHANCEMENTS:
 
-* datasource/ucloud_db_parameter_groups: add `class_type` to argument.
-* resource/ucloud_db_instance: add `postgresql` enum value to `engine`.
-* resource/ucloud_instance: add `Ampere/Altra` enum value to `min_cpu_platform`.
-* resource/ucloud_nat_gateway: support update `security_group`.
-* resource/ucloud_redis_instance: support arguments about backup Redis instance and `standby_zone` for Active-Standby Redis.
+* datasource/ucloud_db_parameter_groups: add `class_type` to argument. [GH-95]
+* resource/ucloud_db_instance: add `postgresql` enum value to `engine`. [GH-95]
+* resource/ucloud_instance: add `Ampere/Altra` enum value to `min_cpu_platform`. [GH-95]
+* resource/ucloud_nat_gateway: support update `security_group`. [GH-95]
+* resource/ucloud_redis_instance: support arguments about backup Redis instance and `standby_zone` for Active-Standby Redis. [GH-95]
 
 ## 1.26.0 (2021-04-28)
 
