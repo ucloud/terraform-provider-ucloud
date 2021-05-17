@@ -2,6 +2,7 @@ package ucloud
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
@@ -20,6 +21,7 @@ func resourceUCloudRedisInstance() *schema.Resource {
 
 		CustomizeDiff: customdiff.All(
 			diffValidateRedisInstanceTypeAndEngineVersion,
+			diffValidateRedisStandbyZone,
 			customdiff.ValidateChange("instance_type", diffValidateRedisInstanceType),
 		),
 
@@ -27,6 +29,12 @@ func resourceUCloudRedisInstance() *schema.Resource {
 			"availability_zone": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
+			},
+
+			"standby_zone": {
+				Type:     schema.TypeString,
+				Optional: true,
 				ForceNew: true,
 			},
 
@@ -104,6 +112,22 @@ func resourceUCloudRedisInstance() *schema.Resource {
 				Computed: true,
 			},
 
+			"auto_backup": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"enable",
+					"disable",
+				}, false),
+				Computed: true,
+			},
+
+			"backup_begin_time": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntBetween(0, 23),
+			},
+
 			"ip_set": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -154,6 +178,9 @@ func resourceUCloudRedisInstanceCreate(d *schema.ResourceData, meta interface{})
 		return createActiveStandbyRedisInstance(d, meta)
 	}
 
+	if v, ok := d.GetOk("standby_zone"); ok {
+		return fmt.Errorf("standby_zone %q only be supported for Active-Standby Redis, not be supported for Distributed Redis", v)
+	}
 	return createDistributedRedisInstance(d, meta)
 }
 
@@ -165,6 +192,9 @@ func resourceUCloudRedisInstanceUpdate(d *schema.ResourceData, meta interface{})
 		return updateActiveStandbyRedisInstance(d, meta)
 	}
 
+	if v, ok := d.GetOk("standby_zone"); ok {
+		return fmt.Errorf("standby_zone %q only be supported for Active-Standby Redis, not be supported for Distributed Redis", v)
+	}
 	return updateDistributedRedisInstance(d, meta)
 }
 
@@ -203,6 +233,10 @@ func createActiveStandbyRedisInstance(d *schema.ResourceData, meta interface{}) 
 		req.ChargeType = ucloud.String(upperCamelCvt.unconvert(v.(string)))
 	} else {
 		req.ChargeType = ucloud.String("Month")
+	}
+
+	if val, ok := d.GetOk("standby_zone"); ok {
+		req.SlaveZone = ucloud.String(val.(string))
 	}
 
 	if v, ok := d.GetOkExists("duration"); ok {
@@ -258,7 +292,7 @@ func createActiveStandbyRedisInstance(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("error on waiting for redis instance %q complete creating, %s", d.Id(), err)
 	}
 
-	return readActiveStandbyRedisInstance(d, meta)
+	return resourceUCloudRedisInstanceUpdate(d, meta)
 }
 
 func createDistributedRedisInstance(d *schema.ResourceData, meta interface{}) error {
@@ -308,7 +342,7 @@ func createDistributedRedisInstance(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("error on waiting for redis instance %q complete creating, %s", d.Id(), err)
 	}
 
-	return readDistributedRedisInstance(d, meta)
+	return resourceUCloudRedisInstanceUpdate(d, meta)
 }
 
 func updateActiveStandbyRedisInstance(d *schema.ResourceData, meta interface{}) error {
@@ -372,6 +406,29 @@ func updateActiveStandbyRedisInstanceWithoutRead(d *schema.ResourceData, meta in
 		if err := client.waitActiveStandbyRedisRunning(d.Id()); err != nil {
 			return fmt.Errorf("error on waiting for %s complete to redis instance %q, %s", "ModifyURedisGroupPassword", d.Id(), err)
 		}
+	}
+
+	backupChanged := false
+	buReq := conn.NewUpdateURedisBackupStrategyRequest()
+	buReq.GroupId = ucloud.String(d.Id())
+
+	if _, ok := d.GetOkExists("backup_begin_time"); (ok && d.IsNewResource()) || d.HasChange("backup_begin_time") || d.HasChange("auto_backup") {
+		backupChanged = true
+	}
+
+	if backupChanged {
+		buReq.BackupTime = ucloud.String(strconv.Itoa(d.Get("backup_begin_time").(int)))
+		if v, ok := d.GetOk("auto_backup"); ok {
+			buReq.AutoBackup = ucloud.String(v.(string))
+		} else {
+			buReq.AutoBackup = ucloud.String("enable")
+		}
+		if _, err := conn.UpdateURedisBackupStrategy(buReq); err != nil {
+			return fmt.Errorf("error on %s to redis instance %q, %s", "UpdateURedisBackupStrategy", d.Id(), err)
+		}
+
+		d.SetPartial("auto_backup")
+		d.SetPartial("backup_begin_time")
 	}
 
 	d.Partial(false)
@@ -446,6 +503,9 @@ func readActiveStandbyRedisInstance(d *schema.ResourceData, meta interface{}) er
 		"ip":   inst.VirtualIP,
 		"port": inst.Port,
 	}})
+	d.Set("standby_zone", inst.SlaveZone)
+	d.Set("auto_backup", inst.AutoBackup)
+	d.Set("backup_begin_time", inst.BackupTime)
 	d.Set("create_time", timestampToString(inst.CreateTime))
 	d.Set("expire_time", timestampToString(inst.ExpireTime))
 	d.Set("status", inst.State)
@@ -640,6 +700,16 @@ func diffValidateRedisInstanceTypeAndEngineVersion(diff *schema.ResourceDiff, v 
 
 	if redisType.Type == "distributed" && engineVersion != "" {
 		return fmt.Errorf("the %q argument is not apply to distributed redis instance", "engine_version")
+	}
+
+	return nil
+}
+
+func diffValidateRedisStandbyZone(diff *schema.ResourceDiff, v interface{}) error {
+	zone := diff.Get("availability_zone").(string)
+
+	if val, ok := diff.GetOk("standby_zone"); ok && val.(string) == zone {
+		return fmt.Errorf("standby_zone %q must be different from availability_zone %q", val.(string), zone)
 	}
 
 	return nil

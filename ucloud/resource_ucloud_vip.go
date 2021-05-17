@@ -65,7 +65,7 @@ func resourceUCloudVIP() *schema.Resource {
 
 func resourceUCloudVIPCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
-	conn := client.unetconn
+	conn := client.vpcconn
 
 	req := conn.NewAllocateVIPRequest()
 	req.VPCId = ucloud.String(d.Get("vpc_id").(string))
@@ -101,7 +101,7 @@ func resourceUCloudVIPCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceUCloudVIPUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
-	conn := client.unetconn
+	conn := client.vpcconn
 
 	d.Partial(true)
 
@@ -161,7 +161,7 @@ func resourceUCloudVIPRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceUCloudVIPDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
-	conn := client.unetconn
+	conn := client.vpcconn
 
 	req := conn.NewReleaseVIPRequest()
 	req.VIPId = ucloud.String(d.Id())

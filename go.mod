@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/hashicorp/terraform-plugin-sdk v1.4.0
-	github.com/ucloud/ucloud-sdk-go v0.17.5
+	github.com/ucloud/ucloud-sdk-go v0.21.3
 	golang.org/x/sys v0.0.0-20200724161237-0e2f3a69832c // indirect
+	gopkg.in/yaml.v2 v2.4.0
 )

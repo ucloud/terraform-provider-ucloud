@@ -31,7 +31,7 @@ func TestAccUCloudEIPAssociation_basic(t *testing.T) {
 
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEIPExists("ucloud_eip.foo", &eip),
-					testAccCheckInstanceExists("ucloud_instance.foo", &instance),
+					//testAccCheckInstanceExists("ucloud_instance.foo", &instance),
 					testAccCheckEIPAssociationExists("ucloud_eip_association.foo", &eip, &instance),
 				),
 			},
@@ -113,19 +113,23 @@ resource "ucloud_eip" "foo" {
 	duration      = 1
 }
 
-resource "ucloud_instance" "foo" {
-	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-	name              = "tf-acc-eip-association-intance"
-	tag               = "tf-acc"
-	instance_type     = "n-highcpu-1"
-	image_id          = "${data.ucloud_images.default.images.0.id}"
-	root_password     = "wA123456"
-	duration          = 1
-	charge_type       = "month"
+data "ucloud_vpcs" "default" {
+	name_regex = "DefaultVPC"
+}
+data "ucloud_subnets" "default" {
+	vpc_id = "${data.ucloud_vpcs.default.vpcs.0.id}"
 }
 
+resource "ucloud_cube_pod" "foo" {
+	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+	name  	 	  = "tf-acc-cube-pod-basic"
+	tag           = "tf-acc"
+	vpc_id        = "${data.ucloud_vpcs.default.vpcs.0.id}"
+	subnet_id     = "${data.ucloud_subnets.default.subnets.0.id}"
+	pod           = "${file("test-fixtures/cube_pod.yml")}"
+}
 resource "ucloud_eip_association" "foo" {
 	eip_id        = "${ucloud_eip.foo.id}"
-	resource_id   = "${ucloud_instance.foo.id}"
+	resource_id   = "${ucloud_cube_pod.foo.id}"
 }
 `

@@ -19,18 +19,25 @@ echo "Compiling ..."
 if [ $OS_TYPE == "Linux" ]; then
 	GOOS=linux GOARCH=amd64 go build -o bin/terraform-provider-ucloud
 	chmod +x bin/terraform-provider-ucloud
-    mkdir -p $HOME/.terraform.d/plugins
-    mv bin/terraform-provider-ucloud $HOME/.terraform.d/plugins
+  mkdir -p $HOME/.terraform.d/plugins
+  mv bin/terraform-provider-ucloud $HOME/.terraform.d/plugins
 elif [ $OS_TYPE == "Mac" ]; then
-	GOOS=darwin GOARCH=amd64 go build -o bin/terraform-provider-ucloud
-	chmod +x bin/terraform-provider-ucloud
+  if [ "$(uname -m)" == arm64 ]; then
+    GOOS=darwin GOARCH=arm64 go build -o bin/terraform-provider-ucloud
+    chmod +x bin/terraform-provider-ucloud
     mkdir -p $HOME/.terraform.d/plugins
     mv bin/terraform-provider-ucloud $HOME/.terraform.d/plugins
+  else
+    GOOS=darwin GOARCH=amd64 go build -o bin/terraform-provider-ucloud
+    chmod +x bin/terraform-provider-ucloud
+    mkdir -p $HOME/.terraform.d/plugins
+    mv bin/terraform-provider-ucloud $HOME/.terraform.d/plugins
+  fi
 elif [ $OS_TYPE == "Windows" ]; then
 	GOOS=windows GOARCH=amd64 go build -o bin/terraform-provider-ucloud.exe
 	chmod +x bin/terraform-provider-ucloud.exe
-    mkdir -p $APPDATA/terraform.d/plugins
-    mv bin/terraform-provider-ucloud.exe $APPDATA/terraform.d/plugins
+  mkdir -p $APPDATA/terraform.d/plugins
+  mv bin/terraform-provider-ucloud.exe $APPDATA/terraform.d/plugins
 else
     echo "Invalid OS"
     exit 1

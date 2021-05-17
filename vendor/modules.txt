@@ -216,17 +216,20 @@ github.com/sirupsen/logrus
 # github.com/spf13/afero v1.2.2
 github.com/spf13/afero
 github.com/spf13/afero/mem
-# github.com/ucloud/ucloud-sdk-go v0.17.5
+# github.com/ucloud/ucloud-sdk-go v0.21.3
 ## explicit
 github.com/ucloud/ucloud-sdk-go/external
 github.com/ucloud/ucloud-sdk-go/private/protocol/http
 github.com/ucloud/ucloud-sdk-go/private/services/umem
 github.com/ucloud/ucloud-sdk-go/private/utils
+github.com/ucloud/ucloud-sdk-go/services/cube
 github.com/ucloud/ucloud-sdk-go/services/ipsecvpn
 github.com/ucloud/ucloud-sdk-go/services/uaccount
 github.com/ucloud/ucloud-sdk-go/services/udb
 github.com/ucloud/ucloud-sdk-go/services/udisk
 github.com/ucloud/ucloud-sdk-go/services/udpn
+github.com/ucloud/ucloud-sdk-go/services/ufile
+github.com/ucloud/ucloud-sdk-go/services/ufs
 github.com/ucloud/ucloud-sdk-go/services/uhost
 github.com/ucloud/ucloud-sdk-go/services/ulb
 github.com/ucloud/ucloud-sdk-go/services/umem
@@ -234,6 +237,7 @@ github.com/ucloud/ucloud-sdk-go/services/unet
 github.com/ucloud/ucloud-sdk-go/services/vpc
 github.com/ucloud/ucloud-sdk-go/ucloud
 github.com/ucloud/ucloud-sdk-go/ucloud/auth
+github.com/ucloud/ucloud-sdk-go/ucloud/config
 github.com/ucloud/ucloud-sdk-go/ucloud/error
 github.com/ucloud/ucloud-sdk-go/ucloud/log
 github.com/ucloud/ucloud-sdk-go/ucloud/metadata
@@ -388,3 +392,6 @@ google.golang.org/grpc/stats
 google.golang.org/grpc/status
 google.golang.org/grpc/tap
 google.golang.org/grpc/test/bufconn
+# gopkg.in/yaml.v2 v2.4.0
+## explicit
+gopkg.in/yaml.v2

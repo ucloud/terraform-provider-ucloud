@@ -27,6 +27,7 @@ The following arguments are supported:
 * `availability_zone` - (Optional) Availability zone where parameter groups are located. Such as: "cn-bj2-02". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
 * `multi_az` - (Optional) Specifies if the replication instance is a multi-az deployment. You cannot set the `availability_zone` parameter if the `multi_az` parameter is set to `true`.
 * `name_regex` - (Optional) A regex string to filter resulting parameter groups by name.
+* `class_type` - (Optional) The type of the DB instance, Possible values are: `sql` for mysql or percona, `postgresql` for postgresql.  
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference

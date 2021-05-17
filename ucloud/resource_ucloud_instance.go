@@ -301,6 +301,7 @@ func resourceUCloudInstance() *schema.Resource {
 					"Intel/CascadelakeR",
 					"Amd/Auto",
 					"Amd/Epyc2",
+					"Ampere/Altra",
 				}, false),
 			},
 

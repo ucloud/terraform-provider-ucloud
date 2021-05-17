@@ -139,6 +139,21 @@ func resourceUCloudNatGatewayUpdate(d *schema.ResourceData, meta interface{}) er
 
 	d.Partial(true)
 
+	if d.HasChange("security_group") && !d.IsNewResource() {
+		conn := client.unetconn
+		req := conn.NewGrantFirewallRequest()
+		req.FWId = ucloud.String(d.Get("security_group").(string))
+		req.ResourceType = ucloud.String(eipResourceTypeNatGateway)
+		req.ResourceId = ucloud.String(d.Id())
+
+		_, err := conn.GrantFirewall(req)
+		if err != nil {
+			return fmt.Errorf("error on %s to nat gateway %q, %s", "GrantFirewall", d.Id(), err)
+		}
+
+		d.SetPartial("security_group")
+	}
+
 	if d.HasChange("white_list") {
 		reqWhite := conn.NewDescribeWhiteListResourceRequest()
 		reqWhite.NATGWIds = []string{d.Id()}

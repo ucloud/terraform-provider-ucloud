@@ -10,7 +10,7 @@ type UHostImageSet struct {
 	// 创建时间，格式为Unix时间戳
 	CreateTime int
 
-	// 特殊状态标识， 目前包含NetEnhnced（网络增强1.0）, NetEnhanced_Ultra]（网络增强2.0）,HotPlug(热升级),CloudInit
+	// 特殊状态标识， 目前包含NetEnhnced（网络增强1.0）, NetEnhanced_Ultra]（网络增强2.0）, HotPlug(热升级), CloudInit, IPv6
 	Features []string
 
 	// 行业镜像类型（仅行业镜像将返回这个值）
@@ -43,7 +43,7 @@ type UHostImageSet struct {
 	// 操作系统名称
 	OsName string
 
-	// 操作系统类型：Liunx，Windows
+	// 操作系统类型：Linux，Windows
 	OsType string
 
 	// 镜像状态， 可用：Available，制作中：Making， 不可用：Unavailable
@@ -61,7 +61,7 @@ SpreadInfo - 每个可用区中硬件隔离组信息
 */
 type SpreadInfo struct {
 
-	// 可用区中硬件隔离组中云主机的数量，不超过7。
+	// 当前地域所有可用区中硬件隔离组中云主机的数量，不超过7。
 	UHostCount int
 
 	// 可用区信息
@@ -94,7 +94,7 @@ type UHostIPSet struct {
 	// IP对应的带宽, 单位: Mb  (内网IP不显示带宽信息)
 	Bandwidth int
 
-	// 【暂未支持】是否为默认网卡。true: 是默认网卡；其他值：不是。
+	// 内网 Private 类型下，表示是否为默认网卡。true: 是默认网卡；其他值：不是。
 	Default string
 
 	// IP地址
@@ -106,8 +106,11 @@ type UHostIPSet struct {
 	// IPv4/IPv6；
 	IPMode string
 
-	// 当前网卡的Mac。
+	// 内网 Private 类型下，当前网卡的Mac。
 	Mac string
+
+	// 弹性网卡为默认网卡时，返回对应的 ID 值
+	NetworkInterfaceId string
 
 	// IP地址对应的子网 ID。（北京一不支持，字段返回为空）
 	SubnetId string
@@ -123,11 +126,23 @@ type UHostIPSet struct {
 }
 
 /*
+UHostKeyPair - 主机密钥信息
+*/
+type UHostKeyPair struct {
+
+	// 密钥对ID
+	KeyPairId string
+
+	// 主机密钥对状态，Normal 正常，Deleted 删除
+	KeyPairState string
+}
+
+/*
 UHostDiskSet - DescribeUHostInstance
 */
 type UHostDiskSet struct {
 
-	// 备份方案。若开通了数据方舟，则为DataArk
+	// 备份方案。若开通了数据方舟，则为DATAARK
 	BackupType string
 
 	// 磁盘ID
@@ -175,7 +190,7 @@ type UHostInstanceSet struct {
 	// 虚拟CPU核数，单位: 个
 	CPU int
 
-	// 计费模式，枚举值为： Year，按年付费； Month，按月付费； Dynamic，按需付费（需开启权限）；
+	// 计费模式，枚举值为： Year，按年付费； Month，按月付费； Dynamic，按需付费（需开启权限）；Preemptive 为抢占式实例；
 	ChargeType string
 
 	// true，支持cloutinit方式初始化；false,不支持
@@ -205,6 +220,9 @@ type UHostInstanceSet struct {
 	// true: 开启热升级； false，未开启热升级
 	HotplugFeature bool
 
+	// true: 开启 hpc 系列功能；false: 未开启
+	HpcFeature bool
+
 	// 详细信息见 UHostIPSet
 	IPSet []UHostIPSet
 
@@ -219,6 +237,9 @@ type UHostInstanceSet struct {
 
 	// 隔离组id，不在隔离组则返回""
 	IsolationGroup string
+
+	// 密钥信息见 UHostKeyPair
+	KeyPair UHostKeyPair
 
 	// 主机的生命周期类型。目前仅支持Normal：普通；
 	LifeCycle string
@@ -250,7 +271,10 @@ type UHostInstanceSet struct {
 	// 备注
 	Remark string
 
-	// 实例状态，枚举值：\\ >初始化: Initializing; \\ >启动中: Starting; \\> 运行中: Running; \\> 关机中: Stopping; \\ >关机: Stopped \\ >安装失败: Install Fail; \\ >重启中: Rebooting
+	// 仅抢占式实例返回，LowSpeed为低速模式，PowerOff为关机模式
+	RestrictMode string
+
+	// 实例状态，枚举值：\\ >初始化: Initializing; \\ >启动中: Starting; \\> 运行中: Running; \\> 关机中: Stopping; \\ >关机: Stopped \\ >安装失败: Install Fail; \\ >重启中: Rebooting; \\ > 未知(空字符串，获取状态超时或出错)：""
 	State string
 
 	// 【建议不再使用】主机磁盘类型。 枚举值为：\\ > LocalDisk，本地磁盘; \\ > UDisk 云盘。\\只要有一块磁盘为本地盘，即返回LocalDisk。

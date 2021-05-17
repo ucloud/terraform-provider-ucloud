@@ -2,6 +2,7 @@ package ucloud
 
 import (
 	"fmt"
+	"github.com/ucloud/ucloud-sdk-go/services/vpc"
 
 	"github.com/ucloud/ucloud-sdk-go/services/unet"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
@@ -46,7 +47,7 @@ func (c *UCloudClient) describeEIPResourceById(eipId, resourceId string) (*unet.
 
 	for i := 0; i < len(resp.EIPSet); i++ {
 		eip := resp.EIPSet[i]
-		if eip.Resource.ResourceId == resourceId {
+		if eip.Resource.ResourceID == resourceId {
 			return &eip.Resource, nil
 		}
 	}
@@ -98,11 +99,11 @@ func (c *UCloudClient) describeFirewallById(sgId string) (*unet.FirewallDataSet,
 	return &resp.DataSet[0], nil
 }
 
-func (c *UCloudClient) describeVIPById(vipId string) (*unet.VIPDetailSet, error) {
+func (c *UCloudClient) describeVIPById(vipId string) (*vpc.VIPDetailSet, error) {
 	if vipId == "" {
 		return nil, newNotFoundError(getNotFoundMessage("vip", vipId))
 	}
-	conn := c.unetconn
+	conn := c.vpcconn
 
 	req := conn.NewDescribeVIPRequest()
 	req.VIPId = ucloud.String(vipId)

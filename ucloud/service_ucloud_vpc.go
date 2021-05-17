@@ -27,7 +27,7 @@ func (c *UCloudClient) describeVPCById(vpcId string) (*vpc.VPCInfo, error) {
 	return &resp.DataSet[0], nil
 }
 
-func (c *UCloudClient) describeSubnetById(subnetId string) (*vpc.VPCSubnetInfoSet, error) {
+func (c *UCloudClient) describeSubnetById(subnetId string) (*vpc.SubnetInfo, error) {
 	if subnetId == "" {
 		return nil, newNotFoundError(getNotFoundMessage("subnet", subnetId))
 	}

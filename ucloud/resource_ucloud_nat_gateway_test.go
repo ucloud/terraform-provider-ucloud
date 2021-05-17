@@ -14,7 +14,7 @@ import (
 func TestAccUCloudNatGW_basic(t *testing.T) {
 	var val vpc.NatGatewayDataSet
 	var vpcSet vpc.VPCInfo
-	var subnetSet vpc.VPCSubnetInfoSet
+	var subnetSet vpc.SubnetInfo
 	var eipSet unet.UnetEIPSet
 
 	resource.ParallelTest(t, resource.TestCase{

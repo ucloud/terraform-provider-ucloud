@@ -7,7 +7,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 )
 
@@ -28,12 +27,11 @@ func resourceUCloudEIPAssociation() *schema.Resource {
 			},
 
 			"resource_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Computed:     true,
-				Deprecated:   "attribute `resource_type` is deprecated for optimizing parameters",
-				ValidateFunc: validation.StringInSlice([]string{"instance", "lb"}, false),
+				Type:       schema.TypeString,
+				Optional:   true,
+				ForceNew:   true,
+				Deprecated: "attribute `resource_type` is deprecated for optimizing parameters",
+				//ValidateFunc: validation.StringInSlice([]string{"instance", "lb"}, false),
 			},
 
 			"resource_id": {
@@ -51,9 +49,42 @@ func resourceUCloudEIPAssociationCreate(d *schema.ResourceData, meta interface{}
 
 	eipId := d.Get("eip_id").(string)
 	resourceId := d.Get("resource_id").(string)
-	resourceType := eipResourceTypeUHost
+	//resourceType := eipResourceTypeUHost
+	//if strings.HasPrefix(resourceId, "ulb-") {
+	//	resourceType = eipResourceTypeULB
+	//}
+	//
+	//if strings.HasPrefix(resourceId, "cube-") {
+	//	resourceType = eipResourceTypeCube
+	//}
+	//
+	//if strings.HasPrefix(resourceId, "natgw-") {
+	//	resourceType = eipResourceTypeNatGateway
+	//}
+
+	var resourceType string
+	if strings.HasPrefix(resourceId, "uhost-") {
+		resourceType = eipResourceTypeUHost
+	}
+
 	if strings.HasPrefix(resourceId, "ulb-") {
 		resourceType = eipResourceTypeULB
+	}
+
+	if strings.HasPrefix(resourceId, "cube-") {
+		resourceType = eipResourceTypeCube
+	}
+
+	if strings.HasPrefix(resourceId, "natgw-") {
+		resourceType = eipResourceTypeNatGateway
+	}
+
+	if resourceType == "" && len(strings.Split(resourceId, "-")) > 0 {
+		resourceType = strings.Split(resourceId, "-")[0]
+	}
+
+	if v, ok := d.GetOk("resource_type"); ok {
+		resourceType = v.(string)
 	}
 
 	req := conn.NewBindEIPRequest()
@@ -112,8 +143,8 @@ func resourceUCloudEIPAssociationRead(d *schema.ResourceData, meta interface{}) 
 
 	// remote api has not returned eip
 	d.Set("eip_id", d.Get("eip_id"))
-	d.Set("resource_id", resource.ResourceId)
-	d.Set("resource_type", lowerCaseProdCvt.unconvert(resource.ResourceType))
+	d.Set("resource_id", resource.ResourceID)
+	//d.Set("resource_type", lowerCaseProdCvt.unconvert(resource.ResourceType))
 
 	return nil
 }
