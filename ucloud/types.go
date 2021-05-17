@@ -133,7 +133,6 @@ func parseInstanceTypeByCustomize(splited ...string) (*instanceType, error) {
 	}
 
 	hostType := splited[0]
-
 	hostScaleType := splited[1]
 
 	cpu, err := strconv.Atoi(splited[2])
@@ -152,6 +151,14 @@ func parseInstanceTypeByCustomize(splited ...string) (*instanceType, error) {
 
 	if memory != 1 && (memory%2) != 0 {
 		return nil, fmt.Errorf("expected the number of memory must be divisible by 2 without a remainder (except single memory), got %d", memory)
+	}
+
+	if cpu < 1 {
+		return nil, fmt.Errorf("expected cpu to be more than 1, got %d", cpu)
+	}
+
+	if memory < 1 {
+		return nil, fmt.Errorf("expected memory to be more than 1,got %d", memory)
 	}
 
 	if cpu/memory > 2 || memory/cpu > 12 || (cpu/memory == 2 && cpu%memory != 0) || (memory/cpu == 12 && memory%cpu != 0) {
@@ -190,6 +197,10 @@ func parseInstanceTypeByNormal(splited ...string) (*instanceType, error) {
 
 		if cpu != 1 && (cpu%2) != 0 {
 			return nil, fmt.Errorf("expected the number of cores of cpu must be divisible by 2 without a remainder (except single core), got %d", cpu)
+		}
+
+		if cpu < 1 {
+			return nil, fmt.Errorf("expected cpu to be more than 1, got %d", cpu)
 		}
 
 		memory := cpu * scale

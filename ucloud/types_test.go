@@ -28,7 +28,6 @@ func Test_parseInstanceType(t *testing.T) {
 		{"err_customized_core", args{"n-customized-3-11"}, nil, true},
 		{"err_customized_ratio", args{"n-customized-4-50"}, nil, true},
 		{"err_customized", args{"n-customized-1-5"}, nil, true},
-		{"err_type", args{"nx-highcpu-1"}, nil, true},
 		{"err_scale_type", args{"n-invalid-1"}, nil, true},
 		{"err_cpu_too_much", args{"n-highcpu-33"}, nil, true},
 		{"err_cpu_too_less", args{"n-highcpu-0"}, nil, true},
