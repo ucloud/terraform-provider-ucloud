@@ -1,20 +1,21 @@
-## 1.27.0 (Unreleased)
+## 1.28.0 (Unreleased)
+## 1.27.0 (2021-05-18)
 
 FEATURES:
 
-* **New Datasource:** `ucloud_ufs_volumes`. [GH-95]
-* **New Datasource:** `ucloud_us3_buckets`. [GH-95]
-* **New Resource:** `ucloud_ufs_volume`. [GH-95]
-* **New Resource:** `ucloud_us3_bucket`. [GH-95]
-* **New Resource:** `ucloud_cube_pod`. [GH-95]
+* **New Datasource:** `ucloud_ufs_volumes`. ([#95](https://github.com/ucloud/terraform-provider-ucloud/issues/95))
+* **New Datasource:** `ucloud_us3_buckets`. ([#95](https://github.com/ucloud/terraform-provider-ucloud/issues/95))
+* **New Resource:** `ucloud_ufs_volume`. ([#95](https://github.com/ucloud/terraform-provider-ucloud/issues/95))
+* **New Resource:** `ucloud_us3_bucket`. ([#95](https://github.com/ucloud/terraform-provider-ucloud/issues/95))
+* **New Resource:** `ucloud_cube_pod`. ([#95](https://github.com/ucloud/terraform-provider-ucloud/issues/95))
 
 ENHANCEMENTS:
 
-* datasource/ucloud_db_parameter_groups: add `class_type` to argument. [GH-95]
-* resource/ucloud_db_instance: add `postgresql` enum value to `engine`. [GH-95]
-* resource/ucloud_instance: add `Ampere/Altra` enum value to `min_cpu_platform`. [GH-95]
-* resource/ucloud_nat_gateway: support update `security_group`. [GH-95]
-* resource/ucloud_redis_instance: support arguments about backup Redis instance and `standby_zone` only for Active-Standby Redis. [GH-95]
+* datasource/ucloud_db_parameter_groups: add `class_type` to argument. ([#95](https://github.com/ucloud/terraform-provider-ucloud/issues/95))
+* resource/ucloud_db_instance: add `postgresql` enum value to `engine`. ([#95](https://github.com/ucloud/terraform-provider-ucloud/issues/95))
+* resource/ucloud_instance: add `Ampere/Altra` enum value to `min_cpu_platform`. ([#95](https://github.com/ucloud/terraform-provider-ucloud/issues/95))
+* resource/ucloud_nat_gateway: support update `security_group`. ([#95](https://github.com/ucloud/terraform-provider-ucloud/issues/95))
+* resource/ucloud_redis_instance: support arguments about backup Redis instance and `standby_zone` only for Active-Standby Redis. ([#95](https://github.com/ucloud/terraform-provider-ucloud/issues/95))
 
 ## 1.26.0 (2021-04-28)
 
