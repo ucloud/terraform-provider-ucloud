@@ -32,6 +32,8 @@ func TestAccUCloudActiveStandbyRedis_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "name", "tf-acc-redis"),
 					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "instance_type", "redis-master-1"),
 					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "engine_version", "4.0"),
+					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "backup_begin_time", "3"),
+					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "auto_backup", "disable"),
 				),
 			},
 
@@ -44,6 +46,8 @@ func TestAccUCloudActiveStandbyRedis_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "name", "tf-acc-redis-renamed"),
 					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "instance_type", "redis-master-2"),
 					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "engine_version", "4.0"),
+					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "backup_begin_time", "0"),
+					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "auto_backup", "disable"),
 				),
 			},
 		},
@@ -189,12 +193,13 @@ const testAccActiveStandbyRedisConfig = `
 data "ucloud_zones" "default" {}
 
 resource "ucloud_redis_instance" "foo" {
-availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-engine_version = "4.0"
-instance_type = "redis-master-1"
-password = "2018_tfacc"
-name = "tf-acc-redis"
-tag = "tf-acc"
+	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+	engine_version = "4.0"
+	instance_type = "redis-master-1"
+	password = "2018_tfacc"
+	name = "tf-acc-redis"
+	tag = "tf-acc"
+	standby_zone = "${data.ucloud_zones.default.zones.1.id}"
 }
 `
 
@@ -208,6 +213,8 @@ resource "ucloud_redis_instance" "foo" {
 	password = "2018_tfacc"
 	name = "tf-acc-redis-renamed"
 	tag = "tf-acc"
+	backup_begin_time = 0
+	standby_zone = "${data.ucloud_zones.default.zones.1.id}"
 }
 `
 

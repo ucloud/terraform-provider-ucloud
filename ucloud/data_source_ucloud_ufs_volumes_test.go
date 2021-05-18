@@ -18,7 +18,7 @@ func TestAccUCloudUFSVolumesDataSource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIDExists("data.ucloud_ufs_volumes.foo"),
 					resource.TestCheckResourceAttr("data.ucloud_ufs_volumes.foo", "ufs_volumes.#", "1"),
-					resource.TestCheckResourceAttr("data.ucloud_ufs_volumes.foo", "ufs_volumes.0.name", "tf-acc-ufss-dataSource-basic"),
+					resource.TestCheckResourceAttr("data.ucloud_ufs_volumes.foo", "ufs_volumes.0.name", "tf-acc-ufs-volumes-dataSource-basic"),
 					resource.TestCheckResourceAttr("data.ucloud_ufs_volumes.foo", "ufs_volumes.0.tag", "tf-acc"),
 					resource.TestCheckResourceAttr("data.ucloud_ufs_volumes.foo", "ufs_volumes.0.size", "500"),
 				),
@@ -63,7 +63,7 @@ resource "ucloud_ufs_volume" "foo" {
 }
 
 data "ucloud_ufs_volumes" "foo" {
-	name_regex  = "${ucloud_ufs.foo.name}"
+	name_regex  = "${ucloud_ufs_volume.foo.name}"
 }
 `
 
@@ -94,6 +94,6 @@ resource "ucloud_ufs_volume" "foo" {
 }
 
 data "ucloud_ufs_volumes" "foo" {
-	ids = ucloud_ufs.foo.*.id
+	ids = ucloud_ufs_volume.foo.*.id
 }
 `
