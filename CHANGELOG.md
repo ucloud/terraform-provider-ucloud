@@ -14,7 +14,7 @@ ENHANCEMENTS:
 * resource/ucloud_db_instance: add `postgresql` enum value to `engine`. [GH-95]
 * resource/ucloud_instance: add `Ampere/Altra` enum value to `min_cpu_platform`. [GH-95]
 * resource/ucloud_nat_gateway: support update `security_group`. [GH-95]
-* resource/ucloud_redis_instance: support arguments about backup Redis instance and `standby_zone` for Active-Standby Redis. [GH-95]
+* resource/ucloud_redis_instance: support arguments about backup Redis instance and `standby_zone` only for Active-Standby Redis. [GH-95]
 
 ## 1.26.0 (2021-04-28)
 
