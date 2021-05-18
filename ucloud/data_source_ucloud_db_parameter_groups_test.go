@@ -24,6 +24,23 @@ func TestAccUCloudDBParameterGroupsDataSource(t *testing.T) {
 	})
 }
 
+func TestAccUCloudDBParameterGroupsDataSourceClassType(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataDBParameterGroupsConfigClassType,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckIDExists("data.ucloud_db_parameter_groups.foo"),
+				),
+			},
+		},
+	})
+}
+
 const testAccDataDBParameterGroupsConfig = `
 data "ucloud_zones" "default" {
 }
@@ -31,5 +48,15 @@ data "ucloud_zones" "default" {
 data "ucloud_db_parameter_groups" "foo" {
 	availability_zone = data.ucloud_zones.default.zones[0].id
 	name_regex		  = "mysql5.6默认配置"
+}
+`
+
+const testAccDataDBParameterGroupsConfigClassType = `
+data "ucloud_zones" "default" {
+}
+
+data "ucloud_db_parameter_groups" "foo" {
+	availability_zone = data.ucloud_zones.default.zones[0].id
+	class_type		  = "postgresql"
 }
 `

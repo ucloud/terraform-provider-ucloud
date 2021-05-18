@@ -428,6 +428,7 @@ resource "ucloud_instance" "foo" {
   root_password     = "wA1234567"
   name              = "tf-acc-instance-config-outstanding"
   tag               = "tf-acc"
+  min_cpu_platform  = "Amd/Auto"
 }
 `
 

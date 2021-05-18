@@ -248,7 +248,7 @@ type dbInstanceType struct {
 	Type   string
 }
 
-var availableDBEngine = []string{"mysql", "percona"}
+var availableDBEngine = []string{"mysql", "percona", "postgresql"}
 var availableDBTypes = []string{"ha"}
 
 func parseDBInstanceType(s string) (*dbInstanceType, error) {
