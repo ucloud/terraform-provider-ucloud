@@ -6,6 +6,7 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/services/cube"
 	"github.com/ucloud/ucloud-sdk-go/services/ufile"
 	"github.com/ucloud/ucloud-sdk-go/services/ufs"
+	"github.com/ucloud/ucloud-sdk-go/services/uk8s"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -140,6 +141,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 	client.udbconn = udb.NewClient(&longtimeCfg, &cred)
 	client.uhostconn = uhost.NewClient(&longtimeCfg, &cred)
 	client.udpnconn = udpn.NewClient(&longtimeCfg, &cred)
+	client.uk8sconn = uk8s.NewClient(&longtimeCfg, &cred)
 
 	if cloudShellCredHandler != nil {
 		client.uhostconn.AddHttpRequestHandler(cloudShellCredHandler)
@@ -156,6 +158,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 		client.ufsconn.AddHttpRequestHandler(cloudShellCredHandler)
 		client.us3conn.AddHttpRequestHandler(cloudShellCredHandler)
 		client.cubeconn.AddHttpRequestHandler(cloudShellCredHandler)
+		client.uk8sconn.AddHttpRequestHandler(cloudShellCredHandler)
 	}
 
 	client.config = &cfg

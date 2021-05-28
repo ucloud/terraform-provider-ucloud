@@ -130,6 +130,7 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_ufs_volume":             resourceUCloudUFSVolume(),
 			"ucloud_us3_bucket":             resourceUCloudUS3Bucket(),
 			"ucloud_cube_pod":               resourceUCloudCubePod(),
+			"ucloud_uk8s_cluster":           resourceUCloudUK8sCluster(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

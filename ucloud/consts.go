@@ -23,6 +23,12 @@ const (
 
 	// statusShutdown is the general status when remote resource is Shutdown
 	statusShutdown = "Shutdown"
+
+	// statusRUNNING is the general status when remote resource is RUNNING
+	statusRUNNING = "RUNNING"
+
+	// statusDELETED is the general status when remote resource is DELETED
+	statusDELETED = "DELETED"
 )
 
 const (

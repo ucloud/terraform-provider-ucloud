@@ -231,6 +231,7 @@ github.com/ucloud/ucloud-sdk-go/services/udpn
 github.com/ucloud/ucloud-sdk-go/services/ufile
 github.com/ucloud/ucloud-sdk-go/services/ufs
 github.com/ucloud/ucloud-sdk-go/services/uhost
+github.com/ucloud/ucloud-sdk-go/services/uk8s
 github.com/ucloud/ucloud-sdk-go/services/ulb
 github.com/ucloud/ucloud-sdk-go/services/umem
 github.com/ucloud/ucloud-sdk-go/services/unet
