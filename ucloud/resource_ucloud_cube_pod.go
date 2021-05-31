@@ -80,6 +80,12 @@ func resourceUCloudCubePod() *schema.Resource {
 				StateFunc:    stateFuncTag,
 			},
 
+			"security_group": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
 			"create_time": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -157,7 +163,7 @@ func resourceUCloudCubePodCreate(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("error on waiting for cube pod %q complete creating, %s", d.Id(), err)
 	}
 
-	return resourceUCloudCubePodRead(d, meta)
+	return resourceUCloudCubePodUpdate(d, meta)
 }
 
 func resourceUCloudCubePodUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -194,9 +200,24 @@ func resourceUCloudCubePodUpdate(d *schema.ResourceData, meta interface{}) error
 		d.SetPartial("name")
 	}
 
+	if d.HasChange("security_group") {
+		conn := client.unetconn
+		req := conn.NewGrantFirewallRequest()
+		req.FWId = ucloud.String(d.Get("security_group").(string))
+		req.ResourceType = ucloud.String(eipResourceTypeCube)
+		req.ResourceId = ucloud.String(d.Id())
+
+		_, err := conn.GrantFirewall(req)
+		if err != nil {
+			return fmt.Errorf("error on %s to cube pod %q, %s", "GrantFirewall", d.Id(), err)
+		}
+
+		d.SetPartial("security_group")
+	}
+
 	d.Partial(false)
 
-	return nil
+	return resourceUCloudCubePodRead(d, meta)
 }
 
 func resourceUCloudCubePodRead(d *schema.ResourceData, meta interface{}) error {
@@ -227,6 +248,16 @@ func resourceUCloudCubePodRead(d *schema.ResourceData, meta interface{}) error {
 		}
 		d.Set("create_time", timestampToString(ctStamp))
 	}
+
+	sgSet, err := client.describeFirewallByIdAndType(d.Id(), eipResourceTypeCube)
+	if err != nil {
+		if isNotFoundError(err) {
+			return nil
+		}
+		return fmt.Errorf("error on reading security group when reading cube pod %q, %s", d.Id(), err)
+	}
+
+	d.Set("security_group", sgSet.FWId)
 
 	return nil
 }

@@ -29,7 +29,7 @@ func resourceUCloudInstance() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
 			Update: schema.DefaultTimeout(20 * time.Minute),
-			Delete: schema.DefaultTimeout(10 * time.Minute),
+			Delete: schema.DefaultTimeout(15 * time.Minute),
 		},
 
 		CustomizeDiff: customdiff.All(
@@ -1027,7 +1027,7 @@ func resourceUCloudInstanceDelete(d *schema.ResourceData, meta interface{}) erro
 		deleReq.ReleaseEIP = ucloud.Bool(v.(bool))
 	}
 
-	return resource.Retry(15*time.Minute, func() *resource.RetryError {
+	return resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
 		instance, err := client.describeInstanceById(d.Id())
 		if err != nil {
 			if isNotFoundError(err) {
@@ -1045,7 +1045,7 @@ func resourceUCloudInstanceDelete(d *schema.ResourceData, meta interface{}) erro
 				Pending:    []string{statusPending},
 				Target:     []string{statusStopped},
 				Refresh:    instanceStateRefreshFunc(client, d.Id(), statusStopped),
-				Timeout:    d.Timeout(schema.TimeoutDelete),
+				Timeout:    5 * time.Minute,
 				Delay:      3 * time.Second,
 				MinTimeout: 2 * time.Second,
 			}
