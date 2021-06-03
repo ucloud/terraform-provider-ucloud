@@ -1,4 +1,13 @@
 ## 1.28.0 (Unreleased)
+
+ENHANCEMENTS:
+
+* resource/ucloud_cube_pod: add `security_group` to argument.[GH-102]
+
+BUG FIXES:
+
+* resource/ucloud_cube_pod: fix the [issue](https://github.com/ucloud/terraform-provider-ucloud/issues/101) .[GH-102]
+
 ## 1.27.0 (2021-05-18)
 
 FEATURES:
