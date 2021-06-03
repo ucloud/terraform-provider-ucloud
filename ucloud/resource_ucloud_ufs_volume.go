@@ -163,7 +163,7 @@ func resourceUCloudUFSVolumeUpdate(d *schema.ResourceData, meta interface{}) err
 
 	d.Partial(false)
 
-	return nil
+	return resourceUCloudUFSVolumeRead(d, meta)
 }
 
 func resourceUCloudUFSVolumeRead(d *schema.ResourceData, meta interface{}) error {

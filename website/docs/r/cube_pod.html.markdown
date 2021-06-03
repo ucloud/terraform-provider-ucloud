@@ -45,6 +45,7 @@ The following arguments are supported:
 * `duration` - (Optional, ForceNew) The duration that you will buy the Cube Pod (Default: `1`). The value is `0` when pay by month and the Cube Pod will be valid till the last day of that month. It is not required when `postpay` (pay by hour).
 * `name` - (Optional) The name of Cube Pod, expected value to be 6 - 63 characters and only support english, numbers, '-', '_', and can not prefix with '-'. If not specified, terraform will auto-generate a name beginning with `tf-cube-pod`.
 * `tag` - (Optional, ForceNew) A tag assigned to CubePod, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
+* `security_group` - (Optional) The ID of the associated security group.
 
 ## Attributes Reference
 

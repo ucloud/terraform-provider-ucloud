@@ -131,10 +131,10 @@ In addition to [generic `provider` arguments](https://www.terraform.io/docs/conf
 (e.g. `alias` and `version`), the following arguments are supported in the UCloud
  `provider` block:
 
-* `public_key` - (Required) This is the UCloud public key. It must be provided, but
+* `public_key` - (Required) This is the UCloud public key. You may refer to [get public key from console](https://console.ucloud.cn/uapi/apikey). It must be provided, but
   it can also be sourced from the `UCLOUD_PUBLIC_KEY` environment variable.
 
-* `private_key` - (Required) This is the UCloud private key. It must be provided, but
+* `private_key` - (Required) This is the UCloud private key. You may refer to [get private key from console](https://console.ucloud.cn/uapi/apikey). It must be provided, but
   it can also be sourced from the `UCLOUD_PRIVATE_KEY` environment variable.
 
 * `region` - (Required) This is the UCloud region. It must be provided, but
