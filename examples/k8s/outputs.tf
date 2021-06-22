@@ -1,3 +1,3 @@
-output "db_instance_id" {
+output "api_server" {
   value = ucloud_uk8s_cluster.foo.id
 }

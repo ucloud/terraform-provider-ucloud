@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestAccUCloudUK8sCluster_basic(t *testing.T) {
+func TestAccUCloudUK8SCluster_basic(t *testing.T) {
 	var uk8sClusterSet uk8s.ClusterSet
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -19,24 +19,24 @@ func TestAccUCloudUK8sCluster_basic(t *testing.T) {
 
 		IDRefreshName: "ucloud_uk8s_cluster.foo",
 		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckUK8sClusterDestroy,
+		CheckDestroy:  testAccCheckUK8SClusterDestroy,
 
 		Steps: []resource.TestStep{
 			{
-				Config: testAccUK8sClusterConfig,
+				Config: testAccUK8SClusterConfig,
 
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckUK8sClusterExists("ucloud_uk8s_cluster.foo", &uk8sClusterSet),
-					testAccCheckUK8sClusterAttributes(&uk8sClusterSet),
+					testAccCheckUK8SClusterExists("ucloud_uk8s_cluster.foo", &uk8sClusterSet),
+					testAccCheckUK8SClusterAttributes(&uk8sClusterSet),
 					resource.TestCheckResourceAttr("ucloud_uk8s_cluster.foo", "name", "tf-acc-uk8s-cluster-basic"),
 				),
 			},
 			{
-				Config: testAccUK8sClusterConfigUpdate,
+				Config: testAccUK8SClusterConfigUpdate,
 
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckUK8sClusterExists("ucloud_uk8s_cluster.foo", &uk8sClusterSet),
-					testAccCheckUK8sClusterAttributes(&uk8sClusterSet),
+					testAccCheckUK8SClusterExists("ucloud_uk8s_cluster.foo", &uk8sClusterSet),
+					testAccCheckUK8SClusterAttributes(&uk8sClusterSet),
 					resource.TestCheckResourceAttr("ucloud_uk8s_cluster.foo", "name", "tf-acc-uk8s-cluster-basic-update"),
 				),
 			},
@@ -44,7 +44,7 @@ func TestAccUCloudUK8sCluster_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckUK8sClusterExists(n string, uk8sClusterSet *uk8s.ClusterSet) resource.TestCheckFunc {
+func testAccCheckUK8SClusterExists(n string, uk8sClusterSet *uk8s.ClusterSet) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 
@@ -57,7 +57,7 @@ func testAccCheckUK8sClusterExists(n string, uk8sClusterSet *uk8s.ClusterSet) re
 		}
 
 		client := testAccProvider.Meta().(*UCloudClient)
-		ptr, err := client.describeUK8sClusterById(rs.Primary.ID)
+		ptr, err := client.describeUK8SClusterById(rs.Primary.ID)
 
 		log.Printf("[INFO] uk8s cluster id %#v", rs.Primary.ID)
 
@@ -70,7 +70,7 @@ func testAccCheckUK8sClusterExists(n string, uk8sClusterSet *uk8s.ClusterSet) re
 	}
 }
 
-func testAccCheckUK8sClusterAttributes(uk8sClusterSet *uk8s.ClusterSet) resource.TestCheckFunc {
+func testAccCheckUK8SClusterAttributes(uk8sClusterSet *uk8s.ClusterSet) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if uk8sClusterSet.ClusterId == "" {
 			return fmt.Errorf("uk8s cluster id is empty")
@@ -79,14 +79,14 @@ func testAccCheckUK8sClusterAttributes(uk8sClusterSet *uk8s.ClusterSet) resource
 	}
 }
 
-func testAccCheckUK8sClusterDestroy(s *terraform.State) error {
+func testAccCheckUK8SClusterDestroy(s *terraform.State) error {
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "ucloud_uk8s_cluster" {
 			continue
 		}
 
 		client := testAccProvider.Meta().(*UCloudClient)
-		d, err := client.describeUK8sClusterById(rs.Primary.ID)
+		d, err := client.describeUK8SClusterById(rs.Primary.ID)
 
 		if err != nil {
 			if isNotFoundError(err) {
@@ -103,7 +103,7 @@ func testAccCheckUK8sClusterDestroy(s *terraform.State) error {
 	return nil
 }
 
-const testAccUK8sClusterConfig = `
+const testAccUK8SClusterConfig = `
 resource "ucloud_vpc" "foo" {
 	name        = "tf-acc-uk8s-cluster"
 	tag         = "tf-acc"
@@ -126,25 +126,19 @@ resource "ucloud_uk8s_cluster" "foo" {
 	service_cidr = "172.16.0.0/16"
 	password     = "ucloud_2021"
 	charge_type  = "dynamic"
-	master_instance_type = "n-basic-2"
-   	master {
-	  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-  	}
-   	master {
-	  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-  	}
-   	master {
-	  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-  	}
 
-	nodes {
+	master {
+	  availability_zones = [
+		"${data.ucloud_zones.default.zones.0.id}",
+		"${data.ucloud_zones.default.zones.0.id}",
+		"${data.ucloud_zones.default.zones.0.id}",
+      ]
 	  instance_type = "n-basic-2"
-	  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
   	}
 }
 `
 
-const testAccUK8sClusterConfigUpdate = `
+const testAccUK8SClusterConfigUpdate = `
 resource "ucloud_vpc" "foo" {
 	name        = "tf-acc-uk8s-cluster"
 	tag         = "tf-acc"
@@ -167,21 +161,14 @@ resource "ucloud_uk8s_cluster" "foo" {
 	service_cidr = "172.16.0.0/16"
 	password     = "ucloud_2021"
 	charge_type  = "dynamic"
-	master_instance_type = "n-basic-2"
 
    	master {
-	  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-  	}
-   	master {
-	  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-  	}
-   	master {
-	  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-  	}
-
-	nodes {
+	  availability_zones = [
+		"${data.ucloud_zones.default.zones.0.id}",
+		"${data.ucloud_zones.default.zones.0.id}",
+		"${data.ucloud_zones.default.zones.0.id}",
+      ]
 	  instance_type = "n-basic-2"
-	  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
   	}
 }
 `

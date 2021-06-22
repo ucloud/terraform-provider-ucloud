@@ -1,5 +1,5 @@
 ---
-subcategory: "Cube"
+subcategory: "Cloud Native"
 layout: "ucloud"
 page_title: "UCloud: ucloud_cube_pod"
 description: |-
