@@ -6,6 +6,7 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/services/cube"
 	"github.com/ucloud/ucloud-sdk-go/services/ufile"
 	"github.com/ucloud/ucloud-sdk-go/services/ufs"
+	"github.com/ucloud/ucloud-sdk-go/services/uk8s"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -67,7 +68,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 	// enable auto retry with http/connection error
 	cfg.MaxRetries = c.MaxRetries
 	cfg.LogLevel = log.PanicLevel
-	cfg.UserAgent = "Terraform-UCloud/1.28.0"
+	cfg.UserAgent = "Terraform-UCloud/1.29.0"
 	cfg.BaseUrl = c.BaseURL
 
 	cred := auth.NewCredential()
@@ -140,6 +141,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 	client.udbconn = udb.NewClient(&longtimeCfg, &cred)
 	client.uhostconn = uhost.NewClient(&longtimeCfg, &cred)
 	client.udpnconn = udpn.NewClient(&longtimeCfg, &cred)
+	client.uk8sconn = uk8s.NewClient(&longtimeCfg, &cred)
 
 	if cloudShellCredHandler != nil {
 		client.uhostconn.AddHttpRequestHandler(cloudShellCredHandler)
@@ -156,6 +158,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 		client.ufsconn.AddHttpRequestHandler(cloudShellCredHandler)
 		client.us3conn.AddHttpRequestHandler(cloudShellCredHandler)
 		client.cubeconn.AddHttpRequestHandler(cloudShellCredHandler)
+		client.uk8sconn.AddHttpRequestHandler(cloudShellCredHandler)
 	}
 
 	client.config = &cfg

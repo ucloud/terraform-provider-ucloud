@@ -23,6 +23,12 @@ const (
 
 	// statusShutdown is the general status when remote resource is Shutdown
 	statusShutdown = "Shutdown"
+
+	// statusRUNNING is the general status when remote resource is RUNNING
+	statusRUNNING = "RUNNING"
+
+	// statusDELETED is the general status when remote resource is DELETED
+	statusDELETED = "DELETED"
 )
 
 const (
@@ -67,6 +73,22 @@ const (
 
 	// CrashLoopBackOff is the status when cube pod initialize failed
 	cubePodStatusCrashLoopBackOff = "CrashLoopBackOff"
+
+	k8sClusterStatusCreateFailed = "CREATEFAILED"
+
+	k8sClusterStatusDeleteFailed = "DELETEFAILED"
+
+	k8sClusterStatusError = "ERROR"
+
+	k8sClusterStatusAbnormal = "ABNORMAL"
+
+	k8sNodeStatusError = "Error"
+
+	k8sNodeStatusReady = "Ready"
+
+	k8sNodeStatusInstallFail = "Install Fail"
+
+	k8sNodeStatusStopped = "Stopped"
 )
 
 const (

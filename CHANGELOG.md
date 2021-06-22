@@ -1,4 +1,10 @@
 ## 1.29.0 (Unreleased)
+
+FEATURES:
+
+* **New Resource:** `ucloud_uk8s_cluster`. [GH-103]
+* **New Resource:** `ucloud_uk8s_node`. [GH-103]
+
 ## 1.28.0 (2021-06-03)
 
 ENHANCEMENTS:

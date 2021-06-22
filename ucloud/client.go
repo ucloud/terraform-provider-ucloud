@@ -11,6 +11,7 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/services/ufile"
 	"github.com/ucloud/ucloud-sdk-go/services/ufs"
 	"github.com/ucloud/ucloud-sdk-go/services/uhost"
+	"github.com/ucloud/ucloud-sdk-go/services/uk8s"
 	"github.com/ucloud/ucloud-sdk-go/services/ulb"
 	"github.com/ucloud/ucloud-sdk-go/services/umem"
 	"github.com/ucloud/ucloud-sdk-go/services/unet"
@@ -40,6 +41,7 @@ type UCloudClient struct {
 	ufsconn        *ufs.UFSClient
 	us3conn        *ufile.UFileClient
 	cubeconn       *cube.CubeClient
+	uk8sconn       *uk8s.UK8SClient
 
 	// private services
 	pumemconn *pumem.UMemClient
