@@ -3,13 +3,13 @@ package ucloud
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/ucloud/ucloud-sdk-go/services/uk8s"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/ucloud/ucloud-sdk-go/services/uk8s"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 )
 
@@ -417,7 +417,6 @@ func resourceUCloudUK8SClusterRead(d *schema.ResourceData, meta interface{}) err
 	_ = d.Set("external_api_server", instance.ExternalApiServer)
 	_ = d.Set("k8s_version", instance.K8sVersion)
 	_ = d.Set("pod_cidr", instance.PodCIDR)
-	_ = d.Set("external_api_server", instance.ExternalApiServer)
 	return nil
 }
 

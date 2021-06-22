@@ -76,7 +76,7 @@ The `master` supports the following:
 * `availability_zones` - (Required, ForceNew) Availability zone list where instance is located. such as: `["cn-bj2-02", "cn-bj2-03", "cn-bj2-05"]`. You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
 * `instance_type` - (Required, ForceNew) The type of instance, please visit the [instance type table](https://docs.ucloud.cn/terraform/specification/instance)
 * `boot_disk_type` - (Optional, ForceNew) The type of boot disk. Possible values are: `local_normal` and `local_ssd` for local boot disk, `cloud_ssd` for cloud SSD boot disk,`rssd_data_disk` as RDMA-SSD cloud disk. (Default: `cloud_ssd`). The `local_ssd` and `cloud_ssd` are not fully support by all regions as boot disk type, please proceed to UCloud console for more details.
-* `data_disk_type` - (Optional, ForceNew) The type of local data disk. Possible values are: `local_normal` and `local_ssd` for local data disk. (Default: `local_normal`). The `local_ssd` is not fully support by all regions as data disk type, please proceed to UCloud console for more details. In addition, the `data_disk_type` must be same as `boot_disk_type` if specified.
+* `data_disk_type` - (Optional, ForceNew) The type of local data disk. Possible values are: `local_normal` and `local_ssd` for local data disk. (Default: `cloud_ssd`). The `local_ssd` is not fully support by all regions as data disk type, please proceed to UCloud console for more details. In addition, the `data_disk_type` must be same as `boot_disk_type` if specified.
 * `data_disk_size` - (Optional, ForceNew) The size of local data disk, measured in GB (GigaByte), 20-2000 for local sata disk and 20-1000 for local ssd disk (all the GPU type instances are included). The volume adjustment must be a multiple of 10 GB. In addition, any reduction of data disk size is not supported.
 * `min_cpu_platform` - (Optional, ForceNew) Specifies a minimum CPU platform for the VM instance. (Default: `Intel/Auto`). You may refer to [min_cpu_platform](https://docs.ucloud.cn/uhost/introduction/uhost/type_new)
     - The Intel CPU platform:
@@ -114,4 +114,4 @@ In addition to all arguments above, the following attributes are exported:
 * `external_api_server` - The api server endpoint for external visiting.
 * `pod_cidr` - The CIDR block of pod network.
 * `create_time` - The time of creation for instance, formatted in RFC3339 time string.
-* `status` - Instance current status. Possible values are `Initializing`, `Starting`, `Running`, `Stopping`, `Stopped`, `Install Fail`, `ResizeFail` and `Rebooting`.
+* `status` - Instance current status. Possible values are `RUNNING`, `CREATEFAILED`, `DELETEFAILED`, `ERROR` and `ABNORMAL`.

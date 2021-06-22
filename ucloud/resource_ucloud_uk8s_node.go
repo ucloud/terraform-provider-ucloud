@@ -274,6 +274,8 @@ func resourceUK8SNodeCreate(d *schema.ResourceData, meta interface{}) error {
 	if v, ok := d.GetOk("data_disk_size"); ok {
 		if val, ok := d.GetOk("data_disk_type"); ok {
 			req.DataDiskType = ucloud.String(upperCvt.unconvert(val.(string)))
+		} else {
+			req.DataDiskType = ucloud.String(upperCvt.unconvert("cloud_ssd"))
 		}
 		req.DataDiskSize = ucloud.String(strconv.Itoa(v.(int)))
 	}

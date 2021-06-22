@@ -47,4 +47,6 @@ resource "ucloud_uk8s_node" "foo" {
 	instance_type = "n-basic-2"
 	charge_type   = "dynamic"
 	availability_zone = data.ucloud_zones.default.zones[0].id
+
+	count = 2
 }

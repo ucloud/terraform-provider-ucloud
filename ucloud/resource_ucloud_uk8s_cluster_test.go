@@ -105,70 +105,70 @@ func testAccCheckUK8SClusterDestroy(s *terraform.State) error {
 
 const testAccUK8SClusterConfig = `
 resource "ucloud_vpc" "foo" {
-	name        = "tf-acc-uk8s-cluster"
-	tag         = "tf-acc"
-	cidr_blocks = ["192.168.0.0/16"]
+    name        = "tf-acc-uk8s-cluster"
+    tag         = "tf-acc"
+    cidr_blocks = ["192.168.0.0/16"]
 }
 resource "ucloud_subnet" "foo" {
-	name       = "tf-acc-uk8s-cluster"
-	tag        = "tf-acc"
-	cidr_block = "192.168.1.0/24"
-	vpc_id     = "${ucloud_vpc.foo.id}"
+    name       = "tf-acc-uk8s-cluster"
+    tag        = "tf-acc"
+    cidr_block = "192.168.1.0/24"
+    vpc_id     = "${ucloud_vpc.foo.id}"
 }
 
 data "ucloud_zones" "default" {
 }
 
 resource "ucloud_uk8s_cluster" "foo" {
-	vpc_id	 	 = "${ucloud_vpc.foo.id}"
-	subnet_id	 = "${ucloud_subnet.foo.id}"
-	name  	 	 = "tf-acc-uk8s-cluster-basic"
-	service_cidr = "172.16.0.0/16"
-	password     = "ucloud_2021"
-	charge_type  = "dynamic"
+    vpc_id       = "${ucloud_vpc.foo.id}"
+    subnet_id    = "${ucloud_subnet.foo.id}"
+    name         = "tf-acc-uk8s-cluster-basic"
+    service_cidr = "172.16.0.0/16"
+    password     = "ucloud_2021"
+    charge_type  = "dynamic"
 
-	master {
-	  availability_zones = [
-		"${data.ucloud_zones.default.zones.0.id}",
-		"${data.ucloud_zones.default.zones.0.id}",
-		"${data.ucloud_zones.default.zones.0.id}",
+    master {
+      availability_zones = [
+        "${data.ucloud_zones.default.zones.0.id}",
+        "${data.ucloud_zones.default.zones.0.id}",
+        "${data.ucloud_zones.default.zones.0.id}",
       ]
-	  instance_type = "n-basic-2"
-  	}
+      instance_type = "n-basic-2"
+      }
 }
 `
 
 const testAccUK8SClusterConfigUpdate = `
 resource "ucloud_vpc" "foo" {
-	name        = "tf-acc-uk8s-cluster"
-	tag         = "tf-acc"
-	cidr_blocks = ["192.168.0.0/16"]
+    name        = "tf-acc-uk8s-cluster"
+    tag         = "tf-acc"
+    cidr_blocks = ["192.168.0.0/16"]
 }
 resource "ucloud_subnet" "foo" {
-	name       = "tf-acc-uk8s-cluster"
-	tag        = "tf-acc"
-	cidr_block = "192.168.1.0/24"
-	vpc_id     = "${ucloud_vpc.foo.id}"
+    name       = "tf-acc-uk8s-cluster"
+    tag        = "tf-acc"
+    cidr_block = "192.168.1.0/24"
+    vpc_id     = "${ucloud_vpc.foo.id}"
 }
 
 data "ucloud_zones" "default" {
 }
 
 resource "ucloud_uk8s_cluster" "foo" {
-	vpc_id	 	 = "${ucloud_vpc.foo.id}"
-	subnet_id	 = "${ucloud_subnet.foo.id}"
-	name  	 	 = "tf-acc-uk8s-cluster-basic-update"
-	service_cidr = "172.16.0.0/16"
-	password     = "ucloud_2021"
-	charge_type  = "dynamic"
+    vpc_id       = "${ucloud_vpc.foo.id}"
+    subnet_id    = "${ucloud_subnet.foo.id}"
+    name         = "tf-acc-uk8s-cluster-basic-update"
+    service_cidr = "172.16.0.0/16"
+    password     = "ucloud_2021"
+    charge_type  = "dynamic"
 
-   	master {
-	  availability_zones = [
-		"${data.ucloud_zones.default.zones.0.id}",
-		"${data.ucloud_zones.default.zones.0.id}",
-		"${data.ucloud_zones.default.zones.0.id}",
+    master {
+      availability_zones = [
+        "${data.ucloud_zones.default.zones.0.id}",
+        "${data.ucloud_zones.default.zones.0.id}",
+        "${data.ucloud_zones.default.zones.0.id}",
       ]
-	  instance_type = "n-basic-2"
-  	}
+      instance_type = "n-basic-2"
+    }
 }
 `
