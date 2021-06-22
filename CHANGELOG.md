@@ -1,9 +1,10 @@
-## 1.29.0 (Unreleased)
+## 1.30.0 (Unreleased)
+## 1.29.0 (2021-06-22)
 
 FEATURES:
 
-* **New Resource:** `ucloud_uk8s_cluster`. [GH-103]
-* **New Resource:** `ucloud_uk8s_node`. [GH-103]
+* **New Resource:** `ucloud_uk8s_cluster`. ([#103](https://github.com/ucloud/terraform-provider-ucloud/issues/103))
+* **New Resource:** `ucloud_uk8s_node`. ([#103](https://github.com/ucloud/terraform-provider-ucloud/issues/103))
 
 ## 1.28.0 (2021-06-03)
 
