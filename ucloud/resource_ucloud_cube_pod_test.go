@@ -111,6 +111,9 @@ data "ucloud_vpcs" "default" {
 data "ucloud_subnets" "default" {
 	vpc_id = "${data.ucloud_vpcs.default.vpcs.0.id}"
 }
+data "ucloud_security_groups" "default" {
+  type = "recommend_web"
+}
 
 resource "ucloud_cube_pod" "foo" {
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
@@ -119,6 +122,7 @@ resource "ucloud_cube_pod" "foo" {
 	vpc_id        = "${data.ucloud_vpcs.default.vpcs.0.id}"
 	subnet_id     = "${data.ucloud_subnets.default.subnets.0.id}"
 	pod           = "${file("test-fixtures/cube_pod.yml")}"
+	security_group = "${data.ucloud_security_groups.default.security_groups.0.id}"
 }
 `
 
@@ -132,6 +136,9 @@ data "ucloud_vpcs" "default" {
 data "ucloud_subnets" "default" {
 	vpc_id = "${data.ucloud_vpcs.default.vpcs.0.id}"
 }
+data "ucloud_security_groups" "default" {
+  type = "recommend_non_web"
+}
 
 resource "ucloud_cube_pod" "foo" {
   	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
@@ -140,5 +147,6 @@ resource "ucloud_cube_pod" "foo" {
 	vpc_id        = "${data.ucloud_vpcs.default.vpcs.0.id}"
 	subnet_id     = "${data.ucloud_subnets.default.subnets.0.id}"
 	pod           = "${file("test-fixtures/cube_pod.yml")}"
+	security_group = "${data.ucloud_security_groups.default.security_groups.0.id}"
 }
 `
