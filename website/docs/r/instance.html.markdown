@@ -141,7 +141,7 @@ The following arguments are supported:
 The `data_disks` supports the following:
 
 * `size` - (Required, ForceNew) The size of the cloud data disk, range 20-8000, measured in GB (GigaByte).
-* `type` - (Required, ForceNew) The type of the cloud data disk. Possible values are: `cloud_normal` for cloud disk, `cloud_ssd` for SSD cloud disk, `rssd_data_disk` as RDMA-SSD cloud disk. 
+* `type` - (Required, ForceNew) The type of the cloud data disk. Possible values are: `cloud_normal` for cloud disk, `cloud_ssd` for SSD cloud disk, `cloud_rssd` as RDMA-SSD cloud disk. 
 
 ~> **NOTE:** Currently, changes to the `data_disks` configuration of _existing_ resources cannot be automatically detected by Terraform. To manage changes and attachments of a cloud data disk to an instance, use the `ucloud_disk` and `ucloud_disk_attachment` resources instead. `data_disks` cannot be mixed with external `ucloud_disk` and `ucloud_disk_attachment` resources for a given instance.  Recently, we recommend using `data_disks` to allocate cloud data disk attached to instance.
 
