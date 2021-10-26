@@ -1,17 +1,18 @@
-## 1.30.0 (Unreleased)
+## 1.31.0 (Unreleased)
+## 1.30.0 (2021-10-26)
 
 FEATURES:
 
-* **New Resource:** `ucloud_ufs_volume_mount_point`. [GH-109]
+* **New Resource:** `ucloud_ufs_volume_mount_point`. ([#109](https://github.com/ucloud/terraform-provider-ucloud/issues/109))
 
 ENHANCEMENTS:
 
-* resource/ucloud_uk8s_cluster: add custom diff precheck of `boot_disk_type` and `instance_type` about outstanding machine. [GH-109]
-* resource/ucloud_uk8s_node: add custom diff precheck of `boot_disk_type` and `instance_type` about outstanding machine. [GH-109]
+* resource/ucloud_uk8s_cluster: add custom diff precheck of `boot_disk_type` and `instance_type` about outstanding machine. ([#109](https://github.com/ucloud/terraform-provider-ucloud/issues/109))
+* resource/ucloud_uk8s_node: add custom diff precheck of `boot_disk_type` and `instance_type` about outstanding machine. ([#109](https://github.com/ucloud/terraform-provider-ucloud/issues/109))
 
 BUG FIXES:
 
-* resource/ucloud_uk8s_cluster: fix the default value to take effect of `boot_disk_type`, `data_disk_type` and `min_cpu_platform`. [GH-109]
+* resource/ucloud_uk8s_cluster: fix the default value to take effect of `boot_disk_type`, `data_disk_type` and `min_cpu_platform`. ([#109](https://github.com/ucloud/terraform-provider-ucloud/issues/109))
 
 ## 1.29.0 (2021-06-22)
 
