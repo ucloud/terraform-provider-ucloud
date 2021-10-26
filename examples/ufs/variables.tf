@@ -1,4 +1,4 @@
 variable "region" {
-  default = "cn-bj2"
+  default = "cn-sh2"
 }
 

@@ -128,6 +128,7 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_vpn_customer_gateway":   resourceUCloudVPNCustomerGateway(),
 			"ucloud_vpn_connection":         resourceUCloudVPNConnection(),
 			"ucloud_ufs_volume":             resourceUCloudUFSVolume(),
+			"ucloud_ufs_volume_mount_point": resourceUCloudUFSVolumeMountPoint(),
 			"ucloud_us3_bucket":             resourceUCloudUS3Bucket(),
 			"ucloud_cube_pod":               resourceUCloudCubePod(),
 			"ucloud_uk8s_cluster":           resourceUCloudUK8SCluster(),
