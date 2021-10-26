@@ -28,8 +28,8 @@ resource "ucloud_subnet" "default" {
 # Create redis instance
 resource "ucloud_redis_instance" "master" {
   availability_zone = var.zone
-//  engine_version    = "4.0"
-  instance_type     = "redis-distributed-8"
+  engine_version    = "4.0"
+  instance_type     = "redis-master-1"
   password          = var.redis_password
   name              = "tf-example-redis"
   tag               = "tf-example"
