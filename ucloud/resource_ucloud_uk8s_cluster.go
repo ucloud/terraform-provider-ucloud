@@ -3,6 +3,7 @@ package ucloud
 import (
 	"encoding/base64"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
 	"strings"
 	"time"
 
@@ -25,6 +26,9 @@ func resourceUCloudUK8SCluster() *schema.Resource {
 			Update: schema.DefaultTimeout(20 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
+		CustomizeDiff: customdiff.All(
+			diffValidateBootDiskTypeWithInstanceTypeOfUK8sCluster,
+		),
 
 		Schema: map[string]*schema.Schema{
 			"service_cidr": {
@@ -304,23 +308,23 @@ func resourceUCloudUK8SClusterCreate(d *schema.ResourceData, meta interface{}) e
 	req.MasterMem = ucloud.Int(mt.Memory)
 	req.MasterMachineType = ucloud.String(strings.ToUpper(mt.HostType))
 
-	if v, ok := master["boot_disk_type"]; ok {
-		req.MasterBootDiskType = ucloud.String(upperCvt.unconvert(v.(string)))
+	if len(master["boot_disk_type"].(string)) != 0 {
+		req.MasterBootDiskType = ucloud.String(upperCvt.unconvert(master["boot_disk_type"].(string)))
 	} else {
 		req.MasterBootDiskType = ucloud.String(upperCvt.unconvert("cloud_ssd"))
 	}
 
-	if v, ok := master["data_disk_size"]; ok {
-		if v, ok := master["data_disk_type"]; ok {
-			req.MasterDataDiskType = ucloud.String(upperCvt.unconvert(v.(string)))
+	if master["data_disk_size"].(int) != 0 {
+		if len(master["data_disk_type"].(string)) != 0 {
+			req.MasterDataDiskType = ucloud.String(upperCvt.unconvert(master["data_disk_type"].(string)))
 		} else {
 			req.MasterDataDiskType = ucloud.String(upperCvt.unconvert("cloud_ssd"))
 		}
-		req.MasterDataDiskSize = ucloud.Int(v.(int))
+		req.MasterDataDiskSize = ucloud.Int(master["data_disk_size"].(int))
 	}
 
-	if v, ok := master["min_cpu_platform"]; ok {
-		req.MasterMinmalCpuPlatform = ucloud.String(v.(string))
+	if len(master["min_cpu_platform"].(string)) != 0 {
+		req.MasterMinmalCpuPlatform = ucloud.String(master["min_cpu_platform"].(string))
 	} else {
 		req.MasterMinmalCpuPlatform = ucloud.String("Intel/Auto")
 	}
@@ -447,4 +451,32 @@ func resourceUCloudUK8SClusterDelete(d *schema.ResourceData, meta interface{}) e
 		}
 		return resource.RetryableError(fmt.Errorf("the specified k8s cluster %q has not been deleted due to unknown error", d.Id()))
 	})
+}
+
+func diffValidateBootDiskTypeWithInstanceTypeOfUK8sCluster(diff *schema.ResourceDiff, meta interface{}) error {
+	master := diff.Get("master").([]interface{})[0].(map[string]interface{})
+	mt, err := parseInstanceType(master["instance_type"].(string))
+	if err != nil {
+		return err
+	}
+
+	var bootDiskType string
+	if len(master["boot_disk_type"].(string)) != 0 {
+		bootDiskType = master["boot_disk_type"].(string)
+	} else {
+		bootDiskType = "cloud_ssd"
+	}
+
+	if strings.Contains(mt.HostType, "o") && isStringIn(bootDiskType, []string{
+		"local_normal",
+		"local_ssd",
+		"cloud_ssd",
+		"cloud_normal",
+	}) {
+		return fmt.Errorf("the boot_disk_type must be set one of  %v "+
+			"when instance type is belong to outstanding machine , got %q",
+			[]string{"cloud_rssd"}, bootDiskType)
+	}
+
+	return nil
 }

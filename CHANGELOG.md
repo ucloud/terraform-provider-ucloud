@@ -1,4 +1,18 @@
 ## 1.30.0 (Unreleased)
+
+FEATURES:
+
+* **New Resource:** `ucloud_ufs_volume_mount_point`. [GH-109]
+
+ENHANCEMENTS:
+
+* resource/ucloud_uk8s_cluster: add custom diff precheck of `boot_disk_type` and `instance_type` about outstanding machine. [GH-109]
+* resource/ucloud_uk8s_node: add custom diff precheck of `boot_disk_type` and `instance_type` about outstanding machine. [GH-109]
+
+BUG FIXES:
+
+* resource/ucloud_uk8s_cluster: fix the default value to take effect of `boot_disk_type`, `data_disk_type` and `min_cpu_platform`. [GH-109]
+
 ## 1.29.0 (2021-06-22)
 
 FEATURES:
