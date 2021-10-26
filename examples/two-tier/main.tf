@@ -6,7 +6,7 @@ provider "ucloud" {
 # Query image
 data "ucloud_images" "default" {
   availability_zone = var.zone
-  name_regex        = "^CentOS 7.[1-2] 64"
+  name_regex        = "^CentOS 8.[1-2] 64"
   image_type        = "base"
 }
 

@@ -3,7 +3,7 @@ package ucloud
 import (
 	"encoding/base64"
 	"fmt"
-	"strconv"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
 	"strings"
 	"time"
 
@@ -25,6 +25,9 @@ func resourceUCloudUK8SNode() *schema.Resource {
 			Update: schema.DefaultTimeout(20 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
+		CustomizeDiff: customdiff.All(
+			diffValidateBootDiskTypeWithInstanceTypeOfUK8sNode,
+		),
 
 		Schema: map[string]*schema.Schema{
 			"availability_zone": {
@@ -277,7 +280,7 @@ func resourceUK8SNodeCreate(d *schema.ResourceData, meta interface{}) error {
 		} else {
 			req.DataDiskType = ucloud.String(upperCvt.unconvert("cloud_ssd"))
 		}
-		req.DataDiskSize = ucloud.String(strconv.Itoa(v.(int)))
+		req.DataDiskSize = ucloud.Int(v.(int))
 	}
 
 	if v, ok := d.GetOk("min_cpu_platform"); ok {
@@ -399,4 +402,31 @@ func resourceUK8SNodeDelete(d *schema.ResourceData, meta interface{}) error {
 		}
 		return resource.RetryableError(fmt.Errorf("the specified k8s cluster %q has not been deleted due to unknown error", d.Id()))
 	})
+}
+
+func diffValidateBootDiskTypeWithInstanceTypeOfUK8sNode(diff *schema.ResourceDiff, meta interface{}) error {
+	mt, err := parseInstanceType(diff.Get("instance_type").(string))
+	if err != nil {
+		return err
+	}
+
+	var bootDiskType string
+	if v, ok := diff.GetOk("boot_disk_type"); ok {
+		bootDiskType = v.(string)
+	} else {
+		bootDiskType = "cloud_ssd"
+	}
+
+	if strings.Contains(mt.HostType, "o") && isStringIn(bootDiskType, []string{
+		"local_normal",
+		"local_ssd",
+		"cloud_ssd",
+		"cloud_normal",
+	}) {
+		return fmt.Errorf("the boot_disk_type must be set one of  %v "+
+			"when instance type is belong to outstanding machine , got %q",
+			[]string{"cloud_rssd"}, bootDiskType)
+	}
+
+	return nil
 }

@@ -1,6 +1,6 @@
 # UFS Example
 
-The UFS example launches an UFS.
+The UFS example launches a UFS Volume with a UFS Volume mount point bind to it.
 
 To run, configure your UCloud provider as described in https://www.terraform.io/docs/providers/ucloud/index.html
 
