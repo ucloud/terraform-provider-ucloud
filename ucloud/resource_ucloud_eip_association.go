@@ -27,11 +27,17 @@ func resourceUCloudEIPAssociation() *schema.Resource {
 			},
 
 			"resource_type": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				ForceNew:   true,
-				Deprecated: "attribute `resource_type` is deprecated for optimizing parameters",
-				//ValidateFunc: validation.StringInSlice([]string{"instance", "lb"}, false),
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if (isStringIn(old, []string{resourceTypeInstance, eipResourceTypeUHost}) && isStringIn(new, []string{resourceTypeInstance, eipResourceTypeUHost})) ||
+						(isStringIn(old, []string{resourceTypeLb, eipResourceTypeULB}) && isStringIn(new, []string{resourceTypeLb, eipResourceTypeULB})) {
+						return true
+					}
+					return false
+				},
 			},
 
 			"resource_id": {
@@ -49,42 +55,17 @@ func resourceUCloudEIPAssociationCreate(d *schema.ResourceData, meta interface{}
 
 	eipId := d.Get("eip_id").(string)
 	resourceId := d.Get("resource_id").(string)
-	//resourceType := eipResourceTypeUHost
-	//if strings.HasPrefix(resourceId, "ulb-") {
-	//	resourceType = eipResourceTypeULB
-	//}
-	//
-	//if strings.HasPrefix(resourceId, "cube-") {
-	//	resourceType = eipResourceTypeCube
-	//}
-	//
-	//if strings.HasPrefix(resourceId, "natgw-") {
-	//	resourceType = eipResourceTypeNatGateway
-	//}
-
 	var resourceType string
-	if strings.HasPrefix(resourceId, "uhost-") {
-		resourceType = eipResourceTypeUHost
-	}
-
-	if strings.HasPrefix(resourceId, "ulb-") {
-		resourceType = eipResourceTypeULB
-	}
-
-	if strings.HasPrefix(resourceId, "cube-") {
-		resourceType = eipResourceTypeCube
-	}
-
-	if strings.HasPrefix(resourceId, "natgw-") {
-		resourceType = eipResourceTypeNatGateway
-	}
-
-	if resourceType == "" && len(strings.Split(resourceId, "-")) > 0 {
+	if len(strings.Split(resourceId, "-")) > 0 {
 		resourceType = strings.Split(resourceId, "-")[0]
 	}
 
 	if v, ok := d.GetOk("resource_type"); ok {
-		resourceType = v.(string)
+		resourceType = lowerCaseProdCvt.convert(v.(string))
+	}
+
+	if len(resourceType) == 0 {
+		return fmt.Errorf("must set `resource_type` when creating eip association")
 	}
 
 	req := conn.NewBindEIPRequest()
@@ -132,7 +113,7 @@ func resourceUCloudEIPAssociationRead(d *schema.ResourceData, meta interface{}) 
 	client := meta.(*UCloudClient)
 
 	p := strings.Split(d.Id(), ":")
-	resource, err := client.describeEIPResourceById(p[0], p[1])
+	res, err := client.describeEIPResourceById(p[0], p[1])
 	if err != nil {
 		if isNotFoundError(err) {
 			d.SetId("")
@@ -143,8 +124,12 @@ func resourceUCloudEIPAssociationRead(d *schema.ResourceData, meta interface{}) 
 
 	// remote api has not returned eip
 	d.Set("eip_id", d.Get("eip_id"))
-	d.Set("resource_id", resource.ResourceID)
-	//d.Set("resource_type", lowerCaseProdCvt.unconvert(resource.ResourceType))
+	d.Set("resource_id", res.ResourceID)
+	if v, ok := d.GetOk("resource_type"); ok && isStringIn(v.(string), []string{resourceTypeInstance, resourceTypeLb}) {
+		d.Set("resource_type", lowerCaseProdCvt.unconvert(res.ResourceType))
+	} else {
+		d.Set("resource_type", res.ResourceType)
+	}
 
 	return nil
 }
@@ -158,8 +143,12 @@ func resourceUCloudEIPAssociationDelete(d *schema.ResourceData, meta interface{}
 	req.EIPId = ucloud.String(p[0])
 	req.ResourceId = ucloud.String(p[1])
 	resourceType := eipResourceTypeUHost
-	if strings.HasPrefix(p[1], "ulb-") {
-		resourceType = eipResourceTypeULB
+	if len(strings.Split(p[1], "-")) > 0 {
+		resourceType = strings.Split(p[1], "-")[0]
+	}
+
+	if v, ok := d.GetOk("resource_type"); ok {
+		resourceType = lowerCaseProdCvt.convert(v.(string))
 	}
 	req.ResourceType = ucloud.String(resourceType)
 

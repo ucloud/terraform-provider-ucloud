@@ -63,7 +63,7 @@ The following arguments are supported:
 
 - - -
 
-* `resource_type` - (**Deprecated**, ForceNew), attribute `resource_type` is deprecated for optimizing parameters.
+* `resource_type` - (Optional, ForceNew) The types of backend servers, possible values are: `instance` or `UHost` as UHost instance.
 * `port` - (Optional) The listening port of the backend server, range: 1-65535, (Default: `80`). Backend server port have the following restrictions: If the LB listener type is `request_proxy`, the backend serve can add different ports to implement different service instances of the same IP. Else if LB listener type is `packets_transmit`, the port of the backend server must be consistent with the LB listening port.
 
 ## Attributes Reference

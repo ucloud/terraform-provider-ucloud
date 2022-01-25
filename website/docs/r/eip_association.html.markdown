@@ -72,4 +72,4 @@ The following arguments are supported:
 
 * `eip_id` - (Required, ForceNew) The ID of EIP.
 * `resource_id` - (Required, ForceNew) The ID of resource with EIP attached.
-* `resource_type` - (**Deprecated**, ForceNew), attribute `resource_type` is deprecated for optimizing parameters.
+* `resource_type` - (Optional, ForceNew) The type of resource with EIP attached, possible values are `instance` or `uhost` as instance, `lb` or `ulb` as load balancer, `natgw` as NAT GateWay host, `udb` as database, `vpngw` as ipsec vpn host.

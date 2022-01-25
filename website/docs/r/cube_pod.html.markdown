@@ -8,7 +8,7 @@ description: |-
 
 # ucloud_cube_pod
 
-Provides a CubePod resource.
+Provides a CubePod resource(**Deprecated**, this resource has been offline).
 
 ## Example Usage
 

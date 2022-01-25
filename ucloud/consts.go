@@ -92,6 +92,8 @@ const (
 )
 
 const (
+	resourceTypeInstance      = "instance"
+	resourceTypeLb            = "lb"
 	lbResourceTypeUHost       = "UHost"
 	lbMatchTypePath           = "Path"
 	lbMatchTypeDomain         = "Domain"
@@ -125,6 +127,11 @@ var lbAttachmentStatusCvt = newIntConverter(map[int]string{
 var lowerCaseProdCvt = newStringConverter(map[string]string{
 	"instance": "uhost",
 	"lb":       "ulb",
+})
+
+// lbBackendCaseProdCvt is used to covert one backend string to another backend string
+var lbBackendCaseProdCvt = newStringConverter(map[string]string{
+	"instance": "UHost",
 })
 
 // titleCaseProdCvt is used to covert one lower string to another string begin with uppercase letters
