@@ -1,9 +1,10 @@
-## 1.31.0 (Unreleased)
+## 1.32.0 (Unreleased)
+## 1.31.0 (2022-01-26)
 
 ENHANCEMENTS:
 
-* resource/ucloud_eip_association: add `resource_type` to argument. [GH-110]
-* resource/ucloud_lb_attachment: add `resource_type` to argument. [GH-110]
+* resource/ucloud_eip_association: add `resource_type` to argument. ([#110](https://github.com/ucloud/terraform-provider-ucloud/issues/110))
+* resource/ucloud_lb_attachment: add `resource_type` to argument. ([#110](https://github.com/ucloud/terraform-provider-ucloud/issues/110))
 
 
 ## 1.30.0 (2021-10-26)
