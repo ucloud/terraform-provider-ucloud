@@ -1,4 +1,11 @@
 ## 1.31.0 (Unreleased)
+
+ENHANCEMENTS:
+
+* resource/ucloud_eip_association: add `resource_type` to argument. [GH-110]
+* resource/ucloud_lb_attachment: add `resource_type` to argument. [GH-110]
+
+
 ## 1.30.0 (2021-10-26)
 
 FEATURES:

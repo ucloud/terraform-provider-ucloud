@@ -2,6 +2,7 @@ package ucloud
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -36,12 +37,16 @@ func resourceUCloudLBAttachment() *schema.Resource {
 			},
 
 			"resource_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Computed:     true,
-				Deprecated:   "attribute `resource_type` is deprecated for optimizing parameters",
-				ValidateFunc: validation.StringInSlice([]string{"instance"}, false),
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if isStringIn(old, []string{resourceTypeInstance, lbResourceTypeUHost}) && isStringIn(new, []string{resourceTypeInstance, lbResourceTypeUHost}) {
+						return true
+					}
+					return false
+				},
 			},
 
 			"resource_id": {
@@ -80,9 +85,17 @@ func resourceUCloudLBAttachmentCreate(d *schema.ResourceData, meta interface{}) 
 	req := conn.NewAllocateBackendRequest()
 	req.ULBId = ucloud.String(lbId)
 	req.VServerId = ucloud.String(listenerId)
-	req.ResourceType = ucloud.String(lbResourceTypeUHost)
-	req.ResourceId = ucloud.String(d.Get("resource_id").(string))
+	resourceId := d.Get("resource_id").(string)
+	req.ResourceId = ucloud.String(resourceId)
 	req.Port = ucloud.Int(d.Get("port").(int))
+	resourceType := lbResourceTypeUHost
+	if v, ok := d.GetOk("resource_type"); ok {
+		resourceType = lbBackendCaseProdCvt.convert(v.(string))
+	} else if len(strings.Split(resourceId, "-")) > 0 && strings.Split(resourceId, "-")[0] != eipResourceTypeUHost {
+		return fmt.Errorf("must set `resource_type` when creating lb attachment")
+	}
+
+	req.ResourceType = ucloud.String(resourceType)
 
 	resp, err := conn.AllocateBackend(req)
 	if err != nil {
@@ -162,10 +175,15 @@ func resourceUCloudLBAttachmentRead(d *schema.ResourceData, meta interface{}) er
 	}
 
 	d.Set("resource_id", backendSet.ResourceId)
-	d.Set("resource_type", titleCaseProdCvt.unconvert(backendSet.ResourceType))
 	d.Set("port", backendSet.Port)
 	d.Set("private_ip", backendSet.PrivateIP)
 	d.Set("status", lbAttachmentStatusCvt.convert(backendSet.Status))
+
+	if v, ok := d.GetOk("resource_type"); ok && isStringIn(v.(string), []string{resourceTypeInstance}) {
+		d.Set("resource_type", lbBackendCaseProdCvt.unconvert(backendSet.ResourceType))
+	} else {
+		d.Set("resource_type", backendSet.ResourceType)
+	}
 
 	return nil
 }
