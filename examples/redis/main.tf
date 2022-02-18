@@ -38,5 +38,6 @@ resource "ucloud_redis_instance" "master" {
   subnet_id = ucloud_subnet.default.id
   backup_begin_time = 3
   auto_backup = "disable"
+  charge_type = var.charge_type
 }
 
