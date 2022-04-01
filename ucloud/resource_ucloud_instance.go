@@ -291,18 +291,6 @@ func resourceUCloudInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"Intel/Auto",
-					"Intel/IvyBridge",
-					"Intel/Haswell",
-					"Intel/Broadwell",
-					"Intel/Skylake",
-					"Intel/Cascadelake",
-					"Intel/CascadelakeR",
-					"Amd/Auto",
-					"Amd/Epyc2",
-					"Ampere/Altra",
-				}, false),
 			},
 
 			"cpu_platform": {
