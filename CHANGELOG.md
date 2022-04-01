@@ -1,6 +1,6 @@
 ## 1.31.1 (Unreleased)
 
-ENHANCEMENTS:
+BUG FIXES:
 
 * resource/ucloud_instance: remove `cpu_platform` validator. [GH-114]
 
