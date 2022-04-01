@@ -1,8 +1,9 @@
-## 1.31.1 (Unreleased)
+## 1.32.0 (Unreleased)
+## 1.31.1 (2022-04-01)
 
 BUG FIXES:
 
-* resource/ucloud_instance: remove `cpu_platform` validator. [GH-114]
+* resource/ucloud_instance: remove `cpu_platform` validator. ([#114](https://github.com/ucloud/terraform-provider-ucloud/issues/114))
 
 ## 1.31.0 (2022-01-26)
 
