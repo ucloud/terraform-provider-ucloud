@@ -1,10 +1,8 @@
-## 1.32.0 (Unreleased)
-
-## 1.31.2 (2022-04-27)
+## 1.31.2 (Unreleased)
 
 BUG FIXES:
 
-* build: fix build failure when using go 1.18 on darwin_arm64. ([golang/go#49219](https://github.com/golang/go/issues/49219))
+* build: fix build failure when using go 1.18 on darwin_arm64. [GH-115]
 
 ## 1.31.1 (2022-04-01)
 
