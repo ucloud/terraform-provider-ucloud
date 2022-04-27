@@ -1,8 +1,9 @@
-## 1.31.2 (Unreleased)
+## 1.32.0 (Unreleased)
+## 1.31.2 (2022-04-27)
 
 BUG FIXES:
 
-* build: fix build failure when using go 1.18 on darwin_arm64. [GH-115]
+* build: fix build failure when using go 1.18 on darwin_arm64. ([#115](https://github.com/ucloud/terraform-provider-ucloud/issues/115))
 
 ## 1.31.1 (2022-04-01)
 
