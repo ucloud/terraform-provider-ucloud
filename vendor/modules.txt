@@ -314,7 +314,7 @@ golang.org/x/oauth2/google
 golang.org/x/oauth2/internal
 golang.org/x/oauth2/jws
 golang.org/x/oauth2/jwt
-# golang.org/x/sys v0.0.0-20200724161237-0e2f3a69832c
+# golang.org/x/sys v0.0.0-20220422013727-9388b58f7150
 ## explicit
 golang.org/x/sys/cpu
 golang.org/x/sys/internal/unsafeheader

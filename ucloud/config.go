@@ -3,15 +3,16 @@ package ucloud
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ucloud/ucloud-sdk-go/services/cube"
-	"github.com/ucloud/ucloud-sdk-go/services/ufile"
-	"github.com/ucloud/ucloud-sdk-go/services/ufs"
-	"github.com/ucloud/ucloud-sdk-go/services/uk8s"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
 	"time"
+
+	"github.com/ucloud/ucloud-sdk-go/services/cube"
+	"github.com/ucloud/ucloud-sdk-go/services/ufile"
+	"github.com/ucloud/ucloud-sdk-go/services/ufs"
+	"github.com/ucloud/ucloud-sdk-go/services/uk8s"
 
 	"github.com/ucloud/ucloud-sdk-go/services/udpn"
 
@@ -68,7 +69,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 	// enable auto retry with http/connection error
 	cfg.MaxRetries = c.MaxRetries
 	cfg.LogLevel = log.PanicLevel
-	cfg.UserAgent = "Terraform-UCloud/1.31.1"
+	cfg.UserAgent = "Terraform-UCloud/1.31.2"
 	cfg.BaseUrl = c.BaseURL
 
 	cred := auth.NewCredential()
