@@ -155,16 +155,16 @@ func resourceUCloudLBListenerCreate(d *schema.ResourceData, meta interface{}) er
 	req := conn.NewCreateVServerRequest()
 	if v, ok := d.GetOk("listen_type"); ok {
 		if isStringIn(upperCamelCvt.convert(lbSet.ListenType), []string{"request_proxy", "packets_transmit"}) && upperCamelCvt.convert(lbSet.ListenType) != v.(string) {
-			return fmt.Errorf("the %q of lb listenr must be same as the lb's %q, got %q", "listen_type", upperCamelCvt.convert(lbSet.ListenType), v.(string))
+			return fmt.Errorf("the %q of lb listener must be same as the lb's %q, got %q", "listen_type", upperCamelCvt.convert(lbSet.ListenType), v.(string))
 		}
-		err := availableLBChoices.validate(lbSet.ULBType, protocol, v.(string))
+		err := availableLBChoices.validate(protocol, v.(string))
 		if err != nil {
 			return err
 		}
 		req.ListenType = ucloud.String(upperCamelCvt.unconvert(v.(string)))
 	} else {
-		if choices := availableLBChoices.availableChoices(lbSet.ULBType, protocol); len(choices) == 0 {
-			return fmt.Errorf("the protocol can only be one of %q, %q when lb is intranet, got %q", "tcp", "udp", protocol)
+		if choices := availableLBChoices.availableChoices(protocol); len(choices) == 0 {
+			return fmt.Errorf("the protocol %q does not have available listen_type", protocol)
 		} else {
 			if isStringIn(upperCamelCvt.convert(lbSet.ListenType), []string{"request_proxy", "packets_transmit"}) {
 				req.ListenType = ucloud.String(lbSet.ListenType)
@@ -448,7 +448,6 @@ func customizeDiffLBProtocolToListenType(diff *schema.ResourceDiff, v interface{
 }
 
 type lBChoice struct {
-	Mode       string
 	Protocol   string
 	ListenType string
 }
@@ -456,34 +455,29 @@ type lBChoice struct {
 type lbChoices []lBChoice
 
 var availableLBChoices = lbChoices{
-	{"OuterMode", "http", "request_proxy"},
-	{"OuterMode", "https", "request_proxy"},
-	{"OuterMode", "tcp", "request_proxy"},
-	{"OuterMode", "tcp", "packets_transmit"},
-	{"OuterMode", "udp", "packets_transmit"},
-	{"InnerMode", "tcp", "packets_transmit"},
-	{"InnerMode", "udp", "packets_transmit"},
+	{"http", "request_proxy"},
+	{"https", "request_proxy"},
+	{"tcp", "request_proxy"},
+	{"tcp", "packets_transmit"},
+	{"udp", "request_proxy"},
+	{"udp", "packets_transmit"},
 }
 
-func (lc *lbChoices) validate(mode, protocol, listen_type string) error {
-	choices := lc.availableChoices(mode, protocol)
+func (lc *lbChoices) validate(protocol, listenType string) error {
+	choices := lc.availableChoices(protocol)
 
-	if listen_type != "" && !isStringIn(listen_type, choices) {
-		if mode == "InnerMode" {
-			return fmt.Errorf("the listen_type can only be one of %v, when protocol is %q in the intranet mode,  got %q", choices, protocol, listen_type)
-		} else {
-			return fmt.Errorf("the listen_type can only be one of %v, when protocol is %q in the extranet mode, got %q", choices, protocol, listen_type)
-		}
+	if listenType != "" && !isStringIn(listenType, choices) {
+		return fmt.Errorf("the listen_type can only be one of %v, when protocol is %q, got %q", choices, protocol, listenType)
 	}
 
 	return nil
 }
 
-func (lc *lbChoices) availableChoices(mode, protocol string) []string {
+func (lc *lbChoices) availableChoices(protocol string) []string {
 	choices := []string{}
 
 	for _, r := range availableLBChoices {
-		if mode == r.Mode && protocol == r.Protocol {
+		if protocol == r.Protocol {
 			choices = append(choices, r.ListenType)
 		}
 	}
