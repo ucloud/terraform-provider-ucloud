@@ -1,4 +1,15 @@
 ## 1.32.0 (Unreleased)
+
+## 1.31.3 (2022-05-11)
+
+ENHANCEMENTS:
+
+* ci: add test workflow to github actions ([#120](https://github.com/ucloud/terraform-provider-ucloud/pull/120))
+
+BUG FIXES:
+
+* resource/ucloud_lb_listener: fix lb listener validation. ([#117](https://github.com/ucloud/terraform-provider-ucloud/pull/117))
+
 ## 1.31.2 (2022-04-27)
 
 BUG FIXES:
