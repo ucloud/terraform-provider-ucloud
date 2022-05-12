@@ -1,4 +1,5 @@
-## 1.31.3 (Unreleased)
+## 1.32.0 (Unreleased)
+## 1.31.3 (2022-05-12)
 
 ENHANCEMENTS:
 
