@@ -1,4 +1,9 @@
 ## 1.33.0 (Unreleased)
+
+NOTES:
+
+* fix `rdma_cluster_id` doc.
+
 ## 1.32.0 (2022-09-19)
 
 FEATURES:
