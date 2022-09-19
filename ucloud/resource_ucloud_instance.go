@@ -373,6 +373,11 @@ func resourceUCloudInstance() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+
+			"rdma_cluster_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -547,6 +552,22 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	d.SetId(resp.UHostIds[0])
+
+	// TODO(twq): Now the CreateUHost api will not return rdma_cluster_id, we need to query it by DescribeUHostInstance api.
+	// This is very bloated, the CreateUHost should return rdma_cluster_id in the future.
+	descReq := conn.NewDescribeUHostInstanceRequest()
+	descReq.UHostIds = append(descReq.UHostIds, resp.UHostIds[0])
+	descReq.ProjectId = req.ProjectId
+	descResp, err := conn.DescribeUHostInstance(descReq)
+	if err != nil {
+		return fmt.Errorf("error on describing instance, %s", err)
+	}
+	if len(descResp.UHostSet) != 1 {
+		return fmt.Errorf("error on describing instance, expected exactly one instance, got %v", len(descResp.UHostSet))
+	}
+	descInstance := descResp.UHostSet[0]
+
+	d.Set("rdma_cluster_id", descInstance.RdmaClusterId)
 
 	if _, ok := d.GetOk("root_password"); !ok {
 		d.Set("root_password", password)

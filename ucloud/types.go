@@ -41,9 +41,9 @@ func parseStringToInt64(str string) int64 {
 /*
 parseUCloudCidrBlock will parse cidr with specific range constraints
 cidr must contained by subnet as followed
-	- 192.168.*.[8, 16, 24 ...]
-	- 172.[16-32].*.[8, 16, 24 ...]
-	- 10.*.*.[8, 16, 24 ...]
+  - 192.168.*.[8, 16, 24 ...]
+  - 172.[16-32].*.[8, 16, 24 ...]
+  - 10.*.*.[8, 16, 24 ...]
 */
 func parseUCloudCidrBlock(s string) (*cidrBlock, error) {
 	cidr, err := parseCidrBlock(s)
