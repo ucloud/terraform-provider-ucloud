@@ -283,6 +283,31 @@ func TestAccUCloudInstance_size(t *testing.T) {
 	})
 }
 
+func TestAccUCloudInstance_rdma(t *testing.T) {
+	var instance uhost.UHostInstanceSet
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		IDRefreshName: "ucloud_instance.foo",
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckInstanceDestroy,
+
+		Steps: []resource.TestStep{
+			{
+				Config: testAccInstanceConfigRDMA,
+
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testAccCheckInstanceExists("ucloud_instance.foo", &instance),
+					resource.TestCheckResourceAttrSet("ucloud_instance.foo", "rdma_cluster_id"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckInstanceExists(n string, instance *uhost.UHostInstanceSet) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -726,5 +751,30 @@ resource "ucloud_instance" "foo" {
 	  eip_internet_type = "bgp"
   }
   delete_eips_with_instance = true
+}
+`
+
+const testAccInstanceConfigRDMA = `
+data "ucloud_zones" "default" {
+}
+
+data "ucloud_security_groups" "default" {
+  type = "recommend_web"
+}
+
+data "ucloud_images" "default" {
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  name_regex        = "^CentOS 7.6 64"
+  image_type        = "base"
+}
+
+resource "ucloud_instance" "foo" {
+  name              = "tf-acc-instance-eip"
+  tag               = "tf-acc"
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  image_id          = "${data.ucloud_images.default.images.0.id}"
+  instance_type     = "n-basic-1"
+  root_password     = "wA1234567"
+  security_group    = "${data.ucloud_security_groups.default.security_groups.0.id}"
 }
 `

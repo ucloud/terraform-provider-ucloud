@@ -56,6 +56,11 @@ func resourceUCloudDisk() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"data_disk", "ssd_data_disk", "rssd_data_disk"}, false),
 			},
 
+			"rdma_cluster_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
 			"charge_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -129,6 +134,17 @@ func resourceUCloudDiskCreate(d *schema.ResourceData, meta interface{}) error {
 		req.Tag = ucloud.String(v.(string))
 	} else {
 		req.Tag = ucloud.String(defaultTag)
+	}
+
+	if v, ok := d.GetOk("rdma_cluster_id"); ok {
+		var diskType string
+		if dtv, ok := d.GetOk("disk_type"); ok {
+			diskType = dtv.(string)
+		}
+		if diskType != "rssd_data_disk" {
+			return fmt.Errorf("error on createing disk, when rdma_cluster_id is specified, the disk_type must be \"rssd_data_disk\", found %q", diskType)
+		}
+		req.RdmaClusterId = ucloud.String(v.(string))
 	}
 
 	resp, err := conn.CreateUDisk(req)
