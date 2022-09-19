@@ -1,8 +1,9 @@
-## 1.32.0 (Unreleased)
+## 1.33.0 (Unreleased)
+## 1.32.0 (2022-09-19)
 
 FEATURES:
 
-* resource/ucloud_instance, resources/ucloud_disk: add field `rdma_cluster_id` to fix rdma missing issue. [GH-127]
+* resource/ucloud_instance, resources/ucloud_disk: add field `rdma_cluster_id` to fix rdma missing issue. ([#127](https://github.com/ucloud/terraform-provider-ucloud/issues/127))
 
 ## 1.31.3 (2022-05-12)
 
