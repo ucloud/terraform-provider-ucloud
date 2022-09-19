@@ -1,4 +1,9 @@
 ## 1.32.0 (Unreleased)
+
+FEATURES:
+
+* resource/ucloud_instance, resources/ucloud_disk: add field `rdma_cluster_id` to fix rdma missing issue. [GH-127]
+
 ## 1.31.3 (2022-05-12)
 
 ENHANCEMENTS:
