@@ -73,4 +73,3 @@ The attribute (`ip_set`) supports the following:
 
 * `internet_type` - Type of Elastic IP routes.
 * `ip` - Elastic IP address.
-* `rdma_cluster_id` - The RDMA Cluster ID of instance. This is only useful for instance with machine type `O`.

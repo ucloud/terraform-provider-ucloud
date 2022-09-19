@@ -90,7 +90,7 @@ The following arguments are supported:
 - - -
 
 * `allow_stopping_for_update` - (Optional) If you try to update some properties which requires stopping the instance, you must set `allow_stopping_for_update` to `true` in your config to allows Terraform to stop the instance to update its properties like `instance_type`, `root_password`, `boot_disk_size`, `data_disk_size`.
- 
+
 * `root_password` - (Optional) The password for the instance, which contains 8-30 characters, and at least 2 items of capital letters, lower case letters, numbers and special characters. The special characters include <code>`()~!@#$%^&*-+=_|{}\[]:;'<>,.?/</code>. If not specified, terraform will auto-generate a password. 
 
     ~> **Note** If you want to update this value, you must set `allow_stopping_for_update`to `true`.
@@ -117,12 +117,10 @@ The following arguments are supported:
 * `delete_disks_with_instance` - (Optional, ForceNew, Required when set `data_disks`)  Whether the cloud data disks attached instance should be destroyed on instance termination.
 
  ~> **NOTE:** We recommend set `delete_disks_with_instance` to `true` means delete cloud data disks attached to instance when instance termination. Otherwise, the cloud data disks will be not managed by the terraform after instance termination.
- 
+
  * `network_interface` - (Optional, ForceNew) Additional network interface eips to attach to the instance. `network_interface` configurations only apply on resource creation. The count of `network_interface` can only be one. See [network_interface](#network_interface) below for details on attributes. When set `network_interface`, the argument `delete_eips_with_instance` must bet set.
  * `delete_eips_with_instance` - (Optional, ForceNew, Required when set `network_interface`)  Whether the network interface eips associated instance should be destroyed on instance termination.
- 
-* `min_cpu_platform` - (Optional) Specifies a minimum CPU platform for the the VM instance. (Default: `Intel/Auto`). You may refer to [product documentation](https://docs.ucloud.cn/uhost/introduction/uhost/type_new) and [API documentation](https://docs.ucloud.cn/api/uhost-api/create_uhost_instance).
-      
+* `min_cpu_platform` - (Optional) Specifies a minimum CPU platform for the the VM instance. (Default: `Intel/Auto`). You may refer to [product documentation](https://docs.ucloud.cn/uhost/introduction/uhost/type_new) and [API documentation](https://docs.ucloud.cn/api/uhost-api/create_uhost_instance).    
 ### data_disks
 
 The `data_disks` supports the following:
@@ -163,6 +161,7 @@ In addition to all arguments above, the following attributes are exported:
 * `status` - Instance current status. Possible values are `Initializing`, `Starting`, `Running`, `Stopping`, `Stopped`, `Install Fail`, `ResizeFail` and `Rebooting`.
 * `ip_set` - It is a nested type which documented below.
 * `disk_set` - It is a nested type which documented below.
+* `rdma_cluster_id` - The RDMA Cluster ID of instance. This is only available when machine type is `O`.
 
 - - -
 

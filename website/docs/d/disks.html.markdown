@@ -51,4 +51,3 @@ The attribute (`disks`) support the following:
 * `create_time` - The creation time of Disk, formatted in RFC3339 time string.
 * `expire_time` - The expiration time of disk, formatted in RFC3339 time string.
 * `status` - The status of disk. Possible values are: `Available`, `InUse`, `Detaching`, `Initializating`, `Failed`, `Cloning`, `Restoring`, `RestoreFailed`.
-* `rdma_cluster_id` - The RDMA Cluster ID of disk. This is only useful with disk type `rssd_data_disk`. If you need to attach a `rssd_data_disk`to an instance, the `rdma_cluster_id` MUST BE PAIRED.
