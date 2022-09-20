@@ -1,4 +1,9 @@
-## 1.33.0 (Unreleased)
+## 1.32.2 (Unreleased)
+
+NOTES:
+
+* doc: update desc for `rdma_cluster_id` in `resource/ucloud_disk`.
+
 ## 1.32.1 (2022-09-19)
 
 NOTES:
