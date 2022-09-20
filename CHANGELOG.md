@@ -1,4 +1,5 @@
-## 1.32.2 (Unreleased)
+## 1.33.0 (Unreleased)
+## 1.32.2 (2022-09-20)
 
 NOTES:
 
