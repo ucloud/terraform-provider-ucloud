@@ -49,7 +49,7 @@ In addition to all arguments above, the following attributes are exported:
 * `create_time` - The time of creation of disk, formatted in RFC3339 time string.
 * `expire_time` - The expiration time of disk, formatted in RFC3339 time string.
 * `status` -  The status of disk. Possible values are: `Available`, `InUse`, `Detaching`, `Initializating`, `Failed`, `Cloning`, `Restoring`, `RestoreFailed`.
-* `rdma_cluster_id` - The RDMA Cluster ID of disk. This is only useful with disk type `rssd_data_disk`. If you need to attach a `rssd_data_disk`to an instance, the `rdma_cluster_id` MUST BE PAIRED.
+* `rdma_cluster_id` - The RDMA Cluster ID of disk. It is mandatory if your disk type is `rssd_data_disk` and must be set to the same value as the UHost instance to attach to. If you don't specifiy this attribute while you are intended to use RSSD, the UHost instance creation has little chance to succeed. So make sure you set this attribute to the value you get from the response of UHost instance creation. For disk type other than `rssd_data_disk`, this attribute is ignored.
 
 ## Import
 
