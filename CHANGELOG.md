@@ -1,4 +1,9 @@
-## 1.33.0 (Unreleased)
+## 1.32.3 (Unreleased)
+
+FEATURES:
+
+* resource/ucloud_redis_instance: remove version validation for field `engine_version`.
+
 ## 1.32.2 (2022-09-20)
 
 NOTES:

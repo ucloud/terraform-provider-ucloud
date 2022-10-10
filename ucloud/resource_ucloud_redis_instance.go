@@ -57,13 +57,6 @@ func resourceUCloudRedisInstance() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"3.0",
-					"3.2",
-					"4.0",
-					"5.0",
-					"6.0",
-				}, false),
 			},
 
 			"charge_type": {
