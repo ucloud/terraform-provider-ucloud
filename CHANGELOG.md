@@ -1,4 +1,5 @@
-## 1.32.3 (Unreleased)
+## 1.33.0 (Unreleased)
+## 1.32.3 (2022-10-10)
 
 FEATURES:
 
