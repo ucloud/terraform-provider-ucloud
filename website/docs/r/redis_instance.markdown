@@ -50,7 +50,7 @@ The following arguments are supported:
 * `tag` - (Optional, ForceNew) A tag assigned to Redis instance, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or an empty string is filled in, then default tag will be assigned. (Default: `Default`).
 * `vpc_id` - (Optional, ForceNew) The ID of VPC linked to the Redis instance.
 * `subnet_id` - (Optional, ForceNew) The ID of subnet linked to the Redis instance.
-* `engine_version` - (active-standby Redis Required, ForceNew) The version of engine of active-standby Redis. Possible values are: 4.0, 5.0 and 6.0.
+* `engine_version` - (active-standby Redis Required, ForceNew) The version of engine of active-standby Redis.
 * `password` - (Optional) The password for  active-standby Redis instance which should have 6-36 characters. It must contain at least 3 items of Capital letters, small letter, numbers and special characters. The special characters include `-_`.
 * `auto_backup` - (Optional) Enable or not start auto backup of Redis instance, only support for Active-Standby Redis, possible values are: `enable`, `disable`.
 * `backup_begin_time` - (Optional) Specifies when the backup starts, measured in hour, only support for Active-Standby Redis, it starts at 3 o'clock in the morning by default, possible values are: 0-23.
