@@ -1,4 +1,9 @@
-## 1.33.0 (Unreleased)
+## 1.32.4 (Unreleased)
+
+BUG FIXES:
+
+* resource/ucloud_redis_instance: still validate version after apply.
+
 ## 1.32.3 (2022-10-10)
 
 FEATURES:
