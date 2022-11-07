@@ -1,4 +1,9 @@
-## 1.33.0 (Unreleased)
+## 1.32.5 (Unreleased)
+
+BUG FIXES:
+
+* resource/uk8s_node: use correct `ImageId` param.
+
 ## 1.32.4 (2022-10-11)
 
 BUG FIXES:
