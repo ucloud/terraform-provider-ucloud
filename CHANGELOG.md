@@ -1,4 +1,5 @@
-## 1.32.5 (Unreleased)
+## 1.33.0 (Unreleased)
+## 1.32.5 (2022-11-07)
 
 BUG FIXES:
 
