@@ -235,7 +235,7 @@ func resourceUK8SNodeCreate(d *schema.ResourceData, meta interface{}) error {
 	req.Password = ucloud.String(base64.StdEncoding.EncodeToString([]byte(d.Get("password").(string))))
 
 	if v, ok := d.GetOk("image_id"); ok {
-		req.UserData = ucloud.String(base64.StdEncoding.EncodeToString([]byte(v.(string))))
+		req.ImageId = ucloud.String(v.(string))
 	}
 
 	if v, ok := d.GetOk("user_data"); ok {
