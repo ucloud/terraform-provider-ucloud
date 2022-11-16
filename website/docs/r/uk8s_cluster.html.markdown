@@ -55,7 +55,7 @@ The following arguments are supported:
 * `vpc_id` - (Required, ForceNew) The ID of VPC linked to the instance. If not defined `vpc_id`, the instance will use the default VPC in the current region.
 * `subnet_id` - (Required, ForceNew) The ID of subnet. If defined `vpc_id`, the `subnet_id` is Required. If not defined `vpc_id` and `subnet_id`, the instance will use the default subnet in the current region.
 * `password` - (Required) The password for the instance, which contains 8-30 characters, and at least 2 items of capital letters, lower case letters, numbers and special characters. The special characters include <code>`()~!@#$%^&*-+=_|{}\[]:;'<>,.?/</code>. If not specified, terraform will auto-generate a password.
-  
+
 ---
 
 * `name` - (Optional) The name of instance, which contains 1-63 characters and only support Chinese, English, numbers, '-', '_', '.'. If not specified, terraform will auto-generate a name beginning with `tf-instance`.
@@ -68,6 +68,7 @@ The following arguments are supported:
 * `delete_disks_with_instance` - (Optional, ForceNew) Whether the cloud data disks attached instance should be destroyed on instance termination.
 * `kube_proxy` - (Optional, ForceNew) The configuration of kube proxy, See [kube proxy](#kube_proxy) for details of attributes.
 * `master` - (Optional, ForceNew) The configuration of master, See [master](#master) for details of attributes.
+* `image_id` - (Optional, ForceNew) The ID for the image to use for the master nodes.
 
 ### master
 
