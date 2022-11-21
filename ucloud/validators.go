@@ -197,6 +197,11 @@ var validateUFSVolumeName = validation.StringMatch(
 	"expected value to be 6 - 63 characters and only support english, numbers, '-', '_', and can not prefix with '-'",
 )
 
+var validateUImageName = validation.StringMatch(
+	regexp.MustCompile(`^uimage-[A-Za-z0-9_]{5,50}$`),
+	"expected value to start with uimage and followed by 5 - 50 characters and only support english, numbers, '_'",
+)
+
 func validateDBInstanceType(v interface{}, k string) (ws []string, errors []error) {
 	dbInstanceType := v.(string)
 

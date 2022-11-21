@@ -3,9 +3,10 @@ package ucloud
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -238,6 +239,19 @@ func resourceUCloudUK8SCluster() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
+			"image_id": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validateUImageName,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if o, _ := d.GetChange("image_id"); o != "" {
+						return true
+					}
+					return false
+				},
+			},
 		},
 	}
 }
@@ -276,6 +290,10 @@ func resourceUCloudUK8SClusterCreate(d *schema.ResourceData, meta interface{}) e
 
 	if v, ok := d.GetOk("k8s_version"); ok {
 		req.K8sVersion = ucloud.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("image_id"); ok {
+		req.ImageId = ucloud.String(v.(string))
 	}
 
 	if v, ok := d.GetOk("enable_external_api_server"); ok {
