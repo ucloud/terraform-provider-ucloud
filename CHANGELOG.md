@@ -1,4 +1,9 @@
 ## 1.33.0 (Unreleased)
+
+FEATURES:
+
+* feat: support custom image for UK8S master nodes.
+
 ## 1.32.5 (2022-11-07)
 
 BUG FIXES:
