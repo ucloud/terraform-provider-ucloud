@@ -1,4 +1,12 @@
-## 1.33.0 (Unreleased)
+## 1.33.1 (2023-01-17)
+
+FEATURES:
+
+* feat: support create UDB from backup
+* feat: datasource to query UDB backups
+* chore: remove cube
+
+## 1.33.0 (2022-11-30)
 
 FEATURES:
 
@@ -267,7 +275,7 @@ FEATURES:
 
 * **New Resource:** `ucloud_nat_gateway`([#48](https://github.com/terraform-providers/terraform-provider-ucloud/issues/48))
 * **New Resource:** `ucloud_nat_gateway_rule`([#48](https://github.com/terraform-providers/terraform-provider-ucloud/issues/48))
-* **New Resource:** `ucloud_vpn_gateway`[[#48](https://github.com/terraform-providers/terraform-provider-ucloud/issues/48)] 
+* **New Resource:** `ucloud_vpn_gateway`[[#48](https://github.com/terraform-providers/terraform-provider-ucloud/issues/48)]
 * **New Resource:** `ucloud_vpn_customer_gateway`([#48](https://github.com/terraform-providers/terraform-provider-ucloud/issues/48))
 * **New Resource:** `ucloud_vpn_connection`([#48](https://github.com/terraform-providers/terraform-provider-ucloud/issues/48))
 * **New Resource:** `ucloud_vip`([#48](https://github.com/terraform-providers/terraform-provider-ucloud/issues/48))
@@ -308,7 +316,7 @@ BUG FIXES:
 
 BUG FIXES:
 
-* Fix the problem of WaitForState function about keep waiting until the timeout occurs in some situation [[#41](https://github.com/terraform-providers/terraform-provider-ucloud/issues/41)] 
+* Fix the problem of WaitForState function about keep waiting until the timeout occurs in some situation [[#41](https://github.com/terraform-providers/terraform-provider-ucloud/issues/41)]
 
 ## 1.11.0 (July 09, 2019)
 FEATURES:
