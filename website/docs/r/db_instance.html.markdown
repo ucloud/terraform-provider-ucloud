@@ -15,13 +15,11 @@ Provides a Database instance resource.
 ## Example Usage
 
 ```hcl
-# Query availability zone
-data "ucloud_zones" "default" {
-}
 
 # Create database instance
 resource "ucloud_db_instance" "master" {
   name              = "tf-example-db"
+  availability_zone = "cn-bj2-05"
   instance_storage  = 20
   instance_type     = "mysql-ha-1"
   engine            = "mysql"
@@ -59,7 +57,9 @@ The following arguments are supported:
 * `duration` - (Optional, ForceNew) The duration that you will buy the db instance (Default: `1`). The value is `0` when pay by month and the instance will be valid till the last day of that month. It is not required when `dynamic` (pay by hour).
 * `vpc_id` - (Optional, ForceNew) The ID of VPC linked to the database instances.
 * `subnet_id` - (Optional, ForceNew) The ID of subnet.
-* `from_backup_id` - (Optional, ForceNew) Create the database instance with the content of specified backup.
+* `from_backup_id` - (Optional, ForceNew) Create the database instance with the
+  content of specified backup. The backup id can be retrieved from UDB console
+  or by using the [`ucloud_db_backups`](https://registry.terraform.io/providers/ucloud/ucloud/latest/docs/data-sources/db_backups) datasource.
 * `backup_count` - (Optional, ForceNew) Specifies the number of backup saved per week, it is 7 backups saved per week by default.
 * `backup_begin_time` - (Optional) Specifies when the backup starts, measured in hour, it starts at one o'clock of 1, 2, 3, 4 in the morning by default.
 * `backup_date` - (Optional) Specifies whether the backup took place from Sunday to Saturday by displaying 7 digits. 0 stands for backup disabled and 1 stands for backup enabled. The rightmost digit specifies whether the backup took place on Sunday, and the digits from right to left specify whether the backup took place from Monday to Saturday, it's mandatory required to backup twice per week at least. such as: digits "1100000" stands for the backup took place on Saturday and Friday.
