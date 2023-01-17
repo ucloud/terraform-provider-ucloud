@@ -98,6 +98,7 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_db_parameter_groups":   dataSourceUCloudDBParameterGroups(),
 			"ucloud_ufs_volumes":           dataSourceUCloudUFSVolumes(),
 			"ucloud_us3_buckets":           dataSourceUCloudUS3Buckets(),
+			"ucloud_db_backups":            dataSourceUCloudDBBackups(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -130,7 +131,6 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_ufs_volume":             resourceUCloudUFSVolume(),
 			"ucloud_ufs_volume_mount_point": resourceUCloudUFSVolumeMountPoint(),
 			"ucloud_us3_bucket":             resourceUCloudUS3Bucket(),
-			"ucloud_cube_pod":               resourceUCloudCubePod(),
 			"ucloud_uk8s_cluster":           resourceUCloudUK8SCluster(),
 			"ucloud_uk8s_node":              resourceUCloudUK8SNode(),
 		},

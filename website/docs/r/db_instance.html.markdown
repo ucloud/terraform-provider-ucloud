@@ -10,7 +10,7 @@ description: |-
 
 Provides a Database instance resource.
 
-~> **Note**  Please do confirm if any task pending submission before reset your password, since the password reset will take effect immediately. In addition, if you try to update the property `parameter_group` which requires restarting the db instance, you must set `allow_stopping_for_update` to `true` in your config to allows Terraform to restart the instance to update its property. 
+~> **Note**  Please do confirm if any task pending submission before reset your password, since the password reset will take effect immediately. In addition, if you try to update the property `parameter_group` which requires restarting the db instance, you must set `allow_stopping_for_update` to `true` in your config to allows Terraform to restart the instance to update its property.
 
 ## Example Usage
 
@@ -27,6 +27,9 @@ resource "ucloud_db_instance" "master" {
   engine            = "mysql"
   engine_version    = "5.7"
   password          = "2018_dbInstance"
+  # specify the backup id if you wish to populate
+  # the database with data from existing backup
+  # from_backup_id  = 1421432443
 }
 ```
 ## Argument Reference
@@ -36,7 +39,7 @@ The following arguments are supported:
 * `availability_zone` - (Required, ForceNew) Availability zone where database instance is located. Such as: "cn-bj2-02". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
 * `engine` - (Required, ForceNew) The type of database engine, possible values are: "mysql", "percona", "postgresql".
 * `engine_version` - (Required, ForceNew) The database engine version, possible values are: "5.5", "5.6", "5.7", "9.4", "9.6", "10.4".
-    - 5.5/5.6/5.7 for mysql and percona engine. 
+    - 5.5/5.6/5.7 for mysql and percona engine.
     - 9.4/9.6/10.4 for postgresql engine.
 * `name` - (Optional) The name of database instance, which contains 6-63 characters and only support Chinese, English, numbers, '-', '_', '.', ',', '[', ']', ':'. If not specified, terraform will auto-generate a name beginning with `tf-db-instance`.
 * `instance_storage` - (Required) Specifies the allocated storage size in gigabytes (GB), range from 20 to 32000GB. The volume adjustment must be a multiple of 10 GB. The maximum disk volume for Highly Availability NVMe SSD is range 20 to 32000GB; The maximum disk volume for Highly Availability SATA SSD type are：
@@ -56,6 +59,7 @@ The following arguments are supported:
 * `duration` - (Optional, ForceNew) The duration that you will buy the db instance (Default: `1`). The value is `0` when pay by month and the instance will be valid till the last day of that month. It is not required when `dynamic` (pay by hour).
 * `vpc_id` - (Optional, ForceNew) The ID of VPC linked to the database instances.
 * `subnet_id` - (Optional, ForceNew) The ID of subnet.
+* `from_backup_id` - (Optional, ForceNew) Create the database instance with the content of specified backup.
 * `backup_count` - (Optional, ForceNew) Specifies the number of backup saved per week, it is 7 backups saved per week by default.
 * `backup_begin_time` - (Optional) Specifies when the backup starts, measured in hour, it starts at one o'clock of 1, 2, 3, 4 in the morning by default.
 * `backup_date` - (Optional) Specifies whether the backup took place from Sunday to Saturday by displaying 7 digits. 0 stands for backup disabled and 1 stands for backup enabled. The rightmost digit specifies whether the backup took place on Sunday, and the digits from right to left specify whether the backup took place from Monday to Saturday, it's mandatory required to backup twice per week at least. such as: digits "1100000" stands for the backup took place on Saturday and Friday.
