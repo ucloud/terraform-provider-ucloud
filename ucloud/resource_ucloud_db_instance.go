@@ -238,7 +238,10 @@ func resourceUCloudDBInstanceCreate(d *schema.ResourceData, meta interface{}) er
 	req.DBTypeId = ucloud.String(dbTypeId)
 	req.BackupCount = ucloud.Int(d.Get("backup_count").(int))
 	req.InstanceType = ucloud.String(dbTypeCvt.convert(dbType.Type))
-	req.BackupId = ucloud.Int(d.Get("from_backup_id").(int))
+
+	if v, ok := d.GetOk("from_backup_id"); ok {
+		req.BackupId = ucloud.Int(v.(int))
+	}
 
 	password := fmt.Sprintf("%s%s%s",
 		acctest.RandStringFromCharSet(5, defaultPasswordStr),

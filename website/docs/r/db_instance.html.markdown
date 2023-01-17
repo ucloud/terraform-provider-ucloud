@@ -15,13 +15,11 @@ Provides a Database instance resource.
 ## Example Usage
 
 ```hcl
-# Query availability zone
-data "ucloud_zones" "default" {
-}
 
 # Create database instance
 resource "ucloud_db_instance" "master" {
   name              = "tf-example-db"
+  availability_zone = "cn-bj2-05"
   instance_storage  = 20
   instance_type     = "mysql-ha-1"
   engine            = "mysql"
