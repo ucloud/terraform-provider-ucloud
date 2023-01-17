@@ -222,6 +222,7 @@ github.com/ucloud/ucloud-sdk-go/external
 github.com/ucloud/ucloud-sdk-go/private/protocol/http
 github.com/ucloud/ucloud-sdk-go/private/services/umem
 github.com/ucloud/ucloud-sdk-go/private/utils
+github.com/ucloud/ucloud-sdk-go/services/cube
 github.com/ucloud/ucloud-sdk-go/services/ipsecvpn
 github.com/ucloud/ucloud-sdk-go/services/uaccount
 github.com/ucloud/ucloud-sdk-go/services/udb
@@ -392,6 +393,3 @@ google.golang.org/grpc/stats
 google.golang.org/grpc/status
 google.golang.org/grpc/tap
 google.golang.org/grpc/test/bufconn
-# gopkg.in/yaml.v2 v2.4.0
-## explicit
-gopkg.in/yaml.v2
