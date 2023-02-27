@@ -166,6 +166,7 @@ func resourceUCloudUK8SCluster() *schema.Resource {
 							ValidateFunc: validation.StringInSlice([]string{
 								"local_normal",
 								"local_ssd",
+								"cloud_normal",
 								"cloud_ssd",
 								"cloud_rssd",
 							}, false),
@@ -188,6 +189,8 @@ func resourceUCloudUK8SCluster() *schema.Resource {
 							ForceNew: true,
 							Computed: true,
 							ValidateFunc: validation.StringInSlice([]string{
+								"local_normal",
+								"local_ssd",
 								"cloud_normal",
 								"cloud_ssd",
 								"cloud_rssd",

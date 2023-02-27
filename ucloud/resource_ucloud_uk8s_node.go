@@ -120,6 +120,9 @@ func resourceUCloudUK8SNode() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{
 					"local_normal",
 					"local_ssd",
+					"cloud_normal",
+					"cloud_ssd",
+					"cloud_rssd",
 				}, false),
 			},
 
