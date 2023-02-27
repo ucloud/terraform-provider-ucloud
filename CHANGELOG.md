@@ -1,3 +1,10 @@
+## 1.34.1 (2023-02-27)
+
+BUG FIXES:
+
+* resource/uk8s_node: fix disk type validation.
+* resource/uk8s_cluster: fix disk type validation.
+
 ## 1.34.0 (2023-01-17)
 
 FEATURES:
