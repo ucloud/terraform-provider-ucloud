@@ -196,18 +196,15 @@ func (c *UHostClient) CreateIsolationGroup(req *CreateIsolationGroupRequest) (*C
 }
 
 /*
-CreateUHostInstanceParamNetworkInterfaceEIPGlobalSSH is request schema for complex param
+UHostDiskCustomBackup is request schema for complex param
 */
-type CreateUHostInstanceParamNetworkInterfaceEIPGlobalSSH struct {
+type UHostDiskCustomBackup struct {
+}
 
-	// 填写支持SSH访问IP的地区名称，如“洛杉矶”，“新加坡”，“香港”，“东京”，“华盛顿”，“法兰克福”。Area和AreaCode两者必填其中之一。
-	Area *string `required:"false"`
-
-	// GlobalSSH的地区编码，格式为区域航空港国际通用代码。Area和AreaCode两者必填其中之一。
-	AreaCode *string `required:"false"`
-
-	// SSH端口，1-65535且不能使用80，443端口
-	Port *int `required:"false"`
+/*
+CreateUHostInstanceParamNetworkInterfaceIPv6 is request schema for complex param
+*/
+type CreateUHostInstanceParamNetworkInterfaceIPv6 struct {
 }
 
 /*
@@ -221,8 +218,8 @@ type CreateUHostInstanceParamNetworkInterfaceEIP struct {
 	// 当前EIP代金券id。请通过DescribeCoupon接口查询，或登录用户中心查看。
 	CouponId *string `required:"false"`
 
-	//
-	GlobalSSH *CreateUHostInstanceParamNetworkInterfaceEIPGlobalSSH `required:"false"`
+	// 【该字段已废弃，请谨慎使用】
+	GlobalSSH *CreateUHostInstanceParamNetworkInterfaceEIPGlobalSSH `required:"false" deprecated:"true"`
 
 	// 【若绑定EIP，此参数必填】弹性IP的线路。枚举值: 国际: International BGP: Bgp 各地域允许的线路参数如下: cn-sh1: Bgp cn-sh2: Bgp cn-gd: Bgp cn-bj1: Bgp cn-bj2: Bgp hk: International us-ca: International th-bkk: International kr-seoul:International us-ws:International ge-fra:International sg:International tw-kh:International.其他海外线路均为 International
 	OperatorName *string `required:"false"`
@@ -235,27 +232,30 @@ type CreateUHostInstanceParamNetworkInterfaceEIP struct {
 }
 
 /*
-CreateUHostInstanceParamNetworkInterfaceIPv6 is request schema for complex param
+CreateUHostInstanceParamVolumes is request schema for complex param
 */
-type CreateUHostInstanceParamNetworkInterfaceIPv6 struct {
+type CreateUHostInstanceParamVolumes struct {
+
+	// 【该字段已废弃，请谨慎使用】
+	CouponId *string `required:"false" deprecated:"true"`
+
+	// 【该字段已废弃，请谨慎使用】
+	IsBoot *string `required:"false" deprecated:"true"`
 }
 
 /*
-CreateUHostInstanceParamVirtualGpu is request schema for complex param
+CreateUHostInstanceParamFeatures is request schema for complex param
 */
-type CreateUHostInstanceParamVirtualGpu struct {
+type CreateUHostInstanceParamFeatures struct {
+
+	// 弹性网卡特性。开启了弹性网卡权限位，此特性才生效，默认 false 未开启，true 开启，仅与 NetCapability Normal 兼容。
+	UNI *bool `required:"false"`
 }
 
 /*
-CreateUHostInstanceParamNetworkInterface is request schema for complex param
+CreateUHostInstanceParamSecGroupId is request schema for complex param
 */
-type CreateUHostInstanceParamNetworkInterface struct {
-
-	// 申请并绑定一个教育网EIP。True为申请并绑定，False为不会申请绑定，默认False。当前只支持具有HPC特性的机型。
-	CreateCernetIp *bool `required:"false"`
-
-	//
-	EIP *CreateUHostInstanceParamNetworkInterfaceEIP `required:"false"`
+type CreateUHostInstanceParamSecGroupId struct {
 }
 
 /*
@@ -263,7 +263,7 @@ UHostDisk is request schema for complex param
 */
 type UHostDisk struct {
 
-	// 磁盘备份方案。枚举值：\\ > NONE，无备份 \\ > DATAARK，数据方舟 \\ > SNAPSHOT（SNAPSHOT模式目前仅在上海C支持），快照 \\当前磁盘支持的备份模式参考 [[api:uhost-api:disk_type|磁盘类型]],默认值:NONE
+	// 磁盘备份方案。枚举值：\\ > NONE，无备份 \\ > DATAARK，数据方舟 \\ > SNAPSHOT，快照 \\当前磁盘支持的备份模式参考 [[api:uhost-api:disk_type|磁盘类型]],默认值:NONE
 	BackupType *string `required:"false"`
 
 	// 云盘代金券id。不适用于系统盘/本地盘。请通过DescribeCoupon接口查询，或登录用户中心查看
@@ -278,7 +278,7 @@ type UHostDisk struct {
 	// 【功能仅部分可用区开放，详询技术支持】kms key id。选择加密盘时必填。
 	KmsKeyId *string `required:"false"`
 
-	// 磁盘大小，单位GB，必须是10GB的整数倍。请参考[[api:uhost-api:disk_type|磁盘类型]]。
+	// 磁盘大小，单位GB。请参考[[api:uhost-api:disk_type|磁盘类型]]。
 	Size *int `required:"true"`
 
 	// 磁盘类型。请参考[[api:uhost-api:disk_type|磁盘类型]]。
@@ -286,15 +286,15 @@ type UHostDisk struct {
 }
 
 /*
-CreateUHostInstanceParamVolumes is request schema for complex param
+CreateUHostInstanceParamNetworkInterface is request schema for complex param
 */
-type CreateUHostInstanceParamVolumes struct {
+type CreateUHostInstanceParamNetworkInterface struct {
 
-	// 【该字段已废弃，请谨慎使用】
-	CouponId *string `required:"false" deprecated:"true"`
+	// 申请并绑定一个教育网EIP。True为申请并绑定，False为不会申请绑定，默认False。当前只支持具有HPC特性的机型。
+	CreateCernetIp *bool `required:"false"`
 
-	// 【该字段已废弃，请谨慎使用】
-	IsBoot *string `required:"false" deprecated:"true"`
+	//
+	EIP *CreateUHostInstanceParamNetworkInterfaceEIP `required:"false"`
 }
 
 // CreateUHostInstanceRequest is request schema for CreateUHostInstance action
@@ -322,7 +322,7 @@ type CreateUHostInstanceRequest struct {
 	// 虚拟CPU核数。可选参数：1-64（具体机型与CPU的对应关系参照控制台）。默认值: 4。
 	CPU *int `required:"false"`
 
-	// 计费模式。枚举值为： \\ > Year，按年付费； \\ > Month，按月付费；\\ > Dynamic，按小时预付费 \\ > Postpay，按小时后付费（支持关机不收费，目前仅部分可用区支持，请联系您的客户经理） \\Preemptive计费为抢占式实例 \\ 默认为月付
+	// 计费模式。枚举值为： \\ > Year，按年付费； \\ > Month，按月付费；\\ > Dynamic，按小时预付费 \\ > Postpay，按小时后付费（支持关机不收费，目前仅部分可用区支持，请联系您的客户经理） \\Preemptive计费为抢占式实例(内测阶段) \\ 默认为月付
 	ChargeType *string `required:"false"`
 
 	// 主机代金券ID。请通过DescribeCoupon接口查询，或登录用户中心查看
@@ -334,10 +334,13 @@ type CreateUHostInstanceRequest struct {
 	//
 	Disks []UHostDisk `required:"false"`
 
+	//
+	Features *CreateUHostInstanceParamFeatures `required:"false"`
+
 	// GPU卡核心数。仅GPU机型支持此字段（可选范围与MachineType+GpuType相关）
 	GPU *int `required:"false"`
 
-	// GPU类型，枚举值["K80", "P40", "V100", "T4", "T4S","2080Ti","2080Ti-4C","1080Ti"]，MachineType为G时必填
+	// GPU类型，枚举值["K80", "P40", "V100", "T4","T4A", "T4S","2080Ti","2080Ti-4C","1080Ti", "T4/4", "MI100", "V100S",2080","2080TiS","2080TiPro","3090","A100"]，MachineType为G时必填
 	GpuType *string `required:"false"`
 
 	// 【该字段已废弃，请谨慎使用】
@@ -361,13 +364,13 @@ type CreateUHostInstanceRequest struct {
 	// 【该字段已废弃，请谨慎使用】
 	KeyPair *string `required:"false" deprecated:"true"`
 
-	// KeypairId 密钥对ID，LoginMode为KeyPair时此项必须
+	// KeypairId 密钥对ID，LoginMode为KeyPair时此项必须。
 	KeyPairId *string `required:"false"`
 
 	// 主机登陆模式。密码（默认选项）: Password，密钥：KeyPair。
 	LoginMode *string `required:"true"`
 
-	// 云主机机型（V2.0），在本字段和字段UHostType中，仅需要其中1个字段即可。枚举值["N", "C", "G", "O", "OS", "OPRO", "OMAX", "O.BM"]。参考[[api:uhost-api:uhost_type|云主机机型说明]]。
+	// 云主机机型（V2.0），在本字段和字段UHostType中，仅需要其中1个字段即可。枚举值["N", "C", "G", "O", "OS", "OM", "OPRO", "OMAX", "O.BM", "O.EPC"]。参考[[api:uhost-api:uhost_type|云主机机型说明]]。
 	MachineType *string `required:"false"`
 
 	// 本次最大创建主机数量，取值范围是[1,100]，默认值为1。
@@ -376,13 +379,13 @@ type CreateUHostInstanceRequest struct {
 	// 内存大小。单位：MB。范围 ：[1024, 262144]，取值为1024的倍数（可选范围参考控制台）。默认值：8192
 	Memory *int `required:"false"`
 
-	// 最低cpu平台，枚举值["Intel/Auto", "Intel/IvyBridge", "Intel/Haswell", "Intel/Broadwell", "Intel/Skylake", "Intel/Cascadelake"；"Intel/CascadelakeR"; “Amd/Epyc2”,"Amd/Auto"],默认值是"Intel/Auto"。
+	// 最低cpu平台，枚举值["Intel/Auto", "Intel/IvyBridge", "Intel/Haswell", "Intel/Broadwell", "Intel/Skylake", "Intel/Cascadelake", "Intel/CascadelakeR", "Intel/IceLake", "Amd/Epyc2", "Amd/Auto","Ampere/Auto","Ampere/Altra"],默认值是"Intel/Auto"。
 	MinimalCpuPlatform *string `required:"false"`
 
 	// UHost实例名称。默认：UHost。请遵照[[api:uhost-api:specification|字段规范]]设定实例名称。
 	Name *string `required:"false"`
 
-	// 网络增强特性。枚举值：Normal（默认），不开启;  Super，开启网络增强1.0； Ultra，开启网络增强2.0（仅支持部分可用区，请参考控制台）
+	// 网络增强特性。枚举值：Normal，不开启;  Super，开启网络增强1.0； Ultra，开启网络增强2.0（详情参考官网文档）
 	NetCapability *string `required:"false"`
 
 	// 【该字段已废弃，请谨慎使用】
@@ -639,6 +642,65 @@ func (c *UHostClient) DeleteUHostKeyPairs(req *DeleteUHostKeyPairsRequest) (*Del
 	reqCopier := *req
 
 	err = c.Client.InvokeAction("DeleteUHostKeyPairs", &reqCopier, &res)
+	if err != nil {
+		return &res, err
+	}
+
+	return &res, nil
+}
+
+// DescribeAvailableInstanceTypesRequest is request schema for DescribeAvailableInstanceTypes action
+type DescribeAvailableInstanceTypesRequest struct {
+	request.CommonBase
+
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。
+	// ProjectId *string `required:"false"`
+
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
+	// Region *string `required:"true"`
+
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
+	// Zone *string `required:"false"`
+
+	// 指定机型列表
+	MachineTypes []string `required:"false"`
+}
+
+// DescribeAvailableInstanceTypesResponse is response schema for DescribeAvailableInstanceTypes action
+type DescribeAvailableInstanceTypesResponse struct {
+	response.CommonBase
+
+	// AvailableInstanceTypes
+	AvailableInstanceTypes []AvailableInstanceTypes
+
+	// 当前区域是否可售
+	Status string
+}
+
+// NewDescribeAvailableInstanceTypesRequest will create request of DescribeAvailableInstanceTypes action.
+func (c *UHostClient) NewDescribeAvailableInstanceTypesRequest() *DescribeAvailableInstanceTypesRequest {
+	req := &DescribeAvailableInstanceTypesRequest{}
+
+	// setup request with client config
+	c.Client.SetupRequest(req)
+
+	// setup retryable with default retry policy (retry for non-create action and common error)
+	req.SetRetryable(true)
+	return req
+}
+
+/*
+API: DescribeAvailableInstanceTypes
+
+DescribeAvailableInstanceTypes
+*/
+func (c *UHostClient) DescribeAvailableInstanceTypes(req *DescribeAvailableInstanceTypesRequest) (*DescribeAvailableInstanceTypesResponse, error) {
+	var err error
+	var res DescribeAvailableInstanceTypesResponse
+
+	reqCopier := *req
+
+	err = c.Client.InvokeAction("DescribeAvailableInstanceTypes", &reqCopier, &res)
 	if err != nil {
 		return &res, err
 	}
@@ -1062,24 +1124,6 @@ func (c *UHostClient) GetAttachedDiskUpgradePrice(req *GetAttachedDiskUpgradePri
 }
 
 /*
-getUHostInstancePriceParamDisks is request schema for complex param
-*/
-type getUHostInstancePriceParamDisks struct {
-
-	// 磁盘备份方案。枚举值：\\ > NONE，无备份 \\ > DATAARK，数据方舟 \\ > SNAPSHOT，快照\\ 当前磁盘支持的备份模式参考 [[api:uhost-api:disk_type|磁盘类型]]
-	BackupType *string `required:"false"`
-
-	// 是否是系统盘。枚举值：\\ > True，是系统盘 \\ > False，是数据盘（默认）。Disks数组中有且只能有一块盘是系统盘。
-	IsBoot *string `required:"true"`
-
-	// 磁盘大小，单位GB。请参考[[api:uhost-api:disk_type|磁盘类型]]。
-	Size *int `required:"true"`
-
-	// 磁盘类型。请参考[[api:uhost-api:disk_type|磁盘类型]]。
-	Type *string `required:"true"`
-}
-
-/*
 GetUHostInstancePriceParamVolumes is request schema for complex param
 */
 type GetUHostInstancePriceParamVolumes struct {
@@ -1095,9 +1139,21 @@ type GetUHostInstancePriceParamVolumes struct {
 }
 
 /*
-GetUHostInstancePriceParamVirtualGpu is request schema for complex param
+getUHostInstancePriceParamDisks is request schema for complex param
 */
-type GetUHostInstancePriceParamVirtualGpu struct {
+type getUHostInstancePriceParamDisks struct {
+
+	// 磁盘备份方案。枚举值：\\ > NONE，无备份 \\ > DATAARK，数据方舟 \\ > SNAPSHOT，快照\\ 当前磁盘支持的备份模式参考 [[api:uhost-api:disk_type|磁盘类型]]
+	BackupType *string `required:"false"`
+
+	// 是否是系统盘。枚举值：\\ > True，是系统盘 \\ > False，是数据盘（默认）。Disks数组中有且只能有一块盘是系统盘。
+	IsBoot *string `required:"true"`
+
+	// 磁盘大小，单位GB。请参考[[api:uhost-api:disk_type|磁盘类型]]。
+	Size *int `required:"true"`
+
+	// 磁盘类型。请参考[[api:uhost-api:disk_type|磁盘类型]]。
+	Type *string `required:"true"`
 }
 
 // GetUHostInstancePriceRequest is request schema for GetUHostInstancePrice action
@@ -1134,7 +1190,7 @@ type GetUHostInstancePriceRequest struct {
 	// GPU卡核心数。仅GPU机型支持此字段。
 	GPU *int `required:"false"`
 
-	// GPU类型，枚举值["K80", "P40", "V100", "T4","T4S","2080Ti","2080Ti-4C","1080Ti"]
+	// GPU类型，枚举值["K80", "P40", "V100", "T4","T4S","2080Ti","2080Ti-4C","1080Ti", "T4/4","MI100","V100S"]
 	GpuType *string `required:"false"`
 
 	// 镜像Id，可通过 [DescribeImage](describe_image.html) 获取镜像ID， 如果镜像ID不传，系统盘大小必传
@@ -1143,7 +1199,7 @@ type GetUHostInstancePriceRequest struct {
 	// 【该字段已废弃，请谨慎使用】
 	LifeCycle *int `required:"false" deprecated:"true"`
 
-	// 云主机机型（V2版本概念）。枚举值["N", "C", "G", "O", "OS", "OPRO", "OMAX", "O.BM"]。参考[[api:uhost-api:uhost_type|云主机机型说明]]。
+	// 云主机机型（V2版本概念）。枚举值["N", "C", "G", "O", "OS", "OPRO", "OMAX", "O.BM", "O.EPC"]。参考[[api:uhost-api:uhost_type|云主机机型说明]]。
 	MachineType *string `required:"false"`
 
 	// 内存大小。单位：MB。范围 ：[1024, 262144]，取值为1024的倍数（可选范围参照好控制台）。默认值：8192
@@ -1155,11 +1211,17 @@ type GetUHostInstancePriceRequest struct {
 	// 购买时长。默认: 1。按小时购买(Dynamic)时无需此参数。 月付时，此参数传0，代表了购买至月末。
 	Quantity *int `required:"false"`
 
+	// 返回价格详细信息
+	ShowPriceDetails *bool `required:"false"`
+
 	// 【该字段已废弃，请谨慎使用】
 	StorageType *string `required:"false" deprecated:"true"`
 
 	// 【该字段已废弃，请谨慎使用】
 	TimemachineFeature *string `required:"false" deprecated:"true"`
+
+	// 专区云主机。如果要在专区宿主机上创建云主机，该参数可以填写为true
+	UDSetUHostInstance *bool `required:"false"`
 
 	// 【待废弃】云主机机型（V1版本概念）。参考[[api:uhost-api:uhost_type|云主机机型说明]]。
 	UHostType *string `required:"false"`

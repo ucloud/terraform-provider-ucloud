@@ -3,6 +3,7 @@ package ucloud
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/ucloud/ucloud-sdk-go/services/uads"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -133,6 +134,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 	client.ufsconn = ufs.NewClient(&cfg, &cred)
 	client.us3conn = ufile.NewClient(&cfg, &cred)
 	client.cubeconn = cube.NewClient(&cfg, &cred)
+	client.uadsconn = uads.NewClient(&cfg, &cred)
 
 	// initialize client connections for private usage
 	client.pumemconn = pumem.NewClient(&cfg, &cred)
@@ -160,6 +162,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 		client.us3conn.AddHttpRequestHandler(cloudShellCredHandler)
 		client.cubeconn.AddHttpRequestHandler(cloudShellCredHandler)
 		client.uk8sconn.AddHttpRequestHandler(cloudShellCredHandler)
+		client.uadsconn.AddHttpRequestHandler(cloudShellCredHandler)
 	}
 
 	client.config = &cfg

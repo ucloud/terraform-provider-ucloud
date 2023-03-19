@@ -436,13 +436,13 @@ func (c *UMemClient) CreateURedisBackup(req *CreateURedisBackupRequest) (*Create
 type CreateURedisGroupRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"false"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"true"`
 
 	// 是否自动备份,enable或disable，默认disable
@@ -457,7 +457,7 @@ type CreateURedisGroupRequest struct {
 	// 计费模式，Year , Month, Dynamic 默认: Month
 	ChargeType *string `required:"false"`
 
-	// 配置ID,目前支持 3.0版本配置ID:"03f58ca9-b64d-4bdd-abc7-c6b9a46fd801",3.2版本配置ID:"3e45ac48-f8a2-a9q2-261d-l342dab130gf", 4.0版本配置ID:"6c9298a3-9d7f-428c-b1d0-e87ab3b8a1ea",默认版本3.0,从备份创建为必传项
+	// 配置ID,目前支持 4.0版本配置ID:"6c9298a3-9d7f-428c-b1d0-e87ab3b8a1ea", 5.0版本配置ID:"3cdeeb90-dcbf-46e8-95cd-a05d8860a22c",6.0版本配置ID:"1d990520-aac8-4e0f-9384-f58611e8eb28",7.0版本配置ID:"48dcf534-db41-11ec-a1a6-52670028d520",默认版本4.0,从备份创建为必传项
 	ConfigId *string `required:"false"`
 
 	// 代金券ID
@@ -468,6 +468,9 @@ type CreateURedisGroupRequest struct {
 
 	// 是否开启高可用,enable或disable
 	HighAvailability *string `required:"true"`
+
+	// 是否创建高性能Redis， 默认为false， 或者不填， 创建高性能为true
+	HighPerformance *bool `required:"false"`
 
 	// Master Redis Group的ID，创建只读Slave时，必须填写
 	MasterGroupId *string `required:"false"`
@@ -496,7 +499,7 @@ type CreateURedisGroupRequest struct {
 	// VPC的ID
 	VPCId *string `required:"false"`
 
-	// Redis版本信息(详见DescribeURedisVersion返回结果),默认版本3.0
+	// Redis版本信息(详见DescribeURedisVersion返回结果),默认版本4.0
 	Version *string `required:"false"`
 }
 
@@ -690,6 +693,62 @@ func (c *UMemClient) DeleteURedisGroup(req *DeleteURedisGroupRequest) (*DeleteUR
 	reqCopier := *req
 
 	err = c.Client.InvokeAction("DeleteURedisGroup", &reqCopier, &res)
+	if err != nil {
+		return &res, err
+	}
+
+	return &res, nil
+}
+
+// DescribeUDRedisProxyInfoRequest is request schema for DescribeUDRedisProxyInfo action
+type DescribeUDRedisProxyInfoRequest struct {
+	request.CommonBase
+
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
+	// ProjectId *string `required:"false"`
+
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
+	// Region *string `required:"true"`
+
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
+	// Zone *string `required:"true"`
+
+	// udredis实例id
+	SpaceId *string `required:"true"`
+}
+
+// DescribeUDRedisProxyInfoResponse is response schema for DescribeUDRedisProxyInfo action
+type DescribeUDRedisProxyInfoResponse struct {
+	response.CommonBase
+
+	// 代理数据集
+	DataSet []UDRedisProxyInfo
+}
+
+// NewDescribeUDRedisProxyInfoRequest will create request of DescribeUDRedisProxyInfo action.
+func (c *UMemClient) NewDescribeUDRedisProxyInfoRequest() *DescribeUDRedisProxyInfoRequest {
+	req := &DescribeUDRedisProxyInfoRequest{}
+
+	// setup request with client config
+	c.Client.SetupRequest(req)
+
+	// setup retryable with default retry policy (retry for non-create action and common error)
+	req.SetRetryable(true)
+	return req
+}
+
+/*
+API: DescribeUDRedisProxyInfo
+
+拉取udredis所有的代理信息
+*/
+func (c *UMemClient) DescribeUDRedisProxyInfo(req *DescribeUDRedisProxyInfoRequest) (*DescribeUDRedisProxyInfoResponse, error) {
+	var err error
+	var res DescribeUDRedisProxyInfoResponse
+
+	reqCopier := *req
+
+	err = c.Client.InvokeAction("DescribeUDRedisProxyInfo", &reqCopier, &res)
 	if err != nil {
 		return &res, err
 	}
@@ -958,13 +1017,13 @@ func (c *UMemClient) DescribeUMemBackupURL(req *DescribeUMemBackupURLRequest) (*
 type DescribeUMemBlockInfoRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"false"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"true"`
 
 	// 分页显示的条目数, 默认值为10
@@ -2154,6 +2213,71 @@ func (c *UMemClient) ModifyUMemSpaceName(req *ModifyUMemSpaceNameRequest) (*Modi
 	return &res, nil
 }
 
+// ModifyURedisConfigRequest is request schema for ModifyURedisConfig action
+type ModifyURedisConfigRequest struct {
+	request.CommonBase
+
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
+	// ProjectId *string `required:"false"`
+
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
+	// Region *string `required:"true"`
+
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
+	// Zone *string `required:"true"`
+
+	// 配置文件的ID
+	ConfigId *string `required:"true"`
+
+	// 如果实例使用默认配置创建，修改配置信息需要填写GroupId
+	GroupId *string `required:"false"`
+
+	// 参数名称
+	Key *string `required:"true"`
+
+	// 是否是跨机房URedis(默认false)
+	RegionFlag *bool `required:"false"`
+
+	// 对应参数的值
+	Value *string `required:"true"`
+}
+
+// ModifyURedisConfigResponse is response schema for ModifyURedisConfig action
+type ModifyURedisConfigResponse struct {
+	response.CommonBase
+}
+
+// NewModifyURedisConfigRequest will create request of ModifyURedisConfig action.
+func (c *UMemClient) NewModifyURedisConfigRequest() *ModifyURedisConfigRequest {
+	req := &ModifyURedisConfigRequest{}
+
+	// setup request with client config
+	c.Client.SetupRequest(req)
+
+	// setup retryable with default retry policy (retry for non-create action and common error)
+	req.SetRetryable(true)
+	return req
+}
+
+/*
+API: ModifyURedisConfig
+
+修改主备Redis配置文件参数
+*/
+func (c *UMemClient) ModifyURedisConfig(req *ModifyURedisConfigRequest) (*ModifyURedisConfigResponse, error) {
+	var err error
+	var res ModifyURedisConfigResponse
+
+	reqCopier := *req
+
+	err = c.Client.InvokeAction("ModifyURedisConfig", &reqCopier, &res)
+	if err != nil {
+		return &res, err
+	}
+
+	return &res, nil
+}
+
 // ModifyURedisGroupNameRequest is request schema for ModifyURedisGroupName action
 type ModifyURedisGroupNameRequest struct {
 	request.CommonBase
@@ -2703,13 +2827,13 @@ func (c *UMemClient) StartURedisGroup(req *StartURedisGroupRequest) (*StartURedi
 type UpdateURedisBackupStrategyRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"false"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"false"`
 
 	// 是否打开默认备份功能。enable(打开)，disable(关闭)，默认enable
@@ -2754,6 +2878,65 @@ func (c *UMemClient) UpdateURedisBackupStrategy(req *UpdateURedisBackupStrategyR
 	reqCopier := *req
 
 	err = c.Client.InvokeAction("UpdateURedisBackupStrategy", &reqCopier, &res)
+	if err != nil {
+		return &res, err
+	}
+
+	return &res, nil
+}
+
+// UpdateURedisRewriteTimeRequest is request schema for UpdateURedisRewriteTime action
+type UpdateURedisRewriteTimeRequest struct {
+	request.CommonBase
+
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
+	// ProjectId *string `required:"false"`
+
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
+	// Region *string `required:"true"`
+
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
+	// Zone *string `required:"true"`
+
+	// 实例名称
+	GroupId *string `required:"true"`
+
+	// 重写时间
+	RewriteTime *int `required:"true"`
+
+	// 跨机房URedis，slave所在可用区（必须和Zone在同一Region，且不可相同）
+	SlaveZone *string `required:"false"`
+}
+
+// UpdateURedisRewriteTimeResponse is response schema for UpdateURedisRewriteTime action
+type UpdateURedisRewriteTimeResponse struct {
+	response.CommonBase
+}
+
+// NewUpdateURedisRewriteTimeRequest will create request of UpdateURedisRewriteTime action.
+func (c *UMemClient) NewUpdateURedisRewriteTimeRequest() *UpdateURedisRewriteTimeRequest {
+	req := &UpdateURedisRewriteTimeRequest{}
+
+	// setup request with client config
+	c.Client.SetupRequest(req)
+
+	// setup retryable with default retry policy (retry for non-create action and common error)
+	req.SetRetryable(true)
+	return req
+}
+
+/*
+API: UpdateURedisRewriteTime
+
+修改主备redis重写时间
+*/
+func (c *UMemClient) UpdateURedisRewriteTime(req *UpdateURedisRewriteTimeRequest) (*UpdateURedisRewriteTimeResponse, error) {
+	var err error
+	var res UpdateURedisRewriteTimeResponse
+
+	reqCopier := *req
+
+	err = c.Client.InvokeAction("UpdateURedisRewriteTime", &reqCopier, &res)
 	if err != nil {
 		return &res, err
 	}

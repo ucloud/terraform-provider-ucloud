@@ -5,6 +5,8 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/services/cube"
 	"github.com/ucloud/ucloud-sdk-go/services/ipsecvpn"
 	"github.com/ucloud/ucloud-sdk-go/services/uaccount"
+	"github.com/ucloud/ucloud-sdk-go/services/uads"
+
 	"github.com/ucloud/ucloud-sdk-go/services/udb"
 	"github.com/ucloud/ucloud-sdk-go/services/udisk"
 	"github.com/ucloud/ucloud-sdk-go/services/udpn"
@@ -42,7 +44,7 @@ type UCloudClient struct {
 	us3conn        *ufile.UFileClient
 	cubeconn       *cube.CubeClient
 	uk8sconn       *uk8s.UK8SClient
-
+	uadsconn       *uads.UADSClient
 	// private services
 	pumemconn *pumem.UMemClient
 }

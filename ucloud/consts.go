@@ -205,6 +205,26 @@ var vpnIkeVersionCvt = newStringConverter(map[string]string{
 	"IKE V2": "ikev2",
 })
 
+const uadsAllowedDomainStatusAdding = 1
+const uadsAllowedDomainStatusSuccess = 2
+const uadsAllowedDomainStatusDeleting = 3
+const uadsAllowedDomainStatusFailure = 4
+const uadsAllowedDomainStatusDeleted = 5
+
+var uadsAllowedDomainStatusCvt = newIntConverter(map[int]string{
+	uadsAllowedDomainStatusAdding:   "Adding",
+	uadsAllowedDomainStatusSuccess:  "Success",
+	uadsAllowedDomainStatusDeleting: "Deleting",
+	uadsAllowedDomainStatusFailure:  "Failure",
+	uadsAllowedDomainStatusDeleted:  "Deleted",
+})
+
+const uadsBGPServiceIPStatusSuccess = "Success"
+const uadsBGPServiceIPStatusPending = "Pending"
+
+const uadsBGPServiceFwdRuleStatusSuccess = "Success"
+const uadsBGPServiceFwdRuleStatusPending = "Pending"
+
 // upperCvt is used to transform uppercase with underscore to lowercase with underscore. eg. LOCAL_SSD -> local_ssd
 var upperCvt = newUpperConverter(nil)
 

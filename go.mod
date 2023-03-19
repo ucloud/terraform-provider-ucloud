@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/hashicorp/terraform-plugin-sdk v1.4.0
-	github.com/ucloud/ucloud-sdk-go v0.21.19
+	github.com/ucloud/ucloud-sdk-go v0.21.53
 )
 
 require (

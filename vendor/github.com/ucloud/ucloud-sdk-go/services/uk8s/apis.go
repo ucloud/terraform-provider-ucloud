@@ -92,6 +92,104 @@ func (c *UK8SClient) AddUK8SExistingUHost(req *AddUK8SExistingUHostRequest) (*Ad
 	return &res, nil
 }
 
+// AddUK8SNodeGroupRequest is request schema for AddUK8SNodeGroup action
+type AddUK8SNodeGroupRequest struct {
+	request.CommonBase
+
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
+	// ProjectId *string `required:"false"`
+
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
+	// Region *string `required:"true"`
+
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
+	// Zone *string `required:"false"`
+
+	// 磁盘类型
+	BootDiskType *string `required:"false"`
+
+	// GPU卡核心数。仅GPU机型支持此字段（可选范围与MachineType+GpuType相关）
+	CPU *int `required:"false"`
+
+	// 计费模式
+	ChargeType *string `required:"false"`
+
+	// 集群ID
+	ClusterId *string `required:"true"`
+
+	// 数据磁盘大小
+	DataDiskSize *int `required:"false"`
+
+	// 磁盘类型
+	DataDiskType *string `required:"false"`
+
+	// GPU卡核心数
+	GPU *int `required:"false"`
+
+	// GPU类型
+	GpuType *string `required:"false"`
+
+	// 镜像ID
+	ImageId *string `required:"false"`
+
+	// 云主机机型。枚举值["N", "C", "G", "O", "OS"]。参考[[api:uhost-api:uhost_type|云主机机型说明]]。
+	MachineType *string `required:"false"`
+
+	// 内存大小。单位：MB
+	Mem *int `required:"false"`
+
+	// 最低cpu平台，枚举值["Intel/Auto", "Intel/IvyBridge", "Intel/Haswell", "Intel/Broadwell", "Intel/Skylake", "Intel/Cascadelake"；"Intel/CascadelakeR"; “Amd/Epyc2”,"Amd/Auto"],默认值是"Intel/Auto"
+	MinimalCpuPlatform *string `required:"false"`
+
+	// 节点池名字
+	NodeGroupName *string `required:"true"`
+
+	// 业务组
+	Tag *string `required:"false"`
+}
+
+// AddUK8SNodeGroupResponse is response schema for AddUK8SNodeGroup action
+type AddUK8SNodeGroupResponse struct {
+	response.CommonBase
+
+	// 返回错误消息，当 RetCode 非 0 时提供详细的描述信息。
+	Message string
+
+	// 节点池ID
+	NodeGroupId string
+}
+
+// NewAddUK8SNodeGroupRequest will create request of AddUK8SNodeGroup action.
+func (c *UK8SClient) NewAddUK8SNodeGroupRequest() *AddUK8SNodeGroupRequest {
+	req := &AddUK8SNodeGroupRequest{}
+
+	// setup request with client config
+	c.Client.SetupRequest(req)
+
+	// setup retryable with default retry policy (retry for non-create action and common error)
+	req.SetRetryable(false)
+	return req
+}
+
+/*
+API: AddUK8SNodeGroup
+
+添加UK8S节点池
+*/
+func (c *UK8SClient) AddUK8SNodeGroup(req *AddUK8SNodeGroupRequest) (*AddUK8SNodeGroupResponse, error) {
+	var err error
+	var res AddUK8SNodeGroupResponse
+
+	reqCopier := *req
+
+	err = c.Client.InvokeAction("AddUK8SNodeGroup", &reqCopier, &res)
+	if err != nil {
+		return &res, err
+	}
+
+	return &res, nil
+}
+
 // AddUK8SPHostNodeRequest is request schema for AddUK8SPHostNode action
 type AddUK8SPHostNodeRequest struct {
 	request.CommonBase
@@ -310,15 +408,6 @@ func (c *UK8SClient) AddUK8SUHostNode(req *AddUK8SUHostNodeRequest) (*AddUK8SUHo
 }
 
 /*
-CreateUK8SClusterV2ParamMaster is request schema for complex param
-*/
-type CreateUK8SClusterV2ParamMaster struct {
-
-	// Master节点所属可用区，需要设置 Master.0.Zone、 Master.1.Zone、Master.2.Zone 三个 Master 节点的可用区。 三个节点可部署在不同可用区。参见 [可用区列表](../summary/regionlist.html)
-	Zone *string `required:"true"`
-}
-
-/*
 CreateUK8SClusterV2ParamNodes is request schema for complex param
 */
 type CreateUK8SClusterV2ParamNodes struct {
@@ -363,6 +452,15 @@ type CreateUK8SClusterV2ParamNodes struct {
 	MinmalCpuPlatform *string `required:"false"`
 
 	// 一组Nodes节点所属可用区，可创建多组Nodes节点，如一组是CPU Nodes节点，另一组是GPU Nodes节点。参见 [可用区列表](../summary/regionlist.html)
+	Zone *string `required:"true"`
+}
+
+/*
+CreateUK8SClusterV2ParamMaster is request schema for complex param
+*/
+type CreateUK8SClusterV2ParamMaster struct {
+
+	// Master节点所属可用区，需要设置 Master.0.Zone、 Master.1.Zone、Master.2.Zone 三个 Master 节点的可用区。 三个节点可部署在不同可用区。参见 [可用区列表](../summary/regionlist.html)
 	Zone *string `required:"true"`
 }
 
@@ -599,6 +697,119 @@ func (c *UK8SClient) DelUK8SClusterNodeV2(req *DelUK8SClusterNodeV2Request) (*De
 	reqCopier := *req
 
 	err = c.Client.InvokeAction("DelUK8SClusterNodeV2", &reqCopier, &res)
+	if err != nil {
+		return &res, err
+	}
+
+	return &res, nil
+}
+
+// DescribeUK8SClusterRequest is request schema for DescribeUK8SCluster action
+type DescribeUK8SClusterRequest struct {
+	request.CommonBase
+
+	// [公共参数] 项目id
+	// ProjectId *string `required:"false"`
+
+	// [公共参数] 所属区域
+	// Region *string `required:"true"`
+
+	// k8s集群ID
+	ClusterId *string `required:"true"`
+}
+
+// DescribeUK8SClusterResponse is response schema for DescribeUK8SCluster action
+type DescribeUK8SClusterResponse struct {
+	response.CommonBase
+
+	// 集群apiserver地址
+	ApiServer string
+
+	// 集群CA根证书
+	CACert string
+
+	// 自定义或者默认的clusterdomain
+	ClusterDomain string
+
+	// 集群ID
+	ClusterId string
+
+	// 资源名字
+	ClusterName string
+
+	// 创建时间
+	CreateTime int
+
+	// 集群etcd服务证书
+	EtcdCert string
+
+	// 集群etcd服务密钥
+	EtcdKey string
+
+	// 集群外部apiserver地址
+	ExternalApiServer string
+
+	// kube-proxy配置
+	KubeProxy KubeProxy
+
+	// Master 节点数量
+	MasterCount int
+
+	// Master节点配置信息，具体参考UhostInfo。托管版不返回该信息
+	MasterList []UhostInfo
+
+	// Master配置预警：Normal正常；Warning 需要升级；Error    需要紧急升级；
+	MasterResourceStatus string
+
+	// Node节点数量
+	NodeCount int
+
+	// Node节点配置信息,具体参考UhostInfo
+	NodeList []UhostInfo
+
+	// Pod网段
+	PodCIDR string
+
+	// 服务网段
+	ServiceCIDR string
+
+	// 状态
+	Status string
+
+	// 所属子网
+	SubnetId string
+
+	// 所属VPC
+	VPCId string
+
+	// K8S版本
+	Version string
+}
+
+// NewDescribeUK8SClusterRequest will create request of DescribeUK8SCluster action.
+func (c *UK8SClient) NewDescribeUK8SClusterRequest() *DescribeUK8SClusterRequest {
+	req := &DescribeUK8SClusterRequest{}
+
+	// setup request with client config
+	c.Client.SetupRequest(req)
+
+	// setup retryable with default retry policy (retry for non-create action and common error)
+	req.SetRetryable(true)
+	return req
+}
+
+/*
+API: DescribeUK8SCluster
+
+获取集群信息
+*/
+func (c *UK8SClient) DescribeUK8SCluster(req *DescribeUK8SClusterRequest) (*DescribeUK8SClusterResponse, error) {
+	var err error
+	var res DescribeUK8SClusterResponse
+
+	reqCopier := *req
+
+	err = c.Client.InvokeAction("DescribeUK8SCluster", &reqCopier, &res)
 	if err != nil {
 		return &res, err
 	}
@@ -923,6 +1134,112 @@ func (c *UK8SClient) ListUK8SClusterV2(req *ListUK8SClusterV2Request) (*ListUK8S
 	reqCopier := *req
 
 	err = c.Client.InvokeAction("ListUK8SClusterV2", &reqCopier, &res)
+	if err != nil {
+		return &res, err
+	}
+
+	return &res, nil
+}
+
+// ListUK8SNodeGroupRequest is request schema for ListUK8SNodeGroup action
+type ListUK8SNodeGroupRequest struct {
+	request.CommonBase
+
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
+	// ProjectId *string `required:"false"`
+
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
+	// Region *string `required:"true"`
+
+	// 集群ID
+	ClusterId *string `required:"true"`
+}
+
+// ListUK8SNodeGroupResponse is response schema for ListUK8SNodeGroup action
+type ListUK8SNodeGroupResponse struct {
+	response.CommonBase
+
+	// 节点池列表
+	NodeGroupList []NodeGroupSet
+}
+
+// NewListUK8SNodeGroupRequest will create request of ListUK8SNodeGroup action.
+func (c *UK8SClient) NewListUK8SNodeGroupRequest() *ListUK8SNodeGroupRequest {
+	req := &ListUK8SNodeGroupRequest{}
+
+	// setup request with client config
+	c.Client.SetupRequest(req)
+
+	// setup retryable with default retry policy (retry for non-create action and common error)
+	req.SetRetryable(true)
+	return req
+}
+
+/*
+API: ListUK8SNodeGroup
+
+列出UK8S节点池
+*/
+func (c *UK8SClient) ListUK8SNodeGroup(req *ListUK8SNodeGroupRequest) (*ListUK8SNodeGroupResponse, error) {
+	var err error
+	var res ListUK8SNodeGroupResponse
+
+	reqCopier := *req
+
+	err = c.Client.InvokeAction("ListUK8SNodeGroup", &reqCopier, &res)
+	if err != nil {
+		return &res, err
+	}
+
+	return &res, nil
+}
+
+// RemoveUK8SNodeGroupRequest is request schema for RemoveUK8SNodeGroup action
+type RemoveUK8SNodeGroupRequest struct {
+	request.CommonBase
+
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
+	// ProjectId *string `required:"false"`
+
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
+	// Region *string `required:"true"`
+
+	// 集群id
+	ClusterId *string `required:"true"`
+
+	// 节点池Id
+	NodeGroupId *string `required:"true"`
+}
+
+// RemoveUK8SNodeGroupResponse is response schema for RemoveUK8SNodeGroup action
+type RemoveUK8SNodeGroupResponse struct {
+	response.CommonBase
+}
+
+// NewRemoveUK8SNodeGroupRequest will create request of RemoveUK8SNodeGroup action.
+func (c *UK8SClient) NewRemoveUK8SNodeGroupRequest() *RemoveUK8SNodeGroupRequest {
+	req := &RemoveUK8SNodeGroupRequest{}
+
+	// setup request with client config
+	c.Client.SetupRequest(req)
+
+	// setup retryable with default retry policy (retry for non-create action and common error)
+	req.SetRetryable(true)
+	return req
+}
+
+/*
+API: RemoveUK8SNodeGroup
+
+删除UK8S节点池
+*/
+func (c *UK8SClient) RemoveUK8SNodeGroup(req *RemoveUK8SNodeGroupRequest) (*RemoveUK8SNodeGroupResponse, error) {
+	var err error
+	var res RemoveUK8SNodeGroupResponse
+
+	reqCopier := *req
+
+	err = c.Client.InvokeAction("RemoveUK8SNodeGroup", &reqCopier, &res)
 	if err != nil {
 		return &res, err
 	}

@@ -34,11 +34,29 @@ type UDBBackupSet struct {
 	// 对应的db名称
 	DBName string
 
+	// 备份错误信息
+	ErrorInfo string
+
+	// 备份文件的MD5值，备份完成后显示，备份中或备份失败时为空,目前只支持Mysql NVMe机型与Mongo
+	MD5 string
+
 	// 备份状态 Backuping // 备份中 Success // 备份成功 Failed // 备份失败 Expired // 备份过期
 	State string
 
 	// 备份所在可用区
 	Zone string
+}
+
+/*
+UFileDataSet - 增加ufile的描述
+*/
+type UFileDataSet struct {
+
+	// bucket名称
+	Bucket string
+
+	// Ufile的令牌tokenid
+	TokenID string
 }
 
 /*
@@ -156,18 +174,6 @@ type UDBSlaveInstanceSet struct {
 
 	// 可用区
 	Zone string
-}
-
-/*
-UFileDataSet - 增加ufile的描述
-*/
-type UFileDataSet struct {
-
-	// bucket名称
-	Bucket string
-
-	// Ufile的令牌tokenid
-	TokenID string
 }
 
 /*
@@ -352,6 +358,9 @@ type LogPackageDataSet struct {
 	// 跨可用区高可用备库所在可用区
 	BackupZone string
 
+	// binlog备份类型 Manual //手动备份 Auto //自动备份
+	BinlogType string
+
 	// dbid
 	DBId string
 
@@ -450,4 +459,16 @@ type UDBTypeSet struct {
 
 	// DB类型id，mysql/mongodb按版本细分各有一个id, 目前id的取值范围为[1,7],数值对应的版本如下： 1：mysql-5.5，2：mysql-5.1，3：percona-5.5 4：mongodb-2.4，5：mongodb-2.6，6：mysql-5.6， 7：percona-5.6
 	DBTypeId string
+}
+
+/*
+ConnNumMap - db实例ip和连接数信息
+*/
+type ConnNumMap struct {
+
+	// 客户端IP
+	Ip string
+
+	// 该Ip连接数
+	Num int
 }

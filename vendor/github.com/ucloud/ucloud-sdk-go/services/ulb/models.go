@@ -94,6 +94,9 @@ type ULBSSLSet struct {
 	// SSL证书的创建时间
 	CreateTime int
 
+	// USSL证书平台的域名,只有当SSLSource为1时才出现
+	Domains string
+
 	// SSL证书的HASH值
 	HashValue string
 
@@ -106,8 +109,68 @@ type ULBSSLSet struct {
 	// SSL证书的名字
 	SSLName string
 
+	// SSL证书来源，SSL证书来源，0代表证书来自于ULB平台，1代表证书来自于USSL平台
+	SSLSource int
+
 	// SSL证书类型，暂时只有 Pem 一种类型
 	SSLType string
+
+	// USSL证书平台的编号,只有当SSLSource为1时才出现
+	USSLId string
+}
+
+/*
+BindVServerInfo - 绑定安全策略的VServer信息
+*/
+type BindVServerInfo struct {
+
+	// VServer端口
+	Port int
+
+	// ULB的ID
+	ULBId string
+
+	// 绑定的VServerId
+	VServerId string
+
+	// 绑定的VServer名称
+	VServerName string
+}
+
+/*
+SecurityPolicy - 安全策略组
+*/
+type SecurityPolicy struct {
+
+	// 加密套件
+	SSLCiphers []string
+
+	// 安全策略ID
+	SecurityPolicyId string
+
+	// 安全策略名称
+	SecurityPolicyName string
+
+	// 安全策略类型 0：预定义 1：自定义
+	SecurityPolicyType int
+
+	// TLS最低版本
+	TLSVersion string
+
+	// 关联的监听
+	VServerSet []BindVServerInfo
+}
+
+/*
+TLSAndCiphers -
+*/
+type TLSAndCiphers struct {
+
+	// 加密套件
+	SSLCiphers []string
+
+	// TLS最低版本
+	TLSVersion string
 }
 
 /*
@@ -141,6 +204,60 @@ type PolicyBackendSet struct {
 
 	// "UNI"或者为空
 	SubResourceType string
+}
+
+/*
+ULBPolicySet - 内容转发详细列表
+*/
+type ULBPolicySet struct {
+
+	// 内容转发下rs的详细信息，参考PolicyBackendSet
+	BackendSet []PolicyBackendSet
+
+	// 内容转发规则中域名的匹配方式。枚举值：Regular，正则；Wildcard，泛域名
+	DomainMatchMode string
+
+	// 内容转发匹配字段;默认内容转发类型下为空。
+	Match string
+
+	// 内容转发Id，默认内容转发类型下为空。
+	PolicyId string
+
+	// 内容转发优先级，范围[1,9999]，数字越大优先级越高。默认内容转发规则下为0。
+	PolicyPriority int
+
+	// 内容类型，枚举值：Custom -> 客户自定义；Default -> 默认内容转发
+	PolicyType string
+
+	// 默认内容转发类型下返回当前rs总数
+	TotalCount int
+
+	// 内容转发匹配字段的类型，枚举值：Domain -> 域名；Path -> 路径； 默认内容转发类型下为空
+	Type string
+
+	// 所属VServerId
+	VServerId string
+}
+
+/*
+BindSecurityPolicy - VServer绑定的安全策略组信息
+*/
+type BindSecurityPolicy struct {
+
+	// 加密套件
+	SSLCiphers []string
+
+	// 安全策略组ID
+	SecurityPolicyId string
+
+	// 安全策略组名称
+	SecurityPolicyName string
+
+	// 安全策略类型 0：预定义 1：自定义
+	SecurityPolicyType int
+
+	// TLS最低版本
+	TLSVersion string
 }
 
 /*
@@ -187,38 +304,32 @@ type ULBBackendSet struct {
 	// 后端提供服务的资源所在的子网的ID
 	SubnetId string
 
-	//
+	// 后端服务器所在的VPC
+	VPCId string
+
+	// 后端RS权重（在加权轮询算法下有效）
 	Weight int
 }
 
 /*
-ULBPolicySet - 内容转发详细列表
+ULBIPSet - DescribeULB
 */
-type ULBPolicySet struct {
+type ULBIPSet struct {
 
-	// 内容转发下rs的详细信息，参考PolicyBackendSet
-	BackendSet []PolicyBackendSet
+	// 弹性IP的带宽值（暂未对外开放）
+	Bandwidth int
 
-	// 内容转发匹配字段;默认内容转发类型下为空。
-	Match string
+	// 弹性IP的带宽类型，枚举值：1 表示是共享带宽，0 普通带宽类型（暂未对外开放）
+	BandwidthType int
 
-	// 内容转发Id，默认内容转发类型下为空。
-	PolicyId string
+	// 弹性IP地址
+	EIP string
 
-	// 内容转发优先级，范围[1,9999]，数字越大优先级越高。默认内容转发规则下为0。
-	PolicyPriority int
+	// 弹性IP的ID
+	EIPId string
 
-	// 内容类型，枚举值：Custom -> 客户自定义；Default -> 默认内容转发
-	PolicyType string
-
-	// 默认内容转发类型下返回当前rs总数
-	TotalCount int
-
-	// 内容转发匹配字段的类型，枚举值：Domain -> 域名；Path -> 路径； 默认内容转发类型下为空
-	Type string
-
-	// 所属VServerId
-	VServerId string
+	// 弹性IP的运营商信息，枚举值为：  Bgp：BGP IP International：国际IP
+	OperatorName string
 }
 
 /*
@@ -234,6 +345,15 @@ type ULBVServerSet struct {
 
 	// 根据MonitorType确认； 当MonitorType为Port时，此字段无意义。当MonitorType为Path时，代表HTTP检查域名
 	Domain string
+
+	// 数据压缩开关，0:关闭 1:开启
+	EnableCompression int
+
+	// 0:关闭 1:开启，用于开启http2功能；默认值为0
+	EnableHTTP2 int
+
+	// 重定向端口，取值范围[0-65535]；默认值为0，代表关闭；仅HTTP协议支持开启重定向功能
+	ForwardPort int
 
 	// VServer服务端口
 	FrontendPort int
@@ -271,35 +391,20 @@ type ULBVServerSet struct {
 	// VServer绑定的SSL证书信息，具体结构见下方 ULBSSLSet。
 	SSLSet []ULBSSLSet
 
+	// VServer绑定的安全策略,具体结构见BindSecurityPolicy
+	SecurityPolicy BindSecurityPolicy
+
 	// VServer的运行状态。枚举值： 0 -> rs全部运行正常;1 -> rs全部运行异常；2 -> rs部分运行异常。
 	Status int
+
+	// 负载均衡实例的Id
+	ULBId string
 
 	// VServer实例的Id
 	VServerId string
 
 	// VServer实例的名字
 	VServerName string
-}
-
-/*
-ULBIPSet - DescribeULB
-*/
-type ULBIPSet struct {
-
-	// 弹性IP的带宽值（暂未对外开放）
-	Bandwidth int
-
-	// 弹性IP的带宽类型，枚举值：1 表示是共享带宽，0 普通带宽类型（暂未对外开放）
-	BandwidthType int
-
-	// 弹性IP地址
-	EIP string
-
-	// 弹性IP的ID
-	EIPId string
-
-	// 弹性IP的运营商信息，枚举值为：  Bgp：BGP IP International：国际IP
-	OperatorName string
 }
 
 /*

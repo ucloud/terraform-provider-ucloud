@@ -173,6 +173,10 @@ github.com/stretchr/testify v1.3.0 h1:TivCn/peBQ7UY8ooIcPgZFpTNSz0Q2U6UrFlUfqbe0
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/ucloud/ucloud-sdk-go v0.21.19 h1:WqD38oLDYxWS3s92DBKR99X3bKktuveTdSigcBynDT4=
 github.com/ucloud/ucloud-sdk-go v0.21.19/go.mod h1:dyLmFHmUfgb4RZKYQP9IArlvQ2pxzFthfhwxRzOEPIw=
+github.com/ucloud/ucloud-sdk-go v0.21.51 h1:L81eGOfRoEdu3rDeUfOW4PY6nnuqRbObZD/zRiak3B0=
+github.com/ucloud/ucloud-sdk-go v0.21.51/go.mod h1:dyLmFHmUfgb4RZKYQP9IArlvQ2pxzFthfhwxRzOEPIw=
+github.com/ucloud/ucloud-sdk-go v0.21.53 h1:8tlgdc80Xqe0E+jns9VC+9kT+wmkOzjCzmm96UI9hrw=
+github.com/ucloud/ucloud-sdk-go v0.21.53/go.mod h1:dyLmFHmUfgb4RZKYQP9IArlvQ2pxzFthfhwxRzOEPIw=
 github.com/ulikunitz/xz v0.5.5 h1:pFrO0lVpTBXLpYw+pnLj6TbvHuyjXMfjGeCwSqCVwok=
 github.com/ulikunitz/xz v0.5.5/go.mod h1:2bypXElzHzzJZwzH67Y6wb67pO62Rzfn7BSiF4ABRW8=
 github.com/vmihailenco/msgpack v3.3.3+incompatible/go.mod h1:fy3FlTQTDXWkZ7Bh6AcGMlsjHatGryHQYUTf1ShIgkk=

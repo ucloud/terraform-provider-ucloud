@@ -3,6 +3,24 @@
 package umem
 
 /*
+UDRedisProxyInfo - udredis代理信息
+*/
+type UDRedisProxyInfo struct {
+
+	// 代理id
+	ProxyId string
+
+	// 代理资源id
+	ResourceId string
+
+	// 代理状态
+	State string
+
+	// 代理ip
+	Vip string
+}
+
+/*
 UDRedisSlowlogSet - DescribeUDRedisSlowlog
 */
 type UDRedisSlowlogSet struct {
