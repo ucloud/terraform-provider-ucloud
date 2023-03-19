@@ -55,7 +55,7 @@ require (
 	github.com/posener/complete v1.2.1 // indirect
 	github.com/sirupsen/logrus v1.3.0 // indirect
 	github.com/spf13/afero v1.2.2 // indirect
-	github.com/ulikunitz/xz v0.5.5 // indirect
+	github.com/ulikunitz/xz v0.5.8 // indirect
 	github.com/vmihailenco/msgpack v4.0.1+incompatible // indirect
 	github.com/zclconf/go-cty v1.1.0 // indirect
 	github.com/zclconf/go-cty-yaml v1.0.1 // indirect
