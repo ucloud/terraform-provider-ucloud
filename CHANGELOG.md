@@ -1,3 +1,14 @@
+## 1.35.0 (2023-03-20)
+
+FEATURES:
+
+* **New Resource:** `ucloud_anti_ddos_instance`.
+* **New Resource:** `ucloud_anti_ddos_ip`.
+* **New Resource:** `ucloud_anti_ddos_allowed_domain`.
+* **New Resource:** `ucloud_anti_ddos_rule`.
+* **New Datasource:** `ucloud_anti_ddos_instances`.
+* **New Datasource:** `ucloud_anti_ddos_ips`.
+
 ## 1.34.1 (2023-02-27)
 
 BUG FIXES:
