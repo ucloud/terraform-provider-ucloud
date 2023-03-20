@@ -99,6 +99,8 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_ufs_volumes":           dataSourceUCloudUFSVolumes(),
 			"ucloud_us3_buckets":           dataSourceUCloudUS3Buckets(),
 			"ucloud_db_backups":            dataSourceUCloudDBBackups(),
+			"ucloud_anti_ddos_instances":   dataSourceUCloudAntiDDoSInstances(),
+			"ucloud_anti_ddos_ips":         dataSourceUCloudAntiDDoSIPs(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{

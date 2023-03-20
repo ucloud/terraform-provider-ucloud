@@ -9,6 +9,7 @@ import (
 func (client *UCloudClient) describeUADSById(id string) (*uads.ServiceInfo, error) {
 	req := client.uadsconn.NewDescribeNapServiceInfoRequest()
 	req.ResourceId = ucloud.String(id)
+	req.NapType = ucloud.Int(1)
 	req.ProjectId = nil
 	resp, err := client.uadsconn.DescribeNapServiceInfo(req)
 	if err != nil {
