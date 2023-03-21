@@ -1,3 +1,9 @@
+## 1.35.1 (2023-03-21)
+
+DOCS:
+
+* update documentation
+
 ## 1.35.0 (2023-03-20)
 
 FEATURES:
