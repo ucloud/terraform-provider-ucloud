@@ -8,7 +8,7 @@ description: |-
 
 # ucloud_anti_ddos_instance
 
-Provides an Anti-DDoS instance resource in Mainland China..
+Provides an Anti-DDoS instance resource in Mainland China.
 
 ## Example Usage
 

@@ -43,13 +43,13 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The ID of the resource ucloud_anti_ddos_ip, the format is `${instance_id}/${ip}`.
+* `id` - The ID of the resource ucloud_anti_ddos_ip, the format is `<instance_id>/<ip>`.
 * `status` - Status of the IP. Possible values are `Pending` and `Success`
 * `domain` - Corresponding domain of the IP.
 
 ## Import
 
-Anti-DDoS instance allowed domain can be imported using the `${instance_id}/${ip}`, e.g.
+Anti-DDoS instance allowed domain can be imported using the `<instance_id>/<ip>`, e.g.
 
 ```
 $ terraform import ucloud_anti_ddos_ip.example usecure_ghp-xxx/10.10.10.10

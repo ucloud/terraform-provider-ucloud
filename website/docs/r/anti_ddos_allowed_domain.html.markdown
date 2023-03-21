@@ -40,12 +40,12 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The ID of the resource ucloud_anti_ddos_allowed_domain, the format is `${instance_id}/${domain}`.
+* `id` - The ID of the resource ucloud_anti_ddos_allowed_domain, the format is `<instance_id>/<domain>`.
 * `status` -  The status of ucloud_anti_ddos_instance. Possible values are `Adding`, `Success`, `Deleting`, `Failure` and `Deleted`.
 
 ## Import
 
-Anti-DDoS instance allowed domain can be imported using the `${instance_id}/${domain}`, e.g.
+Anti-DDoS instance allowed domain can be imported using the `<instance_id>/<domain>`, e.g.
 
 ```
 $ terraform import ucloud_anti_ddos_allowed_domain.example usecure_ghp-xxx/ucloud.cn
