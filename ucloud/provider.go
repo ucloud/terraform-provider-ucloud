@@ -141,6 +141,10 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_anti_ddos_allowed_domain": resourceUCloudAntiDDoSAllowedDomain(),
 			"ucloud_anti_ddos_ip":             resourceUCloudAntiDDoSIP(),
 			"ucloud_anti_ddos_rule":           resourceUCloudAntiDDoSRule(),
+			"ucloud_iam_access_key":           resourceUCloudIAMAccessKey(),
+			"ucloud_iam_user":                 resourceUCloudIAMUser(),
+			"ucloud_iam_group":                resourceUCloudIAMGroup(),
+			"ucloud_iam_group_membership":     resourceUCloudIAMGroupMembership(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
