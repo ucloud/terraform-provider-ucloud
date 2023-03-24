@@ -207,6 +207,27 @@ type PolicyBackendSet struct {
 }
 
 /*
+BindSecurityPolicy - VServer绑定的安全策略组信息
+*/
+type BindSecurityPolicy struct {
+
+	// 加密套件
+	SSLCiphers []string
+
+	// 安全策略组ID
+	SecurityPolicyId string
+
+	// 安全策略组名称
+	SecurityPolicyName string
+
+	// 安全策略类型 0：预定义 1：自定义
+	SecurityPolicyType int
+
+	// TLS最低版本
+	TLSVersion string
+}
+
+/*
 ULBPolicySet - 内容转发详细列表
 */
 type ULBPolicySet struct {
@@ -237,27 +258,6 @@ type ULBPolicySet struct {
 
 	// 所属VServerId
 	VServerId string
-}
-
-/*
-BindSecurityPolicy - VServer绑定的安全策略组信息
-*/
-type BindSecurityPolicy struct {
-
-	// 加密套件
-	SSLCiphers []string
-
-	// 安全策略组ID
-	SecurityPolicyId string
-
-	// 安全策略组名称
-	SecurityPolicyName string
-
-	// 安全策略类型 0：预定义 1：自定义
-	SecurityPolicyType int
-
-	// TLS最低版本
-	TLSVersion string
 }
 
 /*
@@ -309,27 +309,6 @@ type ULBBackendSet struct {
 
 	// 后端RS权重（在加权轮询算法下有效）
 	Weight int
-}
-
-/*
-ULBIPSet - DescribeULB
-*/
-type ULBIPSet struct {
-
-	// 弹性IP的带宽值（暂未对外开放）
-	Bandwidth int
-
-	// 弹性IP的带宽类型，枚举值：1 表示是共享带宽，0 普通带宽类型（暂未对外开放）
-	BandwidthType int
-
-	// 弹性IP地址
-	EIP string
-
-	// 弹性IP的ID
-	EIPId string
-
-	// 弹性IP的运营商信息，枚举值为：  Bgp：BGP IP International：国际IP
-	OperatorName string
 }
 
 /*
@@ -408,6 +387,39 @@ type ULBVServerSet struct {
 }
 
 /*
+FirewallSet - ulb防火墙信息
+*/
+type FirewallSet struct {
+
+	// 防火墙ID
+	FirewallId string
+
+	// 防火墙名称
+	FirewallName string
+}
+
+/*
+ULBIPSet - DescribeULB
+*/
+type ULBIPSet struct {
+
+	// 弹性IP的带宽值（暂未对外开放）
+	Bandwidth int
+
+	// 弹性IP的带宽类型，枚举值：1 表示是共享带宽，0 普通带宽类型（暂未对外开放）
+	BandwidthType int
+
+	// 弹性IP地址
+	EIP string
+
+	// 弹性IP的ID
+	EIPId string
+
+	// 弹性IP的运营商信息，枚举值为：  Bgp：BGP IP International：国际IP
+	OperatorName string
+}
+
+/*
 LoggerSet - ulb日志信息
 */
 type LoggerSet struct {
@@ -420,18 +432,6 @@ type LoggerSet struct {
 
 	// bucket的token名称
 	TokenName string
-}
-
-/*
-FirewallSet - ulb防火墙信息
-*/
-type FirewallSet struct {
-
-	// 防火墙ID
-	FirewallId string
-
-	// 防火墙名称
-	FirewallName string
 }
 
 /*
@@ -483,6 +483,9 @@ type ULBSet struct {
 
 	// ULB的详细信息列表（废弃）
 	Resource []string `deprecated:"true"`
+
+	// ULB后向代理IP，仅当有代理IP时返回否
+	SnatIps []string
 
 	// ULB 为 InnerMode 时，ULB 所属的子网ID，默认为空
 	SubnetId string
@@ -550,6 +553,9 @@ type ULBSimpleSet struct {
 	// 负载均衡的备注
 	Remark string
 
+	// ULB后向代理IP，仅当有代理IP时返回否
+	SnatIps []string
+
 	// ULB 为 InnerMode 时，ULB 所属的子网ID
 	SubnetId string
 
@@ -567,4 +573,7 @@ type ULBSimpleSet struct {
 
 	// ulb下vserver数量
 	VServerCount int
+
+	// WAF功能状态，枚举类型：Unavailable：无法创建WAF；NoWAF：未绑定WAF；Intranet：内网回源Waf；Extranet：外网回源Waf
+	WAFMode string
 }
