@@ -120,7 +120,7 @@ func dataSourceUCloudIAMUsersRead(d *schema.ResourceData, meta interface{}) erro
 	for _, u := range users {
 		loginProfile, err := client.describeLoginProfile(u.UserName)
 		if err != nil {
-			return fmt.Errorf("error on reading user list when get login profile %q, %s", d.Id(), err)
+			return fmt.Errorf("error on reading user list when get login profile, %s", err)
 		}
 		ids = append(ids, u.UserName)
 		data = append(data, map[string]interface{}{
