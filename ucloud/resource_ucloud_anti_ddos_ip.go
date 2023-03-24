@@ -114,7 +114,14 @@ func resourceUCloudAntiDDoSIPRead(d *schema.ResourceData, meta interface{}) erro
 	}
 	instanceId := items[0]
 	ip := items[1]
-
+	_, err := client.describeUADSById(instanceId)
+	if err != nil {
+		if isNotFoundError(err) {
+			d.SetId("")
+			return nil
+		}
+		return fmt.Errorf("error on reading uads ip %s of %s, %s", ip, instanceId, err)
+	}
 	ipInfo, err := client.describeUADSBGPServiceIP(instanceId, ip)
 
 	if err != nil {

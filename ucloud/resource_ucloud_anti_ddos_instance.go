@@ -2,6 +2,7 @@ package ucloud
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"strconv"
 	"time"
 
@@ -25,40 +26,58 @@ func resourceUCloudAntiDDoSInstance() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validateAntiDDoSInstanceName,
 			},
 
 			"area": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"EastChina",
+					"NorthChina",
+				}, false),
 			},
 
 			"data_center": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"Zaozhuang",
+					"Yangzhou",
+					"Taizhou",
+					"Shijiazhuang",
+				}, false),
 			},
 
 			"bandwidth": {
-				Type:     schema.TypeInt,
-				Required: true,
+				Type:         schema.TypeInt,
+				Required:     true,
+				ValidateFunc: validation.IntAtLeast(50),
 			},
 
 			"base_defence_value": {
-				Type:     schema.TypeInt,
-				Required: true,
+				Type:         schema.TypeInt,
+				Required:     true,
+				ValidateFunc: validation.IntAtLeast(30),
 			},
 
 			"max_defence_value": {
-				Type:     schema.TypeInt,
-				Required: true,
+				Type:         schema.TypeInt,
+				Required:     true,
+				ValidateFunc: validation.IntAtLeast(30),
 			},
 			"charge_type": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"month",
+					"year",
+				}, false),
 			},
 			"duration": {
 				Type:         schema.TypeInt,
@@ -66,11 +85,29 @@ func resourceUCloudAntiDDoSInstance() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validateDuration,
 			},
+			"create_time": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"expire_time": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
 
 func resourceUCloudAntiDDoSInstanceCreate(d *schema.ResourceData, meta interface{}) error {
+	err := validateAntiDDoSInstance(d)
+	if err != nil {
+		return err
+	}
 	client := meta.(*UCloudClient)
 	conn := client.uadsconn
 
@@ -118,7 +155,9 @@ func resourceUCloudAntiDDoSInstanceUpdate(d *schema.ResourceData, meta interface
 	client := meta.(*UCloudClient)
 	conn := client.uadsconn
 	d.Partial(true)
-
+	if err := validateAntiDDoSInstance(d); err != nil {
+		return err
+	}
 	if d.HasChange("name") && !d.IsNewResource() {
 		req := conn.NewModifyHighProtectGameServiceRequest()
 		req.ResourceId = ucloud.String(d.Id())
@@ -176,6 +215,10 @@ func resourceUCloudAntiDDoSInstanceRead(d *schema.ResourceData, meta interface{}
 	d.Set("bandwidth", uadsServiceInfo.SrcBandwidth)
 	d.Set("base_defence_value", uadsServiceInfo.DefenceDDosBaseFlowArr[0])
 	d.Set("max_defence_value", uadsServiceInfo.DefenceDDosMaxFlowArr[0])
+	d.Set("status", uadsServiceInfo.DefenceStatus)
+	d.Set("create_time", timestampToString(uadsServiceInfo.CreateTime))
+	d.Set("expire_time", timestampToString(uadsServiceInfo.ExpiredTime))
+
 	return nil
 }
 
@@ -222,4 +265,13 @@ func antiDDoSInstanceWaitForState(client *UCloudClient, id string) *resource.Sta
 			return uadsInfo, statusInitialized, nil
 		},
 	}
+}
+
+func validateAntiDDoSInstance(d *schema.ResourceData) error {
+	baseDefenceValue := d.Get("base_defence_value").(int)
+	maxDefenceValue := d.Get("max_defence_value").(int)
+	if maxDefenceValue < baseDefenceValue {
+		return fmt.Errorf("max_defence_value %v cannot be less than base_defence_value %v", maxDefenceValue, baseDefenceValue)
+	}
+	return nil
 }

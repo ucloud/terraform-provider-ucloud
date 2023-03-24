@@ -213,6 +213,11 @@ func validateDBInstanceType(v interface{}, k string) (ws []string, errors []erro
 	return
 }
 
+var validateAntiDDoSInstanceName = validation.StringMatch(
+	regexp.MustCompile(`^[A-Za-z0-9\p{Han}-_]{1,63}$`),
+	"expected value to be 6 - 63 characters and only support chinese, english, numbers, '-', '_'",
+)
+
 func validateMod(num int) schema.SchemaValidateFunc {
 	return func(v interface{}, k string) (ws []string, errors []error) {
 		value := v.(int)
@@ -333,3 +338,5 @@ func validateBaseUrl(v interface{}, k string) (ws []string, errors []error) {
 
 	return
 }
+
+var validateToaID = validation.IntBetween(0, 254)

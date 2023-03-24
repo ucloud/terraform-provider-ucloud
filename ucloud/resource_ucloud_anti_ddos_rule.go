@@ -39,7 +39,7 @@ func resourceUCloudAntiDDoSRule() *schema.Resource {
 			},
 
 			"port": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				ForceNew: true,
 				Optional: true,
 			},
@@ -69,15 +69,16 @@ func resourceUCloudAntiDDoSRule() *schema.Resource {
 			},
 
 			"toa_id": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  200,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      200,
+				ValidateFunc: validateToaID,
 			},
 
 			"real_server_detection": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  200,
+				Default:  false,
 			},
 
 			"backup_server": {
@@ -91,7 +92,7 @@ func resourceUCloudAntiDDoSRule() *schema.Resource {
 						},
 
 						"port": {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeString,
 							Optional: true,
 						},
 					},
@@ -162,11 +163,11 @@ func resourceUCloudAntiDDoSRuleCreate(d *schema.ResourceData, meta interface{}) 
 		} else {
 			backupServerMap := backupServer.(map[string]interface{})
 			req.BackupIP = ucloud.String(backupServerMap["ip"].(string))
-			if port, portOk := backupServerMap["port"]; portOk {
-				req.BackupPort = ucloud.Int(port.(int))
-			} else {
-				req.BackupPort = ucloud.Int(0)
+			backupPort, err := getAntiDDoSRuleBackupServerPort(backupServerMap)
+			if err != nil {
+				return fmt.Errorf("fail to get backup server port, %v", err)
 			}
+			req.BackupPort = ucloud.Int(backupPort)
 		}
 	} else {
 		req.SourceDetect = ucloud.Int(0)
@@ -253,11 +254,11 @@ func resourceUCloudAntiDDoSRuleUpdate(d *schema.ResourceData, meta interface{}) 
 			} else {
 				backupServerMap := backupServer.(map[string]interface{})
 				req.BackupIP = ucloud.String(backupServerMap["ip"].(string))
-				if port, portOk := backupServerMap["port"]; portOk {
-					req.BackupPort = ucloud.Int(port.(int))
-				} else {
-					req.BackupPort = ucloud.Int(0)
+				backupPort, err := getAntiDDoSRuleBackupServerPort(backupServerMap)
+				if err != nil {
+					return fmt.Errorf("fail to get backup server port, %v", err)
 				}
+				req.BackupPort = ucloud.Int(backupPort)
 			}
 		} else {
 			req.SourceDetect = ucloud.Int(0)
@@ -322,7 +323,7 @@ func resourceUCloudAntiDDoSRuleRead(d *schema.ResourceData, meta interface{}) er
 	d.Set("toa_id", toaId)
 	if ruleInfo.SourceDetect != 0 {
 		d.Set("real_server_detection", true)
-		d.Set("backup_server", map[string]interface{}{"ip": ruleInfo.BackupIP, "port": ruleInfo.BackupPort})
+		d.Set("backup_server", map[string]interface{}{"ip": ruleInfo.BackupIP, "port": strconv.Itoa(ruleInfo.BackupPort)})
 	} else {
 		d.Set("real_server_detection", false)
 	}
@@ -386,4 +387,23 @@ func antiDDoSRuleWaitForState(client *UCloudClient, id string, ruleIndex int) *r
 			}
 		},
 	}
+}
+
+func getAntiDDoSRuleBackupServerPort(backupServerMap map[string]interface{}) (int, error) {
+	var backupPort int
+	if port, portOk := backupServerMap["port"]; portOk {
+		switch p := port.(type) {
+		case string:
+			v, err := strconv.Atoi(p)
+			if err != nil {
+				return 0, fmt.Errorf("fail to parse port, %v", err)
+			}
+			backupPort = v
+		case int:
+			backupPort = p
+		}
+	} else {
+		backupPort = 0
+	}
+	return backupPort, nil
 }
