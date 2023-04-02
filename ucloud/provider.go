@@ -101,6 +101,8 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_db_backups":            dataSourceUCloudDBBackups(),
 			"ucloud_anti_ddos_instances":   dataSourceUCloudAntiDDoSInstances(),
 			"ucloud_anti_ddos_ips":         dataSourceUCloudAntiDDoSIPs(),
+			"ucloud_iam_users":             dataSourceUCloudIAMUsers(),
+			"ucloud_iam_groups":            dataSourceUCloudIAMGroups(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -139,6 +141,10 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_anti_ddos_allowed_domain": resourceUCloudAntiDDoSAllowedDomain(),
 			"ucloud_anti_ddos_ip":             resourceUCloudAntiDDoSIP(),
 			"ucloud_anti_ddos_rule":           resourceUCloudAntiDDoSRule(),
+			"ucloud_iam_access_key":           resourceUCloudIAMAccessKey(),
+			"ucloud_iam_user":                 resourceUCloudIAMUser(),
+			"ucloud_iam_group":                resourceUCloudIAMGroup(),
+			"ucloud_iam_group_membership":     resourceUCloudIAMGroupMembership(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

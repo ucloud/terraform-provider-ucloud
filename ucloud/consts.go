@@ -110,6 +110,12 @@ const (
 	defaultPasswordSpe = "-_"
 )
 
+const (
+	iamStatusActive   = "Active"
+	iamStatusInactive = "Inactive"
+	iamStatusFrozen   = "Frozen"
+)
+
 // listenerStatusCvt is used to covert int to string for status after read lb listener
 var listenerStatusCvt = newIntConverter(map[int]string{
 	0: "allNormal",

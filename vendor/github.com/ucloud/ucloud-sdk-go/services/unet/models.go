@@ -3,14 +3,14 @@
 package unet
 
 /*
-UnetEIPAddrSet - DescribeEIP
+UnetEIPAddrSet - AllocateEIP
 */
 type UnetEIPAddrSet struct {
 
 	// IP地址
 	IP string
 
-	// 运营商信息如: 电信: Telecom, 联通: Unicom, 国际: International, Duplet: 双线IP（电信+联通), BGP: Bgp
+	// 运营商信息如: 国际: International, BGP: BGP
 	OperatorName string
 }
 
@@ -78,6 +78,21 @@ type UnetBandwidthUsageEIPSet struct {
 }
 
 /*
+EIPBinding - EIP绑定内网IP关系数据
+*/
+type EIPBinding struct {
+
+	// 外网ip
+	EIP string
+
+	// 内网ip
+	PrivateIP string
+
+	// 内网ip类型：PrimaryIP（默认）、SecondaryIP（非默认）
+	PrivateIPType string
+}
+
+/*
 ShareBandwidthSet - DescribeEIP
 */
 type ShareBandwidthSet struct {
@@ -141,6 +156,9 @@ type UnetEIPSet struct {
 
 	// 弹性IP的详细信息列表, 具体结构见下方 UnetEIPAddrSet
 	EIPAddr []UnetEIPAddrSet
+
+	// EIP绑定内网IP关系数据
+	EIPBinding EIPBinding
 
 	// 弹性IP的资源ID
 	EIPId string
