@@ -289,7 +289,7 @@ github.com/sirupsen/logrus
 ## explicit
 github.com/spf13/afero
 github.com/spf13/afero/mem
-# github.com/ucloud/ucloud-sdk-go v0.21.58
+# github.com/ucloud/ucloud-sdk-go v0.21.60
 ## explicit; go 1.13
 github.com/ucloud/ucloud-sdk-go/external
 github.com/ucloud/ucloud-sdk-go/private/protocol/http

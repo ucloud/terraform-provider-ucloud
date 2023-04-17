@@ -32,7 +32,7 @@ func dataSourceUCloudIAMGroups() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"comments": {
+						"comment": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -85,8 +85,8 @@ func dataSourceUCloudIAMGroupsRead(d *schema.ResourceData, meta interface{}) err
 	for _, g := range groups {
 		ids = append(ids, g.GroupName)
 		data = append(data, map[string]interface{}{
-			"name":     g.GroupName,
-			"comments": g.Description,
+			"name":    g.GroupName,
+			"comment": g.Description,
 		})
 	}
 

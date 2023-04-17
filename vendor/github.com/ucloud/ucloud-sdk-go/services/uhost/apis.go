@@ -232,12 +232,6 @@ type UHostDiskCustomBackup struct {
 }
 
 /*
-CreateUHostInstanceParamSecGroupId is request schema for complex param
-*/
-type CreateUHostInstanceParamSecGroupId struct {
-}
-
-/*
 CreateUHostInstanceParamNetworkInterface is request schema for complex param
 */
 type CreateUHostInstanceParamNetworkInterface struct {
@@ -295,6 +289,12 @@ type UHostDisk struct {
 
 	// 磁盘类型。请参考[[api:uhost-api:disk_type|磁盘类型]]。
 	Type *string `required:"true"`
+}
+
+/*
+CreateUHostInstanceParamSecGroupId is request schema for complex param
+*/
+type CreateUHostInstanceParamSecGroupId struct {
 }
 
 // CreateUHostInstanceRequest is request schema for CreateUHostInstance action

@@ -51,27 +51,12 @@ type Group struct {
 }
 
 /*
-Customize - IAM策略版本信息
-*/
-type Customize struct {
-
-	// 版本号
-	Version string
-
-	// 版本描述
-	VersionDescription string
-}
-
-/*
 IAMPolicy - 获取IAM权限策略详情
 */
 type IAMPolicy struct {
 
 	// IAM权限策略创建时间
 	CreatedAt int
-
-	// IAM权限策略版本信息
-	Customize Customize
 
 	// IAM权限策略描述
 	Description string
@@ -141,6 +126,33 @@ type Entity struct {
 
 	// 实体名称
 	EntityName string
+}
+
+/*
+Policy - 权限策略
+*/
+type Policy struct {
+
+	// 策略被添加到用户组时的时间戳
+	AttachedAt int
+
+	// 创建时间
+	CreatedAt int
+
+	// 描述
+	Description string
+
+	// 权限策略名称
+	PolicyName string
+
+	// 策略URN
+	PolicyURN string
+
+	// 项目ID
+	ProjectID string
+
+	// 应用范围（ScopeRequired:项目级, ScopeEmpty:全局级, ScopeUnrestricted:项目级/全局级）
+	Scope string
 }
 
 /*

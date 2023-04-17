@@ -15,14 +15,16 @@ func resourceUCloudIAMGroup() *schema.Resource {
 		Update: resourceUCloudIAMGroupUpdate,
 		Read:   resourceUCloudIAMGroupRead,
 		Delete: resourceUCloudIAMGroupDelete,
-
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"comments": {
+			"comment": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -36,7 +38,7 @@ func resourceUCloudIAMGroupCreate(d *schema.ResourceData, meta interface{}) erro
 
 	req := conn.NewCreateGroupRequest()
 	req.GroupName = ucloud.String(d.Get("name").(string))
-	if val, ok := d.GetOk("comments"); ok {
+	if val, ok := d.GetOk("comment"); ok {
 		req.Description = ucloud.String(val.(string))
 	}
 	_, err := conn.CreateGroup(req)
@@ -54,8 +56,8 @@ func resourceUCloudIAMGroupUpdate(d *schema.ResourceData, meta interface{}) erro
 	req := conn.NewUpdateGroupRequest()
 	req.GroupName = ucloud.String(d.Get("name").(string))
 
-	if d.HasChange("comments") {
-		req.Description = ucloud.String(d.Get("comments").(string))
+	if d.HasChange("comment") {
+		req.Description = ucloud.String(d.Get("comment").(string))
 		_, err := conn.UpdateGroup(req)
 		if err != nil {
 			return fmt.Errorf("error on update group, %s", err)
@@ -76,7 +78,7 @@ func resourceUCloudIAMGroupRead(d *schema.ResourceData, meta interface{}) error 
 		return fmt.Errorf("error on reading group %q, %s", d.Id(), err)
 	}
 	d.Set("name", resp.GroupName)
-	d.Set("comments", resp.Description)
+	d.Set("comment", resp.Description)
 	return nil
 }
 

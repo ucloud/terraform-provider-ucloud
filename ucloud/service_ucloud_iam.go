@@ -4,6 +4,7 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/services/iam"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 	"strconv"
+	"strings"
 )
 
 func (client *UCloudClient) describeAccessKey(userName, accessKeyID string) (*iam.AccessKey, error) {
@@ -30,6 +31,38 @@ func (client *UCloudClient) describeAccessKey(userName, accessKeyID string) (*ia
 		}
 	}
 
+	return nil, newNotFoundError(getNotFoundMessage("access_key", accessKeyID))
+}
+
+func (client *UCloudClient) describeAccessKeyByID(accessKeyID string) (*iam.AccessKey, error) {
+	limit := 100
+	offset := 0
+	for {
+		listUsersReq := client.iamconn.NewListUsersRequest()
+		listUsersReq.Limit = ucloud.String(strconv.Itoa(limit))
+		listUsersReq.Offset = ucloud.String(strconv.Itoa(offset))
+		listUsersResp, err := client.iamconn.ListUsers(listUsersReq)
+		if err != nil {
+			return nil, err
+		}
+		if len(listUsersResp.Users) < 1 {
+			break
+		}
+		for _, user := range listUsersResp.Users {
+			accessKey, err := client.describeAccessKey(user.UserName, accessKeyID)
+			if isNotFoundError(err) {
+				continue
+			}
+			if err != nil {
+				return nil, err
+			}
+			return accessKey, nil
+		}
+		if len(listUsersResp.Users) < limit {
+			break
+		}
+		offset = offset + limit
+	}
 	return nil, newNotFoundError(getNotFoundMessage("access_key", accessKeyID))
 }
 
@@ -98,9 +131,7 @@ func (client *UCloudClient) describeGroupMembership(group string) ([]iam.UserFor
 		}
 		offset = offset + limit
 	}
-	if len(users) == 0 {
-		return nil, newNotFoundError(getNotFoundMessage("group_membership", group))
-	}
+
 	return users, nil
 }
 
@@ -138,4 +169,139 @@ func (client *UCloudClient) describeLoginProfile(name string) (*iam.LoginProfile
 	}
 	//loginProfile
 	return &resp.LoginProfile, nil
+}
+
+func (client *UCloudClient) describeIAMProjectById(id string) (*iam.Project, error) {
+	limit := 100
+	for offset := 0; ; offset += limit {
+		req := client.iamconn.NewListProjectsRequest()
+		req.Limit = ucloud.String(strconv.Itoa(limit))
+		req.Offset = ucloud.String(strconv.Itoa(offset))
+		resp, err := client.iamconn.ListProjects(req)
+		if err != nil {
+			return nil, err
+		}
+		if resp == nil || len(resp.Projects) < 1 {
+			return nil, newNotFoundError(getNotFoundMessage("iam", id))
+		}
+		for _, p := range resp.Projects {
+			if p.ProjectID == id {
+				return &p, nil
+			}
+		}
+	}
+}
+
+func (client *UCloudClient) listIAMProject() ([]iam.Project, error) {
+	limit := 100
+	projects := make([]iam.Project, 0)
+	for offset := 0; ; offset += limit {
+		req := client.iamconn.NewListProjectsRequest()
+		req.Limit = ucloud.String(strconv.Itoa(limit))
+		req.Offset = ucloud.String(strconv.Itoa(offset))
+		resp, err := client.iamconn.ListProjects(req)
+		if err != nil {
+			return nil, err
+		}
+		if resp == nil || len(resp.Projects) < 1 {
+			return projects, nil
+		}
+		projects = append(projects, resp.Projects...)
+	}
+}
+
+func (client *UCloudClient) describeIAMPolicyByName(name string, owner string) (*iam.IAMPolicy, error) {
+	limit := 100
+	for offset := 0; ; offset += limit {
+		req := client.iamconn.NewListPoliciesRequest()
+		req.Limit = ucloud.String(strconv.Itoa(limit))
+		req.Offset = ucloud.String(strconv.Itoa(offset))
+		req.Owner = ucloud.String(owner)
+		resp, err := client.iamconn.ListPolicies(req)
+		if err != nil {
+			return nil, err
+		}
+		if resp == nil || len(resp.Policies) < 1 {
+			return nil, newNotFoundError(getNotFoundMessage("iam", name))
+		}
+		for _, p := range resp.Policies {
+			if p.PolicyName == name {
+				return client.describeIAMPolicyByURN(p.PolicyURN)
+			}
+		}
+	}
+}
+
+func (client *UCloudClient) describeIAMPolicyByURN(urn string) (*iam.IAMPolicy, error) {
+	req := client.iamconn.NewGetIAMPolicyRequest()
+	req.PolicyURN = ucloud.String(urn)
+	resp, err := client.iamconn.GetIAMPolicy(req)
+	if err != nil {
+		if resp != nil && resp.RetCode == 11217 {
+			return nil, newNotFoundError(getNotFoundMessage("iam", urn))
+		}
+		return nil, err
+	}
+
+	return &resp.Policy, nil
+}
+
+func (client *UCloudClient) describeIAMUserPolicyAttachment(userName string, policyURN string, projectID string) (*iam.Policy, error) {
+	limit := 100
+	for offset := 0; ; offset += limit {
+		req := client.iamconn.NewListPoliciesForUserRequest()
+		req.Limit = ucloud.String(strconv.Itoa(limit))
+		req.Offset = ucloud.String(strconv.Itoa(offset))
+		req.UserName = ucloud.String(userName)
+		if projectID != "" {
+			req.ProjectId = nil
+			req.ProjectID = ucloud.String(projectID)
+			req.Scope = ucloud.String("Specified")
+		} else {
+			req.Scope = ucloud.String("Unspecified")
+		}
+
+		resp, err := client.iamconn.ListPoliciesForUser(req)
+		if err != nil {
+			return nil, err
+		}
+		if resp == nil || len(resp.Policies) < 1 {
+			return nil, newNotFoundError(getNotFoundMessage("iam user policy attachment", strings.Join([]string{userName, policyURN}, "/")))
+		}
+		for _, p := range resp.Policies {
+			if p.PolicyURN == policyURN {
+				return &p, nil
+			}
+		}
+	}
+}
+
+func (client *UCloudClient) describeIAMGroupPolicyAttachment(groupName string, policyURN string, projectID string) (*iam.Policy, error) {
+	limit := 100
+	for offset := 0; ; offset += limit {
+		req := client.iamconn.NewListPoliciesForGroupRequest()
+		req.Limit = ucloud.String(strconv.Itoa(limit))
+		req.Offset = ucloud.String(strconv.Itoa(offset))
+		req.GroupName = ucloud.String(groupName)
+		if projectID != "" {
+			req.ProjectId = nil
+			req.ProjectID = ucloud.String(projectID)
+			req.Scope = ucloud.String("Specified")
+		} else {
+			req.Scope = ucloud.String("Unspecified")
+		}
+
+		resp, err := client.iamconn.ListPoliciesForGroup(req)
+		if err != nil {
+			return nil, err
+		}
+		if resp == nil || len(resp.Policies) < 1 {
+			return nil, newNotFoundError(getNotFoundMessage("iam group policy attachment", strings.Join([]string{groupName, policyURN}, "/")))
+		}
+		for _, p := range resp.Policies {
+			if p.PolicyURN == policyURN {
+				return &p, nil
+			}
+		}
+	}
 }

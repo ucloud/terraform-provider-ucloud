@@ -312,6 +312,27 @@ type ULBBackendSet struct {
 }
 
 /*
+ULBIPSet - DescribeULB
+*/
+type ULBIPSet struct {
+
+	// 弹性IP的带宽值（暂未对外开放）
+	Bandwidth int
+
+	// 弹性IP的带宽类型，枚举值：1 表示是共享带宽，0 普通带宽类型（暂未对外开放）
+	BandwidthType int
+
+	// 弹性IP地址
+	EIP string
+
+	// 弹性IP的ID
+	EIPId string
+
+	// 弹性IP的运营商信息，枚举值为：  Bgp：BGP IP International：国际IP
+	OperatorName string
+}
+
+/*
 ULBVServerSet - DescribeULB
 */
 type ULBVServerSet struct {
@@ -387,39 +408,6 @@ type ULBVServerSet struct {
 }
 
 /*
-FirewallSet - ulb防火墙信息
-*/
-type FirewallSet struct {
-
-	// 防火墙ID
-	FirewallId string
-
-	// 防火墙名称
-	FirewallName string
-}
-
-/*
-ULBIPSet - DescribeULB
-*/
-type ULBIPSet struct {
-
-	// 弹性IP的带宽值（暂未对外开放）
-	Bandwidth int
-
-	// 弹性IP的带宽类型，枚举值：1 表示是共享带宽，0 普通带宽类型（暂未对外开放）
-	BandwidthType int
-
-	// 弹性IP地址
-	EIP string
-
-	// 弹性IP的ID
-	EIPId string
-
-	// 弹性IP的运营商信息，枚举值为：  Bgp：BGP IP International：国际IP
-	OperatorName string
-}
-
-/*
 LoggerSet - ulb日志信息
 */
 type LoggerSet struct {
@@ -432,6 +420,18 @@ type LoggerSet struct {
 
 	// bucket的token名称
 	TokenName string
+}
+
+/*
+FirewallSet - ulb防火墙信息
+*/
+type FirewallSet struct {
+
+	// 防火墙ID
+	FirewallId string
+
+	// 防火墙名称
+	FirewallName string
 }
 
 /*

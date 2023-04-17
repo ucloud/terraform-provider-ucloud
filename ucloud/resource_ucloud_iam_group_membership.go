@@ -14,7 +14,9 @@ func resourceUCloudIAMGroupMembership() *schema.Resource {
 		Update: resourceUCloudIAMGroupMembershipUpdate,
 		Read:   resourceUCloudIAMGroupMembershipRead,
 		Delete: resourceUCloudIAMGroupMembershipDelete,
-
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 		Schema: map[string]*schema.Schema{
 			"group_name": {
 				Type:     schema.TypeString,
@@ -110,12 +112,16 @@ func resourceUCloudIAMGroupMembershipDelete(d *schema.ResourceData, meta interfa
 			return resource.NonRetryableError(fmt.Errorf("error on remove users from group %q, %s", d.Id(), err))
 		}
 
-		_, err := client.describeGroupMembership(d.Id())
+		users, err := client.describeGroupMembership(d.Id())
 		if err != nil {
 			if isNotFoundError(err) {
 				return nil
 			}
 			return resource.NonRetryableError(fmt.Errorf("error on reading group membership when deleting %q, %s", d.Id(), err))
+		}
+
+		if len(users) == 0 {
+			return nil
 		}
 
 		return resource.RetryableError(fmt.Errorf("the specified group membership %q has not been deleted due to unknown error", d.Id()))

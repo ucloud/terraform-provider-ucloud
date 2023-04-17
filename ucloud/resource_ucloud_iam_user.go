@@ -2,6 +2,7 @@ package ucloud
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"strings"
 	"time"
 
@@ -16,11 +17,14 @@ func resourceUCloudIAMUser() *schema.Resource {
 		Update: resourceUCloudIAMUserUpdate,
 		Read:   resourceUCloudIAMUserRead,
 		Delete: resourceUCloudIAMUserDelete,
-
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"display_name": {
 				Type:     schema.TypeString,
@@ -29,6 +33,7 @@ func resourceUCloudIAMUser() *schema.Resource {
 			"email": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"is_frozen": {
 				Type:     schema.TypeBool,
@@ -126,26 +131,28 @@ func resourceUCloudIAMUserUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	req := conn.NewUpdateUserRequest()
-	req.UserName = ucloud.String(d.Id())
-	if d.HasChange("name") {
-		req.NewUserName = ucloud.String(d.Get("name").(string))
-	}
-	if d.HasChange("display_name") {
-		req.DisplayName = ucloud.String(d.Get("display_name").(string))
-	}
-	if d.HasChange("is_frozen") {
-		if d.Get("is_frozen").(bool) {
-			req.Status = ucloud.String(iamStatusFrozen)
-		} else {
-			req.Status = ucloud.String(iamStatusActive)
+	if d.HasChanges("display_name", "is_frozen") {
+		req := conn.NewUpdateUserRequest()
+		req.UserName = ucloud.String(d.Id())
+		if d.HasChange("display_name") {
+			displayName := d.Get("display_name").(string)
+			if displayName == "" {
+				return errors.New("display_name cannot be updated to empty string")
+			}
+			req.DisplayName = ucloud.String(displayName)
+		}
+		if d.HasChange("is_frozen") {
+			if d.Get("is_frozen").(bool) {
+				req.Status = ucloud.String(iamStatusFrozen)
+			} else {
+				req.Status = ucloud.String(iamStatusActive)
+			}
+		}
+		_, err := conn.UpdateUser(req)
+		if err != nil {
+			return fmt.Errorf("error on update user, %s", err)
 		}
 	}
-	_, err := conn.UpdateUser(req)
-	if err != nil {
-		return fmt.Errorf("error on update user, %s", err)
-	}
-	d.SetId(d.Get("name").(string))
 	return resourceUCloudIAMUserRead(d, meta)
 }
 
