@@ -109,7 +109,7 @@ type ServiceInfo struct {
 	// 套餐最大防护组
 	DefenceDDosMaxFlowArr []int
 
-	// 防护状态
+	// 防护状态，Started：正常、Stopped：关闭、Expired：过期
 	DefenceStatus string
 
 	// 防护类型

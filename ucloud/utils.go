@@ -59,6 +59,10 @@ func hashStringArray(arr []string) string {
 	return fmt.Sprintf("%d", hashcode.String(buf.String()))
 }
 
+func hashString(s string) string {
+	return fmt.Sprintf("%d", hashcode.String(s))
+}
+
 func getAbsPath(filePath string) (string, error) {
 	if strings.HasPrefix(filePath, "~") {
 		usr, err := user.Current()

@@ -207,6 +207,27 @@ type PolicyBackendSet struct {
 }
 
 /*
+BindSecurityPolicy - VServer绑定的安全策略组信息
+*/
+type BindSecurityPolicy struct {
+
+	// 加密套件
+	SSLCiphers []string
+
+	// 安全策略组ID
+	SecurityPolicyId string
+
+	// 安全策略组名称
+	SecurityPolicyName string
+
+	// 安全策略类型 0：预定义 1：自定义
+	SecurityPolicyType int
+
+	// TLS最低版本
+	TLSVersion string
+}
+
+/*
 ULBPolicySet - 内容转发详细列表
 */
 type ULBPolicySet struct {
@@ -237,27 +258,6 @@ type ULBPolicySet struct {
 
 	// 所属VServerId
 	VServerId string
-}
-
-/*
-BindSecurityPolicy - VServer绑定的安全策略组信息
-*/
-type BindSecurityPolicy struct {
-
-	// 加密套件
-	SSLCiphers []string
-
-	// 安全策略组ID
-	SecurityPolicyId string
-
-	// 安全策略组名称
-	SecurityPolicyName string
-
-	// 安全策略类型 0：预定义 1：自定义
-	SecurityPolicyType int
-
-	// TLS最低版本
-	TLSVersion string
 }
 
 /*
@@ -484,6 +484,9 @@ type ULBSet struct {
 	// ULB的详细信息列表（废弃）
 	Resource []string `deprecated:"true"`
 
+	// ULB后向代理IP，仅当有代理IP时返回否
+	SnatIps []string
+
 	// ULB 为 InnerMode 时，ULB 所属的子网ID，默认为空
 	SubnetId string
 
@@ -550,6 +553,9 @@ type ULBSimpleSet struct {
 	// 负载均衡的备注
 	Remark string
 
+	// ULB后向代理IP，仅当有代理IP时返回否
+	SnatIps []string
+
 	// ULB 为 InnerMode 时，ULB 所属的子网ID
 	SubnetId string
 
@@ -567,4 +573,7 @@ type ULBSimpleSet struct {
 
 	// ulb下vserver数量
 	VServerCount int
+
+	// WAF功能状态，枚举类型：Unavailable：无法创建WAF；NoWAF：未绑定WAF；Intranet：内网回源Waf；Extranet：外网回源Waf
+	WAFMode string
 }
