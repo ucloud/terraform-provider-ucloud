@@ -1,3 +1,21 @@
+## 1.36.0 (2023-04-17)
+
+FEATURES:
+
+* **New Resource:** `ucloud_iam_access_key`.
+* **New Resource:** `ucloud_iam_group`.
+* **New Resource:** `ucloud_iam_user`.
+* **New Resource:** `ucloud_iam_group_membership`.
+* **New Resource:** `ucloud_iam_project`.
+* **New Resource:** `ucloud_iam_policy`.
+* **New Resource:** `ucloud_iam_user_policy_attachment`.
+* **New Resource:** `ucloud_iam_group_policy_attachment`.
+* **New Datasource:** `ucloud_iam_groups`.
+* **New Datasource:** `ucloud_iam_users`.
+* **New Datasource:** `ucloud_iam_projects`.
+* **New Datasource:** `ucloud_iam_policy`.
+* **New Datasource:** `ucloud_iam_policy_document`.
+
 ## 1.35.1 (2023-03-21)
 
 DOCS:
