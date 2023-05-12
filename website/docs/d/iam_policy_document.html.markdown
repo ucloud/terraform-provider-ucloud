@@ -6,7 +6,7 @@ description: |-
   Generates an IAM policy document in JSON format for use with resources that expect policy documents such as ucloud_iam_policy.
 ---
 
-# ucloud_iam_policy
+# ucloud_iam_policy_document
 
 Generates an IAM policy document in JSON format for use with resources that expect policy documents such as ucloud_iam_policy.
 

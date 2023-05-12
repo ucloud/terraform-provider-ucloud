@@ -6,7 +6,7 @@ description: |-
   Provides a list of IAM projects.
 ---
 
-# ucloud_iam_groups
+# ucloud_iam_projects
 
 Provides a list of IAM projects.
 

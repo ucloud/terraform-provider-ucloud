@@ -6,7 +6,7 @@ description: |-
   Provides an IAM custom policy resource.
 ---
 
-# ucloud_iam_user
+# ucloud_iam_policy
 
 Provides an IAM custom policy resource.
 
