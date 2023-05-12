@@ -6,7 +6,7 @@ description: |-
   Provides an IAM project resource.
 ---
 
-# ucloud_iam_user
+# ucloud_iam_project
 
 Provides an IAM project resource.
 

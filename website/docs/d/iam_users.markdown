@@ -6,7 +6,7 @@ description: |-
   Provides a list of IAM users.
 ---
 
-# ucloud_iam_groups
+# ucloud_iam_users
 
 Provides a list of IAM users.
 

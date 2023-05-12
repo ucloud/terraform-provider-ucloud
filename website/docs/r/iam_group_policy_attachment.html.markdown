@@ -6,7 +6,7 @@ description: |-
   Provides an IAM group policy attachment resource.
 ---
 
-# ucloud_iam_group
+# ucloud_iam_group_policy_attachment
 
 Provides an IAM group policy attachment resource.
 

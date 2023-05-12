@@ -6,7 +6,7 @@ description: |-
   Provides an IAM group membership resource.
 ---
 
-# ucloud_iam_group
+# ucloud_iam_group_membership
 
 Provides an IAM group membership resource.
 
