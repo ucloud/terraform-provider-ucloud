@@ -1,3 +1,10 @@
+## 1.36.1 (2023-05-12)
+
+DOCS:
+
+* fix documentation
+
+
 ## 1.36.0 (2023-04-17)
 
 FEATURES:
