@@ -31,7 +31,7 @@ func resourceUCloudInstanceState() *schema.Resource {
 			},
 			"force": {
 				Type:     schema.TypeBool,
-				Required: false,
+				Optional: true,
 			},
 		},
 	}
