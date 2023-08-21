@@ -92,6 +92,15 @@ const (
 )
 
 const (
+	instanceStatusInitializing = "Initializing"
+	instanceStatusStarting     = "Starting"
+	instanceStatusRunning      = "Running"
+	instanceStatusStopping     = "Stopping"
+	instanceStatusStopped      = "Stopped"
+	instanceStatusRebooting    = "Rebooting"
+)
+
+const (
 	resourceTypeInstance      = "instance"
 	resourceTypeLb            = "lb"
 	lbResourceTypeUHost       = "UHost"
