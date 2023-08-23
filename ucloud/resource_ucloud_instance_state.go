@@ -43,18 +43,9 @@ func resourceUCloudInstanceStateCreate(d *schema.ResourceData, meta interface{})
 	state := d.Get("state").(string)
 	force := d.Get("force").(bool)
 
-	instance, instanceErr := waitInstanceReady(client, instanceId, d.Timeout(schema.TimeoutCreate))
-	if instanceErr != nil {
-		return fmt.Errorf("error on waiting instance reach a ready status %v", instanceErr)
-	}
-
-	err := updateInstanceState(client, *instance, state, force)
+	err := WaitAndUpdateInstanceState(client, instanceId, state, force, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return err
-	}
-	_, instanceErr = waitInstanceReady(client, instanceId, d.Timeout(schema.TimeoutCreate))
-	if instanceErr != nil {
-		return fmt.Errorf("error on waiting instance reach a ready status %v", instanceErr)
 	}
 	d.SetId(instanceId)
 	return resourceUCloudInstanceStateRead(d, meta)
@@ -80,17 +71,9 @@ func resourceUCloudInstanceStateUpdate(d *schema.ResourceData, meta interface{})
 	state := d.Get("state").(string)
 	force := d.Get("force").(bool)
 
-	instance, instanceErr := waitInstanceReady(client, instanceId, d.Timeout(schema.TimeoutCreate))
-	if instanceErr != nil {
-		return fmt.Errorf("error on waiting instance reach a ready status %v", instanceErr)
-	}
-	err := updateInstanceState(client, *instance, state, force)
+	err := WaitAndUpdateInstanceState(client, instanceId, state, force, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err
-	}
-	_, instanceErr = waitInstanceReady(client, instanceId, d.Timeout(schema.TimeoutCreate))
-	if instanceErr != nil {
-		return fmt.Errorf("error on waiting instance reach a ready status %v", instanceErr)
 	}
 	return resourceUCloudInstanceStateRead(d, meta)
 }
@@ -155,6 +138,22 @@ func updateInstanceState(client *UCloudClient, instance uhost.UHostInstanceSet, 
 				return client.stopInstanceById(instance.UHostId)
 			}
 		}
+	}
+	return nil
+}
+
+func WaitAndUpdateInstanceState(client *UCloudClient, instanceId string, state string, force bool, timeout time.Duration) error {
+	instance, instanceErr := waitInstanceReady(client, instanceId, timeout)
+	if instanceErr != nil {
+		return fmt.Errorf("error on waiting instance reach a ready status %v", instanceErr)
+	}
+	err := updateInstanceState(client, *instance, state, force)
+	if err != nil {
+		return err
+	}
+	_, instanceErr = waitInstanceReady(client, instanceId, timeout)
+	if instanceErr != nil {
+		return fmt.Errorf("error on waiting instance reach a ready status %v", instanceErr)
 	}
 	return nil
 }

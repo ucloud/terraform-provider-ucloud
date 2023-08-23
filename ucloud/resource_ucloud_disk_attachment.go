@@ -38,6 +38,12 @@ func resourceUCloudDiskAttachment() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+
+			"stop_instance_before_detaching": {
+				Type:     schema.TypeBool,
+				Required: false,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -108,6 +114,11 @@ func resourceUCloudDiskAttachmentDelete(d *schema.ResourceData, meta interface{}
 	req.Zone = ucloud.String(d.Get("availability_zone").(string))
 	req.UDiskId = ucloud.String(p[0])
 	req.UHostId = ucloud.String(p[1])
+
+	if _, ok := d.GetOk("stop_instance_before_detaching"); ok {
+		err := WaitAndUpdateInstanceState(client, *req.UHostId, instanceStatusStopped, false, d.Timeout(schema.TimeoutDelete))
+		return fmt.Errorf("error on stop instance before deleting %q, %s", *req.UHostId, err)
+	}
 
 	return resource.Retry(15*time.Minute, func() *resource.RetryError {
 		_, err := client.describeDiskResource(p[0], p[1])
