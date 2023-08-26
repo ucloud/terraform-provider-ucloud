@@ -44,9 +44,10 @@ resource "ucloud_instance" "web" {
 
 # attach cloud disk to instance
 resource "ucloud_disk_attachment" "default" {
-  availability_zone = data.ucloud_zones.default.zones[0].id
-  disk_id           = ucloud_disk.default.id
-  instance_id       = ucloud_instance.web.id
+  availability_zone              = data.ucloud_zones.default.zones[0].id
+  disk_id                        = ucloud_disk.default.id
+  instance_id                    = ucloud_instance.web.id
+  stop_instance_before_detaching = true
 }
 ```
 
@@ -57,3 +58,5 @@ The following arguments are supported:
 * `availability_zone` - (Required, ForceNew) The Zone to attach the disk in.
 * `instance_id` - (Required, ForceNew) The ID of instance.
 * `disk_id` - (Required, ForceNew) The ID of disk that needs to be attached
+* `stop_instance_before_detaching` - (Optional, Boolean) Set this to true to ensure that the target instance is stopped
+  before trying to detach the volume.

@@ -13,10 +13,10 @@ import (
 
 func resourceUCloudDiskAttachment() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceUCloudDiskAttachmentCreate,
-		Read:   resourceUCloudDiskAttachmentRead,
-		Delete: resourceUCloudDiskAttachmentDelete,
-
+		Create:        resourceUCloudDiskAttachmentCreate,
+		Read:          resourceUCloudDiskAttachmentRead,
+		Delete:        resourceUCloudDiskAttachmentDelete,
+		Update:        schema.Noop,
 		SchemaVersion: 1,
 		MigrateState:  resourceUCloudDiskAttachmentMigrateState,
 
@@ -41,7 +41,6 @@ func resourceUCloudDiskAttachment() *schema.Resource {
 
 			"stop_instance_before_detaching": {
 				Type:     schema.TypeBool,
-				Required: false,
 				Optional: true,
 			},
 		},
@@ -117,7 +116,9 @@ func resourceUCloudDiskAttachmentDelete(d *schema.ResourceData, meta interface{}
 
 	if _, ok := d.GetOk("stop_instance_before_detaching"); ok {
 		err := WaitAndUpdateInstanceState(client, *req.UHostId, instanceStatusStopped, false, d.Timeout(schema.TimeoutDelete))
-		return fmt.Errorf("error on stop instance before deleting %q, %s", *req.UHostId, err)
+		if err != nil {
+			return fmt.Errorf("error on stop instance  %q before deleting, %s", *req.UHostId, err)
+		}
 	}
 
 	return resource.Retry(15*time.Minute, func() *resource.RetryError {

@@ -108,16 +108,19 @@ func testAccCheckDiskAttachmentDestroy(s *terraform.State) error {
 }
 
 const testAccDiskAttachmentConfig = `
-data "ucloud_zones" "default" {}
+variable "availability_zone" {
+  type    = string
+  default = "cn-bj2-05"
+}
 
 data "ucloud_images" "default" {
-  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  availability_zone = "cn-bj2-05"
   name_regex        = "^CentOS 7.[1-2] 64"
   image_type        = "base"
 }
 
 resource "ucloud_disk" "foo" {
-  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  availability_zone = "${var.availability_zone}"
   name              = "tf-acc-disk-attachment"
   disk_size         = 20
 }
@@ -125,7 +128,7 @@ resource "ucloud_disk" "foo" {
 resource "ucloud_instance" "foo" {
   name                 = "tf-acc-disk-attachment"
   instance_type        = "n-highcpu-1"
-  availability_zone    = "${data.ucloud_zones.default.zones.0.id}"
+  availability_zone    = "${var.availability_zone}"
   image_id             = "${data.ucloud_images.default.images.0.id}"
   charge_type          = "month"
   duration             = 1
@@ -133,23 +136,26 @@ resource "ucloud_instance" "foo" {
 }
 
 resource "ucloud_disk_attachment" "foo" {
-  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  availability_zone = "${var.availability_zone}"
   disk_id           = "${ucloud_disk.foo.id}"
   instance_id       = "${ucloud_instance.foo.id}"
 }
 `
 
 const testAccDiskAttachmentConfigUpdate = `
-data "ucloud_zones" "default" {}
+variable "availability_zone" {
+  type    = string
+  default = "cn-bj2-05"
+}
 
 data "ucloud_images" "default" {
-  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  availability_zone = "${var.availability_zone}"
   name_regex        = "^CentOS 7.[1-2] 64"
   image_type        = "base"
 }
 
 resource "ucloud_disk" "foo" {
-  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  availability_zone = "${var.availability_zone}"
   name              = "tf-acc-disk-attachment"
   disk_size         = 40
 }
@@ -157,7 +163,7 @@ resource "ucloud_disk" "foo" {
 resource "ucloud_instance" "foo" {
   name                 = "tf-acc-disk-attachment"
   instance_type        = "n-highcpu-1"
-  availability_zone    = "${data.ucloud_zones.default.zones.0.id}"
+  availability_zone    = "${var.availability_zone}"
   image_id             = "${data.ucloud_images.default.images.0.id}"
   charge_type          = "month"
   duration             = 1
@@ -165,8 +171,9 @@ resource "ucloud_instance" "foo" {
 }
 
 resource "ucloud_disk_attachment" "foo" {
-  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-  disk_id           = "${ucloud_disk.foo.id}"
-  instance_id       = "${ucloud_instance.foo.id}"
+  availability_zone              = "${var.availability_zone}"
+  disk_id                        = "${ucloud_disk.foo.id}"
+  instance_id                    = "${ucloud_instance.foo.id}"
+  stop_instance_before_detaching = true
 }
 `

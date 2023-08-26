@@ -15,7 +15,9 @@ func resourceUCloudInstanceState() *schema.Resource {
 		Read:   resourceUCloudInstanceStateRead,
 		Update: resourceUCloudInstanceStateUpdate,
 		Delete: resourceUCloudInstanceStateDelete,
-
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -25,8 +27,8 @@ func resourceUCloudInstanceState() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"stopped",
-					"running",
+					"Stopped",
+					"Running",
 				}, false),
 			},
 			"force": {
