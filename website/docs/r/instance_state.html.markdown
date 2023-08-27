@@ -62,5 +62,5 @@ This resource exports the following attributes in addition to the arguments abov
 Using `terraform import`, import `ucloud_instance_state` using the `instance_id` attribute. For example:
 
 ```console
-% terraform import ucloud_instance_state.test uhost-xyz
+$ terraform import ucloud_instance_state.test uhost-xyz
 ```
