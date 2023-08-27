@@ -9,13 +9,13 @@ import (
 )
 
 func TestAccUCloudInstanceState(t *testing.T) {
-
+	instanceStateResource := "ucloud_instance_state.foo"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
 
-		IDRefreshName: "ucloud_instance_state.foo",
+		IDRefreshName: instanceStateResource,
 		Providers:     testAccProviders,
 		CheckDestroy:  testAccCheckInstanceStateDestroy,
 
@@ -25,7 +25,7 @@ func TestAccUCloudInstanceState(t *testing.T) {
 
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "name", "tf-acc-instance-config-basic"),
-					resource.TestCheckResourceAttr("ucloud_instance_state.foo", "state", "Stopped"),
+					resource.TestCheckResourceAttr(instanceStateResource, "state", "Stopped"),
 				),
 			},
 			{
@@ -33,7 +33,7 @@ func TestAccUCloudInstanceState(t *testing.T) {
 
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "name", "tf-acc-instance-config-basic"),
-					resource.TestCheckResourceAttr("ucloud_instance_state.foo", "state", "Running"),
+					resource.TestCheckResourceAttr(instanceStateResource, "state", "Running"),
 				),
 			},
 		},
