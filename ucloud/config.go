@@ -71,7 +71,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 	// enable auto retry with http/connection error
 	cfg.MaxRetries = c.MaxRetries
 	cfg.LogLevel = log.PanicLevel
-	cfg.UserAgent = "Terraform-UCloud/1.36.0"
+	cfg.UserAgent = "Terraform-UCloud/1.37.0"
 	cfg.BaseUrl = c.BaseURL
 
 	cred := auth.NewCredential()
