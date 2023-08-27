@@ -1,3 +1,10 @@
+## 1.37.0 (2023-08-27)
+
+FEATURES:
+
+* **New Resource:** `ucloud_instance_state`.
+* feat: support stop_instance_before_detaching in disk_attachment resource.
+
 ## 1.36.1 (2023-05-12)
 
 DOCS:
