@@ -1,6 +1,7 @@
 package ucloud
 
 import (
+	"fmt"
 	"github.com/ucloud/ucloud-sdk-go/services/unet"
 	"github.com/ucloud/ucloud-sdk-go/ucloud/error"
 	"strconv"
@@ -112,4 +113,45 @@ func (c *UCloudClient) describeFirewallByIdAndType(resourceId, resourceType stri
 	}
 
 	return &resp.DataSet[0], nil
+}
+
+func (c *UCloudClient) getInstanceState(instanceId string) (string, error) {
+	if instanceId == "" {
+		return "", newNotFoundError(getNotFoundMessage("instance", instanceId))
+	}
+	instance, err := c.describeInstanceById(instanceId)
+	if err != nil {
+		return "", fmt.Errorf("fail to get instance info: %w", err)
+	}
+	return instance.State, nil
+}
+
+func (client *UCloudClient) startInstanceById(instanceId string) error {
+	if instanceId == "" {
+		return newNotFoundError(getNotFoundMessage("instance", instanceId))
+	}
+	req := client.uhostconn.NewStartUHostInstanceRequest()
+	req.UHostId = ucloud.String(instanceId)
+	_, err := client.uhostconn.StartUHostInstance(req)
+	return err
+}
+
+func (client *UCloudClient) stopInstanceById(instanceId string) error {
+	if instanceId == "" {
+		return newNotFoundError(getNotFoundMessage("instance", instanceId))
+	}
+	req := client.uhostconn.NewStopUHostInstanceRequest()
+	req.UHostId = ucloud.String(instanceId)
+	_, err := client.uhostconn.StopUHostInstance(req)
+	return err
+}
+
+func (client *UCloudClient) poweroffInstanceById(instanceId string) error {
+	if instanceId == "" {
+		return newNotFoundError(getNotFoundMessage("instance", instanceId))
+	}
+	req := client.uhostconn.NewPoweroffUHostInstanceRequest()
+	req.UHostId = ucloud.String(instanceId)
+	_, err := client.uhostconn.PoweroffUHostInstance(req)
+	return err
 }

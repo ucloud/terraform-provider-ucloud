@@ -60,7 +60,7 @@ func dataSourceUCloudIAMPolicyRead(d *schema.ResourceData, meta interface{}) err
 	case "Custom":
 		owner = "User"
 	default:
-		errors.New("type not supported")
+		return errors.New("type not supported")
 	}
 	policy, err := client.describeIAMPolicyByName(d.Get("name").(string), owner)
 	if err != nil {
