@@ -18,6 +18,7 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/services/ulb"
 	"github.com/ucloud/ucloud-sdk-go/services/umem"
 	"github.com/ucloud/ucloud-sdk-go/services/unet"
+	"github.com/ucloud/ucloud-sdk-go/services/uphost"
 	"github.com/ucloud/ucloud-sdk-go/services/vpc"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 	"github.com/ucloud/ucloud-sdk-go/ucloud/auth"
@@ -47,6 +48,7 @@ type UCloudClient struct {
 	uk8sconn       *uk8s.UK8SClient
 	uadsconn       *uads.UADSClient
 	iamconn        *iam.IAMClient
+	uphostconn     *uphost.UPHostClient
 	// private services
 	pumemconn *pumem.UMemClient
 }
