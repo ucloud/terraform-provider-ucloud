@@ -310,6 +310,7 @@ github.com/ucloud/ucloud-sdk-go/services/uk8s
 github.com/ucloud/ucloud-sdk-go/services/ulb
 github.com/ucloud/ucloud-sdk-go/services/umem
 github.com/ucloud/ucloud-sdk-go/services/unet
+github.com/ucloud/ucloud-sdk-go/services/uphost
 github.com/ucloud/ucloud-sdk-go/services/vpc
 github.com/ucloud/ucloud-sdk-go/ucloud
 github.com/ucloud/ucloud-sdk-go/ucloud/auth
