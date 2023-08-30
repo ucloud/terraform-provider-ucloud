@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud Native"
+subcategory: "UK8S"
 layout: "ucloud"
 page_title: "UCloud: ucloud_uk8s_node"
 description: |-
