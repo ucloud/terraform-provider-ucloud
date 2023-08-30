@@ -196,9 +196,9 @@ func (c *UHostClient) CreateIsolationGroup(req *CreateIsolationGroupRequest) (*C
 }
 
 /*
-CreateUHostInstanceParamNetworkInterfaceIPv6 is request schema for complex param
+UHostDiskCustomBackup is request schema for complex param
 */
-type CreateUHostInstanceParamNetworkInterfaceIPv6 struct {
+type UHostDiskCustomBackup struct {
 }
 
 /*
@@ -226,42 +226,9 @@ type CreateUHostInstanceParamNetworkInterfaceEIP struct {
 }
 
 /*
-UHostDiskCustomBackup is request schema for complex param
+CreateUHostInstanceParamNetworkInterfaceIPv6 is request schema for complex param
 */
-type UHostDiskCustomBackup struct {
-}
-
-/*
-CreateUHostInstanceParamNetworkInterface is request schema for complex param
-*/
-type CreateUHostInstanceParamNetworkInterface struct {
-
-	// 申请并绑定一个教育网EIP。True为申请并绑定，False为不会申请绑定，默认False。当前只支持具有HPC特性的机型。
-	CreateCernetIp *bool `required:"false"`
-
-	//
-	EIP *CreateUHostInstanceParamNetworkInterfaceEIP `required:"false"`
-}
-
-/*
-CreateUHostInstanceParamVolumes is request schema for complex param
-*/
-type CreateUHostInstanceParamVolumes struct {
-
-	// 【该字段已废弃，请谨慎使用】
-	CouponId *string `required:"false" deprecated:"true"`
-
-	// 【该字段已废弃，请谨慎使用】
-	IsBoot *string `required:"false" deprecated:"true"`
-}
-
-/*
-CreateUHostInstanceParamFeatures is request schema for complex param
-*/
-type CreateUHostInstanceParamFeatures struct {
-
-	// 弹性网卡特性。开启了弹性网卡权限位，此特性才生效，默认 false 未开启，true 开启，仅与 NetCapability Normal 兼容。
-	UNI *bool `required:"false"`
+type CreateUHostInstanceParamNetworkInterfaceIPv6 struct {
 }
 
 /*
@@ -287,14 +254,50 @@ type UHostDisk struct {
 	// 磁盘大小，单位GB。请参考[[api:uhost-api:disk_type|磁盘类型]]。
 	Size *int `required:"true"`
 
+	// 从快照创建盘时所用快照id，目前仅支持数据盘
+	SnapshotId *string `required:"false"`
+
 	// 磁盘类型。请参考[[api:uhost-api:disk_type|磁盘类型]]。
 	Type *string `required:"true"`
+}
+
+/*
+CreateUHostInstanceParamNetworkInterface is request schema for complex param
+*/
+type CreateUHostInstanceParamNetworkInterface struct {
+
+	// 申请并绑定一个教育网EIP。True为申请并绑定，False为不会申请绑定，默认False。当前只支持具有HPC特性的机型。
+	CreateCernetIp *bool `required:"false"`
+
+	//
+	EIP *CreateUHostInstanceParamNetworkInterfaceEIP `required:"false"`
+}
+
+/*
+CreateUHostInstanceParamFeatures is request schema for complex param
+*/
+type CreateUHostInstanceParamFeatures struct {
+
+	// 弹性网卡特性。开启了弹性网卡权限位，此特性才生效，默认 false 未开启，true 开启，仅与 NetCapability Normal 兼容。
+	UNI *bool `required:"false"`
 }
 
 /*
 CreateUHostInstanceParamSecGroupId is request schema for complex param
 */
 type CreateUHostInstanceParamSecGroupId struct {
+}
+
+/*
+CreateUHostInstanceParamVolumes is request schema for complex param
+*/
+type CreateUHostInstanceParamVolumes struct {
+
+	// 【该字段已废弃，请谨慎使用】
+	CouponId *string `required:"false" deprecated:"true"`
+
+	// 【该字段已废弃，请谨慎使用】
+	IsBoot *string `required:"false" deprecated:"true"`
 }
 
 // CreateUHostInstanceRequest is request schema for CreateUHostInstance action
@@ -322,7 +325,7 @@ type CreateUHostInstanceRequest struct {
 	// 虚拟CPU核数。可选参数：1-64（具体机型与CPU的对应关系参照控制台）。默认值: 4。
 	CPU *int `required:"false"`
 
-	// 计费模式。枚举值为： \\ > Year，按年付费； \\ > Month，按月付费；\\ > Dynamic，按小时预付费 \\ > Postpay，按小时后付费（支持关机不收费，目前仅部分可用区支持，请联系您的客户经理） \\Preemptive计费为抢占式实例(内测阶段) \\ 默认为月付
+	// 计费模式。枚举值为： \\ > Year，按年付费； \\ > Month，按月付费；\\ > Dynamic，按小时预付费 \\ > Postpay，按小时后付费（支持关机不收费，目前仅部分可用区支持，请联系您的客户经理） \\ > Spot计费为抢占式实例(内测阶段) \\ 默认为月付
 	ChargeType *string `required:"false"`
 
 	// 主机代金券ID。请通过DescribeCoupon接口查询，或登录用户中心查看
@@ -342,6 +345,9 @@ type CreateUHostInstanceRequest struct {
 
 	// GPU类型，枚举值["K80", "P40", "V100", "T4","T4A", "T4S","2080Ti","2080Ti-4C","1080Ti", "T4/4", "MI100", "V100S",2080","2080TiS","2080TiPro","3090","A100"]，MachineType为G时必填
 	GpuType *string `required:"false"`
+
+	// 【私有专区属性】专区云主机开启宿住关联属性
+	HostBinding *bool `required:"false"`
 
 	// 【该字段已废弃，请谨慎使用】
 	HostType *string `required:"false" deprecated:"true"`
@@ -426,6 +432,12 @@ type CreateUHostInstanceRequest struct {
 
 	// 【该字段已废弃，请谨慎使用】
 	TimemachineFeature *string `required:"false" deprecated:"true"`
+
+	// 【私有专区属性】专区宿主机id
+	UDHostId *string `required:"false"`
+
+	// 【私有专区属性】专区id
+	UDSetId *string `required:"false"`
 
 	// 【建议后续不再使用】云主机机型（V1.0），在本字段和字段MachineType中，仅需要其中1个字段即可。参考[[api:uhost-api:uhost_type|云主机机型说明]]。
 	UHostType *string `required:"false"`
@@ -744,14 +756,14 @@ type DescribeImageRequest struct {
 type DescribeImageResponse struct {
 	response.CommonBase
 
-	// 操作名称
-	Action string
+	// 【该字段已废弃，请谨慎使用】
+	Action string `deprecated:"true"`
 
 	// 镜像列表详见 UHostImageSet
 	ImageSet []UHostImageSet
 
-	// 返回码
-	RetCode int
+	// 【该字段已废弃，请谨慎使用】
+	RetCode int `deprecated:"true"`
 
 	// 满足条件的镜像总数
 	TotalCount int
@@ -1330,6 +1342,62 @@ func (c *UHostClient) GetUHostInstanceVncInfo(req *GetUHostInstanceVncInfoReques
 	reqCopier := *req
 
 	err = c.Client.InvokeAction("GetUHostInstanceVncInfo", &reqCopier, &res)
+	if err != nil {
+		return &res, err
+	}
+
+	return &res, nil
+}
+
+// GetUHostRenewPriceRequest is request schema for GetUHostRenewPrice action
+type GetUHostRenewPriceRequest struct {
+	request.CommonBase
+
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
+	// ProjectId *string `required:"false"`
+
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
+	// Region *string `required:"true"`
+
+	// 计费类型。Year，Month，Dynamic，默认返回全部计费方式对应的价格
+	ChargeType *string `required:"true"`
+
+	// UHost实例ID
+	UHostId *string `required:"true"`
+}
+
+// GetUHostRenewPriceResponse is response schema for GetUHostRenewPrice action
+type GetUHostRenewPriceResponse struct {
+	response.CommonBase
+
+	// 价格列表
+	PriceSet []BasePriceSet
+}
+
+// NewGetUHostRenewPriceRequest will create request of GetUHostRenewPrice action.
+func (c *UHostClient) NewGetUHostRenewPriceRequest() *GetUHostRenewPriceRequest {
+	req := &GetUHostRenewPriceRequest{}
+
+	// setup request with client config
+	c.Client.SetupRequest(req)
+
+	// setup retryable with default retry policy (retry for non-create action and common error)
+	req.SetRetryable(true)
+	return req
+}
+
+/*
+API: GetUHostRenewPrice
+
+获取主机续费价格
+*/
+func (c *UHostClient) GetUHostRenewPrice(req *GetUHostRenewPriceRequest) (*GetUHostRenewPriceResponse, error) {
+	var err error
+	var res GetUHostRenewPriceResponse
+
+	reqCopier := *req
+
+	err = c.Client.InvokeAction("GetUHostRenewPrice", &reqCopier, &res)
 	if err != nil {
 		return &res, err
 	}

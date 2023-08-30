@@ -3,6 +3,7 @@ package ucloud
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -229,55 +230,83 @@ func resourceUCloudBareMetalInstanceCreate(d *schema.ResourceData, meta interfac
 	client := meta.(*UCloudClient)
 	conn := client.uphostconn
 
-	req := conn.NewCreatePHostInstanceRequest()
+	req := conn.NewCreatePHostRequest()
 
 	req.Zone = ucloud.String(d.Get("availability_zone").(string))
 	req.ImageId = ucloud.String(d.Get("image_id").(string))
 	req.Password = ucloud.String(d.Get("root_password").(string))
 	req.ChargeType = ucloud.String(d.Get("charge_type").(string))
-	req.Quantity = ucloud.Int(d.Get("duration").(int))
+	req.Quantity = ucloud.String(strconv.Itoa(d.Get("duration").(int)))
 	req.Name = ucloud.String(d.Get("name").(string))
 	req.Tag = ucloud.String(d.Get("tag").(string))
 	req.Remark = ucloud.String(d.Get("remark").(string))
 	req.SecurityGroupId = ucloud.String(d.Get("security_group").(string))
 	req.VPCId = ucloud.String(d.Get("vpc_id").(string))
 	req.SubnetId = ucloud.String(d.Get("subnet_id").(string))
-	req.PrivateIp = ucloud.String(d.Get("private_ip").(string))
+	req.VpcIp = ucloud.String(d.Get("private_ip").(string))
 
 	// Get instance type
 	instanceType := d.Get("instance_type").(string)
 
+	// Create a request object for DescribePHostMachineType
+	describePHostReq := conn.NewDescribePHostMachineTypeRequest()
+	describePHostReq.Zone = ucloud.String(d.Get("availability_zone").(string))
+
 	// Call DescribePHostMachineType API to get valid types for local disk instance
-	localDiskTypes, err := conn.DescribePHostMachineType()
+	localDiskTypesResp, err := conn.DescribePHostMachineType(describePHostReq)
 	if err != nil {
 		return fmt.Errorf("error on getting local disk types, %s", err)
 	}
+	localDiskTypes := []string{}
+	for _, machineType := range localDiskTypesResp.MachineTypes {
+		localDiskTypes = append(localDiskTypes, machineType.Type)
+	}
+
+	// Create a request object for DescribeBareMetalMachineType
+	describeBareMetalReq := conn.NewDescribeBaremetalMachineTypeRequest()
+	describeBareMetalReq.Zone = ucloud.String(d.Get("availability_zone").(string))
 
 	// Call DescribeBareMetalMachineType API to get valid types for cloud disk instance
-	cloudDiskTypes, err := conn.DescribeBareMetalMachineType()
+	cloudDiskTypesResp, err := conn.DescribeBaremetalMachineType(describeBareMetalReq)
 	if err != nil {
 		return fmt.Errorf("error on getting cloud disk types, %s", err)
+	}
+	cloudDiskTypes := []string{}
+	for _, machineType := range cloudDiskTypesResp.MachineTypes {
+		cloudDiskTypes = append(cloudDiskTypes, machineType.Type)
 	}
 
 	// Check if instance type is a valid type
 	if isStringIn(instanceType, localDiskTypes) {
+		req.Type = ucloud.String(instanceType)
 		if _, ok := d.GetOk("raid_type"); !ok {
 			return fmt.Errorf("raid_type is required for local disk instance")
 		}
 		req.Raid = ucloud.String(d.Get("raid_type").(string))
 	} else if isStringIn(instanceType, cloudDiskTypes) {
+		req.Type = ucloud.String(instanceType)
 		if _, ok := d.GetOk("boot_disk_size"); !ok {
 			return fmt.Errorf("boot_disk_size is required for cloud disk instance")
 		}
 		if _, ok := d.GetOk("boot_disk_type"); !ok {
 			return fmt.Errorf("boot_disk_type is required for cloud disk instance")
 		}
-		req.BootDiskSpace = ucloud.Int(d.Get("boot_disk_size").(int))
-		req.BootDiskType = ucloud.String(d.Get("boot_disk_type").(string))
+		bootDisk := uphost.CreatePHostParamDisks{
+			Size:   ucloud.Int(d.Get("boot_disk_size").(int)),
+			Type:   ucloud.String(d.Get("boot_disk_type").(string)),
+			IsBoot: ucloud.String("True"),
+		}
+		req.Disks = append(req.Disks, bootDisk)
 		if _, ok := d.GetOk("data_disks"); ok {
 			disks := d.Get("data_disks").([]interface{})
-			req.DataDiskSize = ucloud.Int(disks[0].(map[string]interface{})["size"].(int))
-			req.DataDiskType = ucloud.String(disks[0].(map[string]interface{})["type"].(string))
+			for _, disk := range disks {
+				dataDisk := uphost.CreatePHostParamDisks{
+					Size:   ucloud.Int(disk.(map[string]interface{})["size"].(int)),
+					Type:   ucloud.String(disk.(map[string]interface{})["type"].(string)),
+					IsBoot: ucloud.String("False"),
+				}
+				req.Disks = append(req.Disks, dataDisk)
+			}
 		}
 	} else {
 		return fmt.Errorf("invalid instance type: %s", instanceType)
@@ -285,18 +314,26 @@ func resourceUCloudBareMetalInstanceCreate(d *schema.ResourceData, meta interfac
 
 	if val, ok := d.GetOk("network_interface"); ok {
 		interfaces := val.([]interface{})
-		req.EIPBandwidth = ucloud.Int(interfaces[0].(map[string]interface{})["eip_bandwidth"].(int))
-		req.EIPChargeType = ucloud.String(interfaces[0].(map[string]interface{})["eip_charge_mode"].(string))
-		req.EIPInternetType = ucloud.String(interfaces[0].(map[string]interface{})["eip_internet_type"].(string))
+		for _, iface := range interfaces {
+			ifaceMap := iface.(map[string]interface{})
+			networkInterface := uphost.CreatePHostParamNetworkInterface{
+				EIP: &uphost.CreatePHostParamNetworkInterfaceEIP{
+					Bandwidth:    ucloud.String(strconv.Itoa(ifaceMap["eip_bandwidth"].(int))),
+					PayMode:      ucloud.String(ifaceMap["eip_charge_mode"].(string)),
+					OperatorName: ucloud.String(ifaceMap["eip_internet_type"].(string)),
+				},
+			}
+			req.NetworkInterface = append(req.NetworkInterface, networkInterface)
+		}
 	}
 
-	resp, err := conn.CreatePHostInstance(req)
+	resp, err := conn.CreatePHost(req)
 
 	if err != nil {
 		return fmt.Errorf("error on creating bare metal instance, %s", err)
 	}
 
-	d.SetId(resp.PHostId)
+	d.SetId(resp.PHostId[0])
 
 	// Wait for instance to be in "Running" state before returning
 	stateConf := &resource.StateChangeConf{
@@ -321,30 +358,24 @@ func resourceUCloudBareMetalInstanceRead(d *schema.ResourceData, meta interface{
 	conn := client.uphostconn
 
 	req := conn.NewDescribePHostRequest()
-	req.PHostId = ucloud.String(d.Id())
+	req.PHostId = []string{d.Id()}
 
 	resp, err := conn.DescribePHost(req)
 	if err != nil {
-		if isNotFoundError(err) {
-			d.SetId("")
-			return nil
-		}
 		return fmt.Errorf("error on reading bare metal instance %s, %s", d.Id(), err)
 	}
-
+	if len(resp.PHostSet) == 0 {
+		return newNotFoundError("resource cannot be found")
+	}
 	// Set the properties of the instance
-	d.Set("availability_zone", resp.PHosts[0].Zone)
-	d.Set("image_id", resp.PHosts[0].ImageId)
-	d.Set("root_password", resp.PHosts[0].Password)
-	d.Set("charge_type", resp.PHosts[0].ChargeType)
-	d.Set("duration", resp.PHosts[0].Quantity)
-	d.Set("name", resp.PHosts[0].Name)
-	d.Set("tag", resp.PHosts[0].Tag)
-	d.Set("remark", resp.PHosts[0].Remark)
-	d.Set("security_group", resp.PHosts[0].SecurityGroupId)
-	d.Set("vpc_id", resp.PHosts[0].VPCId)
-	d.Set("subnet_id", resp.PHosts[0].SubnetId)
-	d.Set("private_ip", resp.PHosts[0].PrivateIp)
+	d.Set("availability_zone", resp.PHostSet[0].Zone)
+	d.Set("charge_type", resp.PHostSet[0].ChargeType)
+	d.Set("name", resp.PHostSet[0].Name)
+	d.Set("tag", resp.PHostSet[0].Tag)
+	d.Set("remark", resp.PHostSet[0].Remark)
+	d.Set("vpc_id", resp.PHostSet[0])
+	d.Set("subnet_id", resp.PHostSet[0].SubnetId)
+	d.Set("private_ip", resp.PHostSet[0].PrivateIp)
 	d.Set("instance_type", resp.PHosts[0].InstanceType)
 	d.Set("raid_type", resp.PHosts[0].Raid)
 	d.Set("boot_disk_size", resp.PHosts[0].BootDiskSpace)

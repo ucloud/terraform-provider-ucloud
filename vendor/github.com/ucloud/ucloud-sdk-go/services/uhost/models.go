@@ -93,18 +93,15 @@ type Collection struct {
 }
 
 /*
-CpuPlatforms - CPU平台信息
+Features - 虚机可支持的特性
 */
-type CpuPlatforms struct {
+type Features struct {
 
-	// 返回AMD的CPU平台信息，例如：AMD: ['Amd/Epyc2']
-	Amd []string
+	// 可以提供的模式类别
+	Modes []FeatureModes
 
-	// 返回Arm的CPU平台信息，例如：Ampere: ['Ampere/Altra']
-	Ampere []string
-
-	// 返回Intel的CPU平台信息，例如：Intel: ['Intel/CascadeLake','Intel/CascadelakeR','Intel/IceLake']
-	Intel []string
+	// 可支持的特性名称。目前支持的特性网络增强|NetCapability、热升级|Hotplug
+	Name string
 }
 
 /*
@@ -120,18 +117,6 @@ type Performance struct {
 }
 
 /*
-Features - 虚机可支持的特性
-*/
-type Features struct {
-
-	// 可以提供的模式类别
-	Modes []FeatureModes
-
-	// 可支持的特性名称。目前支持的特性网络增强|NetCapability、热升级|Hotplug
-	Name string
-}
-
-/*
 Disks - 磁盘信息
 */
 type Disks struct {
@@ -144,6 +129,21 @@ type Disks struct {
 
 	// 磁盘介质类别信息，磁盘主要分类如下：云盘|cloudDisk、普通本地盘|normalLocalDisk和SSD本地盘|ssdLocalDisk。
 	Name string
+}
+
+/*
+CpuPlatforms - CPU平台信息
+*/
+type CpuPlatforms struct {
+
+	// 返回AMD的CPU平台信息，例如：AMD: ['Amd/Epyc2']
+	Amd []string
+
+	// 返回Arm的CPU平台信息，例如：Ampere: ['Ampere/Altra']
+	Ampere []string
+
+	// 返回Intel的CPU平台信息，例如：Intel: ['Intel/CascadeLake','Intel/CascadelakeR','Intel/IceLake']
+	Intel []string
 }
 
 /*
@@ -214,7 +214,7 @@ type UHostImageSet struct {
 	// 创建时间，格式为Unix时间戳
 	CreateTime int
 
-	// 特殊状态标识， 目前包含NetEnhnced（网络增强1.0）, NetEnhanced_Ultra]（网络增强2.0）, HotPlug(热升级), CloudInit, IPv6
+	// 特殊状态标识， 目前包含NetEnhnced（网络增强1.0）, NetEnhanced_Ultra（网络增强2.0）, HotPlug(热升级), GPU（GPU镜像）,CloudInit, IPv6（支持IPv6网络）,RssdAttachable（支持RSSD云盘）,Vgpu_AMD（支持AMD的vgpu）,Vgpu_NVIDIA（支持NVIDIA的vgpu）,Aarch64_Type（支持arm64架构）
 	Features []string
 
 	// 行业镜像类型（仅行业镜像将返回这个值）
@@ -250,8 +250,17 @@ type UHostImageSet struct {
 	// 操作系统类型：Linux，Windows
 	OsType string
 
-	// 镜像状态， 可用：Available，制作中：Making， 不可用：Unavailable
+	// 主要安装软件
+	PrimarySoftware string
+
+	// 场景分类，目前包含Featured（精选），PreInstalledDrivers（预装驱动），AIPainting（AI绘画），AIModels（AI模型），HPC（高性能计算）
+	SceneCategories []string
+
+	// 镜像状态， 可用：Available，制作中：Making， 不可用：Unavailable，复制中：Copying
 	State string
+
+	// 支持的GPU机型
+	SupportedGPUTypes []string
 
 	// 供应商（仅行业镜像将返回这个值）
 	Vendor string
@@ -288,6 +297,21 @@ type IsolationGroup struct {
 
 	// 每个可用区中的机器数量。参见数据结构SpreadInfo。
 	SpreadInfoSet []SpreadInfo
+}
+
+/*
+UDSetUDHostAttribute - 私有专区对应的宿主机属性
+*/
+type UDSetUDHostAttribute struct {
+
+	// 是否绑定私有专区宿主机
+	HostBinding bool
+
+	// 私有专区宿主机
+	UDHostId string
+
+	// 私有专区
+	UDSetId string
 }
 
 /*
@@ -375,6 +399,15 @@ type UHostIPSet struct {
 }
 
 /*
+SpotAttribute - 竞价实例属性
+*/
+type SpotAttribute struct {
+
+	// 回收时间
+	RecycleTime int
+}
+
+/*
 UHostInstanceSet - DescribeUHostInstance
 */
 type UHostInstanceSet struct {
@@ -397,7 +430,7 @@ type UHostInstanceSet struct {
 	// 计费模式，枚举值为： Year，按年付费； Month，按月付费； Dynamic，按需付费（需开启权限）；Preemptive 为抢占式实例；
 	ChargeType string
 
-	// true，支持cloutinit方式初始化；false,不支持
+	// true: 支持cloutinit方式初始化；false: 不支持
 	CloudInitFeature bool
 
 	// 云主机CPU平台。参考[[api:uhost-api:uhost_type#主机概念20版本|云主机机型说明]]。
@@ -412,14 +445,26 @@ type UHostInstanceSet struct {
 	// 磁盘信息见 UHostDiskSet
 	DiskSet []UHostDiskSet
 
+	// true: 高性能计算主机；false: 不是
+	EpcInstance bool
+
 	// 到期时间，格式为Unix时间戳
 	ExpireTime int
 
 	// GPU个数
 	GPU int
 
+	// GPU类型;枚举值["K80", "P40", "V100", "T4", "T4S","2080Ti","2080Ti-4C","1080Ti", "T4/4", "MI100", "V100S"]
+	GpuType string
+
+	// true: 开启 hidden kvm 功能；false: 不是
+	HiddenKvm bool
+
 	// 【建议不再使用】主机系列：N2，表示系列2；N1，表示系列1
 	HostType string
+
+	// 热升级支持的最大CPU个数
+	HotPlugMaxCpu int
 
 	// true: 开启热升级； false，未开启热升级
 	HotplugFeature bool
@@ -433,7 +478,7 @@ type UHostInstanceSet struct {
 	//
 	IPs []string `deprecated:"true"`
 
-	// true:有ipv6特性；false，没有ipv6特性
+	// true: 有ipv6特性；false，没有ipv6特性
 	IPv6Feature bool
 
 	// 【建议不再使用】主机的系统盘ID。
@@ -478,6 +523,12 @@ type UHostInstanceSet struct {
 	// 仅抢占式实例返回，LowSpeed为低速模式，PowerOff为关机模式
 	RestrictMode string
 
+	// true: 绑定了安全组的主机；false: 不是
+	SecGroupInstance bool
+
+	// 竞价实例信息
+	SpotAttribute SpotAttribute
+
 	// 实例状态，枚举值：\\ >初始化: Initializing; \\ >启动中: Starting; \\> 运行中: Running; \\> 关机中: Stopping; \\ >关机: Stopped \\ >安装失败: Install Fail; \\ >重启中: Rebooting; \\ > 未知(空字符串，获取状态超时或出错)：""
 	State string
 
@@ -495,6 +546,9 @@ type UHostInstanceSet struct {
 
 	// 总的数据盘存储空间。
 	TotalDiskSpace int
+
+	// 私有专区宿主机属性
+	UDHostAttribute UDSetUDHostAttribute
 
 	// UHost实例ID
 	UHostId string
@@ -585,4 +639,19 @@ type UHostPriceSet struct {
 
 	// 价格详细信息（只有询价接口返回）。
 	PriceDetail PriceDetail
+}
+
+/*
+BasePriceSet - 价格信息
+*/
+type BasePriceSet struct {
+
+	// 计费类型
+	ChargeType string
+
+	// 限时优惠的折前原价（即列表价乘以商务折扣后的单价）。
+	OriginalPrice float64
+
+	// 价格，单位: 元，保留小数点后两位有效数字
+	Price float64
 }
