@@ -1,7 +1,9 @@
 package ucloud
 
 import (
+	"errors"
 	"fmt"
+	"github.com/ucloud/ucloud-sdk-go/services/udisk"
 	"regexp"
 	"strconv"
 	"time"
@@ -15,57 +17,11 @@ import (
 
 func resourceUCloudBareMetalInstance() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceUCloudBareMetalInstanceCreate,
-		Read:   resourceUCloudBareMetalInstanceRead,
-		Update: resourceUCloudBareMetalInstanceUpdate,
-		Delete: resourceUCloudBareMetalInstanceDelete,
-		CustomizeDiff: func(diff *schema.ResourceDiff, v interface{}) error {
-			client := v.(*UCloudClient)
-			conn := client.uphostconn
-
-			instanceType := diff.Get("instance_type").(string)
-			cloudDiskTypes, err := conn.DescribeBareMetalMachineType()
-			if err != nil {
-				return fmt.Errorf("error on getting cloud disk types, %s", err)
-			}
-
-			localDiskTypes, err := conn.DescribePHostMachineType()
-			if err != nil {
-				return fmt.Errorf("error on getting local disk types, %s", err)
-			}
-
-			if isStringIn(instanceType, cloudDiskTypes) {
-				if _, ok := diff.GetOk("boot_disk_size"); !ok {
-					return fmt.Errorf("boot_disk_size is required for cloud disk instance")
-				}
-				if _, ok := diff.GetOk("boot_disk_type"); !ok {
-					return fmt.Errorf("boot_disk_type is required for cloud disk instance")
-				}
-				if _, ok := diff.GetOk("data_disks"); !ok {
-					return fmt.Errorf("data_disks is required for cloud disk instance")
-				}
-				if _, ok := diff.GetOk("raid_type"); ok {
-					return fmt.Errorf("raid_type should not be set for cloud disk instance")
-				}
-			} else if isStringIn(instanceType, localDiskTypes) {
-				if _, ok := diff.GetOk("raid_type"); !ok {
-					return fmt.Errorf("raid_type is required for local disk instance")
-				}
-				if _, ok := diff.GetOk("boot_disk_size"); ok {
-					return fmt.Errorf("boot_disk_size should not be set for local disk instance")
-				}
-				if _, ok := diff.GetOk("boot_disk_type"); ok {
-					return fmt.Errorf("boot_disk_type should not be set for local disk instance")
-				}
-				if _, ok := diff.GetOk("data_disks"); ok {
-					return fmt.Errorf("data_disks should not be set for local disk instance")
-				}
-			} else {
-				return fmt.Errorf("invalid instance type: %s", instanceType)
-			}
-
-			return nil
-		},
+		Create:        resourceUCloudBareMetalInstanceCreate,
+		Read:          resourceUCloudBareMetalInstanceRead,
+		Update:        resourceUCloudBareMetalInstanceUpdate,
+		Delete:        resourceUCloudBareMetalInstanceDelete,
+		CustomizeDiff: bareMetalInstanceCustomizeDiff,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -83,11 +39,23 @@ func resourceUCloudBareMetalInstance() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			"allow_stopping_for_resizing_disk": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"allow_stopping_for_detaching_disk": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"root_password": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Sensitive:    true,
 				ValidateFunc: validateUcloudInstanceRootPassword,
+			},
+			"boot_disk_id": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"boot_disk_size": {
 				Type:         schema.TypeInt,
@@ -153,13 +121,19 @@ func resourceUCloudBareMetalInstance() *schema.Resource {
 			"data_disks": {
 				Type:     schema.TypeList,
 				Optional: true,
-				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"device_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"size": {
 							Type:         schema.TypeInt,
 							Required:     true,
-							ForceNew:     true,
 							ValidateFunc: validation.IntBetween(20, 8000),
 						},
 						"type": {
@@ -174,6 +148,11 @@ func resourceUCloudBareMetalInstance() *schema.Resource {
 				},
 			},
 			"delete_disks_with_instance": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+			},
+			"delete_eips_with_instance": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: true,
@@ -235,7 +214,7 @@ func resourceUCloudBareMetalInstanceCreate(d *schema.ResourceData, meta interfac
 	req.Zone = ucloud.String(d.Get("availability_zone").(string))
 	req.ImageId = ucloud.String(d.Get("image_id").(string))
 	req.Password = ucloud.String(d.Get("root_password").(string))
-	req.ChargeType = ucloud.String(d.Get("charge_type").(string))
+	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
 	req.Quantity = ucloud.String(strconv.Itoa(d.Get("duration").(int)))
 	req.Name = ucloud.String(d.Get("name").(string))
 	req.Tag = ucloud.String(d.Get("tag").(string))
@@ -367,21 +346,37 @@ func resourceUCloudBareMetalInstanceRead(d *schema.ResourceData, meta interface{
 	if len(resp.PHostSet) == 0 {
 		return newNotFoundError("resource cannot be found")
 	}
+	instance := resp.PHostSet[0]
+	for _, item := range instance.IPSet {
+		if item.OperatorName == "Private" {
+			d.Set("vpc_id", item.VPCId)
+			d.Set("subnet_id", item.SubnetId)
+			d.Set("private_ip", item.IPAddr)
+			break
+		}
+	}
+	dataDisks := make([]map[string]interface{}, 0)
+	for _, item := range instance.DiskSet {
+		diskType := upperCvt.convert(item.Type)
+		if item.IsBoot == "True" {
+			d.Set("boot_disk_size", item.Space)
+			d.Set("boot_disk_type", diskType)
+			d.Set("boot_disk_id", item.DiskId)
+		}
+		dataDisks = append(dataDisks, map[string]interface{}{
+			"id":          item.DiskId,
+			"device_name": item.Drive,
+			"size":        item.Space,
+			"type":        diskType,
+		})
+	}
 	// Set the properties of the instance
-	d.Set("availability_zone", resp.PHostSet[0].Zone)
-	d.Set("charge_type", resp.PHostSet[0].ChargeType)
-	d.Set("name", resp.PHostSet[0].Name)
-	d.Set("tag", resp.PHostSet[0].Tag)
-	d.Set("remark", resp.PHostSet[0].Remark)
-	d.Set("vpc_id", resp.PHostSet[0])
-	d.Set("subnet_id", resp.PHostSet[0].SubnetId)
-	d.Set("private_ip", resp.PHostSet[0].PrivateIp)
-	d.Set("instance_type", resp.PHosts[0].InstanceType)
-	d.Set("raid_type", resp.PHosts[0].Raid)
-	d.Set("boot_disk_size", resp.PHosts[0].BootDiskSpace)
-	d.Set("boot_disk_type", resp.PHosts[0].BootDiskType)
-	d.Set("data_disks", resp.PHosts[0].DataDisks)
-	d.Set("network_interface", resp.PHosts[0].NetworkInterface)
+	d.Set("availability_zone", instance.Zone)
+	d.Set("charge_type", ucloud.String(upperCamelCvt.convert(instance.ChargeType)))
+	d.Set("name", instance.Name)
+	d.Set("tag", instance.Tag)
+	d.Set("remark", instance.Remark)
+	d.Set("raid_type", instance.RaidSupported)
 
 	return nil
 }
@@ -432,6 +427,94 @@ func resourceUCloudBareMetalInstanceUpdate(d *schema.ResourceData, meta interfac
 		}
 	}
 
+	if d.HasChanges("boot_disk_size", "data_disks") {
+		resizeRequests := make([]*uphost.ResizePHostAttachedDiskRequest, 0)
+		attachRequests := make([]*udisk.CreateAttachUDiskRequest, 0)
+		deleteRequests := make([]*udisk.DetachDeleteUDiskRequest, 0)
+		if d.HasChange("boot_disk_size") {
+			resizeReq := conn.NewResizePHostAttachedDiskRequest()
+			resizeReq.PHostId = ucloud.String(d.Id())
+			resizeReq.DiskSpace = ucloud.Int(d.Get("boot_disk_size").(int))
+			resizeReq.UDiskId = ucloud.String(d.Get("boot_disk_id").(string))
+			resizeRequests = append(resizeRequests, resizeReq)
+		}
+		if d.HasChange("data_disks") {
+			oldItems, newItems := d.GetChange("data_disks")
+			oldDisksMap := make(map[string]map[string]interface{})
+			newDisksMap := make(map[string]map[string]interface{})
+
+			for _, item := range oldItems.([]map[string]interface{}) {
+				oldDisksMap[item["id"].(string)] = item
+			}
+			for _, newDisk := range newItems.([]map[string]interface{}) {
+				if newDiskId, ok := newDisk["id"].(string); ok {
+					newDisksMap[newDiskId] = newDisk
+					oldDiskSize := oldDisksMap[newDiskId]["size"].(int)
+					newDiskSize := newDisk["size"].(int)
+					if newDiskSize < oldDiskSize {
+						return errors.New("new disk size should be larger than old disk size")
+					}
+					resizeReq := conn.NewResizePHostAttachedDiskRequest()
+					resizeReq.PHostId = ucloud.String(d.Id())
+					resizeReq.DiskSpace = ucloud.Int(newDiskSize)
+					resizeReq.UDiskId = ucloud.String(newDiskId)
+					resizeRequests = append(resizeRequests, resizeReq)
+				} else {
+					udiskConn := client.udiskconn
+					createAttachUDiskRequest := udiskConn.NewCreateAttachUDiskRequest()
+					createAttachUDiskRequest.HostId = ucloud.String(d.Id())
+					createAttachUDiskRequest.Name = ucloud.String("data disk")
+					createAttachUDiskRequest.DiskType = ucloud.String(diskTypeCvt.unconvert(newDisk["type"].(string)))
+					createAttachUDiskRequest.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
+					attachRequests = append(attachRequests, createAttachUDiskRequest)
+				}
+				for _, item := range oldItems.([]map[string]interface{}) {
+					if _, ok := newDisksMap[item["id"].(string)]; !ok {
+						deleteRequests = append(deleteRequests, &udisk.DetachDeleteUDiskRequest{
+							UDiskId: ucloud.String(item["id"].(string)),
+							HostId:  ucloud.String(d.Id()),
+						})
+					}
+				}
+			}
+
+		}
+		for _, req := range attachRequests {
+			udiskConn := client.udiskconn
+			if _, err := udiskConn.CreateAttachUDisk(req); err != nil {
+				return fmt.Errorf("error on attaching disk %s", err)
+			}
+		}
+		if _, ok := d.GetOk("allow_stopping_for_resizing_disk"); ok {
+			err := updateFunc(func() error {
+				for _, req := range resizeRequests {
+					if _, err := conn.ResizePHostAttachedDisk(req); err != nil {
+						return fmt.Errorf("error on resizing disk %s", err)
+					}
+				}
+				return nil
+			})
+
+			if err != nil {
+				return err
+			}
+		}
+		if _, ok := d.GetOk("allow_stopping_for_detaching_disk"); ok {
+			err := updateFunc(func() error {
+				for _, req := range deleteRequests {
+					udiskConn := client.udiskconn
+					if _, err := udiskConn.DetachDeleteUDisk(req); err != nil {
+						return fmt.Errorf("error on detaching disk %s", err)
+					}
+				}
+				return nil
+			})
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	if d.HasChange("name") || d.HasChange("remark") || d.HasChange("tag") {
 		modifyInfoReq := conn.NewModifyPHostInfoRequest()
 		modifyInfoReq.PHostId = ucloud.String(d.Id())
@@ -451,10 +534,15 @@ func resourceUCloudBareMetalInstanceDelete(d *schema.ResourceData, meta interfac
 	client := meta.(*UCloudClient)
 	conn := client.uphostconn
 
-	req := conn.NewDeletePHostInstanceRequest()
+	req := conn.NewTerminatePHostRequest()
 	req.PHostId = ucloud.String(d.Id())
+	_, releaseUDisk := d.GetOk("delete_disks_with_instance")
+	_, releaseEIP := d.GetOk("delete_eips_with_instance")
 
-	_, err := conn.DeletePHostInstance(req)
+	req.ReleaseUDisk = ucloud.Bool(releaseUDisk)
+	req.ReleaseEIP = ucloud.Bool(releaseEIP)
+
+	_, err := conn.TerminatePHost(req)
 	if err != nil {
 		return fmt.Errorf("error on deleting bare metal instance %s, %s", d.Id(), err)
 	}
@@ -479,8 +567,8 @@ func resourceUCloudBareMetalInstanceDelete(d *schema.ResourceData, meta interfac
 
 func bareMetalInstanceStateRefreshFunc(client *UCloudClient, instanceId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		req := uphost.DescribePHostRequest()
-		req.PHostIds = []string{instanceId}
+		req := client.uphostconn.NewDescribePHostRequest()
+		req.PHostId = []string{instanceId}
 
 		resp, err := client.uphostconn.DescribePHost(req)
 		if err != nil {
@@ -496,7 +584,7 @@ func bareMetalInstanceStateRefreshFunc(client *UCloudClient, instanceId string) 
 
 		// Assuming that State is a field of PHostSet
 		// Adjust this according to the actual structure of PHostSet
-		return resp.PHostSet[0], resp.PHostSet[0].State, nil
+		return resp.PHostSet[0], resp.PHostSet[0].PMStatus, nil
 	}
 }
 
@@ -519,10 +607,10 @@ func stopUpdateStartBareMetalInstance(d *schema.ResourceData, meta interface{}, 
 	client := meta.(*UCloudClient)
 	conn := client.uphostconn
 
-	stopReq := conn.NewStopPHostInstanceRequest()
+	stopReq := conn.NewTerminatePHostRequest()
 	stopReq.PHostId = ucloud.String(d.Id())
 
-	if _, err := conn.StopPHostInstance(stopReq); err != nil {
+	if _, err := conn.TerminatePHost(stopReq); err != nil {
 		return fmt.Errorf("error on stopping instance when updating, %s", err)
 	}
 
@@ -545,10 +633,10 @@ func stopUpdateStartBareMetalInstance(d *schema.ResourceData, meta interface{}, 
 		return err
 	}
 
-	startReq := conn.NewStartPHostInstanceRequest()
+	startReq := conn.NewStartPHostRequest()
 	startReq.PHostId = ucloud.String(d.Id())
 
-	if _, err := conn.StartPHostInstance(startReq); err != nil {
+	if _, err := conn.StartPHost(startReq); err != nil {
 		return fmt.Errorf("error on starting instance after updating, %s", err)
 	}
 
@@ -564,6 +652,64 @@ func stopUpdateStartBareMetalInstance(d *schema.ResourceData, meta interface{}, 
 
 	if _, err := stateConf.WaitForState(); err != nil {
 		return fmt.Errorf("error on waiting for instance to be started after updating, %s", err)
+	}
+
+	return nil
+}
+
+func bareMetalInstanceCustomizeDiff(diff *schema.ResourceDiff, v interface{}) error {
+	client := v.(*UCloudClient)
+	conn := client.uphostconn
+
+	instanceType := diff.Get("instance_type").(string)
+	baremetalMachineTypeRequest := conn.NewDescribeBaremetalMachineTypeRequest()
+	baremetalMachineTypeRequest.Zone = ucloud.String(diff.Get("availability_zone").(string))
+	cloudDiskTypesResp, err := conn.DescribeBaremetalMachineType(baremetalMachineTypeRequest)
+	if err != nil {
+		return fmt.Errorf("error on getting cloud disk types, %s", err)
+	}
+	phostMachineTypeRequest := conn.NewDescribePHostMachineTypeRequest()
+	phostMachineTypeRequest.Zone = ucloud.String(diff.Get("availability_zone").(string))
+	localDiskTypesResp, err := conn.DescribePHostMachineType(phostMachineTypeRequest)
+	if err != nil {
+		return fmt.Errorf("error on getting local disk types, %s", err)
+	}
+	cloudDiskTypes := []string{}
+	for _, machineType := range cloudDiskTypesResp.MachineTypes {
+		cloudDiskTypes = append(cloudDiskTypes, machineType.Type)
+	}
+	localDiskTypes := []string{}
+	for _, machineType := range localDiskTypesResp.MachineTypes {
+		localDiskTypes = append(localDiskTypes, machineType.Type)
+	}
+	if isStringIn(instanceType, cloudDiskTypes) {
+		if _, ok := diff.GetOk("boot_disk_size"); !ok {
+			return fmt.Errorf("boot_disk_size is required for cloud disk instance")
+		}
+		if _, ok := diff.GetOk("boot_disk_type"); !ok {
+			return fmt.Errorf("boot_disk_type is required for cloud disk instance")
+		}
+		if _, ok := diff.GetOk("data_disks"); !ok {
+			return fmt.Errorf("data_disks is required for cloud disk instance")
+		}
+		if _, ok := diff.GetOk("raid_type"); ok {
+			return fmt.Errorf("raid_type should not be set for cloud disk instance")
+		}
+	} else if isStringIn(instanceType, localDiskTypes) {
+		if _, ok := diff.GetOk("raid_type"); !ok {
+			return fmt.Errorf("raid_type is required for local disk instance")
+		}
+		if _, ok := diff.GetOk("boot_disk_size"); ok {
+			return fmt.Errorf("boot_disk_size should not be set for local disk instance")
+		}
+		if _, ok := diff.GetOk("boot_disk_type"); ok {
+			return fmt.Errorf("boot_disk_type should not be set for local disk instance")
+		}
+		if _, ok := diff.GetOk("data_disks"); ok {
+			return fmt.Errorf("data_disks should not be set for local disk instance")
+		}
+	} else {
+		return fmt.Errorf("invalid instance type: %s", instanceType)
 	}
 
 	return nil
