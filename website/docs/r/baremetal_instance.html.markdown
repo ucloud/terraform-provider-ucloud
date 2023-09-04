@@ -75,3 +75,11 @@ The `network_interface` block supports:
 - `eip_bandwidth` - (Required, ForceNew) Maximum bandwidth to the elastic public network, measured in Mbps (Mega bit per second). The ranges for bandwidth are: 1-200 for pay by traffic, 1-800 for pay by bandwidth.
 - `eip_internet_type` - (Required, ForceNew) Type of Elastic IP routes. Possible values are: international as international BGP IP and bgp as china mainland BGP IP.
 - `eip_charge_mode` - (Required, ForceNew) Elastic IP charge mode.  Possible values are raid1, raid0, raid10, raid5 and no_raid.
+
+## Import
+
+Bare metal instance can be imported using the `id`, e.g.
+
+```
+$ terraform import ucloud_baremetal_instance.example upm-abcdefg
+```
