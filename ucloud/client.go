@@ -51,4 +51,6 @@ type UCloudClient struct {
 	uphostconn     *uphost.UPHostClient
 	// private services
 	pumemconn *pumem.UMemClient
+	// client for generic invocation
+	genericClient *ucloud.Client
 }

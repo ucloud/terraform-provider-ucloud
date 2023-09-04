@@ -106,6 +106,7 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_iam_projects":          dataSourceUCloudIAMProjects(),
 			"ucloud_iam_policy":            dataSourceUCloudIAMPolicy(),
 			"ucloud_iam_policy_document":   dataSourceUCloudIAMPolicyDocument(),
+			"ucloud_baremetal_images":      dataSourceUCloudBareMetalImages(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{

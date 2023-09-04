@@ -33,7 +33,8 @@ func resourceUCloudEIPAssociation() *schema.Resource {
 				Computed: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					if (isStringIn(old, []string{resourceTypeInstance, eipResourceTypeUHost}) && isStringIn(new, []string{resourceTypeInstance, eipResourceTypeUHost})) ||
-						(isStringIn(old, []string{resourceTypeLb, eipResourceTypeULB}) && isStringIn(new, []string{resourceTypeLb, eipResourceTypeULB})) {
+						(isStringIn(old, []string{resourceTypeLb, eipResourceTypeULB}) && isStringIn(new, []string{resourceTypeLb, eipResourceTypeULB})) ||
+						(isStringIn(old, []string{resourceTypeBareMetal, eipResourceTypeUPHost}) && isStringIn(new, []string{resourceTypeBareMetal, eipResourceTypeUPHost})) {
 						return true
 					}
 					return false

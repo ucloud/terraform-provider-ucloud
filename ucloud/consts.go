@@ -29,6 +29,9 @@ const (
 
 	// statusDELETED is the general status when remote resource is DELETED
 	statusDELETED = "DELETED"
+
+	// uphostStatusStopping is the general status when remote resource is being stopped
+	uphostStatusStopping = "Stopping"
 )
 
 const (
@@ -103,6 +106,7 @@ const (
 const (
 	resourceTypeInstance      = "instance"
 	resourceTypeLb            = "lb"
+	resourceTypeBareMetal     = "baremetal"
 	lbResourceTypeUHost       = "UHost"
 	lbMatchTypePath           = "Path"
 	lbMatchTypeDomain         = "Domain"
@@ -110,6 +114,7 @@ const (
 	eipResourceTypeUHost      = "uhost"
 	eipResourceTypeCube       = "cube"
 	eipResourceTypeNatGateway = "natgw"
+	eipResourceTypeUPHost     = "upm"
 )
 
 const (
@@ -140,8 +145,9 @@ var lbAttachmentStatusCvt = newIntConverter(map[int]string{
 
 // lowerCaseProdCvt is used to covert one lower string to another lower string
 var lowerCaseProdCvt = newStringConverter(map[string]string{
-	"instance": "uhost",
-	"lb":       "ulb",
+	"instance":  "uhost",
+	"lb":        "ulb",
+	"baremetal": "upm",
 })
 
 // lbBackendCaseProdCvt is used to covert one backend string to another backend string
@@ -205,6 +211,14 @@ var diskTypeCvt = newStringConverter(map[string]string{
 	"SystemDisk":    "system_disk",
 	"SSDSystemDisk": "ssd_system_disk",
 	"RSSDDataDisk":  "rssd_data_disk",
+})
+
+var raidTypeCvt = newStringConverter(map[string]string{
+	"Raid0":  "raid0",
+	"Raid1":  "raid1",
+	"Raid5":  "raid5",
+	"Raid10": "raid10",
+	"NoRaid": "no_raid",
 })
 
 var vpnAutoCvt = newStringConverter(map[string]string{

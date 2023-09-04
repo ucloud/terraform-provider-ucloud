@@ -1,9 +1,10 @@
 package ucloud
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/ucloud/ucloud-sdk-go/services/udisk"
+	"github.com/ucloud/ucloud-sdk-go/ucloud/request"
 	"regexp"
 	"strconv"
 	"time"
@@ -31,6 +32,11 @@ func resourceUCloudBareMetalInstance() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"instance_type": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
 			"image_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -39,13 +45,19 @@ func resourceUCloudBareMetalInstance() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			"allow_stopping_for_resizing_disk": {
+			"allow_stopping_for_resizing": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			"allow_stopping_for_detaching_disk": {
+			"delete_disks_with_instance": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				ForceNew: true,
+			},
+			"delete_eips_with_instance": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
 			},
 			"root_password": {
 				Type:         schema.TypeString,
@@ -74,6 +86,7 @@ func resourceUCloudBareMetalInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Default:  "day",
 				ValidateFunc: validation.StringInSlice([]string{
 					"year",
 					"month",
@@ -82,6 +95,7 @@ func resourceUCloudBareMetalInstance() *schema.Resource {
 			},
 			"duration": {
 				Type:     schema.TypeInt,
+				Default:  1,
 				Optional: true,
 				ForceNew: true,
 			},
@@ -94,33 +108,39 @@ func resourceUCloudBareMetalInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"tag": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      defaultTag,
+				ValidateFunc: validateTag,
+				StateFunc:    stateFuncTag,
+			},
 			"security_group": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"vpc_id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 				ForceNew: true,
 			},
 			"subnet_id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 				ForceNew: true,
-			},
-			"tag": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringLenBetween(0, 63),
 			},
 			"private_ip": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 			"data_disks": {
 				Type:     schema.TypeList,
 				Optional: true,
+				MaxItems: 1,
+				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -147,20 +167,11 @@ func resourceUCloudBareMetalInstance() *schema.Resource {
 					},
 				},
 			},
-			"delete_disks_with_instance": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: true,
-			},
-			"delete_eips_with_instance": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: true,
-			},
 			"network_interface": {
 				Type:     schema.TypeList,
 				Optional: true,
 				ForceNew: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"eip_bandwidth": {
@@ -210,59 +221,83 @@ func resourceUCloudBareMetalInstanceCreate(d *schema.ResourceData, meta interfac
 	conn := client.uphostconn
 
 	req := conn.NewCreatePHostRequest()
-
+	req.SetEncoder(request.NewJSONEncoder(conn.GetConfig(), conn.GetCredential()))
 	req.Zone = ucloud.String(d.Get("availability_zone").(string))
 	req.ImageId = ucloud.String(d.Get("image_id").(string))
-	req.Password = ucloud.String(d.Get("root_password").(string))
+	req.Password = ucloud.String(base64.StdEncoding.EncodeToString([]byte(d.Get("root_password").(string))))
 	req.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
 	req.Quantity = ucloud.String(strconv.Itoa(d.Get("duration").(int)))
 	req.Name = ucloud.String(d.Get("name").(string))
 	req.Tag = ucloud.String(d.Get("tag").(string))
 	req.Remark = ucloud.String(d.Get("remark").(string))
-	req.SecurityGroupId = ucloud.String(d.Get("security_group").(string))
 	req.VPCId = ucloud.String(d.Get("vpc_id").(string))
 	req.SubnetId = ucloud.String(d.Get("subnet_id").(string))
-	req.VpcIp = ucloud.String(d.Get("private_ip").(string))
+	if privateIp, ok := d.GetOk("private_ip"); ok {
+		req.VpcIp = ucloud.String(privateIp.(string))
+	}
+	if securityGroup, ok := d.GetOk("security_group"); ok {
+		firewall, err := client.describeFirewallById(securityGroup.(string))
+		if err != nil {
+			return fmt.Errorf("fail to retrieve firewall: %v", err)
+		}
+		req.SecurityGroupId = ucloud.String(firewall.GroupId)
+	}
 
 	// Get instance type
 	instanceType := d.Get("instance_type").(string)
+	var isCloudDiskInstance bool
+	var isLocalDiskInstance bool
 
 	// Create a request object for DescribePHostMachineType
 	describePHostReq := conn.NewDescribePHostMachineTypeRequest()
-	describePHostReq.Zone = ucloud.String(d.Get("availability_zone").(string))
 
 	// Call DescribePHostMachineType API to get valid types for local disk instance
 	localDiskTypesResp, err := conn.DescribePHostMachineType(describePHostReq)
 	if err != nil {
 		return fmt.Errorf("error on getting local disk types, %s", err)
 	}
-	localDiskTypes := []string{}
 	for _, machineType := range localDiskTypesResp.MachineTypes {
-		localDiskTypes = append(localDiskTypes, machineType.Type)
+		if machineType.Type == instanceType {
+			for _, cluster := range machineType.Clusters {
+				if cluster.StockStatus != "SoldOut" {
+					req.Cluster = ucloud.String(cluster.Name)
+					break
+				}
+			}
+			isLocalDiskInstance = true
+		}
 	}
 
 	// Create a request object for DescribeBareMetalMachineType
 	describeBareMetalReq := conn.NewDescribeBaremetalMachineTypeRequest()
-	describeBareMetalReq.Zone = ucloud.String(d.Get("availability_zone").(string))
 
 	// Call DescribeBareMetalMachineType API to get valid types for cloud disk instance
 	cloudDiskTypesResp, err := conn.DescribeBaremetalMachineType(describeBareMetalReq)
 	if err != nil {
 		return fmt.Errorf("error on getting cloud disk types, %s", err)
 	}
-	cloudDiskTypes := []string{}
 	for _, machineType := range cloudDiskTypesResp.MachineTypes {
-		cloudDiskTypes = append(cloudDiskTypes, machineType.Type)
+		if machineType.Type == instanceType {
+			for _, cluster := range machineType.Clusters {
+				if cluster.StockStatus != "SoldOut" {
+					req.Cluster = ucloud.String(cluster.Name)
+					break
+				}
+			}
+			isCloudDiskInstance = true
+		}
 	}
-
+	if req.Cluster == nil {
+		return fmt.Errorf("resource of %v is not available", instanceType)
+	}
 	// Check if instance type is a valid type
-	if isStringIn(instanceType, localDiskTypes) {
+	if isLocalDiskInstance {
 		req.Type = ucloud.String(instanceType)
 		if _, ok := d.GetOk("raid_type"); !ok {
 			return fmt.Errorf("raid_type is required for local disk instance")
 		}
-		req.Raid = ucloud.String(d.Get("raid_type").(string))
-	} else if isStringIn(instanceType, cloudDiskTypes) {
+		req.Raid = ucloud.String(raidTypeCvt.unconvert(d.Get("raid_type").(string)))
+	} else if isCloudDiskInstance {
 		req.Type = ucloud.String(instanceType)
 		if _, ok := d.GetOk("boot_disk_size"); !ok {
 			return fmt.Errorf("boot_disk_size is required for cloud disk instance")
@@ -297,9 +332,10 @@ func resourceUCloudBareMetalInstanceCreate(d *schema.ResourceData, meta interfac
 			ifaceMap := iface.(map[string]interface{})
 			networkInterface := uphost.CreatePHostParamNetworkInterface{
 				EIP: &uphost.CreatePHostParamNetworkInterfaceEIP{
+					CouponId:     ucloud.String(""),
 					Bandwidth:    ucloud.String(strconv.Itoa(ifaceMap["eip_bandwidth"].(int))),
-					PayMode:      ucloud.String(ifaceMap["eip_charge_mode"].(string)),
-					OperatorName: ucloud.String(ifaceMap["eip_internet_type"].(string)),
+					PayMode:      ucloud.String(upperCamelCvt.unconvert(ifaceMap["eip_charge_mode"].(string))),
+					OperatorName: ucloud.String(upperCamelCvt.unconvert(ifaceMap["eip_internet_type"].(string))),
 				},
 			}
 			req.NetworkInterface = append(req.NetworkInterface, networkInterface)
@@ -316,7 +352,7 @@ func resourceUCloudBareMetalInstanceCreate(d *schema.ResourceData, meta interfac
 
 	// Wait for instance to be in "Running" state before returning
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"Pending"},
+		Pending:    []string{"Starting"},
 		Target:     []string{"Running"},
 		Refresh:    bareMetalInstanceStateRefreshFunc(client, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
@@ -346,6 +382,7 @@ func resourceUCloudBareMetalInstanceRead(d *schema.ResourceData, meta interface{
 	if len(resp.PHostSet) == 0 {
 		return newNotFoundError("resource cannot be found")
 	}
+	networkInterfaces := make([]map[string]interface{}, 0)
 	instance := resp.PHostSet[0]
 	for _, item := range instance.IPSet {
 		if item.OperatorName == "Private" {
@@ -353,6 +390,22 @@ func resourceUCloudBareMetalInstanceRead(d *schema.ResourceData, meta interface{
 			d.Set("subnet_id", item.SubnetId)
 			d.Set("private_ip", item.IPAddr)
 			break
+		} else {
+			eipPayModeReq := client.unetconn.NewGetEIPPayModeRequest()
+			eipPayModeReq.EIPId = []string{item.IPId}
+			eipPayModeResp, err := client.unetconn.GetEIPPayMode(eipPayModeReq)
+			if err != nil {
+				return fmt.Errorf("error on reading eip_charge_mode when reading instance %q, %s", d.Id(), err)
+			}
+			if len(eipPayModeResp.EIPPayMode) == 0 {
+				return fmt.Errorf("fail to get eip_charge_mode when reading instance %q", d.Id())
+			}
+
+			networkInterfaces = append(networkInterfaces, map[string]interface{}{
+				"eip_bandwidth":     item.Bandwidth,
+				"eip_internet_type": upperCvt.convert(item.OperatorName),
+				"eip_charge_mode":   upperCamelCvt.convert(eipPayModeResp.EIPPayMode[0].EIPPayMode),
+			})
 		}
 	}
 	dataDisks := make([]map[string]interface{}, 0)
@@ -362,13 +415,14 @@ func resourceUCloudBareMetalInstanceRead(d *schema.ResourceData, meta interface{
 			d.Set("boot_disk_size", item.Space)
 			d.Set("boot_disk_type", diskType)
 			d.Set("boot_disk_id", item.DiskId)
+		} else {
+			dataDisks = append(dataDisks, map[string]interface{}{
+				"id":          item.DiskId,
+				"device_name": item.Drive,
+				"size":        item.Space,
+				"type":        diskType,
+			})
 		}
-		dataDisks = append(dataDisks, map[string]interface{}{
-			"id":          item.DiskId,
-			"device_name": item.Drive,
-			"size":        item.Space,
-			"type":        diskType,
-		})
 	}
 	// Set the properties of the instance
 	d.Set("availability_zone", instance.Zone)
@@ -376,8 +430,30 @@ func resourceUCloudBareMetalInstanceRead(d *schema.ResourceData, meta interface{
 	d.Set("name", instance.Name)
 	d.Set("tag", instance.Tag)
 	d.Set("remark", instance.Remark)
-	d.Set("raid_type", instance.RaidSupported)
 
+	raidType, err := client.getRaidTypeById(d.Id())
+	if err != nil {
+		return fmt.Errorf("error on reading raid type when reading instance %q, %s", d.Id(), err)
+	}
+	if raidType != "" {
+		d.Set("raid_type", raidTypeCvt.convert(raidType))
+	}
+	sgSet, err := client.describeFirewallByIdAndType(d.Id(), eipResourceTypeUPHost)
+	if err != nil {
+		if isNotFoundError(err) {
+			return nil
+		}
+		return fmt.Errorf("error on reading security group when reading instance %q, %s", d.Id(), err)
+	}
+
+	d.Set("security_group", sgSet.FWId)
+
+	if _, ok := d.GetOk("data_disks"); ok {
+		d.Set("data_disks", dataDisks)
+	}
+	if _, ok := d.GetOk("network_interface"); ok {
+		d.Set("network_interface", networkInterfaces)
+	}
 	return nil
 }
 
@@ -392,27 +468,34 @@ func resourceUCloudBareMetalInstanceUpdate(d *schema.ResourceData, meta interfac
 		}
 		return nil
 	}
-
+	zone := ucloud.String(d.Get("availability_zone").(string))
+	d.Partial(true)
 	if d.HasChange("root_password") {
-		err := updateFunc(func() error {
-			resetReq := conn.NewResetPHostPasswordRequest()
-			resetReq.PHostId = ucloud.String(d.Id())
-			resetReq.Password = ucloud.String(d.Get("root_password").(string))
+		if _, ok := d.GetOk("allow_stopping_for_update"); ok {
+			err := updateFunc(func() error {
+				resetReq := conn.NewResetPHostPasswordRequest()
+				resetReq.Zone = zone
+				resetReq.PHostId = ucloud.String(d.Id())
+				resetReq.Password = ucloud.String(base64.StdEncoding.EncodeToString([]byte(d.Get("root_password").(string))))
+				if _, err := conn.ResetPHostPassword(resetReq); err != nil {
+					return fmt.Errorf("error on resetting password, %s", err)
+				}
+				return nil
+			})
 
-			if _, err := conn.ResetPHostPassword(resetReq); err != nil {
-				return fmt.Errorf("error on resetting password, %s", err)
+			if err != nil {
+				return err
 			}
-			return nil
-		})
-
-		if err != nil {
-			return err
+			d.SetPartial("root_password")
+		} else {
+			return errors.New("allow_stopping_for_update must be true, when root_password needs to be updated")
 		}
 	}
 
 	if d.HasChange("image_id") {
 		err := updateFunc(func() error {
 			reinstallReq := conn.NewReinstallPHostRequest()
+			reinstallReq.Zone = zone
 			reinstallReq.PHostId = ucloud.String(d.Id())
 			reinstallReq.ImageId = ucloud.String(d.Get("image_id").(string))
 
@@ -425,67 +508,21 @@ func resourceUCloudBareMetalInstanceUpdate(d *schema.ResourceData, meta interfac
 		if err != nil {
 			return err
 		}
+		d.SetPartial("image_id")
 	}
 
-	if d.HasChanges("boot_disk_size", "data_disks") {
+	if d.HasChanges("boot_disk_size") {
 		resizeRequests := make([]*uphost.ResizePHostAttachedDiskRequest, 0)
-		attachRequests := make([]*udisk.CreateAttachUDiskRequest, 0)
-		deleteRequests := make([]*udisk.DetachDeleteUDiskRequest, 0)
 		if d.HasChange("boot_disk_size") {
 			resizeReq := conn.NewResizePHostAttachedDiskRequest()
+			resizeReq.Zone = zone
 			resizeReq.PHostId = ucloud.String(d.Id())
 			resizeReq.DiskSpace = ucloud.Int(d.Get("boot_disk_size").(int))
 			resizeReq.UDiskId = ucloud.String(d.Get("boot_disk_id").(string))
 			resizeRequests = append(resizeRequests, resizeReq)
 		}
-		if d.HasChange("data_disks") {
-			oldItems, newItems := d.GetChange("data_disks")
-			oldDisksMap := make(map[string]map[string]interface{})
-			newDisksMap := make(map[string]map[string]interface{})
 
-			for _, item := range oldItems.([]map[string]interface{}) {
-				oldDisksMap[item["id"].(string)] = item
-			}
-			for _, newDisk := range newItems.([]map[string]interface{}) {
-				if newDiskId, ok := newDisk["id"].(string); ok {
-					newDisksMap[newDiskId] = newDisk
-					oldDiskSize := oldDisksMap[newDiskId]["size"].(int)
-					newDiskSize := newDisk["size"].(int)
-					if newDiskSize < oldDiskSize {
-						return errors.New("new disk size should be larger than old disk size")
-					}
-					resizeReq := conn.NewResizePHostAttachedDiskRequest()
-					resizeReq.PHostId = ucloud.String(d.Id())
-					resizeReq.DiskSpace = ucloud.Int(newDiskSize)
-					resizeReq.UDiskId = ucloud.String(newDiskId)
-					resizeRequests = append(resizeRequests, resizeReq)
-				} else {
-					udiskConn := client.udiskconn
-					createAttachUDiskRequest := udiskConn.NewCreateAttachUDiskRequest()
-					createAttachUDiskRequest.HostId = ucloud.String(d.Id())
-					createAttachUDiskRequest.Name = ucloud.String("data disk")
-					createAttachUDiskRequest.DiskType = ucloud.String(diskTypeCvt.unconvert(newDisk["type"].(string)))
-					createAttachUDiskRequest.ChargeType = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_type").(string)))
-					attachRequests = append(attachRequests, createAttachUDiskRequest)
-				}
-				for _, item := range oldItems.([]map[string]interface{}) {
-					if _, ok := newDisksMap[item["id"].(string)]; !ok {
-						deleteRequests = append(deleteRequests, &udisk.DetachDeleteUDiskRequest{
-							UDiskId: ucloud.String(item["id"].(string)),
-							HostId:  ucloud.String(d.Id()),
-						})
-					}
-				}
-			}
-
-		}
-		for _, req := range attachRequests {
-			udiskConn := client.udiskconn
-			if _, err := udiskConn.CreateAttachUDisk(req); err != nil {
-				return fmt.Errorf("error on attaching disk %s", err)
-			}
-		}
-		if _, ok := d.GetOk("allow_stopping_for_resizing_disk"); ok {
+		if _, ok := d.GetOk("allow_stopping_for_resizing"); ok {
 			err := updateFunc(func() error {
 				for _, req := range resizeRequests {
 					if _, err := conn.ResizePHostAttachedDisk(req); err != nil {
@@ -494,25 +531,17 @@ func resourceUCloudBareMetalInstanceUpdate(d *schema.ResourceData, meta interfac
 				}
 				return nil
 			})
-
 			if err != nil {
 				return err
 			}
-		}
-		if _, ok := d.GetOk("allow_stopping_for_detaching_disk"); ok {
-			err := updateFunc(func() error {
-				for _, req := range deleteRequests {
-					udiskConn := client.udiskconn
-					if _, err := udiskConn.DetachDeleteUDisk(req); err != nil {
-						return fmt.Errorf("error on detaching disk %s", err)
-					}
+		} else {
+			for _, req := range resizeRequests {
+				if _, err := conn.ResizePHostAttachedDisk(req); err != nil {
+					return fmt.Errorf("error on resizing disk %s", err)
 				}
-				return nil
-			})
-			if err != nil {
-				return err
 			}
 		}
+		d.SetPartial("boot_disk_size")
 	}
 
 	if d.HasChange("name") || d.HasChange("remark") || d.HasChange("tag") {
@@ -521,12 +550,29 @@ func resourceUCloudBareMetalInstanceUpdate(d *schema.ResourceData, meta interfac
 		modifyInfoReq.Name = ucloud.String(d.Get("name").(string))
 		modifyInfoReq.Remark = ucloud.String(d.Get("remark").(string))
 		modifyInfoReq.Tag = ucloud.String(d.Get("tag").(string))
-
+		modifyInfoReq.Zone = zone
 		if _, err := conn.ModifyPHostInfo(modifyInfoReq); err != nil {
 			return fmt.Errorf("error on updating name, remark or tag, %s", err)
 		}
+		d.SetPartial("name")
+		d.SetPartial("remark")
+		d.SetPartial("tag")
 	}
+	if d.HasChange("security_group") {
+		conn := client.unetconn
+		req := conn.NewGrantFirewallRequest()
+		req.FWId = ucloud.String(d.Get("security_group").(string))
+		req.ResourceType = ucloud.String(eipResourceTypeUPHost)
+		req.ResourceId = ucloud.String(d.Id())
+		req.Zone = zone
+		_, err := conn.GrantFirewall(req)
+		if err != nil {
+			return fmt.Errorf("error on %s to instance %q, %s", "GrantFirewall", d.Id(), err)
+		}
 
+		d.SetPartial("security_group")
+	}
+	d.Partial(false)
 	return resourceUCloudBareMetalInstanceRead(d, meta)
 }
 
@@ -534,43 +580,63 @@ func resourceUCloudBareMetalInstanceDelete(d *schema.ResourceData, meta interfac
 	client := meta.(*UCloudClient)
 	conn := client.uphostconn
 
-	req := conn.NewTerminatePHostRequest()
-	req.PHostId = ucloud.String(d.Id())
+	deleReq := conn.NewTerminatePHostRequest()
+	deleReq.PHostId = ucloud.String(d.Id())
 	_, releaseUDisk := d.GetOk("delete_disks_with_instance")
 	_, releaseEIP := d.GetOk("delete_eips_with_instance")
 
-	req.ReleaseUDisk = ucloud.Bool(releaseUDisk)
-	req.ReleaseEIP = ucloud.Bool(releaseEIP)
+	deleReq.ReleaseUDisk = ucloud.Bool(releaseUDisk)
+	deleReq.ReleaseEIP = ucloud.Bool(releaseEIP)
 
-	_, err := conn.TerminatePHost(req)
-	if err != nil {
-		return fmt.Errorf("error on deleting bare metal instance %s, %s", d.Id(), err)
-	}
+	return resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
+		instance, err := client.describeBareMetalInstanceById(d.Id())
+		if err != nil {
+			if isNotFoundError(err) {
+				return nil
+			}
+			return resource.NonRetryableError(fmt.Errorf("error on reading instance before deleting %q, %s", d.Id(), err))
+		}
+		stopReq := conn.NewPoweroffPHostRequest()
+		stopReq.PHostId = ucloud.String(d.Id())
+		if !isStringIn(instance.PMStatus, []string{statusStopped, instanceStatusInstallFail, instanceStatusResizeFail}) {
+			if _, err := conn.PoweroffPHost(stopReq); err != nil {
+				return resource.RetryableError(fmt.Errorf("error on stopping instance when deleting %q, %s", d.Id(), err))
+			}
 
-	// Wait for instance to be in "Terminated" state before returning
-	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"Running", "Stopping"},
-		Target:     []string{"Terminated"},
-		Refresh:    bareMetalInstanceStateRefreshFunc(client, d.Id()),
-		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      10 * time.Second,
-		MinTimeout: 3 * time.Second,
-	}
+			stateConf := &resource.StateChangeConf{
+				Pending:    []string{uphostStatusStopping},
+				Target:     []string{statusStopped},
+				Refresh:    bareMetalInstanceStateRefreshFunc(client, d.Id()),
+				Timeout:    5 * time.Minute,
+				Delay:      3 * time.Second,
+				MinTimeout: 2 * time.Second,
+			}
 
-	_, err = stateConf.WaitForState()
-	if err != nil {
-		return fmt.Errorf("error on waiting for bare metal instance %s to be terminated, %s", d.Id(), err)
-	}
+			if _, err = stateConf.WaitForState(); err != nil {
+				return resource.RetryableError(fmt.Errorf("error on waiting for stopping instance when deleting %q, %s", d.Id(), err))
+			}
+		}
 
+		if _, err := conn.TerminatePHost(deleReq); err != nil {
+			return resource.RetryableError(fmt.Errorf("error on deleting instance %q, %s", d.Id(), err))
+		}
+
+		if _, err := client.describeBareMetalInstanceById(d.Id()); err != nil {
+			if isNotFoundError(err) {
+				return nil
+			}
+
+			return resource.NonRetryableError(fmt.Errorf("error on reading instance when deleting %q, %s", d.Id(), err))
+		}
+
+		return resource.RetryableError(fmt.Errorf("the specified instance %q has not been deleted due to unknown error", d.Id()))
+	})
 	return nil
 }
 
 func bareMetalInstanceStateRefreshFunc(client *UCloudClient, instanceId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		req := client.uphostconn.NewDescribePHostRequest()
-		req.PHostId = []string{instanceId}
-
-		resp, err := client.uphostconn.DescribePHost(req)
+		resp, err := client.describeBareMetalInstanceById(instanceId)
 		if err != nil {
 			if isNotFoundError(err) {
 				return nil, "", fmt.Errorf("instance not found")
@@ -578,13 +644,9 @@ func bareMetalInstanceStateRefreshFunc(client *UCloudClient, instanceId string) 
 			return nil, "", err
 		}
 
-		if len(resp.PHostSet) == 0 {
-			return nil, "", fmt.Errorf("instance not found")
-		}
-
 		// Assuming that State is a field of PHostSet
 		// Adjust this according to the actual structure of PHostSet
-		return resp.PHostSet[0], resp.PHostSet[0].PMStatus, nil
+		return resp, resp.PMStatus, nil
 	}
 }
 
@@ -663,13 +725,11 @@ func bareMetalInstanceCustomizeDiff(diff *schema.ResourceDiff, v interface{}) er
 
 	instanceType := diff.Get("instance_type").(string)
 	baremetalMachineTypeRequest := conn.NewDescribeBaremetalMachineTypeRequest()
-	baremetalMachineTypeRequest.Zone = ucloud.String(diff.Get("availability_zone").(string))
 	cloudDiskTypesResp, err := conn.DescribeBaremetalMachineType(baremetalMachineTypeRequest)
 	if err != nil {
 		return fmt.Errorf("error on getting cloud disk types, %s", err)
 	}
 	phostMachineTypeRequest := conn.NewDescribePHostMachineTypeRequest()
-	phostMachineTypeRequest.Zone = ucloud.String(diff.Get("availability_zone").(string))
 	localDiskTypesResp, err := conn.DescribePHostMachineType(phostMachineTypeRequest)
 	if err != nil {
 		return fmt.Errorf("error on getting local disk types, %s", err)
