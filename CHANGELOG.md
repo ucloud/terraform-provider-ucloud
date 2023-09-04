@@ -1,3 +1,9 @@
+## 1.38.1 (2023-09-03)
+
+FEATURES:
+
+* add rdma_cluster_id attribute to bare metal instance
+
 ## 1.38.0 (2023-09-03)
 
 FEATURES:
