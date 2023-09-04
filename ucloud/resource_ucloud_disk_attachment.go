@@ -56,7 +56,7 @@ func resourceUCloudDiskAttachmentCreate(d *schema.ResourceData, meta interface{}
 
 	req := conn.NewAttachUDiskRequest()
 	req.Zone = ucloud.String(d.Get("availability_zone").(string))
-	req.UHostId = ucloud.String(instanceId)
+	req.HostId = ucloud.String(instanceId)
 	req.UDiskId = ucloud.String(diskId)
 
 	_, err := conn.AttachUDisk(req)
@@ -112,7 +112,7 @@ func resourceUCloudDiskAttachmentDelete(d *schema.ResourceData, meta interface{}
 	req := conn.NewDetachUDiskRequest()
 	req.Zone = ucloud.String(d.Get("availability_zone").(string))
 	req.UDiskId = ucloud.String(p[0])
-	req.UHostId = ucloud.String(p[1])
+	req.HostId = ucloud.String(p[1])
 
 	if _, ok := d.GetOk("stop_instance_before_detaching"); ok {
 		err := WaitAndUpdateInstanceState(client, *req.UHostId, instanceStatusStopped, false, d.Timeout(schema.TimeoutDelete))

@@ -4,7 +4,9 @@ go 1.19
 
 require (
 	github.com/hashicorp/terraform-plugin-sdk v1.4.0
-	github.com/ucloud/ucloud-sdk-go v0.21.60
+	github.com/pkg/errors v0.8.0
+	github.com/tidwall/gjson v1.16.0
+	github.com/ucloud/ucloud-sdk-go v0.22.5
 )
 
 require (
@@ -55,10 +57,11 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect
-	github.com/pkg/errors v0.8.0 // indirect
 	github.com/posener/complete v1.2.1 // indirect
 	github.com/sirupsen/logrus v1.3.0 // indirect
 	github.com/spf13/afero v1.2.2 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/ulikunitz/xz v0.5.5 // indirect
 	github.com/vmihailenco/msgpack v4.0.1+incompatible // indirect
 	github.com/zclconf/go-cty v1.1.0 // indirect

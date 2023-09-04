@@ -28,22 +28,22 @@ type AllocateBackendRequest struct {
 	// 所添加的后端资源服务端口，取值范围[1-65535]，默认80
 	Port *int `required:"false"`
 
-	// 所添加的后端服务器的资源实例IP，当ResourceType 为 UHybrid 时有效，且必填
+	// 所添加的后端服务器的资源实例IP，当ResourceType 为 UHybrid 或 IP时有效，且必填；与ResourceId二选一必填
 	ResourceIP *string `required:"false"`
 
-	// 所添加的后端资源的资源ID
-	ResourceId *string `required:"true"`
+	// 所添加的后端资源的资源ID；与ResourceIP二选一必填
+	ResourceId *string `required:"false"`
 
-	// 所添加的后端资源的类型，枚举值：UHost -> 云主机；UNI -> 虚拟网卡；UPM -> 物理云主机； UDHost -> 私有专区主机；UDocker -> 容器；UHybrid->混合云主机；CUBE->Cube，USDP->智能大数据平台；默认值为UHost。报文转发模式不支持UDocker、UHybrid、CUBE
+	// 所添加的后端资源的类型，枚举值：UHost -> 云主机；UNI -> 虚拟网卡；UPM -> 物理云主机；UHybrid->混合云主机；CUBE->Cube， IP->IP类型；默认值为UHost。报文转发模式不支持UHybrid、CUBE、IP
 	ResourceType *string `required:"true"`
 
-	// 所添加的后端服务器所在的子网，当ResourceType 为 UHybrid 时有效，且必填
+	// 所添加的后端服务器所在的子网，当ResourceType 为 UHybrid 或 IP 时有效，且必填
 	SubnetId *string `required:"false"`
 
 	// 负载均衡实例的ID
 	ULBId *string `required:"true"`
 
-	// 所添加的后端服务器所在的vpc，当ResourceType 为 UHybrid 时有效，且必填
+	// 所添加的后端服务器所在的vpc，当ResourceType 为 UHybrid 或 IP 时有效，且必填
 	VPCId *string `required:"false"`
 
 	// VServer实例的ID
@@ -131,8 +131,6 @@ func (c *ULBClient) NewAllocateBackendBatchRequest() *AllocateBackendBatchReques
 
 /*
 API: AllocateBackendBatch
-
-
 */
 func (c *ULBClient) AllocateBackendBatch(req *AllocateBackendBatchRequest) (*AllocateBackendBatchResponse, error) {
 	var err error
@@ -208,19 +206,22 @@ func (c *ULBClient) BindSSL(req *BindSSLRequest) (*BindSSLResponse, error) {
 type CreatePolicyRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"true"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
 	// 内容转发策略应用的后端资源实例的ID，来源于 AllocateBackend 返回的 BackendId
 	BackendId []string `required:"true"`
 
+	// 内容转发规则中域名的匹配方式，默认与原本一致。枚举值：Regular，正则；Wildcard，泛域名
+	DomainMatchMode *string `required:"false"`
+
 	// 内容转发匹配字段
 	Match *string `required:"true"`
 
-	// 策略优先级，1-9999
+	// 策略优先级，1-9999；只针对路径规则生效
 	PolicyPriority *int `required:"false"`
 
 	// 内容转发匹配字段的类型
@@ -1638,6 +1639,9 @@ type UpdatePolicyRequest struct {
 	// 转发规则的ID，当Type为Default时，可以不传或为空
 	PolicyId *string `required:"false"`
 
+	// 策略优先级，1-9999；只针对路径规则生效
+	PolicyPriority *int `required:"false"`
+
 	// 内容转发匹配字段的类型，枚举值：Domain -> 域名转发规则；Path -> 路径转发规则；Default -> 默认转发规则，不传默认值Domain
 	Type *string `required:"false"`
 
@@ -1783,6 +1787,65 @@ func (c *ULBClient) UpdateSSLAttribute(req *UpdateSSLAttributeRequest) (*UpdateS
 	reqCopier := *req
 
 	err = c.Client.InvokeAction("UpdateSSLAttribute", &reqCopier, &res)
+	if err != nil {
+		return &res, err
+	}
+
+	return &res, nil
+}
+
+// UpdateSSLBindingRequest is request schema for UpdateSSLBinding action
+type UpdateSSLBindingRequest struct {
+	request.CommonBase
+
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
+	// ProjectId *string `required:"true"`
+
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
+	// Region *string `required:"true"`
+
+	// 所操作VServer实例ID（仅ListenerId传参时，将更换该Vserver所有原证书为OldSSLId的绑定关系；LoadBalancerId和ListenerId都不传参则将更新该项目下所有原证书为OldSSLId的绑定关系；若LoadBalancerId与ListenerId皆有传参，则会强校验ULB与Vsserver的所属关系，将更换该ulb下vserver所绑定的OldSSLId为NewSSLId）
+	ListenerId *string `required:"false"`
+
+	// 所操作ULB实例ID（仅LoadBalancerId传参时，将更换该ULB所有原证书为OldSSLId的绑定关系；LoadBalancerId和ListenerId都不传参则将更新该项目下所有原证书为OldSSLId的绑定关系）
+	LoadBalancerId *string `required:"false"`
+
+	// VServer实例需要绑定的新的证书
+	NewSSLId *string `required:"true"`
+
+	// VServer实例绑定的旧的证书
+	OldSSLId *string `required:"true"`
+}
+
+// UpdateSSLBindingResponse is response schema for UpdateSSLBinding action
+type UpdateSSLBindingResponse struct {
+	response.CommonBase
+}
+
+// NewUpdateSSLBindingRequest will create request of UpdateSSLBinding action.
+func (c *ULBClient) NewUpdateSSLBindingRequest() *UpdateSSLBindingRequest {
+	req := &UpdateSSLBindingRequest{}
+
+	// setup request with client config
+	c.Client.SetupRequest(req)
+
+	// setup retryable with default retry policy (retry for non-create action and common error)
+	req.SetRetryable(true)
+	return req
+}
+
+/*
+API: UpdateSSLBinding
+
+将VServer绑定的证书更换为另一个证书
+*/
+func (c *ULBClient) UpdateSSLBinding(req *UpdateSSLBindingRequest) (*UpdateSSLBindingResponse, error) {
+	var err error
+	var res UpdateSSLBindingResponse
+
+	reqCopier := *req
+
+	err = c.Client.InvokeAction("UpdateSSLBinding", &reqCopier, &res)
 	if err != nil {
 		return &res, err
 	}

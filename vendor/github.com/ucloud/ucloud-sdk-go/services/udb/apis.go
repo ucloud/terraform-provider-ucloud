@@ -13,16 +13,16 @@ import (
 type BackupUDBInstanceRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"false"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"false"`
 
-	// 使用的备份方式。（快照备份即物理备份。注意只有SSD版本的mysql实例支持设置为snapshot）
+	// 使用的备份方式。默认使用逻辑备份（快照备份即物理备份。SSD版本的mysql/mongodb实例支持设置为snapshot，NVMe版本的mysql实例支持设置为xtrabackup）
 	BackupMethod *string `required:"false"`
 
 	// 备份名称
@@ -81,13 +81,13 @@ func (c *UDBClient) BackupUDBInstance(req *BackupUDBInstanceRequest) (*BackupUDB
 type BackupUDBInstanceBinlogRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"false"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"false"`
 
 	// 需要备份文件,可通过DescribeUDBInstanceBinlog获得 如果要传入多个文件名，以空格键分割,用单引号包含.
@@ -140,13 +140,13 @@ func (c *UDBClient) BackupUDBInstanceBinlog(req *BackupUDBInstanceBinlogRequest)
 type BackupUDBInstanceErrorLogRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"false"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"false"`
 
 	// 备份名称
@@ -196,10 +196,10 @@ func (c *UDBClient) BackupUDBInstanceErrorLog(req *BackupUDBInstanceErrorLogRequ
 type BackupUDBInstanceSlowLogRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"false"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
 	// 备份文件名称
@@ -255,13 +255,13 @@ func (c *UDBClient) BackupUDBInstanceSlowLog(req *BackupUDBInstanceSlowLogReques
 type ChangeUDBParamGroupRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"false"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"false"`
 
 	// DB实例Id
@@ -311,16 +311,16 @@ func (c *UDBClient) ChangeUDBParamGroup(req *ChangeUDBParamGroupRequest) (*Chang
 type CheckRecoverUDBInstanceRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"false"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"false"`
 
-	// 源实例的Id
+	// 源实例的Id(只支持普通版DB不支持高可用)
 	SrcDBId *string `required:"true"`
 }
 
@@ -420,13 +420,13 @@ func (c *UDBClient) CheckUDBInstanceToHAAllowance(req *CheckUDBInstanceToHAAllow
 type ClearUDBLogRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"false"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"false"`
 
 	// 删除时间点(至少前一天)之前log，采用时间戳(秒)，默认当 前时间点前一天
@@ -619,6 +619,9 @@ type CreateUDBInstanceRequest struct {
 	// cpu核数，如果db类型为sqlserver，必传参数
 	CPU *int `required:"false"`
 
+	// mysql大小写参数, 0 为大小写敏感, 1 为大小写不敏感, 目前只针对mysql8.0有效
+	CaseSensitivityParam *int `required:"false"`
+
 	// Year， Month， Dynamic，Trial，默认: Month
 	ChargeType *string `required:"false"`
 
@@ -627,6 +630,9 @@ type CreateUDBInstanceRequest struct {
 
 	// 使用的代金券id
 	CouponId *string `required:"false"`
+
+	// mysql小版本号，支持指定小版本创建
+	DBSubVersion *string `required:"false"`
 
 	// DB类型，mysql/mongodb/postgesql/sqlserver按版本细分 mysql-8.0, mysql-5.5, percona-5.5, mysql-5.6, percona-5.6, mysql-5.7, percona-5.7, mariadb-10.0, postgresql-9.6, postgresql-10.4, postgresql-12.8, postgresql-13.4，mongodb-2.6, mongodb-3.0, mongodb-3.6, mongodb-4.0, sqlserver-2017
 	DBTypeId *string `required:"true"`
@@ -723,14 +729,17 @@ func (c *UDBClient) CreateUDBInstance(req *CreateUDBInstanceRequest) (*CreateUDB
 type CreateUDBInstanceByRecoveryRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"false"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"false"`
+
+	// 管理员密码 (指定库表回档到新实例时有效)
+	AdminPassword *string `required:"false"`
 
 	// Year， Month， Dynamic，Trial，默认: Dynamic
 	ChargeType *string `required:"false"`
@@ -755,6 +764,9 @@ type CreateUDBInstanceByRecoveryRequest struct {
 
 	// 子网ID
 	SubnetId *string `required:"false"`
+
+	// 指定需要恢复的表, 如果指定该字段则回档实例只有指定的表数据，格式为(库名.表名)， 指定多个用逗号隔开，eg: [ udb.test, mysql_school.my_student]
+	Tables *string `required:"false"`
 
 	// 专区的Id
 	UDBCId *string `required:"false"`
@@ -877,17 +889,23 @@ func (c *UDBClient) CreateUDBParamGroup(req *CreateUDBParamGroupRequest) (*Creat
 type CreateUDBReplicationInstanceRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"false"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"false"`
+
+	// Year， Month， Dynamic，Trial，默认和主库保持一致
+	ChargeType *string `required:"false"`
 
 	// 使用的代金券id
 	CouponId *string `required:"false"`
+
+	// UDB数据库机型: "Normal": "标准机型" , "SATA_SSD": "SSD机型" , "PCIE_SSD": "SSD高性能机型" , "Normal_Volume": "标准大容量机型", "SATA_SSD_Volume": "SSD大容量机型" , "PCIE_SSD_Volume": "SSD高性能大容量机型", "NVMe_SSD": "快杰机型"
+	InstanceType *string `required:"false"`
 
 	// 是否是仲裁节点，默认false，仲裁节点按最小机型创建
 	IsArbiter *bool `required:"false"`
@@ -898,10 +916,13 @@ type CreateUDBReplicationInstanceRequest struct {
 	// 端口号，默认27017，取值范围3306至65535。
 	Port *int `required:"false"`
 
+	// 购买时长，默认默认和主库保持一致
+	Quantity *string `required:"false"`
+
 	// primary节点的DBId,该值可以通过DescribeUDBInstance获取
 	SrcId *string `required:"true"`
 
-	// 是否使用SSD，默认 为 true
+	// 是否使用SSD，默认为true。目前主要可用区、海外机房、新机房只提供SSD资源，非SSD资源不再提供。
 	UseSSD *bool `required:"false"`
 }
 
@@ -1167,8 +1188,6 @@ func (c *UDBClient) NewDeleteUDBBackupRequest() *DeleteUDBBackupRequest {
 
 /*
 API: DeleteUDBBackup
-
-
 */
 func (c *UDBClient) DeleteUDBBackup(req *DeleteUDBBackupRequest) (*DeleteUDBBackupResponse, error) {
 	var err error
@@ -1188,13 +1207,13 @@ func (c *UDBClient) DeleteUDBBackup(req *DeleteUDBBackupRequest) (*DeleteUDBBack
 type DeleteUDBInstanceRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"false"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"false"`
 
 	// DB实例的id,该值可以通过DescribeUDBInstance获取
@@ -2030,13 +2049,13 @@ func (c *UDBClient) DescribeUDBInstancePrice(req *DescribeUDBInstancePriceReques
 type DescribeUDBInstanceStateRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"false"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"false"`
 
 	// 实例的Id,该值可以通过DescribeUDBInstance获取
@@ -2243,7 +2262,7 @@ type DescribeUDBLogPackageRequest struct {
 	// 分页显示的起始偏移，列表操作则指定
 	Offset *int `required:"true"`
 
-	// 需要列出的备份文件类型，每种类型的值如下： 2 代表 BINLOG_BACKUP； 3 代表 SLOW_QUERY_BACKUP； 4 代表 ERRORLOG_BACKUP。
+	// 需要列出的备份文件类型，每种类型的值如下： 2 代表 BINLOG_BACKUP； 3 代表 SLOW_QUERY_BACKUP； 4 代表 ERRORLOG_BACKUP；
 	Type *int `required:"false"`
 
 	// Types作为Type的补充，支持多值传入，可以获取多个类型的日志记录，如：Types.0=2&Types.1=3
@@ -2512,10 +2531,10 @@ func (c *UDBClient) DescribeUDBType(req *DescribeUDBTypeRequest) (*DescribeUDBTy
 type DisableUDBRWSplittingRequest struct {
 	request.CommonBase
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"true"`
 
 	// DB实例ID（master)
@@ -2733,13 +2752,13 @@ func (c *UDBClient) ExtractUDBParamGroup(req *ExtractUDBParamGroupRequest) (*Ext
 type FetchUDBInstanceEarliestRecoverTimeRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"false"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"false"`
 
 	// DB实例Id
@@ -2845,13 +2864,13 @@ func (c *UDBClient) GetUDBClientConnNum(req *GetUDBClientConnNumRequest) (*GetUD
 type ModifyUDBInstanceNameRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"false"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"false"`
 
 	// 实例的Id,该值可以通过DescribeUDBInstance获取
@@ -2901,13 +2920,13 @@ func (c *UDBClient) ModifyUDBInstanceName(req *ModifyUDBInstanceNameRequest) (*M
 type ModifyUDBInstancePasswordRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"false"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"false"`
 
 	// sqlserver帐号，仅在sqlserver的情况下填该参数
@@ -2949,6 +2968,62 @@ func (c *UDBClient) ModifyUDBInstancePassword(req *ModifyUDBInstancePasswordRequ
 	reqCopier := *req
 
 	err = c.Client.InvokeAction("ModifyUDBInstancePassword", &reqCopier, &res)
+	if err != nil {
+		return &res, err
+	}
+
+	return &res, nil
+}
+
+// ModifyUDBInstanceRemarkNameRequest is request schema for ModifyUDBInstanceRemarkName action
+type ModifyUDBInstanceRemarkNameRequest struct {
+	request.CommonBase
+
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
+	// ProjectId *string `required:"false"`
+
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
+	// Region *string `required:"true"`
+
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
+	// Zone *string `required:"true"`
+
+	// 实例的Id,该值可以通过DescribeUDBInstance获取
+	DBId *string `required:"true"`
+
+	// 实例的新备注
+	Name *string `required:"true"`
+}
+
+// ModifyUDBInstanceRemarkNameResponse is response schema for ModifyUDBInstanceRemarkName action
+type ModifyUDBInstanceRemarkNameResponse struct {
+	response.CommonBase
+}
+
+// NewModifyUDBInstanceRemarkNameRequest will create request of ModifyUDBInstanceRemarkName action.
+func (c *UDBClient) NewModifyUDBInstanceRemarkNameRequest() *ModifyUDBInstanceRemarkNameRequest {
+	req := &ModifyUDBInstanceRemarkNameRequest{}
+
+	// setup request with client config
+	c.Client.SetupRequest(req)
+
+	// setup retryable with default retry policy (retry for non-create action and common error)
+	req.SetRetryable(true)
+	return req
+}
+
+/*
+API: ModifyUDBInstanceRemarkName
+
+修改UDB实例备注信息
+*/
+func (c *UDBClient) ModifyUDBInstanceRemarkName(req *ModifyUDBInstanceRemarkNameRequest) (*ModifyUDBInstanceRemarkNameResponse, error) {
+	var err error
+	var res ModifyUDBInstanceRemarkNameResponse
+
+	reqCopier := *req
+
+	err = c.Client.InvokeAction("ModifyUDBInstanceRemarkName", &reqCopier, &res)
 	if err != nil {
 		return &res, err
 	}
@@ -3013,13 +3088,13 @@ func (c *UDBClient) PromoteUDBInstanceToHA(req *PromoteUDBInstanceToHARequest) (
 type PromoteUDBSlaveRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"false"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"false"`
 
 	// 实例的Id,该值可以通过DescribeUDBInstance获取
@@ -3149,10 +3224,10 @@ func (c *UDBClient) ResizeUDBInstance(req *ResizeUDBInstanceRequest) (*ResizeUDB
 type RestartRWSplittingRequest struct {
 	request.CommonBase
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"true"`
 
 	// 待关闭读写分离中间键ProxyId
@@ -3199,13 +3274,13 @@ func (c *UDBClient) RestartRWSplitting(req *RestartRWSplittingRequest) (*Restart
 type RestartUDBInstanceRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"false"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"false"`
 
 	// 实例的Id,该值可以通过DescribeUDBInstance获取
@@ -3314,13 +3389,13 @@ func (c *UDBClient) SetUDBRWSplitting(req *SetUDBRWSplittingRequest) (*SetUDBRWS
 type StartUDBInstanceRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"false"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"false"`
 
 	// 实例的Id,该值可以通过DescribeUDBInstance获取
@@ -3367,13 +3442,13 @@ func (c *UDBClient) StartUDBInstance(req *StartUDBInstanceRequest) (*StartUDBIns
 type StopUDBInstanceRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"false"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"false"`
 
 	// 实例的Id,该值可以通过DescribeUDBInstance获取
@@ -3541,29 +3616,41 @@ func (c *UDBClient) SwitchUDBInstanceToHA(req *SwitchUDBInstanceToHARequest) (*S
 type UpdateUDBInstanceBackupStrategyRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](../summary/get_project_list.html)
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
 	// ProjectId *string `required:"false"`
 
-	// [公共参数] 地域。 参见 [地域和可用区列表](../summary/regionlist.html)
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Region *string `required:"true"`
 
-	// [公共参数] 可用区。参见 [可用区列表](../summary/regionlist.html)
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
 	// Zone *string `required:"false"`
 
 	// 备份时期标记位。共7位，每一位为一周中一天的备份情况，0表示关闭当天备份，1表示打开当天备份。最右边的一位为星期天的备份开关，其余从右到左依次为星期一到星期六的备份配置开关，每周必须至少设置两天备份。例如：1100000表示打开星期六和星期五的备份功能
 	BackupDate *string `required:"false"`
 
-	// 选择默认的备份方式，可选 snapshot 表示使用快照/物理备份，不填或者其它任何值为默认的逻辑备份。需要同时设置BackupDate字段。（注意现在只有SSD 版本的 MySQL实例支持物理备份）
+	// 选择默认的备份方式，可选nobackup表示不备份， snapshot 表示使用快照备份，logic 表示使用逻辑备份。需要同时设置BackupDate字段。（快照备份即物理备份。SSD版本的mysql实例支持设置为snapshot，NVMe版本的mysql实例支持设置为xtrabackup）
 	BackupMethod *string `required:"false"`
 
 	// 备份的整点时间，范围[0,23]
 	BackupTime *int `required:"false"`
 
+	// 远端binlog保存时长(天)
+	BinlogRemoteSaveDays *int `required:"false"`
+
 	// 主节点的Id
 	DBId *string `required:"true"`
 
+	// 是否开启binlog备份, 默认为未开启
+	EnableBinlogBackup *bool `required:"false"`
+
 	// 当导出某些数据遇到问题后，是否强制导出其他剩余数据默认是false需要同时设置BackupDate字段
 	ForceDump *bool `required:"false"`
+
+	// 自动备份转存到用户自己的bucket名称，要包含到对应的token id里
+	UserBucket *string `required:"false"`
+
+	// 自动备份转存到用户自己的bucket 的tokenid， 需要用户自己自己设置权限
+	UserTokenID *string `required:"false"`
 }
 
 // UpdateUDBInstanceBackupStrategyResponse is response schema for UpdateUDBInstanceBackupStrategy action

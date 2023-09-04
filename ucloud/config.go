@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/ucloud/ucloud-sdk-go/services/iam"
 	"github.com/ucloud/ucloud-sdk-go/services/uads"
+	"github.com/ucloud/ucloud-sdk-go/services/uphost"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -147,7 +148,8 @@ func (c *Config) Client() (*UCloudClient, error) {
 	client.uhostconn = uhost.NewClient(&longtimeCfg, &cred)
 	client.udpnconn = udpn.NewClient(&longtimeCfg, &cred)
 	client.uk8sconn = uk8s.NewClient(&longtimeCfg, &cred)
-
+	client.uphostconn = uphost.NewClient(&longtimeCfg, &cred)
+	client.genericClient = ucloud.NewClient(&longtimeCfg, &cred)
 	if cloudShellCredHandler != nil {
 		client.uhostconn.AddHttpRequestHandler(cloudShellCredHandler)
 		client.unetconn.AddHttpRequestHandler(cloudShellCredHandler)
@@ -166,6 +168,8 @@ func (c *Config) Client() (*UCloudClient, error) {
 		client.uk8sconn.AddHttpRequestHandler(cloudShellCredHandler)
 		client.uadsconn.AddHttpRequestHandler(cloudShellCredHandler)
 		client.iamconn.AddHttpRequestHandler(cloudShellCredHandler)
+		client.uphostconn.AddHttpRequestHandler(cloudShellCredHandler)
+		client.genericClient.AddHttpRequestHandler(cloudShellCredHandler)
 	}
 
 	client.config = &cfg

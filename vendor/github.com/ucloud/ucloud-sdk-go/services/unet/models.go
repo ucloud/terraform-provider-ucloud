@@ -108,21 +108,6 @@ type UnetEIPResourceSet struct {
 }
 
 /*
-ShareBandwidthSet - DescribeEIP
-*/
-type ShareBandwidthSet struct {
-
-	// 共享带宽带宽值
-	ShareBandwidth int
-
-	// 共享带宽ID
-	ShareBandwidthId string
-
-	// 共享带宽的资源名称
-	ShareBandwidthName string
-}
-
-/*
 EIPBinding - EIP绑定内网IP关系数据
 */
 type EIPBinding struct {
@@ -135,6 +120,21 @@ type EIPBinding struct {
 
 	// 内网ip类型：PrimaryIP（默认）、SecondaryIP（非默认）
 	PrivateIPType string
+}
+
+/*
+ShareBandwidthSet - DescribeEIP
+*/
+type ShareBandwidthSet struct {
+
+	// 共享带宽带宽值
+	ShareBandwidth int
+
+	// 共享带宽ID
+	ShareBandwidthId string
+
+	// 共享带宽的资源名称
+	ShareBandwidthName string
 }
 
 /*
@@ -339,6 +339,36 @@ type UnetShareBandwidthSet struct {
 
 	// 共享带宽的资源ID
 	ShareBandwidthId string
+}
+
+/*
+EIPExclusiveInfo - EIP专属流量包信息
+*/
+type EIPExclusiveInfo struct {
+
+	//
+	AccountId int
+
+	// 专属流量包剩余可用规格（单位MB）
+	AvailableSize int
+
+	// 资源创建时间
+	CreateTime int
+
+	// EIP资源Id
+	EIPId string
+
+	// 专属流量包上次重置时间
+	LastResetTime int
+
+	// 专属流量包下次重置时间
+	NextResetTime int
+
+	// 专属流量包重置策略枚举：Day、Month、Year
+	ResetPolicy string
+
+	// 专属流量包总规格（单位MB）
+	TotalSize int
 }
 
 /*

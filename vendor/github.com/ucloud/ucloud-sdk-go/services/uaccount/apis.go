@@ -13,7 +13,7 @@ import (
 type AddMemberToProjectRequest struct {
 	request.CommonBase
 
-	// [公共参数] 项目ID，请参考[GetProjectList接口](../summary/get_project_list.html)的描述。不填写为创建时间最早的项目。
+	// [公共参数] 项目ID，请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)的描述。不填写为创建时间最早的项目。
 	// ProjectId *string `required:"false"`
 
 	// 被加入成员归属角色ID
@@ -154,8 +154,6 @@ func (c *UAccountClient) NewCreateProjectRequest() *CreateProjectRequest {
 
 /*
 API: CreateProject
-
-
 */
 func (c *UAccountClient) CreateProject(req *CreateProjectRequest) (*CreateProjectResponse, error) {
 	var err error
@@ -492,8 +490,6 @@ func (c *UAccountClient) NewGetUserInfoRequest() *GetUserInfoRequest {
 
 /*
 API: GetUserInfo
-
-
 */
 func (c *UAccountClient) GetUserInfo(req *GetUserInfoRequest) (*GetUserInfoResponse, error) {
 	var err error
@@ -651,8 +647,6 @@ func (c *UAccountClient) NewModifyProjectRequest() *ModifyProjectRequest {
 
 /*
 API: ModifyProject
-
-
 */
 func (c *UAccountClient) ModifyProject(req *ModifyProjectRequest) (*ModifyProjectResponse, error) {
 	var err error
