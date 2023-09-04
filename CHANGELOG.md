@@ -1,3 +1,10 @@
+## 1.37.0 (2023-09-03)
+
+FEATURES:
+
+* **New Resource:** `ucloud_baremetal_instance`.
+* **New Datasource:** `ucloud_baremetal_images`.
+
 ## 1.37.0 (2023-08-27)
 
 FEATURES:
