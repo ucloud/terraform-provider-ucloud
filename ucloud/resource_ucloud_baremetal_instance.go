@@ -631,7 +631,6 @@ func resourceUCloudBareMetalInstanceDelete(d *schema.ResourceData, meta interfac
 
 		return resource.RetryableError(fmt.Errorf("the specified instance %q has not been deleted due to unknown error", d.Id()))
 	})
-	return nil
 }
 
 func bareMetalInstanceStateRefreshFunc(client *UCloudClient, instanceId string) resource.StateRefreshFunc {
