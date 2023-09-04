@@ -213,6 +213,10 @@ func resourceUCloudBareMetalInstance() *schema.Resource {
 					"no_raid",
 				}, false),
 			},
+			"rdma_cluster_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -454,6 +458,8 @@ func resourceUCloudBareMetalInstanceRead(d *schema.ResourceData, meta interface{
 	if _, ok := d.GetOk("network_interface"); ok {
 		d.Set("network_interface", networkInterfaces)
 	}
+
+	d.Set("rdma_cluster_id", instance.RdmaClusterId)
 	return nil
 }
 

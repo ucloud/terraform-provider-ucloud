@@ -1,5 +1,5 @@
 ---
-subcategory: "Bare Metail (UPhost)"
+subcategory: "Bare Metal (UPhost)"
 layout: "ucloud"
 page_title: "UCloud: ucloud_baremetal_images"
 sidebar_current: "docs-ucloud-datasource-baremetal-images"

@@ -1,5 +1,5 @@
 ---
-subcategory: "Bare Metail (UPhost)"
+subcategory: "Bare Metal (UPhost)"
 layout: "ucloud"
 page_title: "UCloud: ucloud_baremetal_instance"
 sidebar_current: "docs-ucloud-resource-baremetal-instance"
@@ -75,6 +75,12 @@ The `network_interface` block supports:
 - `eip_bandwidth` - (Required, ForceNew) Maximum bandwidth to the elastic public network, measured in Mbps (Mega bit per second). The ranges for bandwidth are: 1-200 for pay by traffic, 1-800 for pay by bandwidth.
 - `eip_internet_type` - (Required, ForceNew) Type of Elastic IP routes. Possible values are: international as international BGP IP and bgp as china mainland BGP IP.
 - `eip_charge_mode` - (Required, ForceNew) Elastic IP charge mode.  Possible values are raid1, raid0, raid10, raid5 and no_raid.
+
+## Attributes Reference
+
+In addition to all arguments above, the following attributes are exported:
+
+* `rdma_cluster_id` - The RDMA Cluster ID of disk. It is mandatory if your disk type is `rssd_data_disk` in `ucloud_disk` resource and must be set to the same value as the bare metal instance to attach to.
 
 ## Import
 
