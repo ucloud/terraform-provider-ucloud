@@ -1,3 +1,9 @@
+## 1.38.2 (2023-09-27)
+
+FEATURES:
+
+* add `reboot_instance_for_resizing` attribute to `ucloud_disk` resource
+
 ## 1.38.1 (2023-09-03)
 
 FEATURES:
