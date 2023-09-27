@@ -85,6 +85,12 @@ func resourceUCloudDisk() *schema.Resource {
 				StateFunc:    stateFuncTag,
 			},
 
+			"reboot_instance_for_resizing": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
+
 			"create_time": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -199,33 +205,38 @@ func resourceUCloudDiskUpdate(d *schema.ResourceData, meta interface{}) error {
 			}
 			return fmt.Errorf("error on reading disk %q, %s", d.Id(), err)
 		}
-
+		allowRebootInstance := false
+		if reboot, ok := d.Get("reboot_instance_for_resizing").(bool); reboot || !ok {
+			allowRebootInstance = true
+		}
 		if diskSet.UHostId != "" {
 			uhostId := diskSet.UHostId
 			instance, err := client.describeInstanceById(uhostId)
 			if err != nil {
 				return fmt.Errorf("error on reading instance %q when updating the size of disk %q, %s", uhostId, d.Id(), err)
 			}
-			if instance.State != statusStopped {
-				stopReq := uhostConn.NewStopUHostInstanceRequest()
-				stopReq.UHostId = ucloud.String(uhostId)
-				_, err := uhostConn.StopUHostInstance(stopReq)
-				if err != nil {
-					return fmt.Errorf("error on stopping instance %q when updating the size of disk %q, %s", uhostId, d.Id(), err)
-				}
+			if allowRebootInstance {
+				if instance.State != statusStopped {
+					stopReq := uhostConn.NewStopUHostInstanceRequest()
+					stopReq.UHostId = ucloud.String(uhostId)
+					_, err := uhostConn.StopUHostInstance(stopReq)
+					if err != nil {
+						return fmt.Errorf("error on stopping instance %q when updating the size of disk %q, %s", uhostId, d.Id(), err)
+					}
 
-				// after stop instance, we need to wait it stopped
-				stateConf := &resource.StateChangeConf{
-					Pending:    []string{statusPending},
-					Target:     []string{statusStopped},
-					Refresh:    instanceStateRefreshFunc(client, uhostId, statusStopped),
-					Timeout:    15 * time.Minute,
-					Delay:      3 * time.Second,
-					MinTimeout: 2 * time.Second,
-				}
+					// after stop instance, we need to wait it stopped
+					stateConf := &resource.StateChangeConf{
+						Pending:    []string{statusPending},
+						Target:     []string{statusStopped},
+						Refresh:    instanceStateRefreshFunc(client, uhostId, statusStopped),
+						Timeout:    15 * time.Minute,
+						Delay:      3 * time.Second,
+						MinTimeout: 2 * time.Second,
+					}
 
-				if _, err = stateConf.WaitForState(); err != nil {
-					return fmt.Errorf("error on waiting for stopping instance %q when updating the size of disk %q, %s", uhostId, d.Id(), err)
+					if _, err = stateConf.WaitForState(); err != nil {
+						return fmt.Errorf("error on waiting for stopping instance %q when updating the size of disk %q, %s", uhostId, d.Id(), err)
+					}
 				}
 			}
 
@@ -250,31 +261,32 @@ func resourceUCloudDiskUpdate(d *schema.ResourceData, meta interface{}) error {
 			if err != nil {
 				return fmt.Errorf("error on reading instance %q c %q, %s", uhostId, d.Id(), err)
 			}
+			if allowRebootInstance {
+				if instanceAfter.State != statusRunning {
+					// after instance update, we need to wait it started
+					startReq := uhostConn.NewStartUHostInstanceRequest()
+					startReq.UHostId = ucloud.String(uhostId)
 
-			if instanceAfter.State != statusRunning {
-				// after instance update, we need to wait it started
-				startReq := uhostConn.NewStartUHostInstanceRequest()
-				startReq.UHostId = ucloud.String(uhostId)
+					if _, err := uhostConn.StartUHostInstance(startReq); err != nil {
+						return fmt.Errorf("error on starting instance %q after updating the size of disk %q, %s", uhostId, d.Id(), err)
+					}
 
-				if _, err := uhostConn.StartUHostInstance(startReq); err != nil {
-					return fmt.Errorf("error on starting instance %q after updating the size of disk %q, %s", uhostId, d.Id(), err)
+					stateConf = &resource.StateChangeConf{
+						Pending:    []string{statusPending},
+						Target:     []string{statusRunning},
+						Refresh:    instanceStateRefreshFunc(client, uhostId, statusRunning),
+						Timeout:    15 * time.Minute,
+						Delay:      3 * time.Second,
+						MinTimeout: 2 * time.Second,
+					}
+
+					if _, err = stateConf.WaitForState(); err != nil {
+						return fmt.Errorf("error on waiting for starting instance %q after updating the size of disk %q, %s", uhostId, d.Id(), err)
+					}
+
+					// Executing DetachUDisk immediately after starting up the instance will cause an error, this sleep to avoid this error
+					time.Sleep(3 * time.Second)
 				}
-
-				stateConf = &resource.StateChangeConf{
-					Pending:    []string{statusPending},
-					Target:     []string{statusRunning},
-					Refresh:    instanceStateRefreshFunc(client, uhostId, statusRunning),
-					Timeout:    15 * time.Minute,
-					Delay:      3 * time.Second,
-					MinTimeout: 2 * time.Second,
-				}
-
-				if _, err = stateConf.WaitForState(); err != nil {
-					return fmt.Errorf("error on waiting for starting instance %q after updating the size of disk %q, %s", uhostId, d.Id(), err)
-				}
-
-				// Executing DetachUDisk immediately after starting up the instance will cause an error, this sleep to avoid this error
-				time.Sleep(3 * time.Second)
 			}
 		} else {
 			req := conn.NewResizeUDiskRequest()
