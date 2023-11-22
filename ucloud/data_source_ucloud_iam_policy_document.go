@@ -12,10 +12,10 @@ func dataSourceUCloudIAMPolicyDocument() *schema.Resource {
 		Read: dataSourceUCloudIAMPolicyDocumentRead,
 		Schema: map[string]*schema.Schema{
 			"version": {
-				Type:         schema.TypeInt,
+				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      1,
-				ValidateFunc: validation.IntInSlice([]int{1}),
+				Default:      "1",
+				ValidateFunc: validation.StringInSlice([]string{"1"}, false),
 			},
 			"statement": {
 				Type:     schema.TypeList,
@@ -58,7 +58,7 @@ func dataSourceUCloudIAMPolicyDocument() *schema.Resource {
 }
 func dataSourceUCloudIAMPolicyDocumentRead(d *schema.ResourceData, meta interface{}) error {
 	if v, ok := d.GetOk("statement"); ok {
-		doc, err := assembleDataSourcePolicyJSON(v.([]interface{}), d.Get("version").(int))
+		doc, err := assembleDataSourcePolicyJSON(v.([]interface{}), d.Get("version").(string))
 		if err != nil {
 			return err
 		}
@@ -75,7 +75,7 @@ func dataSourceUCloudIAMPolicyDocumentRead(d *schema.ResourceData, meta interfac
 	return nil
 }
 
-func assembleDataSourcePolicyJSON(statements []interface{}, version int) (string, error) {
+func assembleDataSourcePolicyJSON(statements []interface{}, version string) (string, error) {
 	document := PolicyDocument{Version: version}
 	for _, v := range statements {
 		var statement PolicyStatement
@@ -102,6 +102,6 @@ type PolicyStatement struct {
 	Resource []string `json:"Resource"`
 }
 type PolicyDocument struct {
-	Version   int               `json:"Version"`
+	Version   string            `json:"Version"`
 	Statement []PolicyStatement `json:"Statement"`
 }

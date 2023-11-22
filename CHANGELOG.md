@@ -1,3 +1,9 @@
+## 1.38.3 (2023-11-22)
+
+BUG FIXES:
+
+* `datasource/ucloud_iam_policy_document`: fix data type of version.
+
 ## 1.38.2 (2023-09-27)
 
 FEATURES:

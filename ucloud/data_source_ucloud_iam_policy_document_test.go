@@ -36,7 +36,7 @@ func TestAccUCloudIAMPolicyDocument_basic(t *testing.T) {
 
 const testAccDataIAMPolicyDocumentConfig = `
 data "ucloud_iam_policy_document" foo {
-  version = 1
+  version = "1"
   statement {
     effect = "Allow"
     
@@ -46,7 +46,7 @@ data "ucloud_iam_policy_document" foo {
     ]
     
     resource = [
-      "ucs:uhost:*:<company-id>:instance/uhost-xxx",
+      "ucs:uhost:*:123:instance/uhost-xxx",
     ]
   }
   statement {
