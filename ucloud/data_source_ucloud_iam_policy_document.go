@@ -12,9 +12,9 @@ func dataSourceUCloudIAMPolicyDocument() *schema.Resource {
 		Read: dataSourceUCloudIAMPolicyDocumentRead,
 		Schema: map[string]*schema.Schema{
 			"version": {
-				Type:         schema.TypeInt,
+				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      1,
+				Default:      "1",
 				ValidateFunc: validation.IntInSlice([]int{1}),
 			},
 			"statement": {

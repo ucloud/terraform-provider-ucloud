@@ -14,7 +14,7 @@ Generates an IAM policy document in JSON format for use with resources that expe
 
 ```hcl
 data "ucloud_iam_policy_document" foo {
-  version = 1
+  version = "1"
   statement {
     effect = "Allow"
     
