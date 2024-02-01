@@ -115,9 +115,9 @@ func resourceUCloudDiskAttachmentDelete(d *schema.ResourceData, meta interface{}
 	req.HostId = ucloud.String(p[1])
 
 	if _, ok := d.GetOk("stop_instance_before_detaching"); ok {
-		err := WaitAndUpdateInstanceState(client, *req.UHostId, instanceStatusStopped, false, d.Timeout(schema.TimeoutDelete))
+		err := WaitAndUpdateInstanceState(client, *req.HostId, instanceStatusStopped, false, d.Timeout(schema.TimeoutDelete))
 		if err != nil {
-			return fmt.Errorf("error on stop instance  %q before deleting, %s", *req.UHostId, err)
+			return fmt.Errorf("error on stop instance  %q before deleting, %s", *req.HostId, err)
 		}
 	}
 
