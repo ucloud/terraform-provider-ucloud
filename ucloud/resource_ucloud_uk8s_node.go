@@ -3,9 +3,10 @@ package ucloud
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -170,6 +171,13 @@ func resourceUCloudUK8SNode() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Default:  "Intel/Auto",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if old == "" && new == "Intel/Auto" {
+						return true
+					}
+					return false
+				},
 				ValidateFunc: validation.StringInSlice([]string{
 					"Intel/Auto",
 					"Intel/IvyBridge",
