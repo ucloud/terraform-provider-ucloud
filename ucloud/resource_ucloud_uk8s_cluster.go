@@ -202,6 +202,12 @@ func resourceUCloudUK8SCluster() *schema.Resource {
 							Optional: true,
 							ForceNew: true,
 							Default:  "Intel/Auto",
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								if old == "" && new == "Intel/Auto" {
+									return true
+								}
+								return false
+							},
 							ValidateFunc: validation.StringInSlice([]string{
 								"Intel/Auto",
 								"Intel/IvyBridge",
