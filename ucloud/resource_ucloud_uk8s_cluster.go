@@ -201,6 +201,7 @@ func resourceUCloudUK8SCluster() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
+							Default:  "Intel/Auto",
 							ValidateFunc: validation.StringInSlice([]string{
 								"Intel/Auto",
 								"Intel/IvyBridge",

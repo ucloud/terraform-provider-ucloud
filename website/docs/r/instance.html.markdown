@@ -120,7 +120,7 @@ The following arguments are supported:
 
  * `network_interface` - (Optional, ForceNew) Additional network interface eips to attach to the instance. `network_interface` configurations only apply on resource creation. The count of `network_interface` can only be one. See [network_interface](#network_interface) below for details on attributes. When set `network_interface`, the argument `delete_eips_with_instance` must bet set.
  * `delete_eips_with_instance` - (Optional, ForceNew, Required when set `network_interface`)  Whether the network interface eips associated instance should be destroyed on instance termination.
-* `min_cpu_platform` - (Optional) Specifies a minimum CPU platform for the the VM instance. (Default: `Intel/Auto`). You may refer to [product documentation](https://docs.ucloud.cn/uhost/introduction/uhost/type_new) and [API documentation](https://docs.ucloud.cn/api/uhost-api/create_uhost_instance).    
+* `min_cpu_platform` - (Optional, ForceNew) Specifies a minimum CPU platform for the the VM instance. (Default: `Intel/Auto`). You may refer to [product documentation](https://docs.ucloud.cn/uhost/introduction/uhost/type_new) and [API documentation](https://docs.ucloud.cn/api/uhost-api/create_uhost_instance).    
 ### data_disks
 
 The `data_disks` supports the following:
