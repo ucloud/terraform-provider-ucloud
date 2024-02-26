@@ -85,7 +85,7 @@ The following arguments are supported:
  ~> **NOTE:** We recommend set `delete_disks_with_instance` to `true` means delete cloud data disks attached to instance when instance termination. Otherwise, the cloud data disks will be not managed by the terraform after instance termination.
 
 * `disable_schedule_on_create` - (Optional, ForceNew)  Whether disable any pod scheduling on the node is created.
-* `min_cpu_platform` - (Optional) Specifies a minimum CPU platform for the VM instance. (Default: `Intel/Auto`). You may refer to [min_cpu_platform](https://docs.ucloud.cn/uhost/introduction/uhost/type_new)
+* `min_cpu_platform` - (Optional, ForceNew) Specifies a minimum CPU platform for the VM instance. (Default: `Intel/Auto`). You may refer to [min_cpu_platform](https://docs.ucloud.cn/uhost/introduction/uhost/type_new)
     - The Intel CPU platform:
         - `Intel/Auto` as the Intel CPU platform version will be selected randomly by system;
         - `Intel/IvyBridge` as Intel V2, the version of Intel CPU platform selected by system will be `Intel/IvyBridge` and above; 

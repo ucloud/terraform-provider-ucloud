@@ -291,6 +291,7 @@ func resourceUCloudInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Default:  "Intel/Auto",
 			},
 
 			"cpu_platform": {
