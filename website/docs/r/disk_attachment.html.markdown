@@ -60,3 +60,9 @@ The following arguments are supported:
 * `disk_id` - (Required, ForceNew) The ID of disk that needs to be attached
 * `stop_instance_before_detaching` - (Optional, Boolean) Set this to true to ensure that the target instance is stopped
   before trying to detach the volume.
+
+## Attributes Reference
+
+In addition to all arguments above, the following attributes are exported:
+
+* `device_name` - The device name to expose to the instance, for example `vdb`.
