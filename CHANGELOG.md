@@ -1,3 +1,27 @@
+## v1.38.7 (2024-03-08)
+
+FEATURES:
+
+* `resource/ucloud_disk_attachment`: add `device_name` attribute.
+
+## v1.38.6 (2024-02-26)
+
+BUG FIXES:
+
+* `resource/ucloud_instance`: ignore min_cpu_platform change from null to Intel/Auto
+
+## v1.38.5 (2024-02-26)
+
+BUG FIXES:
+
+* `resource/ucloud_instance`: add a default value of min_cpu_platform
+
+## v1.38.4 (2024-02-01)
+
+BUG FIXES:
+
+* `resource/ucloud_instance`: fix panic issue while detaching disk in a host
+
 ## 1.38.3 (2023-11-22)
 
 BUG FIXES:

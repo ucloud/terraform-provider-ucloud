@@ -43,6 +43,11 @@ func resourceUCloudDiskAttachment() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+
+			"device_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -100,6 +105,7 @@ func resourceUCloudDiskAttachmentRead(d *schema.ResourceData, meta interface{}) 
 	d.Set("availability_zone", d.Get("availability_zone").(string))
 	d.Set("instance_id", resourceSet.UHostId)
 	d.Set("disk_id", resourceSet.UDiskId)
+	d.Set("device_name", resourceSet.DeviceName)
 
 	return nil
 }
