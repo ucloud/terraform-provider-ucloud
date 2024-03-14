@@ -155,6 +155,17 @@ In addition to [generic `provider` arguments](https://www.terraform.io/docs/conf
 * `base_url` - (Optional) This is the base url.(Default: `https://api.ucloud.cn`).
  ~> **Note** this argument conflicts with `insecure`.
 
+* `assume_role` - (Optional) Configuration block for assuming an IAM role. See the [`assume_role` Configuration Block](#assume_role-configuration-block) section below. Only one `assume_role` block may be in the configuration.
+
+### assume_role Configuration Block
+
+The `assume_role` configuration block supports the following arguments:
+
+* `duration` - (Optional) Duration of the assume role session. Represented by a string such as `1h`, `2h45m`, or `30m15s`. Default is `900s`. The maximum value is the maximum session duration of the role
+* `policy` - (Optional) IAM Policy JSON describing further restricting permissions for the IAM Role being assumed.
+* `role_urn` - (Required) URN of the IAM Role to assume.
+* `session_name` - (Required) Session name to use when assuming the role. The value can contain 1 to 64 letters, digits, underscores (_), hyphens (-), and periods (.).
+
 ## Testing
 
 Credentials must be provided via the `UCLOUD_PUBLIC_KEY`, `UCLOUD_PRIVATE_KEY`, `UCLOUD_PROJECT_ID` environment variables in order to run acceptance tests.
