@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/hashicorp/terraform-plugin-sdk v1.4.0
+	github.com/mitchellh/mapstructure v1.1.2
 	github.com/pkg/errors v0.8.0
 	github.com/tidwall/gjson v1.16.0
 	github.com/ucloud/ucloud-sdk-go v0.22.5
@@ -53,7 +54,6 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.0.0 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.0 // indirect
-	github.com/mitchellh/mapstructure v1.1.2 // indirect
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/pierrec/lz4 v2.0.5+incompatible // indirect

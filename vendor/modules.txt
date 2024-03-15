@@ -307,6 +307,7 @@ github.com/ucloud/ucloud-sdk-go/private/utils
 github.com/ucloud/ucloud-sdk-go/services/cube
 github.com/ucloud/ucloud-sdk-go/services/iam
 github.com/ucloud/ucloud-sdk-go/services/ipsecvpn
+github.com/ucloud/ucloud-sdk-go/services/sts
 github.com/ucloud/ucloud-sdk-go/services/uaccount
 github.com/ucloud/ucloud-sdk-go/services/uads
 github.com/ucloud/ucloud-sdk-go/services/udb

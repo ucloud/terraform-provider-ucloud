@@ -1,8 +1,11 @@
 package ucloud
 
 import (
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/mutexkv"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
@@ -73,6 +76,8 @@ func Provider() terraform.ResourceProvider {
 				ConflictsWith: []string{"insecure"},
 				ValidateFunc:  validateBaseUrl,
 			},
+
+			"assume_role": assumeRoleSchema(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -185,8 +190,74 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		config.BaseURL = GetEndpointURL(config.Region)
 	}
 
+	if v, ok := d.GetOk("assume_role"); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
+		config.AssumeRole = expandAssumeRole(v.([]interface{})[0].(map[string]interface{}))
+	}
+
 	client, err := config.Client()
 	return client, err
+}
+
+func assumeRoleSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: true,
+		MaxItems: 1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"duration": {
+					Type:         schema.TypeString,
+					Optional:     true,
+					Description:  "The duration of the role session. Valid time units are ns, us (or µs), ms, s, h, or m.",
+					ValidateFunc: validateAssumeRoleDuration,
+					Default:      "900s",
+				},
+				"policy": {
+					Type:         schema.TypeString,
+					Optional:     true,
+					Description:  "IAM Policy JSON describing further restricting permissions for the IAM Role being assumed.",
+					ValidateFunc: validation.ValidateJsonString,
+				},
+				"role_urn": {
+					Type:        schema.TypeString,
+					Required:    true,
+					Description: "UCloud Resource Name (URN) of an IAM Role to assume prior to making API calls.",
+				},
+				"session_name": {
+					Type:        schema.TypeString,
+					Required:    true,
+					Description: "An identifier for the assumed role session.",
+				},
+			},
+		},
+	}
+}
+
+func expandAssumeRole(tfMap map[string]interface{}) *AssumeRoleConfig {
+	if tfMap == nil {
+		return nil
+	}
+
+	assumeRole := AssumeRoleConfig{}
+
+	if v, ok := tfMap["duration"].(string); ok && v != "" {
+		duration, _ := time.ParseDuration(v)
+		assumeRole.Duration = duration
+	}
+
+	if v, ok := tfMap["policy"].(string); ok && v != "" {
+		assumeRole.Policy = v
+	}
+
+	if v, ok := tfMap["role_urn"].(string); ok && v != "" {
+		assumeRole.RoleURN = v
+	}
+
+	if v, ok := tfMap["session_name"].(string); ok && v != "" {
+		assumeRole.SessionName = v
+	}
+
+	return &assumeRole
 }
 
 var ucloudMutexKV = mutexkv.NewMutexKV()

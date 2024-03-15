@@ -3,14 +3,15 @@ package ucloud
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ucloud/ucloud-sdk-go/services/iam"
-	"github.com/ucloud/ucloud-sdk-go/services/uads"
-	"github.com/ucloud/ucloud-sdk-go/services/uphost"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
 	"time"
+
+	"github.com/ucloud/ucloud-sdk-go/services/iam"
+	"github.com/ucloud/ucloud-sdk-go/services/uads"
+	"github.com/ucloud/ucloud-sdk-go/services/uphost"
 
 	"github.com/ucloud/ucloud-sdk-go/services/cube"
 	"github.com/ucloud/ucloud-sdk-go/services/ufile"
@@ -23,6 +24,7 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/private/protocol/http"
 	pumem "github.com/ucloud/ucloud-sdk-go/private/services/umem"
 	"github.com/ucloud/ucloud-sdk-go/services/ipsecvpn"
+	"github.com/ucloud/ucloud-sdk-go/services/sts"
 	"github.com/ucloud/ucloud-sdk-go/services/uaccount"
 	"github.com/ucloud/ucloud-sdk-go/services/udb"
 	"github.com/ucloud/ucloud-sdk-go/services/udisk"
@@ -42,12 +44,20 @@ type Config struct {
 	PrivateKey            string
 	Profile               string
 	SharedCredentialsFile string
+	AssumeRole            *AssumeRoleConfig
+	Region                string
+	ProjectId             string
+	Insecure              bool
+	BaseURL               string
+	MaxRetries            int
+}
 
-	Region     string
-	ProjectId  string
-	Insecure   bool
-	BaseURL    string
-	MaxRetries int
+// AssumeRoleConfig is the configuration of assume role
+type AssumeRoleConfig struct {
+	Duration    time.Duration
+	RoleURN     string
+	Policy      string
+	SessionName string
 }
 
 type cloudShellCredential struct {
@@ -124,7 +134,14 @@ func (c *Config) Client() (*UCloudClient, error) {
 	} else {
 		return nil, fmt.Errorf("must set credential about public_key and private_key")
 	}
-
+	if c.AssumeRole != nil {
+		// get STS credential
+		stsCredential, err := getSTSCredential(*c.AssumeRole, cfg, cred)
+		if err != nil {
+			return nil, fmt.Errorf("fail to get STS credential, %w", err)
+		}
+		cred = *stsCredential
+	}
 	// initialize client connections
 	client.unetconn = unet.NewClient(&cfg, &cred)
 	client.ulbconn = ulb.NewClient(&cfg, &cred)
@@ -208,4 +225,30 @@ func userHomeDir() string {
 		return home
 	}
 	return os.Getenv("HOME")
+}
+
+func getSTSCredential(assumeRole AssumeRoleConfig, config ucloud.Config, credential auth.Credential) (*auth.Credential, error) {
+	// get STS credential
+	stsClient := sts.NewClient(&config, &credential)
+	var assumeRoleRequest sts.AssumeRoleRequest
+	assumeRoleRequest.Policy = ucloud.String(assumeRole.Policy)
+	assumeRoleRequest.RoleUrn = ucloud.String(assumeRole.RoleURN)
+	assumeRoleRequest.RoleSessionName = ucloud.String(assumeRole.SessionName)
+	assumeRoleRequest.DurationSeconds = ucloud.Int(int(assumeRole.Duration.Seconds()))
+	assumeRoleResponse, err := stsClient.AssumeRole(&assumeRoleRequest)
+	if err != nil {
+		return nil, fmt.Errorf("fail to assume role, %w", err)
+	}
+	// set STS credential
+	var stsCredential auth.Credential
+	stsCredential.PublicKey = assumeRoleResponse.Credentials.AccessKeyId
+	stsCredential.PrivateKey = assumeRoleResponse.Credentials.AccessKeySecret
+	stsCredential.SecurityToken = assumeRoleResponse.Credentials.SecurityToken
+	stsCredential.CanExpire = true
+	expireTime, err := time.Parse(time.RFC3339, assumeRoleResponse.Credentials.Expiration)
+	if err != nil {
+		return nil, fmt.Errorf("fail to parse expiration time, %w", err)
+	}
+	stsCredential.Expires = expireTime
+	return &stsCredential, nil
 }

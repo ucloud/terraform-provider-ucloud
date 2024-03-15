@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -340,3 +341,15 @@ func validateBaseUrl(v interface{}, k string) (ws []string, errors []error) {
 }
 
 var validateToaID = validation.IntBetween(0, 254)
+
+// validateAssumeRoleDuration validates a string can be parsed as a valid time.Duration
+func validateAssumeRoleDuration(v interface{}, k string) (ws []string, errors []error) {
+	_, err := time.ParseDuration(v.(string))
+
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q cannot be parsed as a duration: %w", k, err))
+		return
+	}
+
+	return
+}
