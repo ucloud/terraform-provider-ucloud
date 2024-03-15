@@ -1,3 +1,10 @@
+## v1.38.8 (2024-03-16)
+
+FEATURES:
+
+* `provider/ucloud`: support identity verification through ucloud security token service.
+
+
 ## v1.38.7 (2024-03-08)
 
 FEATURES:
