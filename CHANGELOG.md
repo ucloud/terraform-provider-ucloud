@@ -1,3 +1,12 @@
+## v1.39.0 (2024-04-24)
+
+FEATURES:
+
+* **New Resource:** `ucloud_label`.
+* **New Resource:** `ucloud_label_attachment`.
+* **New Datasource:** `ucloud_labels`.
+* **New Datasource:** `ucloud_label_resources`.
+
 ## v1.38.8 (2024-03-16)
 
 FEATURES:

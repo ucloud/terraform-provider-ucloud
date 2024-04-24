@@ -112,6 +112,8 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_iam_policy":            dataSourceUCloudIAMPolicy(),
 			"ucloud_iam_policy_document":   dataSourceUCloudIAMPolicyDocument(),
 			"ucloud_baremetal_images":      dataSourceUCloudBareMetalImages(),
+			"ucloud_labels":                dataSourceUCloudLabels(),
+			"ucloud_label_resources":       dataSourceUCloudLabelResources(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -160,6 +162,8 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_iam_group_policy_attachment": resourceUCloudIAMGroupPolicyAttachment(),
 			"ucloud_instance_state":              resourceUCloudInstanceState(),
 			"ucloud_baremetal_instance":          resourceUCloudBareMetalInstance(),
+			"ucloud_label":                       resourceUCloudLabel(),
+			"ucloud_label_attachment":            resourceUCloudLabelAttachment(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
