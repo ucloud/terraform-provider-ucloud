@@ -6,7 +6,7 @@ description: |-
   Provides a list of resources with specific label.
 ---
 
-# ucloud_labels
+# ucloud_label_resources
 
 Provides a list of labels.
 

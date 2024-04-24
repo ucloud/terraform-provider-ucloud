@@ -6,7 +6,7 @@ description: |-
   Provides a label attachment resource.
 ---
 
-# ucloud_label
+# ucloud_label_attachment
 
 Provides a label attachment resource.
 
