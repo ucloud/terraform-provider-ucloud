@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/ucloud/ucloud-sdk-go/services/iam"
+	"github.com/ucloud/ucloud-sdk-go/services/label"
 	"github.com/ucloud/ucloud-sdk-go/services/uads"
 	"github.com/ucloud/ucloud-sdk-go/services/uphost"
 
@@ -155,6 +156,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 	client.cubeconn = cube.NewClient(&cfg, &cred)
 	client.uadsconn = uads.NewClient(&cfg, &cred)
 	client.iamconn = iam.NewClient(&cfg, &cred)
+	client.labelconn = label.NewClient(&cfg, &cred)
 
 	// initialize client connections for private usage
 	client.pumemconn = pumem.NewClient(&cfg, &cred)
@@ -185,6 +187,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 		client.uk8sconn.AddHttpRequestHandler(cloudShellCredHandler)
 		client.uadsconn.AddHttpRequestHandler(cloudShellCredHandler)
 		client.iamconn.AddHttpRequestHandler(cloudShellCredHandler)
+		client.labelconn.AddHttpRequestHandler(cloudShellCredHandler)
 		client.uphostconn.AddHttpRequestHandler(cloudShellCredHandler)
 		client.genericClient.AddHttpRequestHandler(cloudShellCredHandler)
 	}

@@ -8,6 +8,7 @@ import (
 	"github.com/ucloud/ucloud-sdk-go/services/uads"
 
 	"github.com/ucloud/ucloud-sdk-go/services/iam"
+	"github.com/ucloud/ucloud-sdk-go/services/label"
 	"github.com/ucloud/ucloud-sdk-go/services/udb"
 	"github.com/ucloud/ucloud-sdk-go/services/udisk"
 	"github.com/ucloud/ucloud-sdk-go/services/udpn"
@@ -48,6 +49,7 @@ type UCloudClient struct {
 	uk8sconn       *uk8s.UK8SClient
 	uadsconn       *uads.UADSClient
 	iamconn        *iam.IAMClient
+	labelconn      *label.LabelClient
 	uphostconn     *uphost.UPHostClient
 	// private services
 	pumemconn *pumem.UMemClient

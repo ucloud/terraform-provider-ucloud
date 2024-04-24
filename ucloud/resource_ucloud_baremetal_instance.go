@@ -4,10 +4,11 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/ucloud/ucloud-sdk-go/ucloud/request"
 	"regexp"
 	"strconv"
 	"time"
+
+	"github.com/ucloud/ucloud-sdk-go/ucloud/request"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -262,11 +263,8 @@ func resourceUCloudBareMetalInstanceCreate(d *schema.ResourceData, meta interfac
 	}
 	for _, machineType := range localDiskTypesResp.MachineTypes {
 		if machineType.Type == instanceType {
-			for _, cluster := range machineType.Clusters {
-				if cluster.StockStatus != "SoldOut" {
-					req.Cluster = ucloud.String(cluster.Name)
-					break
-				}
+			if machineType.StockStatus != "SoldOut" {
+				req.Cluster = ucloud.String(machineType.Cluster)
 			}
 			isLocalDiskInstance = true
 		}
@@ -282,11 +280,8 @@ func resourceUCloudBareMetalInstanceCreate(d *schema.ResourceData, meta interfac
 	}
 	for _, machineType := range cloudDiskTypesResp.MachineTypes {
 		if machineType.Type == instanceType {
-			for _, cluster := range machineType.Clusters {
-				if cluster.StockStatus != "SoldOut" {
-					req.Cluster = ucloud.String(cluster.Name)
-					break
-				}
+			if machineType.StockStatus != "SoldOut" {
+				req.Cluster = ucloud.String(machineType.Cluster)
 			}
 			isCloudDiskInstance = true
 		}

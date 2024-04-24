@@ -7,7 +7,7 @@ require (
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/pkg/errors v0.8.0
 	github.com/tidwall/gjson v1.16.0
-	github.com/ucloud/ucloud-sdk-go v0.22.5
+	github.com/ucloud/ucloud-sdk-go v0.22.17
 )
 
 require (
