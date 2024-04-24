@@ -1,3 +1,9 @@
+## v1.39.1 (2024-04-25)
+
+BUG FIXES:
+
+* fix documents of label resources
+
 ## v1.39.0 (2024-04-24)
 
 FEATURES:
