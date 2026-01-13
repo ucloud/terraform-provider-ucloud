@@ -80,6 +80,21 @@ func dataSourceUCloudEips() *schema.Resource {
 							Computed: true,
 						},
 
+						"share_bandwidth_package_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
+						"share_bandwidth_package_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
+						"share_bandwidth": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+
 						"name": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -185,17 +200,29 @@ func dataSourceUCloudEipsSave(d *schema.ResourceData, eips []unet.UnetEIPSet) er
 			})
 		}
 
+		shareBandwidthPackageID := ""
+		shareBandwidthPackageName := ""
+		shareBandwidth := 0
+		if item.PayMode == "ShareBandwidth" || item.BandwidthType == 1 {
+			shareBandwidthPackageID = item.ShareBandwidthSet.ShareBandwidthId
+			shareBandwidthPackageName = item.ShareBandwidthSet.ShareBandwidthName
+			shareBandwidth = item.ShareBandwidthSet.ShareBandwidth
+		}
+
 		data = append(data, map[string]interface{}{
-			"bandwidth":   item.Bandwidth,
-			"charge_type": upperCamelCvt.convert(item.ChargeType),
-			"charge_mode": upperCamelCvt.convert(item.PayMode),
-			"name":        item.Name,
-			"remark":      item.Remark,
-			"tag":         item.Tag,
-			"status":      item.Status,
-			"create_time": timestampToString(item.CreateTime),
-			"expire_time": timestampToString(item.ExpireTime),
-			"ip_set":      eipAddr,
+			"bandwidth":                    item.Bandwidth,
+			"charge_type":                  upperCamelCvt.convert(item.ChargeType),
+			"charge_mode":                  upperCamelCvt.convert(item.PayMode),
+			"share_bandwidth_package_id":   shareBandwidthPackageID,
+			"share_bandwidth_package_name": shareBandwidthPackageName,
+			"share_bandwidth":              shareBandwidth,
+			"name":                         item.Name,
+			"remark":                       item.Remark,
+			"tag":                          item.Tag,
+			"status":                       item.Status,
+			"create_time":                  timestampToString(item.CreateTime),
+			"expire_time":                  timestampToString(item.ExpireTime),
+			"ip_set":                       eipAddr,
 		})
 	}
 
