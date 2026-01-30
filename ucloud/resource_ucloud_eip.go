@@ -59,14 +59,14 @@ func resourceUCloudEIP() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{
 					"traffic",
 					"bandwidth",
-				"share_bandwidth",
+					"share_bandwidth",
 				}, false),
 			},
 
-		"share_bandwidth_package_id": {
-			Type:     schema.TypeString,
-			Optional: true,
-		},
+			"share_bandwidth_package_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 
 			"duration": {
 				Type:         schema.TypeInt,
