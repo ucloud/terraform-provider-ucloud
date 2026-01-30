@@ -419,3 +419,29 @@ func eipWaitForState(client *UCloudClient, eipId string) *resource.StateChangeCo
 		},
 	}
 }
+
+func validateSharedBandwidthConfig(d *schema.ResourceData) error {
+	shareBandwidthId, hasShareBandwidth := d.GetOk("share_bandwidth_package_id")
+	bandwidth := d.Get("bandwidth").(int)
+	chargeMode := d.Get("charge_mode").(string)
+
+	if hasShareBandwidth && shareBandwidthId.(string) != "" {
+		// Has shared bandwidth - strict requirements
+		if chargeMode != "share_bandwidth" {
+			return fmt.Errorf("charge_mode must be 'share_bandwidth' when share_bandwidth_package_id is set, got '%s'", chargeMode)
+		}
+		if bandwidth != 0 {
+			return fmt.Errorf("bandwidth must be 0 when share_bandwidth_package_id is set, got %d", bandwidth)
+		}
+	} else {
+		// No shared bandwidth - regular requirements
+		if chargeMode == "share_bandwidth" {
+			return fmt.Errorf("charge_mode cannot be 'share_bandwidth' without share_bandwidth_package_id")
+		}
+		if bandwidth == 0 {
+			return fmt.Errorf("bandwidth must be greater than 0 when not using shared bandwidth package")
+		}
+	}
+
+	return nil
+}
