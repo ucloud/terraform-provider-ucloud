@@ -23,27 +23,12 @@ func resourceUCloudEIP() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 
-		CustomizeDiff: customdiff.All(
-			eipCustomizeDiff,
-			customdiff.ForceNewIfChange("charge_mode", func(old, new, meta interface{}) bool {
-				oldS, _ := old.(string)
-				newS, _ := new.(string)
-				return oldS == "share_bandwidth" || newS == "share_bandwidth"
-			}),
-		),
-
 		Schema: map[string]*schema.Schema{
 			"bandwidth": {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Computed:     true,
-				ValidateFunc: validation.IntBetween(0, 800),
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					if v, ok := d.GetOk("share_bandwidth_package_id"); ok && v.(string) != "" {
-						return true
-					}
-					return d.Get("charge_mode").(string) == "share_bandwidth"
-				},
+				ValidateFunc: validation.IntBetween(1, 800),
 			},
 
 			"internet_type": {
@@ -84,7 +69,6 @@ func resourceUCloudEIP() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ForceNew: true,
 			},
 
 			"duration": {
@@ -180,6 +164,11 @@ func resourceUCloudEIPCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := client.unetconn
 
 	req := conn.NewAllocateEIPRequest()
+
+	// Validate shared bandwidth configuration
+	if err := validateSharedBandwidthConfig(d); err != nil {
+		return err
+	}
 	req.OperatorName = ucloud.String(upperCamelCvt.unconvert(d.Get("internet_type").(string)))
 	if v, ok := d.GetOk("charge_type"); ok {
 		req.ChargeType = ucloud.String(upperCamelCvt.unconvert(v.(string)))
@@ -249,6 +238,10 @@ func resourceUCloudEIPCreate(d *schema.ResourceData, meta interface{}) error {
 		req.Remark = ucloud.String(v.(string))
 	}
 
+	if v, ok := d.GetOk("share_bandwidth_package_id"); ok {
+		req.ShareBandwidthId = ucloud.String(v.(string))
+	}
+
 	resp, err := conn.AllocateEIP(req)
 	if err != nil {
 		return fmt.Errorf("error on creating eip, %s", err)
@@ -277,11 +270,15 @@ func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	d.Partial(true)
 
-	if d.HasChange("bandwidth") && !d.IsNewResource() {
-		if d.Get("charge_mode").(string) == "share_bandwidth" {
+	// Validate shared bandwidth configuration
+	if err := validateSharedBandwidthConfig(d); err != nil {
+		return err
+	}
+
+	if d.HasChange("bandwidth") && !d.IsNewResource() && !d.HasChange("share_bandwidth_package_id") {
+    if d.Get("charge_mode").(string) == "share_bandwidth" {
 			return fmt.Errorf("bandwidth cannot be modified when charge_mode is %q", "share_bandwidth")
 		}
-
 		reqBand := conn.NewModifyEIPBandwidthRequest()
 		reqBand.EIPId = ucloud.String(d.Id())
 		reqBand.Bandwidth = ucloud.Int(d.Get("bandwidth").(int))
@@ -302,11 +299,7 @@ func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	if d.HasChange("charge_mode") && !d.IsNewResource() {
-		if d.Get("charge_mode").(string) == "share_bandwidth" {
-			return fmt.Errorf("changing charge_mode to %q requires recreating the resource", "share_bandwidth")
-		}
-
+	if d.HasChange("charge_mode") && !d.IsNewResource() && !d.HasChange("share_bandwidth_package_id") {
 		reqCharge := conn.NewSetEIPPayModeRequest()
 		reqCharge.EIPId = ucloud.String(d.Id())
 		reqCharge.PayMode = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_mode").(string)))
@@ -325,6 +318,65 @@ func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
 		_, err = stateConf.WaitForState()
 		if err != nil {
 			return fmt.Errorf("error on waiting for %s complete to eip %q, %s", "SetEIPPayMode", d.Id(), err)
+		}
+	}
+
+	if d.HasChange("share_bandwidth_package_id") && !d.IsNewResource() {
+		oldVal, newVal := d.GetChange("share_bandwidth_package_id")
+		oldId := oldVal.(string)
+		newId := newVal.(string)
+
+		// Disassociate from old shared bandwidth package
+		if oldId != "" {
+			reqDisassoc := conn.NewDisassociateEIPWithShareBandwidthRequest()
+			reqDisassoc.ShareBandwidthId = ucloud.String(oldId)
+			reqDisassoc.EIPIds = []string{d.Id()}
+
+			if newId != "" {
+				// Swapping packages: use safe interim values since the EIP
+				// will be immediately re-associated with the new package
+				reqDisassoc.Bandwidth = ucloud.Int(1)
+				reqDisassoc.PayMode = ucloud.String("Bandwidth")
+			} else {
+				// Leaving shared bandwidth entirely: use the target values
+				reqDisassoc.Bandwidth = ucloud.Int(d.Get("bandwidth").(int))
+				reqDisassoc.PayMode = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_mode").(string)))
+			}
+
+			_, err := conn.DisassociateEIPWithShareBandwidth(reqDisassoc)
+			if err != nil {
+				return fmt.Errorf("error on disassociating eip %q from shared bandwidth, %s", d.Id(), err)
+			}
+
+			d.SetPartial("share_bandwidth_package_id")
+
+			// after disassociating eip, we need to wait it completed
+			stateConf := eipWaitForState(client, d.Id())
+			_, err = stateConf.WaitForState()
+			if err != nil {
+				return fmt.Errorf("error on waiting for disassociation complete for eip %q, %s", d.Id(), err)
+			}
+		}
+
+		// Associate with new shared bandwidth package
+		if newId != "" {
+			reqAssoc := conn.NewAssociateEIPWithShareBandwidthRequest()
+			reqAssoc.ShareBandwidthId = ucloud.String(newId)
+			reqAssoc.EIPIds = []string{d.Id()}
+
+			_, err := conn.AssociateEIPWithShareBandwidth(reqAssoc)
+			if err != nil {
+				return fmt.Errorf("error on associating eip %q with shared bandwidth, %s", d.Id(), err)
+			}
+
+			d.SetPartial("share_bandwidth_package_id")
+
+			// after associating eip, we need to wait it completed
+			stateConf := eipWaitForState(client, d.Id())
+			_, err = stateConf.WaitForState()
+			if err != nil {
+				return fmt.Errorf("error on waiting for association complete for eip %q, %s", d.Id(), err)
+			}
 		}
 	}
 
@@ -404,6 +456,8 @@ func resourceUCloudEIPRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("create_time", timestampToString(eip.CreateTime))
 	d.Set("expire_time", timestampToString(eip.ExpireTime))
 
+	d.Set("share_bandwidth_package_id", eip.ShareBandwidthSet.ShareBandwidthId)
+
 	eipAddr := []map[string]interface{}{}
 	for _, item := range eip.EIPAddr {
 		eipAddr = append(eipAddr, map[string]interface{}{
@@ -479,26 +533,27 @@ func eipWaitForState(client *UCloudClient, eipId string) *resource.StateChangeCo
 	}
 }
 
-func eipCustomizeDiff(diff *schema.ResourceDiff, meta interface{}) error {
-	chargeMode, hasChargeMode := diff.GetOk("charge_mode")
-	_, hasShareBandwidthPackageID := diff.GetOk("share_bandwidth_package_id")
+func validateSharedBandwidthConfig(d *schema.ResourceData) error {
+	shareBandwidthId, hasShareBandwidth := d.GetOk("share_bandwidth_package_id")
+	bandwidth := d.Get("bandwidth").(int)
+	chargeMode := d.Get("charge_mode").(string)
 
-	if hasShareBandwidthPackageID && hasChargeMode && chargeMode.(string) != "share_bandwidth" {
-		return fmt.Errorf("share_bandwidth_package_id can only be used when charge_mode is %q", "share_bandwidth")
-	}
-
-	if (hasChargeMode && chargeMode.(string) == "share_bandwidth") || (hasShareBandwidthPackageID && !hasChargeMode) {
-		if !hasShareBandwidthPackageID {
-			return fmt.Errorf("share_bandwidth_package_id must be set when charge_mode is %q", "share_bandwidth")
+	if hasShareBandwidth && shareBandwidthId.(string) != "" {
+		// Has shared bandwidth - strict requirements
+		if chargeMode != "share_bandwidth" {
+			return fmt.Errorf("charge_mode must be 'share_bandwidth' when share_bandwidth_package_id is set, got '%s'", chargeMode)
 		}
-		if v, ok := diff.GetOkExists("bandwidth"); ok && v.(int) != 0 {
-			return fmt.Errorf("bandwidth must be 0 when charge_mode is %q", "share_bandwidth")
+		if bandwidth != 0 {
+			return fmt.Errorf("bandwidth must be 0 when share_bandwidth_package_id is set, got %d", bandwidth)
 		}
-		return nil
-	}
-
-	if v, ok := diff.GetOkExists("bandwidth"); ok && v.(int) == 0 {
-		return fmt.Errorf("bandwidth must be greater than 0 unless charge_mode is %q", "share_bandwidth")
+	} else {
+		// No shared bandwidth - regular requirements
+		if chargeMode == "share_bandwidth" {
+			return fmt.Errorf("charge_mode cannot be 'share_bandwidth' without share_bandwidth_package_id")
+		}
+		if bandwidth == 0 {
+			return fmt.Errorf("bandwidth must be greater than 0 when not using shared bandwidth package")
+		}
 	}
 
 	return nil

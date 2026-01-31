@@ -22,6 +22,19 @@ resource "ucloud_eip" "example" {
 }
 ```
 
+## Example Usage with Shared Bandwidth
+
+```hcl
+resource "ucloud_eip" "example_shared" {
+  internet_type              = "bgp"
+  bandwidth                  = 0
+  charge_mode                = "share_bandwidth"
+  share_bandwidth_package_id = "bwpack-xxxxx"
+  name                       = "tf-example-eip-shared"
+  tag                        = "tf-example"
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
