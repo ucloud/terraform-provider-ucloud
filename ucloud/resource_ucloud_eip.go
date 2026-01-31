@@ -161,6 +161,11 @@ func resourceUCloudEIPCreate(d *schema.ResourceData, meta interface{}) error {
 	conn := client.unetconn
 
 	req := conn.NewAllocateEIPRequest()
+
+	// Validate shared bandwidth configuration
+	if err := validateSharedBandwidthConfig(d); err != nil {
+		return err
+	}
 	req.OperatorName = ucloud.String(upperCamelCvt.unconvert(d.Get("internet_type").(string)))
 	if v, ok := d.GetOk("charge_type"); ok {
 		req.ChargeType = ucloud.String(upperCamelCvt.unconvert(v.(string)))
@@ -203,6 +208,10 @@ func resourceUCloudEIPCreate(d *schema.ResourceData, meta interface{}) error {
 		req.Remark = ucloud.String(v.(string))
 	}
 
+	if v, ok := d.GetOk("share_bandwidth_package_id"); ok {
+		req.ShareBandwidthId = ucloud.String(v.(string))
+	}
+
 	resp, err := conn.AllocateEIP(req)
 	if err != nil {
 		return fmt.Errorf("error on creating eip, %s", err)
@@ -230,6 +239,11 @@ func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
 	conn := client.unetconn
 
 	d.Partial(true)
+
+	// Validate shared bandwidth configuration
+	if err := validateSharedBandwidthConfig(d); err != nil {
+		return err
+	}
 
 	if d.HasChange("bandwidth") && !d.IsNewResource() {
 		reqBand := conn.NewModifyEIPBandwidthRequest()
@@ -271,6 +285,56 @@ func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
 		_, err = stateConf.WaitForState()
 		if err != nil {
 			return fmt.Errorf("error on waiting for %s complete to eip %q, %s", "SetEIPPayMode", d.Id(), err)
+		}
+	}
+
+	if d.HasChange("share_bandwidth_package_id") && !d.IsNewResource() {
+		oldVal, newVal := d.GetChange("share_bandwidth_package_id")
+		oldId := oldVal.(string)
+		newId := newVal.(string)
+
+		// Disassociate from old shared bandwidth package
+		if oldId != "" {
+			reqDisassoc := conn.NewDisassociateEIPWithShareBandwidthRequest()
+			reqDisassoc.ShareBandwidthId = ucloud.String(oldId)
+			reqDisassoc.EIPIds = []string{d.Id()}
+			reqDisassoc.Bandwidth = ucloud.Int(d.Get("bandwidth").(int))
+			reqDisassoc.PayMode = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_mode").(string)))
+
+			_, err := conn.DisassociateEIPWithShareBandwidth(reqDisassoc)
+			if err != nil {
+				return fmt.Errorf("error on disassociating eip %q from shared bandwidth, %s", d.Id(), err)
+			}
+
+			d.SetPartial("share_bandwidth_package_id")
+
+			// after disassociating eip, we need to wait it completed
+			stateConf := eipWaitForState(client, d.Id())
+			_, err = stateConf.WaitForState()
+			if err != nil {
+				return fmt.Errorf("error on waiting for disassociation complete for eip %q, %s", d.Id(), err)
+			}
+		}
+
+		// Associate with new shared bandwidth package
+		if newId != "" {
+			reqAssoc := conn.NewAssociateEIPWithShareBandwidthRequest()
+			reqAssoc.ShareBandwidthId = ucloud.String(newId)
+			reqAssoc.EIPIds = []string{d.Id()}
+
+			_, err := conn.AssociateEIPWithShareBandwidth(reqAssoc)
+			if err != nil {
+				return fmt.Errorf("error on associating eip %q with shared bandwidth, %s", d.Id(), err)
+			}
+
+			d.SetPartial("share_bandwidth_package_id")
+
+			// after associating eip, we need to wait it completed
+			stateConf := eipWaitForState(client, d.Id())
+			_, err = stateConf.WaitForState()
+			if err != nil {
+				return fmt.Errorf("error on waiting for association complete for eip %q, %s", d.Id(), err)
+			}
 		}
 	}
 
@@ -344,6 +408,12 @@ func resourceUCloudEIPRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("status", eip.Status)
 	d.Set("create_time", timestampToString(eip.CreateTime))
 	d.Set("expire_time", timestampToString(eip.ExpireTime))
+
+	if eip.ShareBandwidthSet.ShareBandwidthId != "" {
+		d.Set("share_bandwidth_package_id", eip.ShareBandwidthSet.ShareBandwidthId)
+	} else {
+		d.Set("share_bandwidth_package_id", "")
+	}
 
 	eipAddr := []map[string]interface{}{}
 	for _, item := range eip.EIPAddr {
