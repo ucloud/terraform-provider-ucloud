@@ -334,7 +334,11 @@ func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
 			if newId != "" {
 				// Swapping packages: use safe interim values since the EIP
 				// will be immediately re-associated with the new package
-				reqDisassoc.Bandwidth = ucloud.Int(1)
+				if bandwidth, ok := d.Get("bandwidth").(int); ok && bandwidth > 0 {
+					reqDisassoc.Bandwidth = ucloud.Int(bandwidth)
+				} else {
+					reqDisassoc.Bandwidth = ucloud.Int(1)
+				}
 				reqDisassoc.PayMode = ucloud.String("Bandwidth")
 			} else {
 				// Leaving shared bandwidth entirely: use the target values
@@ -541,9 +545,6 @@ func validateSharedBandwidthConfig(d *schema.ResourceData) error {
 		// Has shared bandwidth - strict requirements
 		if chargeMode != "share_bandwidth" {
 			return fmt.Errorf("charge_mode must be 'share_bandwidth' when share_bandwidth_package_id is set, got '%s'", chargeMode)
-		}
-		if bandwidth != 0 {
-			return fmt.Errorf("bandwidth must be 0 when share_bandwidth_package_id is set, got %d", bandwidth)
 		}
 	} else {
 		// No shared bandwidth - regular requirements
