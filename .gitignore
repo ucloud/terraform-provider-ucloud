@@ -36,3 +36,4 @@ website/vendor
 /.vs
 .vscode/
 .worktrees/
+docs/plans

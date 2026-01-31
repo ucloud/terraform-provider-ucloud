@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -276,7 +275,7 @@ func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if d.HasChange("bandwidth") && !d.IsNewResource() && !d.HasChange("share_bandwidth_package_id") {
-    if d.Get("charge_mode").(string) == "share_bandwidth" {
+		if d.Get("charge_mode").(string) == "share_bandwidth" {
 			return fmt.Errorf("bandwidth cannot be modified when charge_mode is %q", "share_bandwidth")
 		}
 		reqBand := conn.NewModifyEIPBandwidthRequest()
