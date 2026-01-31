@@ -43,8 +43,11 @@ The attribute (`eips`) support the following:
 * `ip_set` - It is a nested type which documented below.
 * `create_time` - The creation time of Elastic IP, formatted in RFC3339 time string.
 * `expire_time` - The expiration time for Elastic IP, formatted in RFC3339 time string.
-* `charge_mode` - The charge mode of Elastic IP. Possible values are: `traffic` as pay by traffic, `bandwidth` as pay by bandwidth.
+* `charge_mode` - The charge mode of Elastic IP. Possible values are: `traffic` as pay by traffic, `bandwidth` as pay by bandwidth, `share_bandwidth` as share bandwidth mode.
 * `charge_type` - The charge type of Elastic IP. Possible values are: `year` as pay by year, `month` as pay by month, `dynamic` as pay by hour.
+* `share_bandwidth_package_id` - The ID of shared bandwidth package when `charge_mode` is `share_bandwidth`, otherwise empty.
+* `share_bandwidth_package_name` - The name of shared bandwidth package when `charge_mode` is `share_bandwidth`, otherwise empty.
+* `share_bandwidth` - The shared bandwidth value (Mbps) when `charge_mode` is `share_bandwidth`, otherwise `0`.
 * `name` - The name of Elastic IP.
 * `remark` - The remarks of Elastic IP.
 * `status` - Elastic IP status. Possible values are: `used` as in use, `free` as available and `freeze` as associating.
