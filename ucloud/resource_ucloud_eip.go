@@ -27,7 +27,7 @@ func resourceUCloudEIP() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Computed:     true,
-				ValidateFunc: validation.IntBetween(1, 800),
+				ValidateFunc: validation.IntBetween(0, 800),
 			},
 
 			"internet_type": {
@@ -245,7 +245,7 @@ func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	if d.HasChange("bandwidth") && !d.IsNewResource() {
+	if d.HasChange("bandwidth") && !d.IsNewResource() && !d.HasChange("share_bandwidth_package_id") {
 		reqBand := conn.NewModifyEIPBandwidthRequest()
 		reqBand.EIPId = ucloud.String(d.Id())
 		reqBand.Bandwidth = ucloud.Int(d.Get("bandwidth").(int))
@@ -266,7 +266,7 @@ func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	if d.HasChange("charge_mode") && !d.IsNewResource() {
+	if d.HasChange("charge_mode") && !d.IsNewResource() && !d.HasChange("share_bandwidth_package_id") {
 		reqCharge := conn.NewSetEIPPayModeRequest()
 		reqCharge.EIPId = ucloud.String(d.Id())
 		reqCharge.PayMode = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_mode").(string)))
@@ -298,8 +298,17 @@ func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
 			reqDisassoc := conn.NewDisassociateEIPWithShareBandwidthRequest()
 			reqDisassoc.ShareBandwidthId = ucloud.String(oldId)
 			reqDisassoc.EIPIds = []string{d.Id()}
-			reqDisassoc.Bandwidth = ucloud.Int(d.Get("bandwidth").(int))
-			reqDisassoc.PayMode = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_mode").(string)))
+
+			if newId != "" {
+				// Swapping packages: use safe interim values since the EIP
+				// will be immediately re-associated with the new package
+				reqDisassoc.Bandwidth = ucloud.Int(1)
+				reqDisassoc.PayMode = ucloud.String("Bandwidth")
+			} else {
+				// Leaving shared bandwidth entirely: use the target values
+				reqDisassoc.Bandwidth = ucloud.Int(d.Get("bandwidth").(int))
+				reqDisassoc.PayMode = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_mode").(string)))
+			}
 
 			_, err := conn.DisassociateEIPWithShareBandwidth(reqDisassoc)
 			if err != nil {
@@ -409,11 +418,7 @@ func resourceUCloudEIPRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("create_time", timestampToString(eip.CreateTime))
 	d.Set("expire_time", timestampToString(eip.ExpireTime))
 
-	if eip.ShareBandwidthSet.ShareBandwidthId != "" {
-		d.Set("share_bandwidth_package_id", eip.ShareBandwidthSet.ShareBandwidthId)
-	} else {
-		d.Set("share_bandwidth_package_id", "")
-	}
+	d.Set("share_bandwidth_package_id", eip.ShareBandwidthSet.ShareBandwidthId)
 
 	eipAddr := []map[string]interface{}{}
 	for _, item := range eip.EIPAddr {
