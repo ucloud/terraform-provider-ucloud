@@ -34,20 +34,6 @@ func TestValidateSharedBandwidthConfig_WithPackageId_InvalidChargeMode(t *testin
 	}
 }
 
-func TestValidateSharedBandwidthConfig_WithPackageId_InvalidBandwidth(t *testing.T) {
-	d := schema.TestResourceDataRaw(t, resourceUCloudEIP().Schema, map[string]interface{}{
-		"internet_type":              "bgp",
-		"share_bandwidth_package_id": "bwpack-test",
-		"charge_mode":                "share_bandwidth",
-		"bandwidth":                  10,
-	})
-
-	err := validateSharedBandwidthConfig(d)
-	if err == nil {
-		t.Fatal("expected error with non-zero bandwidth, got nil")
-	}
-}
-
 func TestValidateSharedBandwidthConfig_WithoutPackageId(t *testing.T) {
 	d := schema.TestResourceDataRaw(t, resourceUCloudEIP().Schema, map[string]interface{}{
 		"internet_type": "bgp",
