@@ -35,3 +35,5 @@ website/vendor
 *.winfile eol=crlf
 /.vs
 .vscode/
+.worktrees/
+docs/plans
