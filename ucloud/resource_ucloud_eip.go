@@ -67,7 +67,6 @@ func resourceUCloudEIP() *schema.Resource {
 			"share_bandwidth_package_id": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
 			},
 
 			"duration": {
@@ -204,12 +203,8 @@ func resourceUCloudEIPCreate(d *schema.ResourceData, meta interface{}) error {
 		req.Bandwidth = ucloud.Int(1)
 	}
 
-	if effectiveChargeMode == "share_bandwidth" {
-		if v, ok := d.GetOkExists("bandwidth"); ok && v.(int) != 0 {
-			return fmt.Errorf("bandwidth must be 0 when charge_mode is %q", "share_bandwidth")
-		}
-	} else {
-		if v, ok := d.GetOkExists("bandwidth"); ok && v.(int) == 0 {
+	if effectiveChargeMode != "share_bandwidth" {
+		if v, ok := d.GetOkExists("bandwidth"); ok && v.(int) <= 0 {
 			return fmt.Errorf("bandwidth must be greater than 0 unless charge_mode is %q", "share_bandwidth")
 		}
 	}
@@ -274,52 +269,6 @@ func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	if d.HasChange("bandwidth") && !d.IsNewResource() && !d.HasChange("share_bandwidth_package_id") {
-		if d.Get("charge_mode").(string) == "share_bandwidth" {
-			return fmt.Errorf("bandwidth cannot be modified when charge_mode is %q", "share_bandwidth")
-		}
-		reqBand := conn.NewModifyEIPBandwidthRequest()
-		reqBand.EIPId = ucloud.String(d.Id())
-		reqBand.Bandwidth = ucloud.Int(d.Get("bandwidth").(int))
-
-		_, err := conn.ModifyEIPBandwidth(reqBand)
-		if err != nil {
-			return fmt.Errorf("error on %s to eip %q, %s", "ModifyEIPBandwidth", d.Id(), err)
-		}
-
-		d.SetPartial("bandwidth")
-
-		// after update eip bandwidth, we need to wait it completed
-		stateConf := eipWaitForState(client, d.Id())
-
-		_, err = stateConf.WaitForState()
-		if err != nil {
-			return fmt.Errorf("error on waiting for %s complete to eip %q, %s", "ModifyEIPBandwidth", d.Id(), err)
-		}
-	}
-
-	if d.HasChange("charge_mode") && !d.IsNewResource() && !d.HasChange("share_bandwidth_package_id") {
-		reqCharge := conn.NewSetEIPPayModeRequest()
-		reqCharge.EIPId = ucloud.String(d.Id())
-		reqCharge.PayMode = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_mode").(string)))
-		reqCharge.Bandwidth = ucloud.Int(d.Get("bandwidth").(int))
-
-		_, err := conn.SetEIPPayMode(reqCharge)
-		if err != nil {
-			return fmt.Errorf("error on %s to eip %q, %s", "SetEIPPayMode", d.Id(), err)
-		}
-
-		d.SetPartial("charge_mode")
-
-		// after update eip internet charge mode, we need to wait it completed
-		stateConf := eipWaitForState(client, d.Id())
-
-		_, err = stateConf.WaitForState()
-		if err != nil {
-			return fmt.Errorf("error on waiting for %s complete to eip %q, %s", "SetEIPPayMode", d.Id(), err)
-		}
-	}
-
 	if d.HasChange("share_bandwidth_package_id") && !d.IsNewResource() {
 		oldVal, newVal := d.GetChange("share_bandwidth_package_id")
 		oldId := oldVal.(string)
@@ -380,6 +329,49 @@ func resourceUCloudEIPUpdate(d *schema.ResourceData, meta interface{}) error {
 			if err != nil {
 				return fmt.Errorf("error on waiting for association complete for eip %q, %s", d.Id(), err)
 			}
+		}
+	}
+
+	if d.HasChange("bandwidth") && !d.IsNewResource() && d.Get("charge_mode").(string) != "share_bandwidth" && !d.HasChange("share_bandwidth_package_id") {
+		reqBand := conn.NewModifyEIPBandwidthRequest()
+		reqBand.EIPId = ucloud.String(d.Id())
+		reqBand.Bandwidth = ucloud.Int(d.Get("bandwidth").(int))
+
+		_, err := conn.ModifyEIPBandwidth(reqBand)
+		if err != nil {
+			return fmt.Errorf("error on %s to eip %q, %s", "ModifyEIPBandwidth", d.Id(), err)
+		}
+
+		d.SetPartial("bandwidth")
+
+		// after update eip bandwidth, we need to wait it completed
+		stateConf := eipWaitForState(client, d.Id())
+
+		_, err = stateConf.WaitForState()
+		if err != nil {
+			return fmt.Errorf("error on waiting for %s complete to eip %q, %s", "ModifyEIPBandwidth", d.Id(), err)
+		}
+	}
+
+	if d.HasChange("charge_mode") && !d.IsNewResource() && !d.HasChange("share_bandwidth_package_id") {
+		reqCharge := conn.NewSetEIPPayModeRequest()
+		reqCharge.EIPId = ucloud.String(d.Id())
+		reqCharge.PayMode = ucloud.String(upperCamelCvt.unconvert(d.Get("charge_mode").(string)))
+		reqCharge.Bandwidth = ucloud.Int(d.Get("bandwidth").(int))
+
+		_, err := conn.SetEIPPayMode(reqCharge)
+		if err != nil {
+			return fmt.Errorf("error on %s to eip %q, %s", "SetEIPPayMode", d.Id(), err)
+		}
+
+		d.SetPartial("charge_mode")
+
+		// after update eip internet charge mode, we need to wait it completed
+		stateConf := eipWaitForState(client, d.Id())
+
+		_, err = stateConf.WaitForState()
+		if err != nil {
+			return fmt.Errorf("error on waiting for %s complete to eip %q, %s", "SetEIPPayMode", d.Id(), err)
 		}
 	}
 
@@ -447,19 +439,12 @@ func resourceUCloudEIPRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("bandwidth", eip.Bandwidth)
 	d.Set("charge_type", upperCamelCvt.convert(eip.ChargeType))
 	d.Set("charge_mode", upperCamelCvt.convert(eip.PayMode))
-	if eip.PayMode == "ShareBandwidth" {
-		d.Set("share_bandwidth_package_id", eip.ShareBandwidthSet.ShareBandwidthId)
-	} else {
-		d.Set("share_bandwidth_package_id", "")
-	}
 	d.Set("name", eip.Name)
 	d.Set("remark", eip.Remark)
 	d.Set("tag", eip.Tag)
 	d.Set("status", eip.Status)
 	d.Set("create_time", timestampToString(eip.CreateTime))
 	d.Set("expire_time", timestampToString(eip.ExpireTime))
-
-	d.Set("share_bandwidth_package_id", eip.ShareBandwidthSet.ShareBandwidthId)
 
 	eipAddr := []map[string]interface{}{}
 	for _, item := range eip.EIPAddr {
