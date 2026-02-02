@@ -27,7 +27,7 @@ func resourceUCloudEIP() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Computed:     true,
-				ValidateFunc: validation.IntBetween(1, 800),
+				ValidateFunc: validation.IntBetween(0, 800),
 			},
 
 			"internet_type": {
