@@ -48,6 +48,22 @@ resource "ucloud_instance" "normal" {
   delete_disks_with_instance = true
 }
 
+# Create instance with key pair login
+resource "ucloud_instance" "keypair" {
+  availability_zone = "cn-bj2-03"
+  image_id          = data.ucloud_images.normal.images[0].id
+  instance_type     = "n-basic-2"
+  name              = "tf-example-keypair-instance"
+  tag               = "tf-example"
+  boot_disk_type    = "cloud_ssd"
+
+  login_mode  = "KeyPair"
+  key_pair_id = "keypair-xxxxx"
+
+  # the default Web Security Group that UCloud recommend to users
+  security_group = data.ucloud_security_groups.default.security_groups[0].id
+}
+
 # Create instance in SecGroup mode
 resource "ucloud_instance" "secgroup" {
   availability_zone = "cn-bj2-03"
@@ -111,6 +127,11 @@ The following arguments are supported:
 * `root_password` - (Optional) The password for the instance, which contains 8-30 characters, and at least 2 items of capital letters, lower case letters, numbers and special characters. The special characters include <code>`()~!@#$%^&*-+=_|{}\[]:;'<>,.?/</code>. If not specified, terraform will auto-generate a password. 
 
     ~> **Note** If you want to update this value, you must set `allow_stopping_for_update`to `true`.
+* `login_mode` - (Optional) The login mode of instance. Possible values are: `Password` and `KeyPair`. If not specified, Terraform uses `Password` for backward compatibility.
+* `key_pair_id` - (Optional) The ID of the key pair used when `login_mode` is `KeyPair`. This argument is required when `login_mode` is `KeyPair`, and cannot be used when `login_mode` is `Password`.
+* `deletion_protection` - (Optional) Whether deletion protection is enabled when creating the instance.
+
+    ~> **Note** If `deletion_protection` is set to `true`, UCloud will reject instance termination until deletion protection is disabled outside Terraform.
 * `boot_disk_size` - (Optional) The size of the boot disk, measured in GB (GigaByte). Range: 20-500. The value set of disk size must be larger or equal to `20`(default: `20`) for Linux and `40` (default: `40`) for Windows. The responsive time is a bit longer if the value set is larger than default for local boot disk, and further settings may be required on host instance if the value set is larger than default for cloud boot disk. The disk volume adjustment must be a multiple of 10 GB. In addition, any reduction of boot disk size is not supported.
 
     ~> **Note** If you want to update this value, you must set `allow_stopping_for_update`to `true`. In addition, when it is changed, you need to [go to the instance for configuration](https://docs.ucloud.cn/compute/uhost/guide/disk). 

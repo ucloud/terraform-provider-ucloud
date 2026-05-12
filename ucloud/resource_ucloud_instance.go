@@ -85,6 +85,7 @@ func resourceUCloudInstance() *schema.Resource {
 			customdiff.ValidateChange("data_disk_size", diffValidateInstanceDataDiskSize),
 			customdiff.ValidateChange("boot_disk_size", diffValidateInstanceBootDiskSize),
 			customdiff.ValidateChange("instance_type", diffValidateInstanceType),
+			validateInstanceLoginMode,
 			diffValidateBootDiskTypeWithDataDiskType,
 			diffValidateChargeTypeWithDuration,
 			diffValidateDataDisks,
@@ -116,6 +117,22 @@ func resourceUCloudInstance() *schema.Resource {
 				Sensitive:    true,
 				Computed:     true,
 				ValidateFunc: validateInstancePassword,
+			},
+
+			"login_mode": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"Password", "KeyPair"}, false),
+			},
+
+			"key_pair_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
+			"deletion_protection": {
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 
 			"instance_type": {
@@ -485,7 +502,11 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 	t, _ := parseInstanceType(d.Get("instance_type").(string))
 
 	req := conn.NewCreateUHostInstanceRequest()
-	req.LoginMode = ucloud.String("Password")
+	loginMode := "Password"
+	if v, ok := d.GetOk("login_mode"); ok && v.(string) != "" {
+		loginMode = v.(string)
+	}
+	req.LoginMode = ucloud.String(loginMode)
 	zone := d.Get("availability_zone").(string)
 	req.Zone = ucloud.String(zone)
 	req.ImageId = ucloud.String(imageId)
@@ -495,10 +516,20 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 		acctest.RandStringFromCharSet(5, defaultPasswordStr),
 		acctest.RandStringFromCharSet(1, defaultPasswordSpe),
 		acctest.RandStringFromCharSet(5, defaultPasswordNum))
-	if v, ok := d.GetOk("root_password"); ok {
+	if loginMode == "KeyPair" {
+		req.Password = nil
+	} else if v, ok := d.GetOk("root_password"); ok {
 		req.Password = ucloud.String(v.(string))
 	} else {
 		req.Password = ucloud.String(password)
+	}
+
+	if v, ok := d.GetOk("key_pair_id"); ok {
+		req.KeyPairId = ucloud.String(v.(string))
+	}
+
+	if v, ok := d.GetOkExists("deletion_protection"); ok {
+		req.DeletionProtection = ucloud.Bool(v.(bool))
 	}
 
 	if v, ok := d.GetOk("charge_type"); ok {
@@ -665,7 +696,9 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 	d.Set("rdma_cluster_id", descInstance.RdmaClusterId)
 
 	if _, ok := d.GetOk("root_password"); !ok {
-		d.Set("root_password", password)
+		if loginMode != "KeyPair" {
+			d.Set("root_password", password)
+		}
 	}
 	// after create instance, we need to wait it initialized
 	stateConf := &resource.StateChangeConf{
