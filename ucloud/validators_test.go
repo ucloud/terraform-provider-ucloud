@@ -52,6 +52,13 @@ func TestValidateInstanceLoginModeValues(t *testing.T) {
 			wantErr:         true,
 		},
 		{
+			name:            "key pair login rejects empty root password",
+			loginMode:       "KeyPair",
+			keyPairID:       "keypair-test",
+			hasRootPassword: true,
+			wantErr:         true,
+		},
+		{
 			name:      "unsupported login mode",
 			loginMode: "ImagePasswd",
 			wantErr:   true,

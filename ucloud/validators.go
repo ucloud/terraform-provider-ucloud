@@ -26,7 +26,7 @@ func validateInstanceType(v interface{}, k string) (ws []string, errors []error)
 func validateInstanceLoginMode(d *schema.ResourceDiff, _ interface{}) error {
 	loginMode := d.Get("login_mode").(string)
 	keyPairID := d.Get("key_pair_id").(string)
-	rootPassword, hasRootPassword := d.GetOk("root_password")
+	rootPassword, hasRootPassword := d.GetOkExists("root_password")
 	rootPasswordValue := ""
 	if hasRootPassword {
 		rootPasswordValue = rootPassword.(string)
@@ -51,7 +51,7 @@ func validateInstanceLoginModeValues(loginMode, keyPairID, rootPassword string, 
 		if keyPairID == "" {
 			return fmt.Errorf("%q is required when %q is %q", "key_pair_id", "login_mode", "KeyPair")
 		}
-		if hasRootPassword && rootPassword != "" {
+		if hasRootPassword {
 			return fmt.Errorf("%q cannot be set when %q is %q", "root_password", "login_mode", "KeyPair")
 		}
 		return nil

@@ -517,7 +517,9 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 		acctest.RandStringFromCharSet(1, defaultPasswordSpe),
 		acctest.RandStringFromCharSet(5, defaultPasswordNum))
 	if loginMode == "KeyPair" {
-		req.Password = nil
+		if _, ok := d.GetOkExists("root_password"); ok {
+			return fmt.Errorf("%q cannot be set when %q is %q", "root_password", "login_mode", "KeyPair")
+		}
 	} else if v, ok := d.GetOk("root_password"); ok {
 		req.Password = ucloud.String(v.(string))
 	} else {
