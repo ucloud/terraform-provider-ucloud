@@ -516,14 +516,16 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 		acctest.RandStringFromCharSet(5, defaultPasswordStr),
 		acctest.RandStringFromCharSet(1, defaultPasswordSpe),
 		acctest.RandStringFromCharSet(5, defaultPasswordNum))
-	if loginMode == "KeyPair" {
+	if shouldPreserveInstanceRootPasswordState(loginMode) {
+		if v, ok := d.GetOk("root_password"); ok {
+			req.Password = ucloud.String(v.(string))
+		} else {
+			req.Password = ucloud.String(password)
+		}
+	} else if loginMode == "KeyPair" {
 		if _, ok := d.GetOkExists("root_password"); ok {
 			return fmt.Errorf("%q cannot be set when %q is %q", "root_password", "login_mode", "KeyPair")
 		}
-	} else if v, ok := d.GetOk("root_password"); ok {
-		req.Password = ucloud.String(v.(string))
-	} else {
-		req.Password = ucloud.String(password)
 	}
 
 	if v, ok := d.GetOk("key_pair_id"); ok {
@@ -698,7 +700,7 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 	d.Set("rdma_cluster_id", descInstance.RdmaClusterId)
 
 	if _, ok := d.GetOk("root_password"); !ok {
-		if loginMode != "KeyPair" {
+		if shouldPreserveInstanceRootPasswordState(loginMode) {
 			d.Set("root_password", password)
 		}
 	}
@@ -1105,6 +1107,10 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 	return resourceUCloudInstanceRead(d, meta)
 }
 
+func shouldPreserveInstanceRootPasswordState(loginMode string) bool {
+	return loginMode == "" || loginMode == "Password"
+}
+
 func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
 
@@ -1124,7 +1130,9 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 	if cpu != 0 {
 		d.Set("instance_type", instanceTypeSetFunc(upperCvt.convert(instance.MachineType), cpu, memory/1024))
 	}
-	d.Set("root_password", d.Get("root_password"))
+	if shouldPreserveInstanceRootPasswordState(d.Get("login_mode").(string)) {
+		d.Set("root_password", d.Get("root_password"))
+	}
 	d.Set("isolation_group", instance.IsolationGroup)
 	d.Set("name", instance.Name)
 	d.Set("availability_zone", instance.Zone)

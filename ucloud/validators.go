@@ -31,8 +31,9 @@ func validateInstanceLoginMode(d *schema.ResourceDiff, _ interface{}) error {
 	if hasRootPassword {
 		rootPasswordValue = rootPassword.(string)
 	}
+	hasConfiguredRootPassword := hasRootPassword && (rootPasswordValue != "" || d.HasChange("root_password"))
 
-	return validateInstanceLoginModeValues(loginMode, keyPairID, rootPasswordValue, hasRootPassword)
+	return validateInstanceLoginModeValues(loginMode, keyPairID, rootPasswordValue, hasConfiguredRootPassword)
 }
 
 func validateInstanceLoginModeValues(loginMode, keyPairID, rootPassword string, hasRootPassword bool) error {

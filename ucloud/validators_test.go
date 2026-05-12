@@ -1,6 +1,11 @@
 package ucloud
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+)
 
 func TestValidateInstanceLoginModeValues(t *testing.T) {
 	tests := []struct {
@@ -70,6 +75,69 @@ func TestValidateInstanceLoginModeValues(t *testing.T) {
 			err := validateInstanceLoginModeValues(tt.loginMode, tt.keyPairID, tt.rootPassword, tt.hasRootPassword)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("validateInstanceLoginModeValues() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidateInstanceLoginModeIgnoresEmptyRootPasswordState(t *testing.T) {
+	resource := &schema.Resource{
+		CustomizeDiff: validateInstanceLoginMode,
+		Schema: map[string]*schema.Schema{
+			"login_mode": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"key_pair_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"root_password": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+		},
+	}
+	config := map[string]interface{}{
+		"login_mode":  "KeyPair",
+		"key_pair_id": "keypair-test",
+	}
+	state := &terraform.InstanceState{
+		ID: "uhost-test",
+		Attributes: map[string]string{
+			"login_mode":    "KeyPair",
+			"key_pair_id":   "keypair-test",
+			"root_password": "",
+		},
+	}
+
+	if _, err := resource.Diff(state, terraform.NewResourceConfigRaw(config), nil); err != nil {
+		t.Fatalf("Diff() with empty root_password state returned error: %s", err)
+	}
+
+	config["root_password"] = "wA1234567"
+	if _, err := resource.Diff(nil, terraform.NewResourceConfigRaw(config), nil); err == nil {
+		t.Fatal("Diff() with key pair login and configured root_password returned no error")
+	}
+}
+
+func TestShouldPreserveInstanceRootPasswordState(t *testing.T) {
+	tests := []struct {
+		loginMode string
+		want      bool
+	}{
+		{loginMode: "", want: true},
+		{loginMode: "Password", want: true},
+		{loginMode: "KeyPair"},
+		{loginMode: "FutureLoginMode"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.loginMode, func(t *testing.T) {
+			got := shouldPreserveInstanceRootPasswordState(tt.loginMode)
+			if got != tt.want {
+				t.Fatalf("shouldPreserveInstanceRootPasswordState(%q) = %v, want %v", tt.loginMode, got, tt.want)
 			}
 		})
 	}
