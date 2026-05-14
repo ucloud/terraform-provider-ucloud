@@ -3,6 +3,8 @@ package ucloud
 import (
 	"fmt"
 	"log"
+	"os"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
@@ -36,6 +38,7 @@ func TestAccUCloudInstance_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "instance_type", "n-highcpu-1"),
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "cpu", "1"),
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "memory", "1"),
+					resource.TestCheckNoResourceAttr("ucloud_instance.foo", "key_pair_id"),
 				),
 			},
 			{
@@ -49,6 +52,99 @@ func TestAccUCloudInstance_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "cpu", "2"),
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "memory", "4"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccUCloudInstance_passwordLoginMode(t *testing.T) {
+	rInt := acctest.RandInt()
+	var instance uhost.UHostInstanceSet
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		IDRefreshName: "ucloud_instance.foo",
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckInstanceDestroy,
+
+		Steps: []resource.TestStep{
+			{
+				Config: testAccInstanceConfigPasswordLoginMode(rInt),
+
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckInstanceExists("ucloud_instance.foo", &instance),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "login_mode", "Password"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "root_password", "wA1234567"),
+					resource.TestCheckNoResourceAttr("ucloud_instance.foo", "key_pair_id"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccUCloudInstance_keyPair(t *testing.T) {
+	rInt := acctest.RandInt()
+	keyPairID := os.Getenv("UCLOUD_KEY_PAIR_ID")
+	if keyPairID == "" {
+		t.Skip("UCLOUD_KEY_PAIR_ID must be set for key pair login acceptance tests")
+	}
+
+	var instance uhost.UHostInstanceSet
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		IDRefreshName: "ucloud_instance.foo",
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckInstanceDestroy,
+
+		Steps: []resource.TestStep{
+			{
+				Config: testAccInstanceConfigKeyPair(rInt, keyPairID),
+
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckInstanceExists("ucloud_instance.foo", &instance),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "login_mode", "KeyPair"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "key_pair_id", keyPairID),
+				),
+			},
+		},
+	})
+}
+
+func TestAccUCloudInstance_invalidLoginMode(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		Providers: testAccProviders,
+
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccInstanceConfigKeyPairWithRootPassword,
+				ExpectError: regexp.MustCompile(`(?i)key_pair_id|login_mode|root_password`),
+			},
+			{
+				Config:      testAccInstanceConfigKeyPairWithoutKeyPairID,
+				ExpectError: regexp.MustCompile(`(?i)key_pair_id|login_mode|KeyPair`),
+			},
+			{
+				Config:      testAccInstanceConfigKeyPairIDWithoutLoginMode,
+				ExpectError: regexp.MustCompile(`(?i)login_mode|key_pair_id`),
+			},
+			{
+				Config:      testAccInstanceConfigPasswordWithKeyPairID,
+				ExpectError: regexp.MustCompile(`(?i)key_pair_id|login_mode|Password`),
+			},
+			{
+				Config:      testAccInstanceConfigUnsupportedLoginMode,
+				ExpectError: regexp.MustCompile(`(?i)login_mode|Password|KeyPair`),
 			},
 		},
 	})
@@ -434,6 +530,40 @@ resource "ucloud_instance" "foo" {
 }`, rInt)
 }
 
+func testAccInstanceConfigPasswordLoginMode(rInt int) string {
+	return fmt.Sprintf(`
+data "ucloud_zones" "default" {}
+
+data "ucloud_images" "default" {
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  name_regex        = "^CentOS 7.[1-2] 64"
+  image_type        = "base"
+}
+
+resource "ucloud_security_group" "default" {
+  name = "tf-acc-instance-password-login-%d"
+  tag  = "tf-acc"
+
+  rules {
+    port_range = "80"
+    protocol   = "tcp"
+    cidr_block = "192.168.0.0/16"
+    policy     = "accept"
+  }
+}
+
+resource "ucloud_instance" "foo" {
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  image_id          = "${data.ucloud_images.default.images.0.id}"
+  security_group    = "${ucloud_security_group.default.id}"
+  instance_type     = "n-basic-1"
+  login_mode        = "Password"
+  root_password     = "wA1234567"
+  name              = "tf-acc-instance-password-login"
+  tag               = "tf-acc"
+}`, rInt)
+}
+
 const testAccInstanceConfigOutstanding = `
 data "ucloud_images" "default" {
   availability_zone = "cn-bj2-05"
@@ -776,5 +906,81 @@ resource "ucloud_instance" "foo" {
   instance_type     = "n-basic-1"
   root_password     = "wA1234567"
   security_group    = "${data.ucloud_security_groups.default.security_groups.0.id}"
+}
+`
+
+func testAccInstanceConfigKeyPair(rInt int, keyPairID string) string {
+	return fmt.Sprintf(`
+data "ucloud_zones" "default" {
+}
+
+data "ucloud_images" "default" {
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  name_regex        = "^CentOS 7.[1-2] 64"
+  image_type        = "base"
+}
+
+resource "ucloud_security_group" "default" {
+  name = "tf-acc-instance-keypair-%d"
+  tag  = "tf-acc"
+
+  rules {
+    port_range = "80"
+    protocol   = "tcp"
+    cidr_block = "192.168.0.0/16"
+    policy     = "accept"
+  }
+}
+
+resource "ucloud_instance" "foo" {
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  image_id          = "${data.ucloud_images.default.images.0.id}"
+  security_group    = "${ucloud_security_group.default.id}"
+  instance_type     = "n-basic-1"
+  login_mode        = "KeyPair"
+  key_pair_id       = "%s"
+  name              = "tf-acc-instance-keypair"
+  tag               = "tf-acc"
+}
+`, rInt, keyPairID)
+}
+
+const testAccInstanceConfigInvalidLoginModeBase = `
+resource "ucloud_instance" "foo" {
+  availability_zone = "cn-bj2-02"
+  image_id          = "uimage-test"
+  security_group    = "secgroup-test"
+  instance_type     = "n-basic-1"
+  name              = "tf-acc-instance-invalid-login"
+  tag               = "tf-acc"
+`
+
+const testAccInstanceConfigKeyPairWithRootPassword = testAccInstanceConfigInvalidLoginModeBase + `
+  login_mode        = "KeyPair"
+  key_pair_id       = "keypair-test"
+  root_password     = "wA1234567"
+}
+`
+
+const testAccInstanceConfigKeyPairWithoutKeyPairID = testAccInstanceConfigInvalidLoginModeBase + `
+  login_mode        = "KeyPair"
+}
+`
+
+const testAccInstanceConfigKeyPairIDWithoutLoginMode = testAccInstanceConfigInvalidLoginModeBase + `
+  key_pair_id       = "keypair-test"
+}
+`
+
+const testAccInstanceConfigPasswordWithKeyPairID = testAccInstanceConfigInvalidLoginModeBase + `
+  login_mode        = "Password"
+  key_pair_id       = "keypair-test"
+  root_password     = "wA1234567"
+}
+`
+
+const testAccInstanceConfigUnsupportedLoginMode = testAccInstanceConfigInvalidLoginModeBase + `
+  login_mode        = "ImagePasswd"
+  root_password     = "wA1234567"
 }
 `

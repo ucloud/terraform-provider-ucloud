@@ -23,6 +23,44 @@ func validateInstanceType(v interface{}, k string) (ws []string, errors []error)
 	return
 }
 
+func validateInstanceLoginMode(d *schema.ResourceDiff, _ interface{}) error {
+	loginMode := d.Get("login_mode").(string)
+	keyPairID := d.Get("key_pair_id").(string)
+	rootPassword, hasRootPassword := d.GetOkExists("root_password")
+	rootPasswordValue := ""
+	if hasRootPassword {
+		rootPasswordValue = rootPassword.(string)
+	}
+	hasConfiguredRootPassword := hasRootPassword && (rootPasswordValue != "" || d.HasChange("root_password"))
+
+	return validateInstanceLoginModeValues(loginMode, keyPairID, rootPasswordValue, hasConfiguredRootPassword)
+}
+
+func validateInstanceLoginModeValues(loginMode, keyPairID, rootPassword string, hasRootPassword bool) error {
+	switch loginMode {
+	case "":
+		if keyPairID != "" {
+			return fmt.Errorf("%q is required when %q is set to %q", "login_mode", "key_pair_id", keyPairID)
+		}
+		return nil
+	case "Password":
+		if keyPairID != "" {
+			return fmt.Errorf("%q cannot be set when %q is %q", "key_pair_id", "login_mode", "Password")
+		}
+		return nil
+	case "KeyPair":
+		if keyPairID == "" {
+			return fmt.Errorf("%q is required when %q is %q", "key_pair_id", "login_mode", "KeyPair")
+		}
+		if hasRootPassword {
+			return fmt.Errorf("%q cannot be set when %q is %q", "root_password", "login_mode", "KeyPair")
+		}
+		return nil
+	default:
+		return fmt.Errorf("%q must be one of %q, %q, or empty, got %q", "login_mode", "Password", "KeyPair", loginMode)
+	}
+}
+
 var instancePasswordUpperPattern = regexp.MustCompile(`[A-Z]`)
 var instancePasswordLowerPattern = regexp.MustCompile(`[a-z]`)
 var instancePasswordNumPattern = regexp.MustCompile(`[0-9]`)
