@@ -43,7 +43,9 @@ resource "ucloud_uk8s_cluster" "foo" {
       "${data.ucloud_zones.default.zones.0.id}",
       "${data.ucloud_zones.default.zones.0.id}",
     ]
-    instance_type = "n-basic-2"
+    cpu          = 2
+    memory       = 4096
+    machine_type = "N"
   }
 }
 
@@ -51,10 +53,12 @@ resource "ucloud_uk8s_node" "foo" {
   cluster_id    = "${ucloud_uk8s_cluster.foo.id}"
   subnet_id     = "${ucloud_subnet.foo.id}"
   password      = "ucloud_2021"
-  instance_type = "n-basic-2"
+  cpu           = 2
+  memory        = 4096
+  machine_type  = "N"
   charge_type   = "dynamic"
   availability_zone = "${data.ucloud_zones.default.zones.0.id}"
-  
+
   count = 2
 }
 ```
@@ -67,9 +71,20 @@ The following arguments are supported:
 * `cluster_id` - (Required, ForceNew) The ID of uk8s cluster.
 * `image_id` - (Required, ForceNew) The ID for the image to use for the instance.
 * `password` - (Required, ForceNew) The password for the instance, which contains 8-30 characters, and at least 2 items of capital letters, lower case letters, numbers and special characters. The special characters include <code>`()~!@#$%^&*-+=_|{}\[]:;'<>,.?/</code>. If not specified, terraform will auto-generate a password.
-* `instance_type` - (Required, ForceNew) The type of instance, please visit the [instance type table](https://docs.ucloud.cn/terraform/specification/instance)
-  
+* `cpu` - (Optional, ForceNew) The number of virtual CPU cores of the node. Required together with `memory` and `machine_type`. This replaces the deprecated `instance_type`.
+* `memory` - (Optional, ForceNew) The size of memory of the node, measured in MB (MegaByte). Required together with `cpu` and `machine_type`.
+* `machine_type` - (Optional, ForceNew) The machine type of the node. Possible values are: `N`, `C`, `G`, `O`, `OS`. Required together with `cpu` and `memory`.
+* `instance_type` - (Optional, ForceNew, **Deprecated**) The type of instance, please visit the [instance type table](https://docs.ucloud.cn/terraform/specification/instance). Deprecated, use `cpu`, `memory` and `machine_type` instead.
+
 ---
+
+* `gpu` - (Optional, ForceNew) The number of GPU cores of the node. Only supported by GPU machine type (`G`).
+* `gpu_type` - (Optional, ForceNew) The GPU type of the node. Required when `machine_type` is `G`.
+* `max_pods` - (Optional, ForceNew) The maximum number of pods that can be scheduled onto the node. (Default: `110`).
+* `taints` - (Optional, ForceNew) The taints of the node, formatted as `key=value:effect`, multiple taints separated by comma, up to 5 groups. e.g. `key1=value1:NoSchedule,key2=value2:NoExecute`.
+* `tag` - (Optional, ForceNew) The business group of the node.
+* `labels` - (Optional, ForceNew) The labels of the node, it is a nested type which documented below. Up to 5 labels are supported.
+* `boot_disk_size` - (Optional, ForceNew) The size of boot disk, measured in GB (GigaByte). Range: [40, 500].
 
 * `charge_type` - (Optional, ForceNew) The charge type of instance, possible values are: `year`, `month` and `dynamic` as pay by hour (specific permission required). (Default: `month`).
 * `duration` - (Optional, ForceNew) The duration that you will buy the instance (Default: `1`). The value is `0` when pay by month and the instance will be valid till the last day of that month. It is not required when `dynamic` (pay by hour).
@@ -124,3 +139,10 @@ The attribute (`ip_set`) supports the following:
 
 * `internet_type` - Type of Elastic IP routes. Possible values are: `International` as international BGP IP, `BGP` as china BGP IP and `Private` as private IP.
 * `ip` - Elastic IP address.
+
+- - -
+
+The argument (`labels`) supports the following:
+
+* `key` - (Required, ForceNew) The key of the label.
+* `value` - (Required, ForceNew) The value of the label.
