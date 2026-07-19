@@ -105,6 +105,12 @@ func resourceUCloudUK8SCluster() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"tag": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
 			"enable_external_api_server": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -153,9 +159,35 @@ func resourceUCloudUK8SCluster() *schema.Resource {
 
 						"instance_type": {
 							Type:         schema.TypeString,
-							Required:     true,
+							Optional:     true,
 							ForceNew:     true,
+							Deprecated:   "attribute `instance_type` is deprecated, use `cpu`, `memory` and `machine_type` instead",
 							ValidateFunc: validateInstanceType,
+						},
+
+						"cpu": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							ForceNew: true,
+						},
+
+						"memory": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							ForceNew:     true,
+							ValidateFunc: validation.IntBetween(1024, 262144),
+						},
+
+						"machine_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"N",
+								"C",
+								"O",
+								"OS",
+							}, false),
 						},
 
 						"boot_disk_type": {
@@ -170,6 +202,13 @@ func resourceUCloudUK8SCluster() *schema.Resource {
 								"cloud_ssd",
 								"cloud_rssd",
 							}, false),
+						},
+
+						"boot_disk_size": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							Computed: true,
+							ForceNew: true,
 						},
 
 						"data_disk_size": {
@@ -330,16 +369,26 @@ func resourceUCloudUK8SClusterCreate(d *schema.ResourceData, meta interface{}) e
 		req.Master = append(req.Master, masterNode)
 	}
 
-	// skip error because it has been validated by schema
-	mt, _ := parseInstanceType(master["instance_type"].(string))
-	req.MasterCPU = ucloud.Int(mt.CPU)
-	req.MasterMem = ucloud.Int(mt.Memory)
-	req.MasterMachineType = ucloud.String(strings.ToUpper(mt.HostType))
+	// skip error because it has been validated by schema and CustomizeDiff
+	cpu, memMB, machineType, err := resolveUK8SMachine(
+		func(k string) interface{} { return master[k] },
+		"cpu", "memory", "machine_type", "instance_type",
+	)
+	if err != nil {
+		return err
+	}
+	req.MasterCPU = ucloud.Int(cpu)
+	req.MasterMem = ucloud.Int(memMB)
+	req.MasterMachineType = ucloud.String(machineType)
 
 	if len(master["boot_disk_type"].(string)) != 0 {
 		req.MasterBootDiskType = ucloud.String(upperCvt.unconvert(master["boot_disk_type"].(string)))
 	} else {
 		req.MasterBootDiskType = ucloud.String(upperCvt.unconvert("cloud_ssd"))
+	}
+
+	if master["boot_disk_size"].(int) != 0 {
+		req.MasterBootDiskSize = ucloud.Int(master["boot_disk_size"].(int))
 	}
 
 	if master["data_disk_size"].(int) != 0 {
@@ -352,9 +401,13 @@ func resourceUCloudUK8SClusterCreate(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if len(master["min_cpu_platform"].(string)) != 0 {
-		req.MasterMinmalCpuPlatform = ucloud.String(master["min_cpu_platform"].(string))
+		req.MasterMinimalCpuPlatform = ucloud.String(master["min_cpu_platform"].(string))
 	} else {
-		req.MasterMinmalCpuPlatform = ucloud.String("Intel/Auto")
+		req.MasterMinimalCpuPlatform = ucloud.String("Intel/Auto")
+	}
+
+	if v, ok := d.GetOk("tag"); ok {
+		req.Tag = ucloud.String(v.(string))
 	}
 
 	resp, err := conn.CreateUK8SClusterV2(req)
@@ -483,7 +536,10 @@ func resourceUCloudUK8SClusterDelete(d *schema.ResourceData, meta interface{}) e
 
 func diffValidateBootDiskTypeWithInstanceTypeOfUK8sCluster(diff *schema.ResourceDiff, meta interface{}) error {
 	master := diff.Get("master").([]interface{})[0].(map[string]interface{})
-	mt, err := parseInstanceType(master["instance_type"].(string))
+	_, _, machineType, err := resolveUK8SMachine(
+		func(k string) interface{} { return master[k] },
+		"cpu", "memory", "machine_type", "instance_type",
+	)
 	if err != nil {
 		return err
 	}
@@ -495,7 +551,7 @@ func diffValidateBootDiskTypeWithInstanceTypeOfUK8sCluster(diff *schema.Resource
 		bootDiskType = "cloud_ssd"
 	}
 
-	if strings.Contains(mt.HostType, "o") && isStringIn(bootDiskType, []string{
+	if strings.Contains(strings.ToLower(machineType), "o") && isStringIn(bootDiskType, []string{
 		"local_normal",
 		"local_ssd",
 		"cloud_ssd",

@@ -65,9 +65,87 @@ func resourceUCloudUK8SNode() *schema.Resource {
 
 			"instance_type": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
 				ForceNew:     true,
+				Deprecated:   "attribute `instance_type` is deprecated, use `cpu`, `memory` and `machine_type` instead",
 				ValidateFunc: validateInstanceType,
+			},
+
+			"cpu": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+			},
+
+			"memory": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IntBetween(1024, 262144),
+			},
+
+			"machine_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"N",
+					"C",
+					"G",
+					"O",
+					"OS",
+				}, false),
+			},
+
+			"gpu": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+			},
+
+			"gpu_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
+			"max_pods": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+			},
+
+			"taints": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
+			"tag": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
+			"labels": {
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+
+						"value": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+					},
+				},
 			},
 
 			"charge_type": {
@@ -101,6 +179,13 @@ func resourceUCloudUK8SNode() *schema.Resource {
 					"cloud_ssd",
 					"cloud_rssd",
 				}, false),
+			},
+
+			"boot_disk_size": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
 			},
 
 			"data_disk_size": {
@@ -273,16 +358,39 @@ func resourceUK8SNodeCreate(d *schema.ResourceData, meta interface{}) error {
 		req.IsolationGroup = ucloud.String(v.(string))
 	}
 
-	// skip error because it has been validated by schema
-	mt, _ := parseInstanceType(d.Get("instance_type").(string))
-	req.CPU = ucloud.Int(mt.CPU)
-	req.Mem = ucloud.Int(mt.Memory)
-	req.MachineType = ucloud.String(strings.ToUpper(mt.HostType))
+	// skip error because it has been validated by schema and CustomizeDiff
+	cpu, memMB, machineType, err := resolveUK8SMachine(d.Get, "cpu", "memory", "machine_type", "instance_type")
+	if err != nil {
+		return err
+	}
+	req.CPU = ucloud.Int(cpu)
+	req.Mem = ucloud.Int(memMB)
+	req.MachineType = ucloud.String(machineType)
+
+	if v, ok := d.GetOk("gpu"); ok {
+		req.GPU = ucloud.Int(v.(int))
+	}
+
+	if v, ok := d.GetOk("gpu_type"); ok {
+		req.GpuType = ucloud.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("taints"); ok {
+		req.Taints = ucloud.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("tag"); ok {
+		req.Tag = ucloud.String(v.(string))
+	}
 
 	if v, ok := d.GetOk("boot_disk_type"); ok {
 		req.BootDiskType = ucloud.String(upperCvt.unconvert(v.(string)))
 	} else {
 		req.BootDiskType = ucloud.String(upperCvt.unconvert("cloud_ssd"))
+	}
+
+	if v, ok := d.GetOk("boot_disk_size"); ok {
+		req.BootDiskSize = ucloud.Int(v.(int))
 	}
 
 	if v, ok := d.GetOk("data_disk_size"); ok {
@@ -295,9 +403,9 @@ func resourceUK8SNodeCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if v, ok := d.GetOk("min_cpu_platform"); ok {
-		req.MinmalCpuPlatform = ucloud.String(v.(string))
+		req.MinimalCpuPlatform = ucloud.String(v.(string))
 	} else {
-		req.MinmalCpuPlatform = ucloud.String("Intel/Auto")
+		req.MinimalCpuPlatform = ucloud.String("Intel/Auto")
 	}
 
 	if v, ok := d.GetOk("max_pods"); ok {
@@ -316,7 +424,7 @@ func resourceUK8SNodeCreate(d *schema.ResourceData, meta interface{}) error {
 
 	resp, err := conn.AddUK8SUHostNode(req)
 	if err != nil {
-		return fmt.Errorf("error on creating uk8s cluster, %s", err)
+		return fmt.Errorf("error on creating uk8s node, %s", uk8sErrorWithMessage(err, resp.Message))
 	}
 
 	d.SetId(resp.NodeIds[0])
@@ -408,15 +516,15 @@ func resourceUK8SNodeDelete(d *schema.ResourceData, meta interface{}) error {
 				return resource.RetryableError(fmt.Errorf("the specified k8s cluster %q has not been deleted due to unknown error", d.Id()))
 			}
 		}
-		if _, err := conn.DelUK8SClusterNodeV2(deleReq); err != nil {
-			return resource.RetryableError(fmt.Errorf("error on deleting k8s cluster %q, %s", d.Id(), err))
+		if resp, err := conn.DelUK8SClusterNodeV2(deleReq); err != nil {
+			return resource.RetryableError(fmt.Errorf("error on deleting k8s cluster %q, %s", d.Id(), uk8sErrorWithMessage(err, resp.Message)))
 		}
 		return resource.RetryableError(fmt.Errorf("the specified k8s cluster %q has not been deleted due to unknown error", d.Id()))
 	})
 }
 
 func diffValidateBootDiskTypeWithInstanceTypeOfUK8sNode(diff *schema.ResourceDiff, meta interface{}) error {
-	mt, err := parseInstanceType(diff.Get("instance_type").(string))
+	_, _, machineType, err := resolveUK8SMachine(diff.Get, "cpu", "memory", "machine_type", "instance_type")
 	if err != nil {
 		return err
 	}
@@ -428,7 +536,7 @@ func diffValidateBootDiskTypeWithInstanceTypeOfUK8sNode(diff *schema.ResourceDif
 		bootDiskType = "cloud_ssd"
 	}
 
-	if strings.Contains(mt.HostType, "o") && isStringIn(bootDiskType, []string{
+	if strings.Contains(strings.ToLower(machineType), "o") && isStringIn(bootDiskType, []string{
 		"local_normal",
 		"local_ssd",
 		"cloud_ssd",
