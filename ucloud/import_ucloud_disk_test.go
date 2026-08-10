@@ -19,10 +19,16 @@ func TestAccUCloudDisk_import(t *testing.T) {
 			},
 
 			{
-				ResourceName:            resourceName,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"duration"},
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+
+				// both are provider-side only, the DescribeUDisk API does not
+				// return them, so they are absent from the imported state
+				ImportStateVerifyIgnore: []string{
+					"duration",
+					"reboot_instance_for_resizing",
+				},
 			},
 		},
 	})
