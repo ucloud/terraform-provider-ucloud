@@ -48,11 +48,14 @@ func resourceUCloudDisk() *schema.Resource {
 				),
 			},
 
+			// disk_type is computed instead of defaulted, so that a disk cloned from
+			// a snapshot keeps the type of its source snapshot rather than being
+			// forced to rebuild against the default value on every plan
 			"disk_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:     true,
 				ForceNew:     true,
-				Default:      "data_disk",
 				ValidateFunc: validation.StringInSlice([]string{"data_disk", "ssd_data_disk", "rssd_data_disk"}, false),
 			},
 
@@ -116,7 +119,11 @@ func resourceUCloudDiskCreate(d *schema.ResourceData, meta interface{}) error {
 	req := conn.NewCreateUDiskRequest()
 	req.Zone = ucloud.String(d.Get("availability_zone").(string))
 	req.Size = ucloud.Int(d.Get("disk_size").(int))
-	req.DiskType = ucloud.String(diskTypeCvt.unconvert(d.Get("disk_type").(string)))
+	if v, ok := d.GetOk("disk_type"); ok {
+		req.DiskType = ucloud.String(diskTypeCvt.unconvert(v.(string)))
+	} else {
+		req.DiskType = ucloud.String(diskTypeCvt.unconvert("data_disk"))
+	}
 	if v, ok := d.GetOk("charge_type"); ok {
 		req.ChargeType = ucloud.String(upperCamelCvt.unconvert(v.(string)))
 	} else {
