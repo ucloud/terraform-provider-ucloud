@@ -1,3 +1,19 @@
+## Unreleased
+
+FEATURES:
+
+* **New Resource:** `ucloud_disk_snapshot`.
+* **New Datasource:** `ucloud_disk_snapshots`.
+* `resource/ucloud_disk`: add `snapshot_id` to create a cloud disk from an existing snapshot.
+* `resource/ucloud_disk`: add `snapshot_service` to enable the snapshot service on the disk, which
+  is required before any snapshot can be created from it.
+
+ENHANCEMENTS:
+
+* `resource/ucloud_disk`: `disk_type` is now computed when it is omitted, so that a disk cloned
+  from a snapshot keeps the type of its source snapshot instead of being rebuilt against the
+  default value on every plan.
+
 ## v1.39.1 (2024-04-25)
 
 BUG FIXES:

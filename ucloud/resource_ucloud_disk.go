@@ -59,6 +59,21 @@ func resourceUCloudDisk() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"data_disk", "ssd_data_disk", "rssd_data_disk"}, false),
 			},
 
+			"snapshot_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
+			// the snapshot service can only be enabled while the disk is being created,
+			// there is no remote api to enable it on an existing disk
+			"snapshot_service": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+
 			"rdma_cluster_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -116,6 +131,10 @@ func resourceUCloudDiskCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*UCloudClient)
 	conn := client.udiskconn
 
+	if v, ok := d.GetOk("snapshot_id"); ok {
+		return resourceUCloudDiskCreateFromSnapshot(d, meta, v.(string))
+	}
+
 	req := conn.NewCreateUDiskRequest()
 	req.Zone = ucloud.String(d.Get("availability_zone").(string))
 	req.Size = ucloud.Int(d.Get("disk_size").(int))
@@ -123,6 +142,9 @@ func resourceUCloudDiskCreate(d *schema.ResourceData, meta interface{}) error {
 		req.DiskType = ucloud.String(diskTypeCvt.unconvert(v.(string)))
 	} else {
 		req.DiskType = ucloud.String(diskTypeCvt.unconvert("data_disk"))
+	}
+	if d.Get("snapshot_service").(bool) {
+		req.SnapshotService = ucloud.String(boolCamelCvt.convert(true))
 	}
 	if v, ok := d.GetOk("charge_type"); ok {
 		req.ChargeType = ucloud.String(upperCamelCvt.unconvert(v.(string)))
@@ -172,6 +194,98 @@ func resourceUCloudDiskCreate(d *schema.ResourceData, meta interface{}) error {
 	d.SetId(resp.UDiskId[0])
 
 	// after create disk, we need to wait it initialized
+	stateConf := diskWaitForState(client, d.Id())
+
+	if _, err = stateConf.WaitForState(); err != nil {
+		return fmt.Errorf("error on waiting for disk %q complete creating, %s", d.Id(), err)
+	}
+
+	return resourceUCloudDiskRead(d, meta)
+}
+
+// resourceUCloudDiskCreateFromSnapshot clones a new disk from the specified snapshot,
+// the type of the cloned disk is decided by the snapshot instead of the request
+func resourceUCloudDiskCreateFromSnapshot(d *schema.ResourceData, meta interface{}, snapshotId string) error {
+	client := meta.(*UCloudClient)
+	conn := client.udiskconn
+
+	snapshotSet, err := client.describeSnapshotById(snapshotId)
+	if err != nil {
+		return fmt.Errorf("error on reading snapshot %q when creating disk, %s", snapshotId, err)
+	}
+
+	// the cloned disk inherits the type of its source snapshot, the types out of the
+	// following list (system disks for instance) are not supported by this resource
+	sourceDiskType := snapshotDiskTypeCvt.convert(snapshotSet.DiskType)
+	if !isStringIn(sourceDiskType, []string{"data_disk", "ssd_data_disk", "rssd_data_disk"}) {
+		return fmt.Errorf("error on creating disk, the specified snapshot %q is created from a %q which is not supported by the disk resource", snapshotId, sourceDiskType)
+	}
+
+	// disk_type is computed when it is not set, so the mismatch can only be caused by an
+	// explicit value, which would be silently dropped by the remote api and lead to a
+	// permanent diff afterwards
+	if v, ok := d.GetOk("disk_type"); ok && v.(string) != sourceDiskType {
+		return fmt.Errorf("error on creating disk, the %q must be %q which is decided by the specified snapshot %q, got %q", "disk_type", sourceDiskType, snapshotId, v.(string))
+	}
+
+	diskSize := d.Get("disk_size").(int)
+	if diskSize < snapshotSet.Size {
+		return fmt.Errorf("error on creating disk, the %q must be larger than or equal to the size of the specified snapshot %q which is %d, got %d", "disk_size", snapshotId, snapshotSet.Size, diskSize)
+	}
+
+	req := conn.NewCloneUDiskSnapshotRequest()
+	req.Zone = ucloud.String(d.Get("availability_zone").(string))
+	req.SourceId = ucloud.String(snapshotId)
+	req.Size = ucloud.Int(diskSize)
+
+	if d.Get("snapshot_service").(bool) {
+		req.SnapshotService = ucloud.String(boolCamelCvt.convert(true))
+	}
+
+	if v, ok := d.GetOk("charge_type"); ok {
+		req.ChargeType = ucloud.String(upperCamelCvt.unconvert(v.(string)))
+	} else {
+		req.ChargeType = ucloud.String("Month")
+	}
+
+	if v, ok := d.GetOkExists("duration"); ok {
+		req.Quantity = ucloud.Int(v.(int))
+	} else {
+		req.Quantity = ucloud.Int(1)
+	}
+
+	if v, ok := d.GetOk("name"); ok {
+		req.Name = ucloud.String(v.(string))
+	} else {
+		req.Name = ucloud.String(resource.PrefixedUniqueId("tf-disk-"))
+	}
+
+	// if tag is empty string, use default tag
+	if v, ok := d.GetOk("tag"); ok {
+		req.Tag = ucloud.String(v.(string))
+	} else {
+		req.Tag = ucloud.String(defaultTag)
+	}
+
+	if v, ok := d.GetOk("rdma_cluster_id"); ok {
+		if sourceDiskType != "rssd_data_disk" {
+			return fmt.Errorf("error on creating disk, when rdma_cluster_id is specified, the snapshot %q must be created from a %q, found %q", snapshotId, "rssd_data_disk", sourceDiskType)
+		}
+		req.RdmaClusterId = ucloud.String(v.(string))
+	}
+
+	resp, err := conn.CloneUDiskSnapshot(req)
+	if err != nil {
+		return fmt.Errorf("error on creating disk from snapshot %q, %s", snapshotId, err)
+	}
+
+	if len(resp.UDiskId) != 1 {
+		return fmt.Errorf("error on creating disk from snapshot %q, expected exactly one disk, got %v", snapshotId, len(resp.UDiskId))
+	}
+
+	d.SetId(resp.UDiskId[0])
+
+	// after clone disk, we need to wait it initialized
 	stateConf := diskWaitForState(client, d.Id())
 
 	if _, err = stateConf.WaitForState(); err != nil {
@@ -343,6 +457,7 @@ func resourceUCloudDiskRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("expire_time", timestampToString(diskSet.ExpiredTime))
 	d.Set("status", diskSet.Status)
 	d.Set("disk_type", diskTypeCvt.convert(diskSet.DiskType))
+	d.Set("snapshot_service", diskSet.BackupMode == backupModeSnapshotService)
 
 	return nil
 }
