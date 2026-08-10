@@ -42,7 +42,9 @@ resource "ucloud_uk8s_cluster" "foo" {
       "${data.ucloud_zones.default.zones.0.id}",
       "${data.ucloud_zones.default.zones.0.id}",
     ]
-    instance_type = "n-basic-2"
+    cpu          = 2
+    memory       = 4096
+    machine_type = "N"
   }
 }
 ```
@@ -69,13 +71,18 @@ The following arguments are supported:
 * `kube_proxy` - (Optional, ForceNew) The configuration of kube proxy, See [kube proxy](#kube_proxy) for details of attributes.
 * `master` - (Optional, ForceNew) The configuration of master, See [master](#master) for details of attributes.
 * `image_id` - (Optional, ForceNew) The ID for the image to use for the master nodes.
+* `tag` - (Optional, ForceNew) The business group of the cluster.
 
 ### master
 
 The `master` supports the following:
 
 * `availability_zones` - (Required, ForceNew) Availability zone list where instance is located. such as: `["cn-bj2-02", "cn-bj2-03", "cn-bj2-05"]`. You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
-* `instance_type` - (Required, ForceNew) The type of instance, please visit the [instance type table](https://docs.ucloud.cn/terraform/specification/instance)
+* `cpu` - (Optional, ForceNew) The number of virtual CPU cores of the master node. Required together with `memory` and `machine_type`. This replaces the deprecated `instance_type`.
+* `memory` - (Optional, ForceNew) The size of memory of the master node, measured in MB (MegaByte). Required together with `cpu` and `machine_type`.
+* `machine_type` - (Optional, ForceNew) The machine type of the master node. Possible values are: `N`, `C`, `O`, `OS`. Required together with `cpu` and `memory`.
+* `instance_type` - (Optional, ForceNew, **Deprecated**) The type of instance, please visit the [instance type table](https://docs.ucloud.cn/terraform/specification/instance). Deprecated, use `cpu`, `memory` and `machine_type` instead.
+* `boot_disk_size` - (Optional, ForceNew) The size of boot disk of the master node, measured in GB (GigaByte). Range: [40, 500].
 * `boot_disk_type` - (Optional, ForceNew) The type of boot disk. Possible values are: `local_normal` and `local_ssd` for local boot disk, `cloud_ssd` for cloud SSD boot disk,`rssd_data_disk` as RDMA-SSD cloud disk. (Default: `cloud_ssd`). The `local_ssd` and `cloud_ssd` are not fully support by all regions as boot disk type, please proceed to UCloud console for more details.
 * `data_disk_type` - (Optional, ForceNew) The type of local data disk. Possible values are: `local_normal` and `local_ssd` for local data disk. (Default: `cloud_ssd`). The `local_ssd` is not fully support by all regions as data disk type, please proceed to UCloud console for more details. In addition, the `data_disk_type` must be same as `boot_disk_type` if specified.
 * `data_disk_size` - (Optional, ForceNew) The size of local data disk, measured in GB (GigaByte), 20-2000 for local sata disk and 20-1000 for local ssd disk (all the GPU type instances are included). The volume adjustment must be a multiple of 10 GB. In addition, any reduction of data disk size is not supported.

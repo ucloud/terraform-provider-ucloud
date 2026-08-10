@@ -116,6 +116,7 @@ func Provider() terraform.ResourceProvider {
 			"ucloud_baremetal_images":      dataSourceUCloudBareMetalImages(),
 			"ucloud_labels":                dataSourceUCloudLabels(),
 			"ucloud_label_resources":       dataSourceUCloudLabelResources(),
+			"ucloud_uk8s_images":           dataSourceUCloudUK8SImages(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
