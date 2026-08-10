@@ -68,6 +68,18 @@ const (
 	// diskStatusDetaching is the status when disk is detaching
 	diskStatusDetaching = "Detaching"
 
+	// backupModeSnapshotService is the backup mode of the disk when the snapshot service is enabled
+	backupModeSnapshotService = "SnapshotService"
+
+	// snapshotStatusCreating is the status when disk snapshot is being created
+	snapshotStatusCreating = "Creating"
+
+	// snapshotStatusNormal is the status when disk snapshot is available
+	snapshotStatusNormal = "Normal"
+
+	// snapshotStatusFailed is the status when disk snapshot is failed to create
+	snapshotStatusFailed = "Failed"
+
 	// eipStatusFree is the status when eip is free
 	eipStatusFree = "free"
 
@@ -211,6 +223,16 @@ var diskTypeCvt = newStringConverter(map[string]string{
 	"SystemDisk":    "system_disk",
 	"SSDSystemDisk": "ssd_system_disk",
 	"RSSDDataDisk":  "rssd_data_disk",
+})
+
+// snapshotDiskTypeCvt is used to transform int to string for the disk type of disk snapshot,
+// the value 5 (rssd system disk) is not mapped since it has no counterpart in diskTypeCvt
+var snapshotDiskTypeCvt = newIntConverter(map[int]string{
+	0: "data_disk",
+	1: "system_disk",
+	2: "ssd_data_disk",
+	3: "ssd_system_disk",
+	4: "rssd_data_disk",
 })
 
 var raidTypeCvt = newStringConverter(map[string]string{

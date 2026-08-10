@@ -6,29 +6,22 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
-func TestAccUCloudDisk_import(t *testing.T) {
-	resourceName := "ucloud_disk.foo"
+func TestAccUCloudDiskSnapshot_import(t *testing.T) {
+	resourceName := "ucloud_disk_snapshot.foo"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckDiskDestroy,
+		CheckDestroy: testAccCheckDiskSnapshotDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDiskConfig,
+				Config: testAccDiskSnapshotConfig,
 			},
 
 			{
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
-
-				// both are provider-side only, the DescribeUDisk API does not
-				// return them, so they are absent from the imported state
-				ImportStateVerifyIgnore: []string{
-					"duration",
-					"reboot_instance_for_resizing",
-				},
 			},
 		},
 	})

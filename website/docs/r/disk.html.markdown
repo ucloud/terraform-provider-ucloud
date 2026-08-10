@@ -12,6 +12,8 @@ Provides a Cloud Disk resource.
 
 ~> **Note** If the disk have attached to the instance and reboot_instance_for_resizing is not set to false, the instance will reboot automatically to make the change take effect when update the  `disk_size` by default.
 
+~> **Note** When the disk is created from a snapshot by `snapshot_id`, the `disk_type` is decided by the source snapshot instead of the configuration. Leave `disk_type` unset so that it follows the snapshot, otherwise it must be set to exactly the type of the source snapshot.
+
 ## Example Usage
 
 ```hcl
@@ -26,17 +28,47 @@ resource "ucloud_disk" "example" {
 }
 ```
 
+Create a cloud disk from an existing snapshot:
+
+```hcl
+data "ucloud_zones" "default" {}
+
+resource "ucloud_disk" "example" {
+  availability_zone = data.ucloud_zones.default.zones[0].id
+  name              = "tf-example-disk"
+  disk_size         = 20
+  disk_type         = "ssd_data_disk"
+  snapshot_service  = true
+}
+
+resource "ucloud_disk_snapshot" "example" {
+  availability_zone = data.ucloud_zones.default.zones[0].id
+  disk_id           = ucloud_disk.example.id
+  name              = "tf-example-disk-snapshot"
+}
+
+# the cloned disk is a ssd_data_disk as its source snapshot
+resource "ucloud_disk" "cloned" {
+  availability_zone = data.ucloud_zones.default.zones[0].id
+  name              = "tf-example-disk-cloned"
+  disk_size         = 20
+  snapshot_id       = ucloud_disk_snapshot.example.id
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
 
 * `availability_zone` - (Required, ForceNew)  Availability zone where cloud disk is located. Such as: "cn-bj2-02". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist).
-* `disk_size` - (Required) The size of disk. Purchase the size of disk in GB. 20-8000 for a cloud disk, 20-8000 for SSD cloud disk . If the disk have attached to the instance, the instance will reboot automatically to make the change take effect when update the  `disk_size`.
+* `disk_size` - (Required) The size of disk. Purchase the size of disk in GB. 20-8000 for a cloud disk, 20-8000 for SSD cloud disk . If the disk have attached to the instance, the instance will reboot automatically to make the change take effect when update the  `disk_size`. When `snapshot_id` is set, it must be larger than or equal to the size of the source snapshot.
 
 - - -
 
 * `name` - (Optional) The name of disk, should have 6-63 characters and only support Chinese, English, numbers, '-', '_'. If not specified, terraform will auto-generate a name beginning with `tf-disk`.
-* `disk_type` - (Optional, ForceNew) The type of disk. Possible values are: `data_disk`as cloud disk, `ssd_data_disk` as ssd cloud disk, `rssd_data_disk` as RDMA-SSD cloud disk.(Default: `data_disk`).
+* `snapshot_id` - (Optional, ForceNew) The ID of the snapshot which the disk is created from. If it is set, the disk is cloned from the specified snapshot and inherits the type of that snapshot.
+* `snapshot_service` - (Optional, ForceNew) Whether the snapshot service is enabled on the disk. (Default: `false`). It must be `true` before any `ucloud_disk_snapshot` can be created from this disk. The snapshot service can only be enabled while the disk is being created, there is no way to enable it on an existing disk through terraform.
+* `disk_type` - (Optional, ForceNew) The type of disk. Possible values are: `data_disk`as cloud disk, `ssd_data_disk` as ssd cloud disk, `rssd_data_disk` as RDMA-SSD cloud disk. If it is not specified, `data_disk` is used for a newly created disk, while a disk created from `snapshot_id` follows the type of its source snapshot.
 * `charge_type` - (Optional, ForceNew) Charge type of disk. Possible values are: `year` as pay by year, `month` as pay by month, `dynamic` as pay by hour. (Default: `month`).
 * `duration` - (Optional, ForceNew) The duration that you will buy the resource. (Default: `1`). It is not required when `dynamic` (pay by hour), the value is `0` when `month`(pay by month) and the disk will be vaild till the last day of that month.
 * `tag` - (Optional, ForceNew) A tag assigned to VPC, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
