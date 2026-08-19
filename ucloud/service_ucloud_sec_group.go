@@ -5,7 +5,12 @@ import (
 
 	"github.com/ucloud/ucloud-sdk-go/services/vpc"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
+	uerr "github.com/ucloud/ucloud-sdk-go/ucloud/error"
 )
+
+// DescribeSecGroup answers a missing sec group with this error code instead of
+// an empty result set, eg. "describe secgroup error: secgroup-xxx not exist in VPC()"
+const secGroupNotExistCode = 208704
 
 func (c *UCloudClient) describeSecGroupsByVPCId(vpcId string) ([]vpc.SecGroupInfo, error) {
 	conn := c.vpcconn
@@ -63,4 +68,55 @@ func (c *UCloudClient) describeResourceSecGroup(resourceId string) ([]vpc.Bindin
 	}
 
 	return resp.DataSet[0].SecGroupInfo, nil
+}
+
+func (c *UCloudClient) describeSecGroupById(secGroupId string) (*vpc.SecGroupInfo, error) {
+	if secGroupId == "" {
+		return nil, newNotFoundError(getNotFoundMessage("sec group", secGroupId))
+	}
+
+	conn := c.vpcconn
+
+	req := conn.NewDescribeSecGroupRequest()
+	req.SecGroupId = []string{secGroupId}
+
+	resp, err := conn.DescribeSecGroup(req)
+	if err != nil {
+		if uErr, ok := err.(uerr.Error); ok && uErr.Code() == secGroupNotExistCode {
+			return nil, newNotFoundError(getNotFoundMessage("sec group", secGroupId))
+		}
+		return nil, err
+	}
+	if resp.GetRetCode() != 0 {
+		if resp.GetRetCode() == secGroupNotExistCode {
+			return nil, newNotFoundError(getNotFoundMessage("sec group", secGroupId))
+		}
+		return nil, fmt.Errorf("error on reading sec group %q, %s", secGroupId, resp.GetMessage())
+	}
+	if len(resp.DataSet) < 1 {
+		return nil, newNotFoundError(getNotFoundMessage("sec group", secGroupId))
+	}
+
+	return &resp.DataSet[0], nil
+}
+
+// there is no api to describe a single sec group rule, so we read the whole
+// sec group and pick the rule out of it by rule id
+func (c *UCloudClient) describeSecGroupRuleById(secGroupId, ruleId string) (*vpc.SecGroupRuleInfo, error) {
+	if secGroupId == "" || ruleId == "" {
+		return nil, newNotFoundError(getNotFoundMessage("sec group rule", ruleId))
+	}
+
+	sgSet, err := c.describeSecGroupById(secGroupId)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range sgSet.Rule {
+		if sgSet.Rule[i].RuleId == ruleId {
+			return &sgSet.Rule[i], nil
+		}
+	}
+
+	return nil, newNotFoundError(getNotFoundMessage("sec group rule", ruleId))
 }
