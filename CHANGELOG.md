@@ -2,6 +2,10 @@
 
 FEATURES:
 
+* **New Resource:** `ucloud_sec_group`, manages a VPC security group. Note that it is a different
+  product from `ucloud_security_group`, which manages a firewall.
+* **New Resource:** `ucloud_sec_group_rule`, manages a single ingress or egress rule of a VPC
+  security group.
 * **New Resource:** `ucloud_disk_snapshot`.
 * **New Datasource:** `ucloud_disk_snapshots`.
 * `resource/ucloud_disk`: add `snapshot_id` to create a cloud disk from an existing snapshot.
