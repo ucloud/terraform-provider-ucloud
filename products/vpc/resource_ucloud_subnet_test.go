@@ -1,0 +1,78 @@
+package vpc_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	vpcapi "github.com/ucloud/ucloud-sdk-go/services/vpc"
+)
+
+func TestAccUCloudSubnet_basic(t *testing.T) {
+	var val vpcapi.SubnetInfo
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		IDRefreshName: "ucloud_subnet.foo",
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckSubnetDestroy,
+
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSubnetConfig,
+
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSubnetExists("ucloud_subnet.foo", &val),
+					testAccCheckSubnetAttributes(&val),
+					resource.TestCheckResourceAttr("ucloud_subnet.foo", "cidr_block", "192.168.1.0/24"),
+					resource.TestCheckResourceAttr("ucloud_subnet.foo", "name", "tf-acc-subnet"),
+					resource.TestCheckResourceAttr("ucloud_subnet.foo", "tag", "tf-acc"),
+				),
+			},
+
+			{
+				Config: testAccSubnetConfigTwo,
+
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSubnetExists("ucloud_subnet.foo", &val),
+					testAccCheckSubnetAttributes(&val),
+					resource.TestCheckResourceAttr("ucloud_subnet.foo", "cidr_block", "192.168.1.0/24"),
+					resource.TestCheckResourceAttr("ucloud_subnet.foo", "name", "tf-acc-subnet-two"),
+					resource.TestCheckResourceAttr("ucloud_subnet.foo", "tag", defaultTag),
+				),
+			},
+		},
+	})
+}
+
+const testAccSubnetConfig = `
+resource "ucloud_vpc" "foo" {
+	name        = "tf-acc-vpc"
+	tag         = "tf-acc"
+	cidr_blocks = ["192.168.0.0/16"]
+}
+
+resource "ucloud_subnet" "foo" {
+	name       = "tf-acc-subnet"
+	tag        = "tf-acc"
+	cidr_block = "192.168.1.0/24"
+	vpc_id     = "${ucloud_vpc.foo.id}"
+}
+`
+
+const testAccSubnetConfigTwo = `
+resource "ucloud_vpc" "foo" {
+	name        = "tf-acc-vpc"
+	tag         = "tf-acc"
+	cidr_blocks = ["192.168.0.0/16"]
+}
+
+resource "ucloud_subnet" "foo" {
+	name       = "tf-acc-subnet-two"
+	tag        = ""
+	cidr_block = "192.168.1.0/24"
+	vpc_id     = "${ucloud_vpc.foo.id}"
+}
+`

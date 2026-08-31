@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "core": {
+    "github_users": [
+      "Ali1213"
+    ]
+  },
+  "products": {
+    "iam": {
+      "github_users": [
+        "Ali1213"
+      ],
+      "paths": [
+        "products/iam/**"
+      ]
+    },
+    "ipsecvpn": {
+      "github_users": [
+        "Ali1213"
+      ],
+      "paths": [
+        "products/ipsecvpn/**"
+      ]
+    },
+    "label": {
+      "github_users": [
+        "Ali1213"
+      ],
+      "paths": [
+        "products/label/**"
+      ]
+    },
+    "uaccount": {
+      "github_users": [
+        "Ali1213"
+      ],
+      "paths": [
+        "products/uaccount/**"
+      ]
+    },
+    "uads": {
+      "github_users": [
+        "Ali1213"
+      ],
+      "paths": [
+        "products/uads/**"
+      ]
+    },
+    "udb": {
+      "github_users": [
+        "Ali1213"
+      ],
+      "paths": [
+        "products/udb/**"
+      ]
+    },
+    "udisk": {
+      "github_users": [
+        "Ali1213"
+      ],
+      "paths": [
+        "products/udisk/**"
+      ]
+    },
+    "udpn": {
+      "github_users": [
+        "Ali1213"
+      ],
+      "paths": [
+        "products/udpn/**"
+      ]
+    },
+    "ufs": {
+      "github_users": [
+        "Ali1213"
+      ],
+      "paths": [
+        "products/ufs/**"
+      ]
+    },
+    "uhost": {
+      "github_users": [
+        "Ali1213"
+      ],
+      "paths": [
+        "products/uhost/**"
+      ]
+    },
+    "uk8s": {
+      "github_users": [
+        "Ali1213"
+      ],
+      "paths": [
+        "products/uk8s/**"
+      ]
+    },
+    "ulb": {
+      "github_users": [
+        "Ali1213"
+      ],
+      "paths": [
+        "products/ulb/**"
+      ]
+    },
+    "umem": {
+      "github_users": [
+        "Ali1213"
+      ],
+      "paths": [
+        "products/umem/**"
+      ]
+    },
+    "unet": {
+      "github_users": [
+        "Ali1213"
+      ],
+      "paths": [
+        "products/unet/**"
+      ]
+    },
+    "uphost": {
+      "github_users": [
+        "Ali1213"
+      ],
+      "paths": [
+        "products/uphost/**"
+      ]
+    },
+    "us3": {
+      "github_users": [
+        "Ali1213"
+      ],
+      "paths": [
+        "products/us3/**",
+        "examples/us3/**",
+        "website/docs/d/us3_*.html.markdown",
+        "website/docs/r/us3_*.html.markdown"
+      ]
+    },
+    "vpc": {
+      "github_users": [
+        "Ali1213"
+      ],
+      "paths": [
+        "products/vpc/**"
+      ]
+    }
+  }
+}

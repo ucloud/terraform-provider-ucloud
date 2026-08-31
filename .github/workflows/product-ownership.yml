@@ -1,0 +1,42 @@
+name: Product ownership
+
+on:
+  pull_request_target:
+    branches:
+      - master
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+      - edited
+
+permissions:
+  contents: read
+  pull-requests: read
+  statuses: write
+
+concurrency:
+  group: product-ownership-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  ownership:
+    name: Enforce product ownership
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out trusted default branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: "1.19.5"
+          cache: false
+      - name: Verify pull request owner and paths
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: go run ./cmd/product-ownership -config .github/product-owners.json -event "${GITHUB_EVENT_PATH}"

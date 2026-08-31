@@ -1,0 +1,16 @@
+{
+  "id": "tf-compat-us3-bucket",
+  "attributes": {
+    "create_time": "2024-01-01T00:00:00Z",
+    "id": "tf-compat-us3-bucket",
+    "name": "tf-compat-us3-bucket",
+    "source_domain_names.#": "1",
+    "source_domain_names.0": "example.test",
+    "tag": "Default",
+    "type": "private"
+  },
+  "meta": {
+    "schema_version": "0"
+  },
+  "tainted": false
+}

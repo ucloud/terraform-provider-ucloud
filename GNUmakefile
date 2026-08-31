@@ -1,8 +1,13 @@
 SWEEP?=cn-bj2,cn-sh2
 TEST?=./...
+PRODUCT?=
+PRODUCTS=iam ipsecvpn label uaccount uads udb udisk udpn ufs uhost uk8s ulb umem unet uphost us3 vpc
+PRODUCT_NAME:=$(if $(word 2,$(value PRODUCT)),,$(filter $(PRODUCTS),$(value PRODUCT)))
 GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
 PKG_NAME=ucloud
 WEBSITE_REPO=github.com/hashicorp/terraform-website
+
+unexport PRODUCT
 
 default: build
 
@@ -16,8 +21,22 @@ sweep:
 test: fmtcheck
 	go test $(TEST) -timeout=30s -parallel=32
 
+compat: fmtcheck
+	go test ./internal/product ./internal/productownership ./internal/providercompat -count=1
+	go test ./ucloud ./products/... -run '^(TestProvider$$|TestProviderContract$$|TestProductClient|TestRegistration|TestBucket|TestUpgradeFixtureSyntax$$)' -count=1
+
 testacc: fmtcheck
-	TF_ACC=1 go test -cover $(TEST) -v $(TESTARGS) -timeout 120m -parallel=32
+	@set -eu; \
+		product="$(PRODUCT_NAME)"; \
+		if [ -z "$$product" ]; then \
+			echo "ERROR: Set PRODUCT to one of: $(PRODUCTS)" >&2; \
+			exit 2; \
+		fi; \
+		if ! go test "./products/$$product" -list '^TestAcc' | grep -q '^TestAcc'; then \
+			echo "ERROR: Product $$product has no acceptance tests" >&2; \
+			exit 3; \
+		fi; \
+		TF_ACC=1 go test -cover "./products/$$product" -v -timeout 120m -parallel=32
 
 vet:
 	@echo "go vet ."
@@ -62,7 +81,7 @@ ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
 endif
 	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider-test PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
 
-.PHONY: build sweep test testacc vet fmt fmtcheck errcheck vendor-status test-compile website website-test
+.PHONY: build sweep test compat testacc vet fmt fmtcheck errcheck vendor-status test-compile website website-test
 
 all: mac windows linux
 

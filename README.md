@@ -54,13 +54,21 @@ In order to test the provider, you can simply run `make test`.
 make test
 ```
 
-In order to run the full suite of Acceptance tests, run `make testacc`.
+To run acceptance tests for one product, pass its package name to `make testacc`.
 
 *Note:* Acceptance tests create real resources, and often cost money to run.
 
 ```sh
-make testacc
+make testacc PRODUCT=us3
 ```
+
+### Go Package Compatibility
+
+The supported Go compatibility surface of the `ucloud` package is limited to
+`Provider`, `Config`, `AssumeRoleConfig`, `UCloudClient`, `GetEndpointURL`, and
+`GetInsecureEndpointURL`. Product-specific helpers and types are implementation
+details. Use [ucloud-sdk-go](https://github.com/ucloud/ucloud-sdk-go) when
+integrating with UCloud APIs directly.
 
 Replace the default binary
 ---------------------------
@@ -100,7 +108,9 @@ After development done, you should clean the `~/.terraformrc` file.
 
 ## Acceptance Testing
 
-Before making a release, the resources and data sources are tested automatically with acceptance tests (the tests are located in the `ucloud/*_test.go` files).
+Before making a release, resources and data sources are tested with acceptance
+tests located under `products/<product>/*_test.go`. Run one product at a time
+because these tests create real cloud resources.
 
 You can run them by entering the following instructions in a terminal:
 
@@ -110,7 +120,7 @@ export UCLOUD_PUBLIC_KEY=xxx
 export UCLOUD_PRIVATE_KEY=xxx
 export UCLOUD_REGION=xxx
 export UCLOUD_PROJECT_ID=xxx
-TF_ACC=1 TF_LOG=INFO go test ./ucloud -v -run="^TestAccUCloud" -timeout=1440m
+make testacc PRODUCT=us3
 ```
 
 ## Reference
