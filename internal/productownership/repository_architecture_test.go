@@ -12,38 +12,29 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/terraform-providers/terraform-provider-ucloud/internal/productcatalog"
 	"github.com/terraform-providers/terraform-provider-ucloud/internal/productownership"
 )
 
 const modulePath = "github.com/terraform-providers/terraform-provider-ucloud"
 
-var baselineAcceptanceTestCounts = map[string]int{
-	"iam": 18, "ipsecvpn": 9, "label": 4, "uaccount": 2, "uads": 2,
-	"udb": 11, "udisk": 16, "udpn": 2, "ufs": 4, "uhost": 20,
-	"uk8s": 2, "ulb": 21, "umem": 3, "unet": 11, "uphost": 3,
-	"us3": 2, "vpc": 16,
-}
-
-var baselineImportTestCounts = map[string]int{
-	"iam": 0, "ipsecvpn": 3, "label": 0, "uaccount": 0, "uads": 1,
-	"udb": 1, "udisk": 2, "udpn": 1, "ufs": 0, "uhost": 2,
-	"uk8s": 0, "ulb": 4, "umem": 0, "unet": 2, "uphost": 0,
-	"us3": 0, "vpc": 3,
-}
-
 func TestRepositoryProductArchitecture(t *testing.T) {
 	root := repositoryRoot(t)
 	policy := loadRepositoryPolicy(t, root)
-	wantProducts := sortedProductNames(policy.Products)
+	wantProducts := productcatalog.Names()
 
-	t.Run("policy matches product directories", func(t *testing.T) {
+	t.Run("ownership policy matches catalog", func(t *testing.T) {
+		got := sortedProductNames(policy.Products)
+		assertStringSlicesEqual(t, got, wantProducts)
+	})
+
+	t.Run("product directories match catalog", func(t *testing.T) {
 		got := productDirectories(t, root)
 		assertStringSlicesEqual(t, got, wantProducts)
 	})
 
-	t.Run("provider binds every product exactly once", func(t *testing.T) {
-		got := providerBindings(t, filepath.Join(root, "ucloud", "provider.go"))
-		assertStringSlicesEqual(t, got, wantProducts)
+	t.Run("provider uses catalog bindings", func(t *testing.T) {
+		assertProviderUsesCatalog(t, filepath.Join(root, "ucloud", "provider.go"))
 	})
 
 	t.Run("provider starts with empty registration maps", func(t *testing.T) {
@@ -54,19 +45,15 @@ func TestRepositoryProductArchitecture(t *testing.T) {
 		for _, name := range wantProducts {
 			name := name
 			t.Run(name, func(t *testing.T) {
-				minimum, tracked := baselineAcceptanceTestCounts[name]
+				baseline, tracked := productcatalog.Baseline(name)
 				if !tracked {
-					t.Fatalf("products/%s has no acceptance-test compatibility baseline", name)
+					t.Fatalf("products/%s has no compatibility test baseline", name)
 				}
-				if count := countTestFunctions(t, filepath.Join(root, "products", name), "TestAcc"); count < minimum {
-					t.Fatalf("products/%s has %d TestAcc functions; compatibility baseline requires at least %d", name, count, minimum)
+				if count := countTestFunctions(t, filepath.Join(root, "products", name), "TestAcc"); count < baseline.AcceptanceTests {
+					t.Fatalf("products/%s has %d TestAcc functions; compatibility baseline requires at least %d", name, count, baseline.AcceptanceTests)
 				}
-				minimumImports, tracked := baselineImportTestCounts[name]
-				if !tracked {
-					t.Fatalf("products/%s has no import-test compatibility baseline", name)
-				}
-				if count := countTestFunctionsWithSuffix(t, filepath.Join(root, "products", name), "TestAcc", "_import"); count < minimumImports {
-					t.Fatalf("products/%s has %d import tests; compatibility baseline requires at least %d", name, count, minimumImports)
+				if count := countTestFunctionsWithSuffix(t, filepath.Join(root, "products", name), "TestAcc", "_import"); count < baseline.ImportTests {
+					t.Fatalf("products/%s has %d import tests; compatibility baseline requires at least %d", name, count, baseline.ImportTests)
 				}
 			})
 		}
@@ -131,36 +118,57 @@ func productDirectories(t *testing.T, root string) []string {
 	return names
 }
 
-func providerBindings(t *testing.T, filename string) []string {
+func assertProviderUsesCatalog(t *testing.T, filename string) {
 	t.Helper()
 	file := parseGoFile(t, filename)
-	var names []string
+	directBindings := 0
+	catalogCalls := 0
+	catalogRegistrations := 0
 	ast.Inspect(file, func(node ast.Node) bool {
 		call, ok := node.(*ast.CallExpr)
-		if !ok || len(call.Args) == 0 {
+		if !ok {
 			return true
 		}
 		selector, ok := call.Fun.(*ast.SelectorExpr)
-		if !ok || selector.Sel.Name != "Bind" {
+		if !ok {
 			return true
 		}
 		pkg, ok := selector.X.(*ast.Ident)
-		if !ok || pkg.Name != "product" {
+		if !ok {
 			return true
 		}
-		literal, ok := call.Args[0].(*ast.BasicLit)
-		if !ok || literal.Kind != token.STRING {
-			t.Fatalf("product.Bind first argument must be a string literal")
+		if pkg.Name == "product" && selector.Sel.Name == "Bind" {
+			directBindings++
 		}
-		name, err := strconv.Unquote(literal.Value)
-		if err != nil {
-			t.Fatalf("decode product.Bind name: %v", err)
+		if pkg.Name == "productcatalog" && selector.Sel.Name == "Bindings" {
+			catalogCalls++
 		}
-		names = append(names, name)
+		if pkg.Name == "product" && selector.Sel.Name == "MustRegister" &&
+			len(call.Args) == 2 && call.Ellipsis.IsValid() &&
+			isPackageCall(call.Args[1], "productcatalog", "Bindings") {
+			catalogRegistrations++
+		}
 		return true
 	})
-	sort.Strings(names)
-	return names
+	if directBindings != 0 {
+		t.Fatalf("provider contains %d direct product.Bind calls; bindings must come from the catalog", directBindings)
+	}
+	if catalogCalls != 1 || catalogRegistrations != 1 {
+		t.Fatalf("provider catalog calls = %d and registrations = %d; want one productcatalog.Bindings registration", catalogCalls, catalogRegistrations)
+	}
+}
+
+func isPackageCall(expression ast.Expr, packageName, functionName string) bool {
+	call, ok := expression.(*ast.CallExpr)
+	if !ok || len(call.Args) != 0 {
+		return false
+	}
+	selector, ok := call.Fun.(*ast.SelectorExpr)
+	if !ok || selector.Sel.Name != functionName {
+		return false
+	}
+	pkg, ok := selector.X.(*ast.Ident)
+	return ok && pkg.Name == packageName
 }
 
 func assertEmptyProviderMaps(t *testing.T, filename string) {

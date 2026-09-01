@@ -3,7 +3,6 @@ package productownership_test
 import (
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 	"testing"
 
@@ -82,10 +81,16 @@ func TestProductAcceptanceWorkflowUsesProductEnvironmentOnMaster(t *testing.T) {
 	}
 	content := string(workflow)
 	if strings.Count(content, "github.ref == 'refs/heads/master'") != 2 {
-		t.Fatal("product acceptance jobs must be restricted to the default branch")
+		t.Fatal("product acceptance entry and upgrade jobs must be restricted to the default branch")
 	}
-	if strings.Count(content, "name: product-${{ inputs.product }}-acceptance") != 2 {
-		t.Fatal("product acceptance jobs must use a product-specific environment")
+	if !strings.Contains(content, "acceptance_environment:") || !strings.Contains(content, "type: environment") {
+		t.Fatal("product acceptance workflow must use an environment input")
+	}
+	if strings.Contains(content, "type: choice") || strings.Contains(content, "        options:") {
+		t.Fatal("product acceptance workflow must not maintain a static product option list")
+	}
+	if strings.Count(content, "name: ${{ needs.resolve.outputs.environment }}") != 2 {
+		t.Fatal("product acceptance jobs must use the validated selected environment")
 	}
 	for _, forbidden := range []string{
 		"uses: actions/checkout@v",
@@ -96,14 +101,18 @@ func TestProductAcceptanceWorkflowUsesProductEnvironmentOnMaster(t *testing.T) {
 			t.Fatalf("product acceptance workflow contains mutable action reference %q", forbidden)
 		}
 	}
-	if !strings.Contains(content, "PRODUCT: ${{ inputs.product }}") ||
+	if !strings.Contains(content, "PRODUCT: ${{ needs.resolve.outputs.product }}") ||
 		!strings.Contains(content, `go test "./products/${PRODUCT}"`) {
 		t.Fatal("product acceptance workflow must test the selected product package")
+	}
+	if !strings.Contains(content, `^product-([a-z][a-z0-9_-]*)-acceptance$`) ||
+		!strings.Contains(content, `[[ ! -d "products/${product}" ]]`) {
+		t.Fatal("product acceptance workflow must validate the environment name and product directory before loading secrets")
 	}
 	if !strings.Contains(content, `-list '^TestAcc'`) {
 		t.Fatal("product acceptance workflow must reject packages without acceptance tests")
 	}
-	if !strings.Contains(content, "inputs.product == 'us3'") {
+	if !strings.Contains(content, "needs.resolve.outputs.product == 'us3'") {
 		t.Fatal("the released-to-current upgrade fixture must remain restricted to US3")
 	}
 	if strings.Count(content, "name: Mask cloud credentials") != 2 ||
@@ -115,43 +124,14 @@ func TestProductAcceptanceWorkflowUsesProductEnvironmentOnMaster(t *testing.T) {
 	}
 }
 
-func TestProductAcceptanceWorkflowOptionsMatchOwnershipPolicy(t *testing.T) {
-	file, err := os.Open("../../.github/product-owners.json")
+func TestMakefileDiscoversProductDirectories(t *testing.T) {
+	makefile, err := os.ReadFile("../../GNUmakefile")
 	if err != nil {
-		t.Fatalf("open repository product ownership policy: %v", err)
+		t.Fatalf("read GNUmakefile: %v", err)
 	}
-	defer file.Close()
-
-	policy, err := productownership.Load(file)
-	if err != nil {
-		t.Fatalf("load repository product ownership policy: %v", err)
-	}
-	workflow, err := os.ReadFile("../../.github/workflows/product-acceptance.yml")
-	if err != nil {
-		t.Fatalf("read product acceptance workflow: %v", err)
-	}
-
-	content := string(workflow)
-	optionsStart := strings.Index(content, "        options:\n")
-	permissionsStart := strings.Index(content, "\npermissions:\n")
-	if optionsStart < 0 || permissionsStart < 0 || permissionsStart <= optionsStart {
-		t.Fatal("cannot locate product acceptance workflow options")
-	}
-
-	var got []string
-	for _, line := range strings.Split(content[optionsStart+len("        options:\n"):permissionsStart], "\n") {
-		line = strings.TrimSpace(line)
-		if strings.HasPrefix(line, "- ") {
-			got = append(got, strings.TrimPrefix(line, "- "))
-		}
-	}
-	want := make([]string, 0, len(policy.Products))
-	for name := range policy.Products {
-		want = append(want, name)
-	}
-	sort.Strings(got)
-	sort.Strings(want)
-	if strings.Join(got, ",") != strings.Join(want, ",") {
-		t.Fatalf("product acceptance options = %v, want %v", got, want)
+	content := string(makefile)
+	if !strings.Contains(content, "PRODUCT_DIRS:=$(wildcard products/*/)") ||
+		!strings.Contains(content, "PRODUCTS:=$(sort $(notdir $(patsubst %/,%,$(PRODUCT_DIRS))))") {
+		t.Fatal("GNUmakefile must derive its product list from products/*/")
 	}
 }

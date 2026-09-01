@@ -1,7 +1,8 @@
 SWEEP?=cn-bj2,cn-sh2
 TEST?=./...
 PRODUCT?=
-PRODUCTS=iam ipsecvpn label uaccount uads udb udisk udpn ufs uhost uk8s ulb umem unet uphost us3 vpc
+PRODUCT_DIRS:=$(wildcard products/*/)
+PRODUCTS:=$(sort $(notdir $(patsubst %/,%,$(PRODUCT_DIRS))))
 PRODUCT_NAME:=$(if $(word 2,$(value PRODUCT)),,$(filter $(PRODUCTS),$(value PRODUCT)))
 GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
 PKG_NAME=ucloud
@@ -22,7 +23,7 @@ test: fmtcheck
 	go test $(TEST) -timeout=30s -parallel=32
 
 compat: fmtcheck
-	go test ./internal/product ./internal/productownership ./internal/providercompat -count=1
+	go test ./internal/product ./internal/productcatalog ./internal/productownership ./internal/providercompat -count=1
 	go test ./ucloud ./products/... -run '^(TestProvider$$|TestProviderContract$$|TestProductClient|TestRegistration|TestBucket|TestUpgradeFixtureSyntax$$)' -count=1
 
 testacc: fmtcheck

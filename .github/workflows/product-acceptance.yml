@@ -3,43 +3,53 @@ name: product-acceptance
 on:
   workflow_dispatch:
     inputs:
-      product:
-        description: Product package to test
+      acceptance_environment:
+        description: Protected product acceptance environment
         required: true
-        type: choice
-        options:
-          - iam
-          - ipsecvpn
-          - label
-          - uaccount
-          - uads
-          - udb
-          - udisk
-          - udpn
-          - ufs
-          - uhost
-          - uk8s
-          - ulb
-          - umem
-          - unet
-          - uphost
-          - us3
-          - vpc
+        type: environment
 
 permissions:
   contents: read
 
 concurrency:
-  group: product-acceptance-${{ inputs.product }}
+  group: product-acceptance-${{ inputs.acceptance_environment }}
   cancel-in-progress: false
 
 jobs:
-  acceptance:
+  resolve:
     if: ${{ github.ref == 'refs/heads/master' }}
+    runs-on: ubuntu-latest
+    outputs:
+      product: ${{ steps.resolve.outputs.product }}
+      environment: ${{ steps.resolve.outputs.environment }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - id: resolve
+        name: Resolve product environment
+        shell: bash
+        env:
+          ACCEPTANCE_ENVIRONMENT: ${{ inputs.acceptance_environment }}
+        run: |
+          set -euo pipefail
+          environment="${ACCEPTANCE_ENVIRONMENT}"
+          if [[ ! "${environment}" =~ ^product-([a-z][a-z0-9_-]*)-acceptance$ ]]; then
+            echo "environment must be named product-<name>-acceptance" >&2
+            exit 2
+          fi
+          product="${BASH_REMATCH[1]}"
+          if [[ ! -d "products/${product}" ]]; then
+            echo "unknown product: ${product}" >&2
+            exit 2
+          fi
+          printf 'product=%s\n' "${product}" >>"${GITHUB_OUTPUT}"
+          printf 'environment=%s\n' "${environment}" >>"${GITHUB_OUTPUT}"
+
+  acceptance:
+    needs: resolve
     timeout-minutes: 120
     runs-on: ubuntu-latest
     environment:
-      name: product-${{ inputs.product }}-acceptance
+      name: ${{ needs.resolve.outputs.environment }}
     env:
       TF_ACC: "1"
       UCLOUD_PUBLIC_KEY: ${{ secrets.UCLOUD_PUBLIC_KEY }}
@@ -66,7 +76,7 @@ jobs:
       - name: Run product acceptance tests
         shell: bash
         env:
-          PRODUCT: ${{ inputs.product }}
+          PRODUCT: ${{ needs.resolve.outputs.product }}
         run: |
           set -uo pipefail
           case "${PRODUCT}" in
@@ -100,12 +110,12 @@ jobs:
           exit "${test_rc}"
 
   upgrade:
-    needs: acceptance
-    if: ${{ github.ref == 'refs/heads/master' && inputs.product == 'us3' }}
+    needs: [resolve, acceptance]
+    if: ${{ github.ref == 'refs/heads/master' && needs.resolve.outputs.product == 'us3' }}
     timeout-minutes: 120
     runs-on: ubuntu-latest
     environment:
-      name: product-${{ inputs.product }}-acceptance
+      name: ${{ needs.resolve.outputs.environment }}
     env:
       UCLOUD_PUBLIC_KEY: ${{ secrets.UCLOUD_PUBLIC_KEY }}
       UCLOUD_PRIVATE_KEY: ${{ secrets.UCLOUD_PRIVATE_KEY }}

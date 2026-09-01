@@ -4,23 +4,7 @@ import (
 	"time"
 
 	"github.com/terraform-providers/terraform-provider-ucloud/internal/product"
-	"github.com/terraform-providers/terraform-provider-ucloud/products/iam"
-	"github.com/terraform-providers/terraform-provider-ucloud/products/ipsecvpn"
-	"github.com/terraform-providers/terraform-provider-ucloud/products/label"
-	"github.com/terraform-providers/terraform-provider-ucloud/products/uaccount"
-	"github.com/terraform-providers/terraform-provider-ucloud/products/uads"
-	"github.com/terraform-providers/terraform-provider-ucloud/products/udb"
-	"github.com/terraform-providers/terraform-provider-ucloud/products/udisk"
-	"github.com/terraform-providers/terraform-provider-ucloud/products/udpn"
-	"github.com/terraform-providers/terraform-provider-ucloud/products/ufs"
-	"github.com/terraform-providers/terraform-provider-ucloud/products/uhost"
-	"github.com/terraform-providers/terraform-provider-ucloud/products/uk8s"
-	"github.com/terraform-providers/terraform-provider-ucloud/products/ulb"
-	"github.com/terraform-providers/terraform-provider-ucloud/products/umem"
-	"github.com/terraform-providers/terraform-provider-ucloud/products/unet"
-	"github.com/terraform-providers/terraform-provider-ucloud/products/uphost"
-	"github.com/terraform-providers/terraform-provider-ucloud/products/us3"
-	"github.com/terraform-providers/terraform-provider-ucloud/products/vpc"
+	"github.com/terraform-providers/terraform-provider-ucloud/internal/productcatalog"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -102,33 +86,7 @@ func Provider() terraform.ResourceProvider {
 		ResourcesMap:   map[string]*schema.Resource{},
 		ConfigureFunc:  providerConfigure,
 	}
-	product.MustRegister(
-		provider,
-		product.Bind("iam", iam.New()),
-		product.Bind("ipsecvpn", ipsecvpn.New(), product.WithTerraformNamespaces("vpn")),
-		product.Bind("label", label.New(), product.WithTerraformNamespaces("label", "labels")),
-		product.Bind("uaccount", uaccount.New(), product.WithTerraformNamespaces("projects", "zones")),
-		product.Bind("uads", uads.New(), product.WithTerraformNamespaces("anti_ddos")),
-		product.Bind("udb", udb.New(), product.WithTerraformNamespaces("db")),
-		product.Bind("udisk", udisk.New(), product.WithTerraformNamespaces("disk", "disks")),
-		product.Bind("udpn", udpn.New()),
-		product.Bind("ufs", ufs.New()),
-		product.Bind("uhost", uhost.New(), product.WithTerraformNamespaces(
-			"instance", "instances", "images", "isolation_group",
-		)),
-		product.Bind("uk8s", uk8s.New()),
-		product.Bind("ulb", ulb.New(), product.WithTerraformNamespaces("lb", "lbs")),
-		product.Bind("umem", umem.New(), product.WithTerraformNamespaces("redis", "memcache")),
-		product.Bind("unet", unet.New(), product.WithTerraformNamespaces(
-			"eip", "eips", "security_group", "security_groups",
-		)),
-		product.Bind("uphost", uphost.New(), product.WithTerraformNamespaces("baremetal")),
-		product.Bind("us3", us3.New()),
-		product.Bind("vpc", vpc.New(), product.WithTerraformNamespaces(
-			"vpc", "vpcs", "subnet", "subnets", "vip",
-			"nat_gateway", "nat_gateways", "sec_group", "sec_groups",
-		)),
-	)
+	product.MustRegister(provider, productcatalog.Bindings()...)
 	return provider
 }
 
