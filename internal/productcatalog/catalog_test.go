@@ -22,8 +22,8 @@ func TestDefinitions(t *testing.T) {
 		if definition.newAdapter == nil {
 			t.Fatalf("catalog product %q has no adapter constructor", definition.name)
 		}
-		if definition.apiManager.Product == "" || definition.apiManager.Package == "" {
-			t.Fatalf("catalog product %q has incomplete API Manager identity: %#v", definition.name, definition.apiManager)
+		if definition.masterData.EnSampleName == "" || definition.masterData.Key == "" {
+			t.Fatalf("catalog product %q has incomplete product master data identity: %#v", definition.name, definition.masterData)
 		}
 		adapter := definition.newAdapter()
 		if adapter == nil {
@@ -70,40 +70,40 @@ func TestNamesReturnsCopy(t *testing.T) {
 	}
 }
 
-func TestAPIManagerIdentityFor(t *testing.T) {
-	want := map[string]APIManagerIdentity{
-		"iam":      {Product: "IAM", Package: "iam"},
-		"ipsecvpn": {Product: "IPSecVPN", Package: "ipsecvpn"},
-		"label":    {Product: "Label", Package: "label"},
-		"uaccount": {Product: "UAccount", Package: "uaccount"},
-		"uads":     {Product: "UDDoS", Package: "uddos"},
-		"udb":      {Product: "UDB", Package: "udb"},
-		"udisk":    {Product: "UDisk", Package: "udisk"},
-		"udpn":     {Product: "UDPN", Package: "udpn"},
-		"ufs":      {Product: "UFS", Package: "ufs"},
-		"uhost":    {Product: "UHost", Package: "uhost"},
-		"uk8s":     {Product: "UK8S", Package: "uk8s"},
-		"ulb":      {Product: "ULB", Package: "ulb"},
-		"umem":     {Product: "UMem", Package: "umem"},
-		"unet":     {Product: "UNet", Package: "unet"},
-		"uphost":   {Product: "UPHost", Package: "uphost"},
-		"us3":      {Product: "UFile", Package: "ufile"},
-		"vpc":      {Product: "VPC", Package: "vpc"},
+func TestProductMasterDataIdentityFor(t *testing.T) {
+	want := map[string]ProductMasterDataIdentity{
+		"iam":      {EnSampleName: "IAM", Key: "iam"},
+		"ipsecvpn": {EnSampleName: "IPSecVPN", Key: "ipsecvpn"},
+		"label":    {EnSampleName: "Label", Key: "label"},
+		"uaccount": {EnSampleName: "UAccount", Key: "uaccount"},
+		"uads":     {EnSampleName: "UDDoS", Key: "uddos"},
+		"udb":      {EnSampleName: "UDB", Key: "udb"},
+		"udisk":    {EnSampleName: "UDisk", Key: "udisk"},
+		"udpn":     {EnSampleName: "UDPN", Key: "udpn"},
+		"ufs":      {EnSampleName: "UFS", Key: "ufs"},
+		"uhost":    {EnSampleName: "UHost", Key: "uhost"},
+		"uk8s":     {EnSampleName: "UK8S", Key: "uk8s"},
+		"ulb":      {EnSampleName: "ULB", Key: "ulb"},
+		"umem":     {EnSampleName: "UMem", Key: "umem"},
+		"unet":     {EnSampleName: "UNet", Key: "unet"},
+		"uphost":   {EnSampleName: "UPHost", Key: "uphost"},
+		"us3":      {EnSampleName: "UFile", Key: "ufile"},
+		"vpc":      {EnSampleName: "VPC", Key: "vpc"},
 	}
 	if got := len(Names()); got != len(want) {
 		t.Fatalf("historical product count = %d, mapped count = %d", got, len(want))
 	}
 	for name, expected := range want {
-		got, ok := APIManagerIdentityFor(name)
+		got, ok := ProductMasterDataIdentityFor(name)
 		if !ok {
-			t.Fatalf("APIManagerIdentityFor(%q) did not find historical product", name)
+			t.Fatalf("ProductMasterDataIdentityFor(%q) did not find historical product", name)
 		}
 		if got != expected {
-			t.Errorf("APIManagerIdentityFor(%q) = %#v, want %#v", name, got, expected)
+			t.Errorf("ProductMasterDataIdentityFor(%q) = %#v, want %#v", name, got, expected)
 		}
 	}
-	if got, ok := APIManagerIdentityFor("unknown"); ok || got != (APIManagerIdentity{}) {
-		t.Fatalf("APIManagerIdentityFor(unknown) = (%#v, %t), want zero, false", got, ok)
+	if got, ok := ProductMasterDataIdentityFor("unknown"); ok || got != (ProductMasterDataIdentity{}) {
+		t.Fatalf("ProductMasterDataIdentityFor(unknown) = (%#v, %t), want zero, false", got, ok)
 	}
 }
 
