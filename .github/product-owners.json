@@ -11,7 +11,9 @@
         "Ali1213"
       ],
       "paths": [
-        "products/iam/**"
+        "products/iam/**",
+        "website/docs/d/iam_*",
+        "website/docs/r/iam_*"
       ]
     },
     "ipsecvpn": {
@@ -19,7 +21,10 @@
         "Ali1213"
       ],
       "paths": [
-        "products/ipsecvpn/**"
+        "products/ipsecvpn/**",
+        "examples/vpn_gateway/**",
+        "website/docs/d/vpn_*",
+        "website/docs/r/vpn_*"
       ]
     },
     "label": {
@@ -27,7 +32,9 @@
         "Ali1213"
       ],
       "paths": [
-        "products/label/**"
+        "products/label/**",
+        "website/docs/d/label*",
+        "website/docs/r/label*"
       ]
     },
     "uaccount": {
@@ -35,7 +42,9 @@
         "Ali1213"
       ],
       "paths": [
-        "products/uaccount/**"
+        "products/uaccount/**",
+        "website/docs/d/projects.html.markdown",
+        "website/docs/d/zones.html.markdown"
       ]
     },
     "uads": {
@@ -43,7 +52,9 @@
         "Ali1213"
       ],
       "paths": [
-        "products/uads/**"
+        "products/uads/**",
+        "website/docs/d/anti_ddos_*",
+        "website/docs/r/anti_ddos_*"
       ]
     },
     "udb": {
@@ -51,7 +62,11 @@
         "Ali1213"
       ],
       "paths": [
-        "products/udb/**"
+        "products/udb/**",
+        "examples/db/**",
+        "website/docs/appendix/db_instance_type.html.markdown",
+        "website/docs/d/db_*",
+        "website/docs/r/db_*"
       ]
     },
     "udisk": {
@@ -59,7 +74,11 @@
         "Ali1213"
       ],
       "paths": [
-        "products/udisk/**"
+        "products/udisk/**",
+        "examples/disk_snapshot/**",
+        "examples/rssd/**",
+        "website/docs/d/disk*",
+        "website/docs/r/disk*"
       ]
     },
     "udpn": {
@@ -67,7 +86,8 @@
         "Ali1213"
       ],
       "paths": [
-        "products/udpn/**"
+        "products/udpn/**",
+        "website/docs/r/udpn_*"
       ]
     },
     "ufs": {
@@ -75,7 +95,10 @@
         "Ali1213"
       ],
       "paths": [
-        "products/ufs/**"
+        "products/ufs/**",
+        "examples/ufs/**",
+        "website/docs/d/ufs_*",
+        "website/docs/r/ufs_*"
       ]
     },
     "uhost": {
@@ -83,7 +106,15 @@
         "Ali1213"
       ],
       "paths": [
-        "products/uhost/**"
+        "products/uhost/**",
+        "examples/intranet-cluster/**",
+        "examples/outstanding-instance/**",
+        "examples/web-server/**",
+        "website/docs/appendix/instance_type.html.markdown",
+        "website/docs/d/images.html.markdown",
+        "website/docs/d/instances.html.markdown",
+        "website/docs/r/instance*",
+        "website/docs/r/isolation_group.html.markdown"
       ]
     },
     "uk8s": {
@@ -91,7 +122,9 @@
         "Ali1213"
       ],
       "paths": [
-        "products/uk8s/**"
+        "products/uk8s/**",
+        "examples/k8s/**",
+        "website/docs/r/uk8s_*"
       ]
     },
     "ulb": {
@@ -99,7 +132,11 @@
         "Ali1213"
       ],
       "paths": [
-        "products/ulb/**"
+        "products/ulb/**",
+        "examples/intranet-lb/**",
+        "examples/lb/**",
+        "website/docs/d/lb*",
+        "website/docs/r/lb*"
       ]
     },
     "umem": {
@@ -107,7 +144,13 @@
         "Ali1213"
       ],
       "paths": [
-        "products/umem/**"
+        "products/umem/**",
+        "examples/memcache/**",
+        "examples/redis/**",
+        "website/docs/appendix/memcache_instance_type.html.markdown",
+        "website/docs/appendix/redis_instance_type.html.markdown",
+        "website/docs/r/memcache_*",
+        "website/docs/r/redis_*"
       ]
     },
     "unet": {
@@ -115,7 +158,11 @@
         "Ali1213"
       ],
       "paths": [
-        "products/unet/**"
+        "products/unet/**",
+        "website/docs/d/eips.html.markdown",
+        "website/docs/d/security_groups.html.markdown",
+        "website/docs/r/eip*",
+        "website/docs/r/security_group.html.markdown"
       ]
     },
     "uphost": {
@@ -123,7 +170,9 @@
         "Ali1213"
       ],
       "paths": [
-        "products/uphost/**"
+        "products/uphost/**",
+        "website/docs/d/baremetal_*",
+        "website/docs/r/baremetal_*"
       ]
     },
     "us3": {
@@ -142,7 +191,17 @@
         "Ali1213"
       ],
       "paths": [
-        "products/vpc/**"
+        "products/vpc/**",
+        "examples/nat_gateway/**",
+        "examples/vpc/**",
+        "website/docs/d/nat_gateway*",
+        "website/docs/d/sec_groups.html.markdown",
+        "website/docs/d/subnets.html.markdown",
+        "website/docs/d/vpcs.html.markdown",
+        "website/docs/r/nat_gateway*",
+        "website/docs/r/subnet.html.markdown",
+        "website/docs/r/vip.html.markdown",
+        "website/docs/r/vpc*"
       ]
     }
   }

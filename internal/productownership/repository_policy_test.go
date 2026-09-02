@@ -45,6 +45,50 @@ func TestRepositoryProductOwnershipPolicyLoads(t *testing.T) {
 	}
 }
 
+func TestRepositoryExamplesAndDocsHaveExplicitOwnership(t *testing.T) {
+	root := repositoryRoot(t)
+	policy := loadRepositoryPolicy(t, root)
+	policy.Core.GitHubUsers = []string{"coverage-core"}
+	for name, product := range policy.Products {
+		product.GitHubUsers = []string{"coverage-owner"}
+		policy.Products[name] = product
+	}
+
+	for _, scope := range []string{"examples", filepath.Join("website", "docs")} {
+		err := filepath.WalkDir(filepath.Join(root, scope), func(filename string, entry os.DirEntry, walkErr error) error {
+			if walkErr != nil {
+				return walkErr
+			}
+			if entry.IsDir() {
+				return nil
+			}
+			relative, err := filepath.Rel(root, filename)
+			if err != nil {
+				return err
+			}
+			relative = filepath.ToSlash(relative)
+			if relative == "examples/README.md" ||
+				relative == "website/docs/index.html.markdown" ||
+				strings.HasPrefix(relative, "examples/two-tier/") {
+				return nil
+			}
+
+			decision, err := policy.Authorize("coverage-owner", []productownership.Change{{Path: relative}})
+			if err != nil {
+				t.Errorf("%s must have exactly one product owner or be explicitly Core-owned: %v", relative, err)
+				return nil
+			}
+			if decision.Owner == "" || decision.Owner == "core" {
+				t.Errorf("%s resolved to invalid product owner %q", relative, decision.Owner)
+			}
+			return nil
+		})
+		if err != nil {
+			t.Fatalf("walk %s ownership scope: %v", scope, err)
+		}
+	}
+}
+
 func TestProductOwnershipWorkflowNeverExecutesPullRequestCode(t *testing.T) {
 	workflow, err := os.ReadFile("../../.github/workflows/product-ownership.yml")
 	if err != nil {

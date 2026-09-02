@@ -1,6 +1,7 @@
 package productownership_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -242,11 +243,11 @@ func TestLoadRejectsPathAssignedToMultipleProducts(t *testing.T) {
 		"products": {
 			"us3": {
 				"github_users": ["US3Owner"],
-				"paths": ["products/us3/**", "website/docs/shared/**"]
+				"paths": ["products/us3/**", "website/docs/d/shared_*"]
 			},
 			"uhost": {
 				"github_users": ["UHostOwner"],
-				"paths": ["products/uhost/**", "website/docs/shared/**"]
+				"paths": ["products/uhost/**", "website/docs/d/shared_*"]
 			}
 		}
 	}`))
@@ -268,5 +269,33 @@ func TestLoadRequiresPrimaryProductPath(t *testing.T) {
 	}`))
 	if err == nil || !strings.Contains(err.Error(), "products/us3/**") {
 		t.Fatalf("Load() error = %v, want missing primary product path error", err)
+	}
+}
+
+func TestLoadRejectsBroadSupplementalProductPaths(t *testing.T) {
+	tests := []string{
+		"examples/**",
+		"examples/*/**",
+		"website/docs/**",
+		"website/docs/d/**",
+		"website/docs/d/*.html.markdown",
+	}
+
+	for _, pattern := range tests {
+		t.Run(pattern, func(t *testing.T) {
+			_, err := productownership.Load(strings.NewReader(fmt.Sprintf(`{
+				"version": 1,
+				"core": {"github_users": ["CoreMaintainer"]},
+				"products": {
+					"us3": {
+						"github_users": ["US3Owner"],
+						"paths": ["products/us3/**", %q]
+					}
+				}
+			}`, pattern)))
+			if err == nil || !strings.Contains(err.Error(), "specific product-owned entry") {
+				t.Fatalf("Load() error = %v, want specific product-owned entry error", err)
+			}
+		})
 	}
 }

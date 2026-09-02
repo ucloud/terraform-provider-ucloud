@@ -237,12 +237,13 @@ func validateProductPattern(productName, pattern string) error {
 			return fmt.Errorf("products path must stay under products/%s", productName)
 		}
 	case "examples":
-		if len(parts) < 2 {
-			return fmt.Errorf("examples path must identify a product-owned entry")
+		if len(parts) < 2 || strings.ContainsAny(parts[1], "*?[") {
+			return fmt.Errorf("examples path must identify one specific product-owned entry")
 		}
 	case "website":
-		if len(parts) < 3 || parts[1] != "docs" {
-			return fmt.Errorf("website path must stay under website/docs")
+		if len(parts) < 4 || parts[1] != "docs" ||
+			strings.ContainsAny(parts[2], "*?[") || strings.ContainsAny(parts[3][:1], "*?[") {
+			return fmt.Errorf("website/docs path must identify one specific product-owned entry")
 		}
 	default:
 		return fmt.Errorf("path is core-owned; product paths are limited to products, examples, and website/docs")
