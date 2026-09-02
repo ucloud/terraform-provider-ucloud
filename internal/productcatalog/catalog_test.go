@@ -107,6 +107,33 @@ func TestProductMasterDataIdentityFor(t *testing.T) {
 	}
 }
 
+func TestOwnershipMetadataUsesCatalogAndRegistration(t *testing.T) {
+	metadata, err := OwnershipMetadataFor("ulb")
+	if err != nil {
+		t.Fatalf("OwnershipMetadataFor(ulb) error = %v", err)
+	}
+	if metadata.Name != "ulb" || metadata.MasterData.Key != "ulb" {
+		t.Fatalf("OwnershipMetadataFor(ulb) identity = %#v", metadata)
+	}
+	if got, want := metadata.TerraformNamespaces, []string{"lb", "lbs"}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("ULB Terraform namespaces = %v, want %v", got, want)
+	}
+	if !containsString(metadata.ResourceTypes, "ucloud_lb") || !containsString(metadata.DataSourceTypes, "ucloud_lbs") {
+		t.Fatalf("ULB Terraform surface is incomplete: %#v", metadata)
+	}
+
+	all, err := AllOwnershipMetadata()
+	if err != nil {
+		t.Fatalf("AllOwnershipMetadata() error = %v", err)
+	}
+	if got, want := len(all), len(Names()); got != want {
+		t.Fatalf("AllOwnershipMetadata() count = %d, want %d", got, want)
+	}
+	if _, err := OwnershipMetadataFor("ULB"); err == nil {
+		t.Fatal("OwnershipMetadataFor(ULB) succeeded, want exact-name error")
+	}
+}
+
 func TestBaselineLookup(t *testing.T) {
 	for _, name := range Names() {
 		if _, ok := Baseline(name); !ok {
@@ -116,4 +143,13 @@ func TestBaselineLookup(t *testing.T) {
 	if _, ok := Baseline("unknown"); ok {
 		t.Fatal("unknown product has a test baseline")
 	}
+}
+
+func containsString(values []string, target string) bool {
+	for _, value := range values {
+		if value == target {
+			return true
+		}
+	}
+	return false
 }

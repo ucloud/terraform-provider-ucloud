@@ -145,6 +145,133 @@ func TestGatePublishesSuccessOnHeadAndMergeCommits(t *testing.T) {
 	}
 }
 
+func TestGateAllowsTrustedProductOnboardingPolicy(t *testing.T) {
+	policy, err := productownership.Load(strings.NewReader(`{
+		"version": 1,
+		"core": {"github_users": ["CoreMaintainer"]},
+		"products": {
+			"ulb": {
+				"github_users": ["OldOwner"],
+				"paths": ["products/ulb/**"]
+			}
+		}
+	}`))
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+
+	var statuses []string
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		switch request.Method {
+		case http.MethodGet:
+			writer.Header().Set("Content-Type", "application/json")
+			_, _ = writer.Write([]byte(`[{"filename":".github/product-owners.json","status":"modified"}]`))
+		case http.MethodPost:
+			var body map[string]string
+			if err := json.NewDecoder(request.Body).Decode(&body); err != nil {
+				t.Fatalf("decode status request: %v", err)
+			}
+			statuses = append(statuses, body["state"])
+			writer.WriteHeader(http.StatusCreated)
+		default:
+			t.Fatalf("unexpected method %q", request.Method)
+		}
+	}))
+	defer server.Close()
+
+	called := false
+	gate := productownership.Gate{
+		Policy: policy,
+		GitHub: productownership.GitHubClient{
+			BaseURL:    server.URL,
+			Token:      "test-token",
+			HTTPClient: server.Client(),
+		},
+		OnboardingAuthorizer: func(_ context.Context, event productownership.PullRequestEvent) (productownership.Decision, error) {
+			called = true
+			if event.Author != "NewOwner" || event.Sender != "NewOwner" {
+				t.Fatalf("onboarding event = %#v", event)
+			}
+			return productownership.Decision{Owner: "ulb"}, nil
+		},
+		StatusContext: "product-ownership",
+	}
+	result, err := gate.Run(context.Background(), productownership.PullRequestEvent{
+		Repository:   "ucloud/terraform-provider-ucloud",
+		Number:       42,
+		Author:       "NewOwner",
+		Sender:       "NewOwner",
+		ChangedFiles: 1,
+		HeadSHA:      "0123456789abcdef0123456789abcdef01234567",
+	})
+	if err != nil {
+		t.Fatalf("Run() error = %v", err)
+	}
+	if !called || result.Decision.Owner != "ulb" {
+		t.Fatalf("onboarding result = %#v, called = %t", result, called)
+	}
+	if got := strings.Join(statuses, ","); got != "pending,success" {
+		t.Fatalf("commit status states = %q, want pending,success", got)
+	}
+}
+
+func TestGateDoesNotUseOnboardingForMixedChanges(t *testing.T) {
+	policy, err := productownership.Load(strings.NewReader(`{
+		"version": 1,
+		"core": {"github_users": ["CoreMaintainer"]},
+		"products": {
+			"ulb": {
+				"github_users": ["OldOwner"],
+				"paths": ["products/ulb/**"]
+			}
+		}
+	}`))
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		switch request.Method {
+		case http.MethodGet:
+			writer.Header().Set("Content-Type", "application/json")
+			_, _ = writer.Write([]byte(`[
+				{"filename":".github/product-owners.json","status":"modified"},
+				{"filename":"products/ulb/product.go","status":"modified"}
+			]`))
+		case http.MethodPost:
+			writer.WriteHeader(http.StatusCreated)
+		default:
+			t.Fatalf("unexpected method %q", request.Method)
+		}
+	}))
+	defer server.Close()
+
+	gate := productownership.Gate{
+		Policy: policy,
+		GitHub: productownership.GitHubClient{
+			BaseURL:    server.URL,
+			Token:      "test-token",
+			HTTPClient: server.Client(),
+		},
+		OnboardingAuthorizer: func(context.Context, productownership.PullRequestEvent) (productownership.Decision, error) {
+			t.Fatal("onboarding authorizer called for mixed changes")
+			return productownership.Decision{}, nil
+		},
+		StatusContext: "product-ownership",
+	}
+	_, err = gate.Run(context.Background(), productownership.PullRequestEvent{
+		Repository:   "ucloud/terraform-provider-ucloud",
+		Number:       42,
+		Author:       "NewOwner",
+		Sender:       "NewOwner",
+		ChangedFiles: 2,
+		HeadSHA:      "0123456789abcdef0123456789abcdef01234567",
+	})
+	if err == nil || !strings.Contains(err.Error(), "core maintainer") {
+		t.Fatalf("Run() error = %v, want core-path authorization error", err)
+	}
+}
+
 func TestGateRejectsUnauthorizedEventSender(t *testing.T) {
 	policy, err := productownership.Load(strings.NewReader(`{
 		"version": 1,

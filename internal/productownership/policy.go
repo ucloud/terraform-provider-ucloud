@@ -167,8 +167,24 @@ func (policy *Policy) Authorize(author string, changes []Change) (Decision, erro
 }
 
 func (policy *Policy) ownerOf(changedPath string) (string, error) {
+	owner, found, err := policy.ProductOwner(changedPath)
+	if err != nil {
+		return "", err
+	}
+	if !found {
+		return "", fmt.Errorf("path %q is not owned by a product and requires a core maintainer", changedPath)
+	}
+	return owner, nil
+}
+
+// ProductOwner resolves a repository path to its product owner. A valid path
+// with no product assignment returns found=false; overlapping assignments fail.
+func (policy *Policy) ProductOwner(changedPath string) (owner string, found bool, err error) {
+	if policy == nil {
+		return "", false, fmt.Errorf("product ownership policy is nil")
+	}
 	if err := validateRepositoryPath(changedPath); err != nil {
-		return "", fmt.Errorf("changed path %q: %w", changedPath, err)
+		return "", false, fmt.Errorf("changed path %q: %w", changedPath, err)
 	}
 
 	owners := make([]string, 0, 1)
@@ -183,11 +199,11 @@ func (policy *Policy) ownerOf(changedPath string) (string, error) {
 	sort.Strings(owners)
 	switch len(owners) {
 	case 0:
-		return "", fmt.Errorf("path %q is not owned by a product and requires a core maintainer", changedPath)
+		return "", false, nil
 	case 1:
-		return owners[0], nil
+		return owners[0], true, nil
 	default:
-		return "", fmt.Errorf("path %q matches multiple products: %s", changedPath, strings.Join(owners, ", "))
+		return "", false, fmt.Errorf("path %q matches multiple products: %s", changedPath, strings.Join(owners, ", "))
 	}
 }
 
@@ -195,6 +211,13 @@ func matchPath(pattern, name string) bool {
 	patternParts := strings.Split(pattern, "/")
 	nameParts := strings.Split(name, "/")
 	return matchParts(patternParts, nameParts)
+}
+
+// MatchesPath reports whether a validated ownership pattern matches a
+// repository-relative path. Callers that accept untrusted patterns must load
+// them through Load first.
+func MatchesPath(pattern, name string) bool {
+	return matchPath(pattern, name)
 }
 
 func matchParts(pattern, name []string) bool {

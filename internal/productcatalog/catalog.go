@@ -2,6 +2,10 @@
 package productcatalog
 
 import (
+	"fmt"
+	"sort"
+	"strings"
+
 	"github.com/terraform-providers/terraform-provider-ucloud/internal/product"
 	"github.com/terraform-providers/terraform-provider-ucloud/products/iam"
 	"github.com/terraform-providers/terraform-provider-ucloud/products/ipsecvpn"
@@ -32,6 +36,16 @@ type TestBaseline struct {
 type ProductMasterDataIdentity struct {
 	EnSampleName string
 	Key          string
+}
+
+// OwnershipMetadata is the trusted product identity and Terraform surface used
+// to derive product-owned repository paths.
+type OwnershipMetadata struct {
+	Name                string
+	MasterData          ProductMasterDataIdentity
+	TerraformNamespaces []string
+	ResourceTypes       []string
+	DataSourceTypes     []string
 }
 
 type definition struct {
@@ -94,6 +108,54 @@ func ProductMasterDataIdentityFor(name string) (ProductMasterDataIdentity, bool)
 	return ProductMasterDataIdentity{}, false
 }
 
+// OwnershipMetadataFor returns the catalog and Registration data for one
+// product. Product names must use the exact Provider catalog name.
+func OwnershipMetadataFor(name string) (OwnershipMetadata, error) {
+	for _, definition := range definitions {
+		if definition.name != name {
+			continue
+		}
+		registration := definition.newAdapter().Registration()
+		if registration.Name != definition.name {
+			return OwnershipMetadata{}, fmt.Errorf(
+				"catalog product %q constructor registers %q",
+				definition.name,
+				registration.Name,
+			)
+		}
+		namespaces := append([]string(nil), definition.terraformNamespaces...)
+		if len(namespaces) == 0 {
+			namespaces = []string{strings.ReplaceAll(definition.name, "-", "_")}
+		}
+		metadata := OwnershipMetadata{
+			Name:                definition.name,
+			MasterData:          definition.masterData,
+			TerraformNamespaces: namespaces,
+			ResourceTypes:       mapKeys(registration.Resources),
+			DataSourceTypes:     mapKeys(registration.DataSources),
+		}
+		return metadata, nil
+	}
+	return OwnershipMetadata{}, fmt.Errorf(
+		"unknown Provider product %q; choose one of: %s",
+		name,
+		strings.Join(Names(), ", "),
+	)
+}
+
+// AllOwnershipMetadata returns trusted metadata for every catalog product.
+func AllOwnershipMetadata() ([]OwnershipMetadata, error) {
+	metadata := make([]OwnershipMetadata, 0, len(definitions))
+	for _, definition := range definitions {
+		entry, err := OwnershipMetadataFor(definition.name)
+		if err != nil {
+			return nil, err
+		}
+		metadata = append(metadata, entry)
+	}
+	return metadata, nil
+}
+
 // Baseline returns the compatibility test floor for a registered product.
 func Baseline(name string) (TestBaseline, bool) {
 	for _, definition := range definitions {
@@ -102,4 +164,13 @@ func Baseline(name string) (TestBaseline, bool) {
 		}
 	}
 	return TestBaseline{}, false
+}
+
+func mapKeys[T any](values map[string]T) []string {
+	keys := make([]string, 0, len(values))
+	for key := range values {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	return keys
 }

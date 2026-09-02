@@ -23,7 +23,7 @@ test: fmtcheck
 	go test $(TEST) -timeout=30s -parallel=32
 
 compat: fmtcheck
-	go test ./internal/product ./internal/productcatalog ./internal/productownership ./internal/providercompat -count=1
+	go test ./internal/product ./internal/productcatalog ./internal/productownership ./internal/productownershipsync ./internal/providercompat -count=1
 	go test ./ucloud ./products/... -run '^(TestProvider$$|TestProviderContract$$|TestProductClient|TestRegistration|TestBucket|TestUpgradeFixtureSyntax$$)' -count=1
 
 testacc: fmtcheck

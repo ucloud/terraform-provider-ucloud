@@ -135,6 +135,7 @@
         "products/ulb/**",
         "examples/intranet-lb/**",
         "examples/lb/**",
+        "examples/two-tier/**",
         "website/docs/d/lb*",
         "website/docs/r/lb*"
       ]

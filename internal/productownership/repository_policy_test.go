@@ -68,14 +68,13 @@ func TestRepositoryExamplesAndDocsHaveExplicitOwnership(t *testing.T) {
 			}
 			relative = filepath.ToSlash(relative)
 			if relative == "examples/README.md" ||
-				relative == "website/docs/index.html.markdown" ||
-				strings.HasPrefix(relative, "examples/two-tier/") {
+				relative == "website/docs/index.html.markdown" {
 				return nil
 			}
 
 			decision, err := policy.Authorize("coverage-owner", []productownership.Change{{Path: relative}})
 			if err != nil {
-				t.Errorf("%s must have exactly one product owner or be explicitly Core-owned: %v", relative, err)
+				t.Errorf("%s must have exactly one product owner: %v", relative, err)
 				return nil
 			}
 			if decision.Owner == "" || decision.Owner == "core" {

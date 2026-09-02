@@ -172,6 +172,31 @@ func TestCoreMaintainerCanChangeAnyValidRepositoryPath(t *testing.T) {
 	}
 }
 
+func TestProductOwnerDistinguishesOwnedAndCorePaths(t *testing.T) {
+	policy, err := productownership.Load(strings.NewReader(`{
+		"version": 1,
+		"core": {"github_users": ["CoreMaintainer"]},
+		"products": {
+			"us3": {
+				"github_users": ["US3Owner"],
+				"paths": ["products/us3/**", "examples/us3/**"]
+			}
+		}
+	}`))
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+
+	owner, found, err := policy.ProductOwner("examples/us3/main.tf")
+	if err != nil || !found || owner != "us3" {
+		t.Fatalf("ProductOwner(owned) = (%q, %t, %v), want (us3, true, nil)", owner, found, err)
+	}
+	owner, found, err = policy.ProductOwner("ucloud/provider.go")
+	if err != nil || found || owner != "" {
+		t.Fatalf("ProductOwner(core) = (%q, %t, %v), want empty, false, nil", owner, found, err)
+	}
+}
+
 func TestLoadRequiresCoreMaintainer(t *testing.T) {
 	_, err := productownership.Load(strings.NewReader(`{
 		"version": 1,

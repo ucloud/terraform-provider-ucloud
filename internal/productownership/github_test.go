@@ -2,6 +2,7 @@ package productownership_test
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -184,5 +185,62 @@ func TestGitHubClientLoadsPullRequestChanges(t *testing.T) {
 	}
 	if changes[1].PreviousPath != "products/us3/old.go" {
 		t.Errorf("changes[1].PreviousPath = %q", changes[1].PreviousPath)
+	}
+}
+
+func TestGitHubClientLoadsPullRequestFileContent(t *testing.T) {
+	contents := []byte("{\"version\":1}\n")
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if request.URL.Path != "/repos/ucloud/terraform-provider-ucloud/contents/.github/product-owners.json" {
+			t.Errorf("request path = %q", request.URL.Path)
+		}
+		if request.URL.Query().Get("ref") != "0123456789abcdef0123456789abcdef01234567" {
+			t.Errorf("request ref = %q", request.URL.Query().Get("ref"))
+		}
+		if request.Header.Get("Authorization") != "Bearer test-token" {
+			t.Errorf("Authorization = %q", request.Header.Get("Authorization"))
+		}
+		writer.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(writer).Encode(map[string]interface{}{
+			"type":     "file",
+			"encoding": "base64",
+			"content":  base64.StdEncoding.EncodeToString(contents),
+			"size":     len(contents),
+		})
+	}))
+	defer server.Close()
+
+	client := productownership.GitHubClient{BaseURL: server.URL, Token: "test-token", HTTPClient: server.Client()}
+	got, err := client.PullRequestFileContent(context.Background(), productownership.PullRequestEvent{
+		Repository: "ucloud/terraform-provider-ucloud",
+		HeadSHA:    "0123456789abcdef0123456789abcdef01234567",
+	}, ".github/product-owners.json")
+	if err != nil {
+		t.Fatalf("PullRequestFileContent() error = %v", err)
+	}
+	if string(got) != string(contents) {
+		t.Fatalf("PullRequestFileContent() = %q, want %q", got, contents)
+	}
+}
+
+func TestGitHubClientRejectsPullRequestFileSizeMismatch(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(writer).Encode(map[string]interface{}{
+			"type":     "file",
+			"encoding": "base64",
+			"content":  base64.StdEncoding.EncodeToString([]byte("short")),
+			"size":     100,
+		})
+	}))
+	defer server.Close()
+
+	client := productownership.GitHubClient{BaseURL: server.URL, Token: "test-token", HTTPClient: server.Client()}
+	_, err := client.PullRequestFileContent(context.Background(), productownership.PullRequestEvent{
+		Repository: "ucloud/terraform-provider-ucloud",
+		HeadSHA:    "0123456789abcdef0123456789abcdef01234567",
+	}, ".github/product-owners.json")
+	if err == nil || !strings.Contains(err.Error(), "decoded to") {
+		t.Fatalf("PullRequestFileContent() error = %v, want decoded-size error", err)
 	}
 }

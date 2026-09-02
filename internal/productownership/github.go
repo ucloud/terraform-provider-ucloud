@@ -3,6 +3,7 @@ package productownership
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -12,7 +13,10 @@ import (
 	"strings"
 )
 
-const maxPullRequestFiles = 3000
+const (
+	maxPullRequestFiles       = 3000
+	maxPullRequestFileContent = 1024 * 1024
+)
 
 // PullRequestEvent is the trusted identity and scope supplied by GitHub Actions.
 type PullRequestEvent struct {
@@ -186,6 +190,88 @@ func (client GitHubClient) PullRequestChanges(ctx context.Context, event PullReq
 		return nil, fmt.Errorf("GitHub returned %d of %d changed files", len(changes), event.ChangedFiles)
 	}
 	return changes, nil
+}
+
+// PullRequestFileContent reads one file at the pull request head without
+// checking out or executing content from the pull request branch.
+func (client GitHubClient) PullRequestFileContent(ctx context.Context, event PullRequestEvent, filename string) ([]byte, error) {
+	if strings.TrimSpace(client.BaseURL) == "" {
+		return nil, fmt.Errorf("GitHub API base URL is empty")
+	}
+	if strings.TrimSpace(client.Token) == "" {
+		return nil, fmt.Errorf("GitHub API token is empty")
+	}
+	repository := strings.Split(event.Repository, "/")
+	if len(repository) != 2 || !validRepositoryName(repository[0]) || !validRepositoryName(repository[1]) {
+		return nil, fmt.Errorf("GitHub repository %q must be owner/name", event.Repository)
+	}
+	if !validCommitSHA(event.HeadSHA) {
+		return nil, fmt.Errorf("GitHub pull request head SHA %q is invalid", event.HeadSHA)
+	}
+	if err := validateRepositoryPath(filename); err != nil {
+		return nil, fmt.Errorf("GitHub pull request filename %q: %w", filename, err)
+	}
+
+	escapedParts := strings.Split(filename, "/")
+	for index := range escapedParts {
+		escapedParts[index] = url.PathEscape(escapedParts[index])
+	}
+	endpoint := strings.TrimRight(client.BaseURL, "/") +
+		"/repos/" + url.PathEscape(repository[0]) +
+		"/" + url.PathEscape(repository[1]) +
+		"/contents/" + strings.Join(escapedParts, "/") +
+		"?ref=" + url.QueryEscape(event.HeadSHA)
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+	if err != nil {
+		return nil, fmt.Errorf("create GitHub pull request file request: %w", err)
+	}
+	request.Header.Set("Accept", "application/vnd.github+json")
+	request.Header.Set("Authorization", "Bearer "+client.Token)
+	request.Header.Set("X-GitHub-Api-Version", "2022-11-28")
+
+	httpClient := client.HTTPClient
+	if httpClient == nil {
+		httpClient = http.DefaultClient
+	}
+	response, err := httpClient.Do(request)
+	if err != nil {
+		return nil, fmt.Errorf("request GitHub pull request file: %w", err)
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		message, _ := io.ReadAll(io.LimitReader(response.Body, 4096))
+		return nil, fmt.Errorf("GitHub pull request file returned %s: %s", response.Status, strings.TrimSpace(string(message)))
+	}
+	var payload struct {
+		Type     string `json:"type"`
+		Encoding string `json:"encoding"`
+		Content  string `json:"content"`
+		Size     int    `json:"size"`
+	}
+	decoder := json.NewDecoder(io.LimitReader(response.Body, 2*maxPullRequestFileContent+1))
+	if err := decoder.Decode(&payload); err != nil {
+		return nil, fmt.Errorf("decode GitHub pull request file: %w", err)
+	}
+	if payload.Type != "file" || payload.Encoding != "base64" {
+		return nil, fmt.Errorf("GitHub pull request path %q is not a base64-encoded file", filename)
+	}
+	if payload.Size < 0 || payload.Size > maxPullRequestFileContent {
+		return nil, fmt.Errorf("GitHub pull request file %q is %d bytes; maximum supported is %d", filename, payload.Size, maxPullRequestFileContent)
+	}
+	encoded := strings.Map(func(char rune) rune {
+		if char == '\r' || char == '\n' || char == ' ' || char == '\t' {
+			return -1
+		}
+		return char
+	}, payload.Content)
+	contents, err := base64.StdEncoding.DecodeString(encoded)
+	if err != nil {
+		return nil, fmt.Errorf("decode GitHub pull request file %q content: %w", filename, err)
+	}
+	if len(contents) != payload.Size {
+		return nil, fmt.Errorf("GitHub pull request file %q decoded to %d bytes, want %d", filename, len(contents), payload.Size)
+	}
+	return contents, nil
 }
 
 // SetCommitStatus publishes the trusted gate result on the pull request head.
