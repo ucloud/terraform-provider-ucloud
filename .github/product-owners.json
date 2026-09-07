@@ -119,7 +119,10 @@
     },
     "uk8s": {
       "github_users": [
-        "Ali1213"
+        "aixiak",
+        "Andrewmatilde",
+        "HelloHJC",
+        "NatureLR"
       ],
       "paths": [
         "products/uk8s/**",
