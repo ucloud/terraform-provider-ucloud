@@ -3,7 +3,9 @@ package ucloud
 import (
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/mutexkv"
+	"github.com/terraform-providers/terraform-provider-ucloud/internal/product"
+	"github.com/terraform-providers/terraform-provider-ucloud/internal/productcatalog"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
@@ -11,7 +13,7 @@ import (
 
 // Provider returns a terraform.ResourceProvider.
 func Provider() terraform.ResourceProvider {
-	return &schema.Provider{
+	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"public_key": {
 				Type:        schema.TypeString,
@@ -80,96 +82,12 @@ func Provider() terraform.ResourceProvider {
 			"assume_role": assumeRoleSchema(),
 		},
 
-		DataSourcesMap: map[string]*schema.Resource{
-			"ucloud_projects":              dataSourceUCloudProjects(),
-			"ucloud_images":                dataSourceUCloudImages(),
-			"ucloud_zones":                 dataSourceUCloudZones(),
-			"ucloud_eips":                  dataSourceUCloudEips(),
-			"ucloud_instances":             dataSourceUCloudInstances(),
-			"ucloud_lbs":                   dataSourceUCloudLBs(),
-			"ucloud_lb_listeners":          dataSourceUCloudLBListeners(),
-			"ucloud_lb_rules":              dataSourceUCloudLBRules(),
-			"ucloud_lb_attachments":        dataSourceUCloudLBAttachments(),
-			"ucloud_disks":                 dataSourceUCloudDisks(),
-			"ucloud_disk_snapshots":        dataSourceUCloudDiskSnapshots(),
-			"ucloud_db_instances":          dataSourceUCloudDBInstances(),
-			"ucloud_security_groups":       dataSourceUCloudSecurityGroups(),
-			"ucloud_sec_groups":            dataSourceUCloudSecGroups(),
-			"ucloud_subnets":               dataSourceUCloudSubnets(),
-			"ucloud_lb_ssls":               dataSourceUCloudLBSSLs(),
-			"ucloud_vpcs":                  dataSourceUCloudVPCs(),
-			"ucloud_nat_gateways":          dateSourceUCloudNatGateways(),
-			"ucloud_vpn_gateways":          dateSourceUCloudVPNGateways(),
-			"ucloud_vpn_customer_gateways": dateSourceUCloudVPNCustomerGateways(),
-			"ucloud_vpn_connections":       dateSourceUCloudVPNConnections(),
-			"ucloud_db_parameter_groups":   dataSourceUCloudDBParameterGroups(),
-			"ucloud_ufs_volumes":           dataSourceUCloudUFSVolumes(),
-			"ucloud_us3_buckets":           dataSourceUCloudUS3Buckets(),
-			"ucloud_db_backups":            dataSourceUCloudDBBackups(),
-			"ucloud_anti_ddos_instances":   dataSourceUCloudAntiDDoSInstances(),
-			"ucloud_anti_ddos_ips":         dataSourceUCloudAntiDDoSIPs(),
-			"ucloud_iam_users":             dataSourceUCloudIAMUsers(),
-			"ucloud_iam_groups":            dataSourceUCloudIAMGroups(),
-			"ucloud_iam_projects":          dataSourceUCloudIAMProjects(),
-			"ucloud_iam_policy":            dataSourceUCloudIAMPolicy(),
-			"ucloud_iam_policy_document":   dataSourceUCloudIAMPolicyDocument(),
-			"ucloud_baremetal_images":      dataSourceUCloudBareMetalImages(),
-			"ucloud_labels":                dataSourceUCloudLabels(),
-			"ucloud_label_resources":       dataSourceUCloudLabelResources(),
-		},
-
-		ResourcesMap: map[string]*schema.Resource{
-			"ucloud_instance":                    resourceUCloudInstance(),
-			"ucloud_eip":                         resourceUCloudEIP(),
-			"ucloud_eip_association":             resourceUCloudEIPAssociation(),
-			"ucloud_vpc":                         resourceUCloudVPC(),
-			"ucloud_subnet":                      resourceUCloudSubnet(),
-			"ucloud_vpc_peering_connection":      resourceUCloudVPCPeeringConnection(),
-			"ucloud_udpn_connection":             resourceUCloudUDPNConnection(),
-			"ucloud_lb":                          resourceUCloudLB(),
-			"ucloud_lb_listener":                 resourceUCloudLBListener(),
-			"ucloud_lb_attachment":               resourceUCloudLBAttachment(),
-			"ucloud_lb_rule":                     resourceUCloudLBRule(),
-			"ucloud_disk":                        resourceUCloudDisk(),
-			"ucloud_disk_attachment":             resourceUCloudDiskAttachment(),
-			"ucloud_disk_snapshot":               resourceUCloudDiskSnapshot(),
-			"ucloud_security_group":              resourceUCloudSecurityGroup(),
-			"ucloud_lb_ssl":                      resourceUCloudLBSSL(),
-			"ucloud_lb_ssl_attachment":           resourceUCloudLBSSLAttachment(),
-			"ucloud_db_instance":                 resourceUCloudDBInstance(),
-			"ucloud_redis_instance":              resourceUCloudRedisInstance(),
-			"ucloud_memcache_instance":           resourceUCloudMemcacheInstance(),
-			"ucloud_isolation_group":             resourceUCloudIsolationGroup(),
-			"ucloud_vip":                         resourceUCloudVIP(),
-			"ucloud_nat_gateway":                 resourceUCloudNatGateway(),
-			"ucloud_nat_gateway_rule":            resourceUCloudNatGatewayRule(),
-			"ucloud_vpn_gateway":                 resourceUCloudVPNGateway(),
-			"ucloud_vpn_customer_gateway":        resourceUCloudVPNCustomerGateway(),
-			"ucloud_vpn_connection":              resourceUCloudVPNConnection(),
-			"ucloud_ufs_volume":                  resourceUCloudUFSVolume(),
-			"ucloud_ufs_volume_mount_point":      resourceUCloudUFSVolumeMountPoint(),
-			"ucloud_us3_bucket":                  resourceUCloudUS3Bucket(),
-			"ucloud_uk8s_cluster":                resourceUCloudUK8SCluster(),
-			"ucloud_uk8s_node":                   resourceUCloudUK8SNode(),
-			"ucloud_anti_ddos_instance":          resourceUCloudAntiDDoSInstance(),
-			"ucloud_anti_ddos_allowed_domain":    resourceUCloudAntiDDoSAllowedDomain(),
-			"ucloud_anti_ddos_ip":                resourceUCloudAntiDDoSIP(),
-			"ucloud_anti_ddos_rule":              resourceUCloudAntiDDoSRule(),
-			"ucloud_iam_access_key":              resourceUCloudIAMAccessKey(),
-			"ucloud_iam_user":                    resourceUCloudIAMUser(),
-			"ucloud_iam_group":                   resourceUCloudIAMGroup(),
-			"ucloud_iam_group_membership":        resourceUCloudIAMGroupMembership(),
-			"ucloud_iam_project":                 resourceUCloudIAMProject(),
-			"ucloud_iam_policy":                  resourceUCloudIAMPolicy(),
-			"ucloud_iam_user_policy_attachment":  resourceUCloudIAMUserPolicyAttachment(),
-			"ucloud_iam_group_policy_attachment": resourceUCloudIAMGroupPolicyAttachment(),
-			"ucloud_instance_state":              resourceUCloudInstanceState(),
-			"ucloud_baremetal_instance":          resourceUCloudBareMetalInstance(),
-			"ucloud_label":                       resourceUCloudLabel(),
-			"ucloud_label_attachment":            resourceUCloudLabelAttachment(),
-		},
-		ConfigureFunc: providerConfigure,
+		DataSourcesMap: map[string]*schema.Resource{},
+		ResourcesMap:   map[string]*schema.Resource{},
+		ConfigureFunc:  providerConfigure,
 	}
+	product.MustRegister(provider, productcatalog.Bindings()...)
+	return provider
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
@@ -266,8 +184,6 @@ func expandAssumeRole(tfMap map[string]interface{}) *AssumeRoleConfig {
 
 	return &assumeRole
 }
-
-var ucloudMutexKV = mutexkv.NewMutexKV()
 
 var descriptions map[string]string
 

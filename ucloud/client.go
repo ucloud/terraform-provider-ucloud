@@ -1,26 +1,11 @@
 package ucloud
 
 import (
-	pumem "github.com/ucloud/ucloud-sdk-go/private/services/umem"
-	"github.com/ucloud/ucloud-sdk-go/services/cube"
-	"github.com/ucloud/ucloud-sdk-go/services/ipsecvpn"
-	"github.com/ucloud/ucloud-sdk-go/services/uaccount"
-	"github.com/ucloud/ucloud-sdk-go/services/uads"
+	"fmt"
+	"reflect"
+	"sync"
 
-	"github.com/ucloud/ucloud-sdk-go/services/iam"
-	"github.com/ucloud/ucloud-sdk-go/services/label"
-	"github.com/ucloud/ucloud-sdk-go/services/udb"
-	"github.com/ucloud/ucloud-sdk-go/services/udisk"
-	"github.com/ucloud/ucloud-sdk-go/services/udpn"
-	"github.com/ucloud/ucloud-sdk-go/services/ufile"
-	"github.com/ucloud/ucloud-sdk-go/services/ufs"
-	"github.com/ucloud/ucloud-sdk-go/services/uhost"
-	"github.com/ucloud/ucloud-sdk-go/services/uk8s"
-	"github.com/ucloud/ucloud-sdk-go/services/ulb"
-	"github.com/ucloud/ucloud-sdk-go/services/umem"
-	"github.com/ucloud/ucloud-sdk-go/services/unet"
-	"github.com/ucloud/ucloud-sdk-go/services/uphost"
-	"github.com/ucloud/ucloud-sdk-go/services/vpc"
+	"github.com/terraform-providers/terraform-provider-ucloud/internal/product"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 	"github.com/ucloud/ucloud-sdk-go/ucloud/auth"
 )
@@ -30,29 +15,58 @@ type UCloudClient struct {
 	region    string
 	projectId string
 
-	config     *ucloud.Config
-	credential *auth.Credential
+	config          *ucloud.Config
+	credential      *auth.Credential
+	requestHandlers []ucloud.HttpRequestHandler
+	productClients  sync.Map
+}
 
-	uhostconn      *uhost.UHostClient
-	unetconn       *unet.UNetClient
-	ulbconn        *ulb.ULBClient
-	vpcconn        *vpc.VPCClient
-	uaccountconn   *uaccount.UAccountClient
-	udiskconn      *udisk.UDiskClient
-	udpnconn       *udpn.UDPNClient
-	udbconn        *udb.UDBClient
-	umemconn       *umem.UMemClient
-	ipsecvpnClient *ipsecvpn.IPSecVPNClient
-	ufsconn        *ufs.UFSClient
-	us3conn        *ufile.UFileClient
-	cubeconn       *cube.CubeClient
-	uk8sconn       *uk8s.UK8SClient
-	uadsconn       *uads.UADSClient
-	iamconn        *iam.IAMClient
-	labelconn      *label.LabelClient
-	uphostconn     *uphost.UPHostClient
-	// private services
-	pumemconn *pumem.UMemClient
-	// client for generic invocation
-	genericClient *ucloud.Client
+var _ product.RuntimeV1 = (*UCloudClient)(nil)
+
+// ProductClient returns one lazily-created SDK client per product name.
+// Products own the concrete SDK type and constructor; the provider runtime
+// owns shared configuration, credentials, request handlers, and caching.
+func (client *UCloudClient) ProductClient(
+	name string,
+	constructor product.ClientConstructor,
+) (interface{}, error) {
+	if name == "" {
+		return nil, fmt.Errorf("product client name is empty")
+	}
+	if constructor == nil {
+		return nil, fmt.Errorf("product client %q constructor is nil", name)
+	}
+
+	if productClient, ok := client.productClients.Load(name); ok {
+		return productClient, nil
+	}
+	if client.config == nil || client.credential == nil {
+		return nil, fmt.Errorf("product client %q requested before provider configuration", name)
+	}
+
+	config := *client.config
+	credential := *client.credential
+	handlers := append([]ucloud.HttpRequestHandler(nil), client.requestHandlers...)
+	productClient := constructor(&config, &credential, handlers)
+	if isNilProductClient(productClient) {
+		return nil, fmt.Errorf("product client %q constructor returned nil", name)
+	}
+	actual, loaded := client.productClients.LoadOrStore(name, productClient)
+	if loaded {
+		return actual, nil
+	}
+	return productClient, nil
+}
+
+func isNilProductClient(value interface{}) bool {
+	if value == nil {
+		return true
+	}
+	reflected := reflect.ValueOf(value)
+	switch reflected.Kind() {
+	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Ptr, reflect.Slice:
+		return reflected.IsNil()
+	default:
+		return false
+	}
 }

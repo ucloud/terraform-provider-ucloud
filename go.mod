@@ -3,11 +3,14 @@ module github.com/terraform-providers/terraform-provider-ucloud
 go 1.19
 
 require (
+	github.com/hashicorp/hcl v0.0.0-20170504190234-a4b07c25de5f
+	github.com/hashicorp/hcl/v2 v2.0.0
 	github.com/hashicorp/terraform-plugin-sdk v1.4.0
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/pkg/errors v0.8.0
 	github.com/tidwall/gjson v1.16.0
 	github.com/ucloud/ucloud-sdk-go v0.22.70
+	github.com/zclconf/go-cty v1.1.0
 )
 
 require (
@@ -37,8 +40,6 @@ require (
 	github.com/hashicorp/go-uuid v1.0.1 // indirect
 	github.com/hashicorp/go-version v1.2.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
-	github.com/hashicorp/hcl v0.0.0-20170504190234-a4b07c25de5f // indirect
-	github.com/hashicorp/hcl/v2 v2.0.0 // indirect
 	github.com/hashicorp/logutils v1.0.0 // indirect
 	github.com/hashicorp/terraform-config-inspect v0.0.0-20191115094559-17f92b0546e8 // indirect
 	github.com/hashicorp/terraform-svchost v0.0.0-20191011084731-65d371908596 // indirect
@@ -64,7 +65,6 @@ require (
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/ulikunitz/xz v0.5.5 // indirect
 	github.com/vmihailenco/msgpack v4.0.1+incompatible // indirect
-	github.com/zclconf/go-cty v1.1.0 // indirect
 	github.com/zclconf/go-cty-yaml v1.0.1 // indirect
 	go.opencensus.io v0.22.0 // indirect
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550 // indirect

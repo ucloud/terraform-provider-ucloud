@@ -1,0 +1,35 @@
+package uhost_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+)
+
+func TestAccUCloudInstance_import(t *testing.T) {
+	rInt := acctest.RandInt()
+	resourceName := "ucloud_instance.foo"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckInstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccInstanceConfigVPC(rInt),
+			},
+
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+
+				ImportStateVerifyIgnore: []string{
+					"root_password",
+					"duration",
+				},
+			},
+		},
+	})
+}

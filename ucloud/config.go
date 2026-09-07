@@ -9,31 +9,9 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/ucloud/ucloud-sdk-go/services/iam"
-	"github.com/ucloud/ucloud-sdk-go/services/label"
-	"github.com/ucloud/ucloud-sdk-go/services/uads"
-	"github.com/ucloud/ucloud-sdk-go/services/uphost"
-
-	"github.com/ucloud/ucloud-sdk-go/services/cube"
-	"github.com/ucloud/ucloud-sdk-go/services/ufile"
-	"github.com/ucloud/ucloud-sdk-go/services/ufs"
-	"github.com/ucloud/ucloud-sdk-go/services/uk8s"
-
-	"github.com/ucloud/ucloud-sdk-go/services/udpn"
-
 	"github.com/ucloud/ucloud-sdk-go/external"
 	"github.com/ucloud/ucloud-sdk-go/private/protocol/http"
-	pumem "github.com/ucloud/ucloud-sdk-go/private/services/umem"
-	"github.com/ucloud/ucloud-sdk-go/services/ipsecvpn"
 	"github.com/ucloud/ucloud-sdk-go/services/sts"
-	"github.com/ucloud/ucloud-sdk-go/services/uaccount"
-	"github.com/ucloud/ucloud-sdk-go/services/udb"
-	"github.com/ucloud/ucloud-sdk-go/services/udisk"
-	"github.com/ucloud/ucloud-sdk-go/services/uhost"
-	"github.com/ucloud/ucloud-sdk-go/services/ulb"
-	"github.com/ucloud/ucloud-sdk-go/services/umem"
-	"github.com/ucloud/ucloud-sdk-go/services/unet"
-	"github.com/ucloud/ucloud-sdk-go/services/vpc"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
 	"github.com/ucloud/ucloud-sdk-go/ucloud/auth"
 	"github.com/ucloud/ucloud-sdk-go/ucloud/log"
@@ -67,7 +45,7 @@ type cloudShellCredential struct {
 	CSRFToken string `json:"csrf_token"`
 }
 
-// Client will returns a client with connections for all product
+// Client returns the shared runtime used by independently-owned products.
 func (c *Config) Client() (*UCloudClient, error) {
 	var client UCloudClient
 
@@ -88,7 +66,7 @@ func (c *Config) Client() (*UCloudClient, error) {
 
 	cred := auth.NewCredential()
 
-	if isAcc() {
+	if os.Getenv("TF_ACC") != "" {
 		//set DebugLevel for acceptance test
 		cfg.LogLevel = log.DebugLevel
 
@@ -143,53 +121,8 @@ func (c *Config) Client() (*UCloudClient, error) {
 		}
 		cred = *stsCredential
 	}
-	// initialize client connections
-	client.unetconn = unet.NewClient(&cfg, &cred)
-	client.ulbconn = ulb.NewClient(&cfg, &cred)
-	client.vpcconn = vpc.NewClient(&cfg, &cred)
-	client.uaccountconn = uaccount.NewClient(&cfg, &cred)
-	client.udiskconn = udisk.NewClient(&cfg, &cred)
-	client.umemconn = umem.NewClient(&cfg, &cred)
-	client.ipsecvpnClient = ipsecvpn.NewClient(&cfg, &cred)
-	client.ufsconn = ufs.NewClient(&cfg, &cred)
-	client.us3conn = ufile.NewClient(&cfg, &cred)
-	client.cubeconn = cube.NewClient(&cfg, &cred)
-	client.uadsconn = uads.NewClient(&cfg, &cred)
-	client.iamconn = iam.NewClient(&cfg, &cred)
-	client.labelconn = label.NewClient(&cfg, &cred)
-
-	// initialize client connections for private usage
-	client.pumemconn = pumem.NewClient(&cfg, &cred)
-
-	longtimeCfg := cfg
-	longtimeCfg.Timeout = 60 * time.Second
-	client.udbconn = udb.NewClient(&longtimeCfg, &cred)
-	client.uhostconn = uhost.NewClient(&longtimeCfg, &cred)
-	client.udpnconn = udpn.NewClient(&longtimeCfg, &cred)
-	client.uk8sconn = uk8s.NewClient(&longtimeCfg, &cred)
-	client.uphostconn = uphost.NewClient(&longtimeCfg, &cred)
-	client.genericClient = ucloud.NewClient(&longtimeCfg, &cred)
 	if cloudShellCredHandler != nil {
-		client.uhostconn.AddHttpRequestHandler(cloudShellCredHandler)
-		client.unetconn.AddHttpRequestHandler(cloudShellCredHandler)
-		client.ulbconn.AddHttpRequestHandler(cloudShellCredHandler)
-		client.vpcconn.AddHttpRequestHandler(cloudShellCredHandler)
-		client.uaccountconn.AddHttpRequestHandler(cloudShellCredHandler)
-		client.udiskconn.AddHttpRequestHandler(cloudShellCredHandler)
-		client.udpnconn.AddHttpRequestHandler(cloudShellCredHandler)
-		client.udbconn.AddHttpRequestHandler(cloudShellCredHandler)
-		client.umemconn.AddHttpRequestHandler(cloudShellCredHandler)
-		client.ipsecvpnClient.AddHttpRequestHandler(cloudShellCredHandler)
-		client.pumemconn.AddHttpRequestHandler(cloudShellCredHandler)
-		client.ufsconn.AddHttpRequestHandler(cloudShellCredHandler)
-		client.us3conn.AddHttpRequestHandler(cloudShellCredHandler)
-		client.cubeconn.AddHttpRequestHandler(cloudShellCredHandler)
-		client.uk8sconn.AddHttpRequestHandler(cloudShellCredHandler)
-		client.uadsconn.AddHttpRequestHandler(cloudShellCredHandler)
-		client.iamconn.AddHttpRequestHandler(cloudShellCredHandler)
-		client.labelconn.AddHttpRequestHandler(cloudShellCredHandler)
-		client.uphostconn.AddHttpRequestHandler(cloudShellCredHandler)
-		client.genericClient.AddHttpRequestHandler(cloudShellCredHandler)
+		client.requestHandlers = append(client.requestHandlers, cloudShellCredHandler)
 	}
 
 	client.config = &cfg
