@@ -10,18 +10,59 @@ on:
       - reopened
       - ready_for_review
       - edited
+  workflow_run:
+    workflows: [Product ownership review]
+    types: [completed]
+  workflow_dispatch:
 
 permissions:
   contents: read
   pull-requests: read
   statuses: write
 
-concurrency:
-  group: product-ownership-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
-
 jobs:
+  resolve:
+    if: >-
+      github.event_name == 'pull_request_target' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.event == 'pull_request_review') ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      pull_requests: ${{ steps.resolve.outputs.pull_requests }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - id: resolve
+        name: Resolve current ownership proposals
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          EVENT_PR: ${{ github.event.pull_request.number }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME}" == 'pull_request_target' ]]; then
+            numbers="${EVENT_PR}"
+          else
+            numbers="$(bash scripts/recheck-product-ownership.sh list)"
+          fi
+          matrix="$(printf '%s\n' "${numbers}" | jq -Rsc 'split("\n") | map(select(length > 0) | tonumber)')"
+          printf 'pull_requests=%s\n' "${matrix}" >>"${GITHUB_OUTPUT}"
+
   ownership:
+    needs: resolve
+    if: needs.resolve.outputs.pull_requests != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        pull_request: ${{ fromJSON(needs.resolve.outputs.pull_requests) }}
+    concurrency:
+      group: product-ownership-${{ matrix.pull_request }}
+      cancel-in-progress: false
     name: Enforce product ownership
     timeout-minutes: 5
     runs-on: ubuntu-latest
@@ -37,6 +78,13 @@ jobs:
           go-version: "1.19.5"
           cache: false
       - name: Verify pull request owner and paths
+        if: github.event_name == 'pull_request_target'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: go run ./cmd/product-ownership -config .github/product-owners.json -event "${GITHUB_EVENT_PATH}"
+      - name: Recheck ownership proposals after review
+        if: github.event_name != 'pull_request_target'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PRODUCT_OWNERSHIP_PR: ${{ matrix.pull_request }}
+        run: bash scripts/recheck-product-ownership.sh

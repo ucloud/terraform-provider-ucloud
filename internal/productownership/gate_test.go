@@ -165,6 +165,10 @@ func TestGateAllowsTrustedProductOnboardingPolicy(t *testing.T) {
 		switch request.Method {
 		case http.MethodGet:
 			writer.Header().Set("Content-Type", "application/json")
+			if strings.HasSuffix(request.URL.Path, "/reviews") {
+				_, _ = writer.Write([]byte(`[{"id":1,"user":{"login":"CoreMaintainer"},"state":"APPROVED","commit_id":"0123456789abcdef0123456789abcdef01234567"}]`))
+				return
+			}
 			_, _ = writer.Write([]byte(`[{"filename":".github/product-owners.json","status":"modified"}]`))
 		case http.MethodPost:
 			var body map[string]string
