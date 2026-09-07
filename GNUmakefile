@@ -15,6 +15,8 @@ default: build
 build: fmtcheck
 	go install
 
+# UDPN is currently the only package registering resource sweepers.
+sweep: TEST=./products/udpn
 sweep:
 	@echo "WARNING: This will destroy infrastructure. Use only in development accounts."
 	go test $(TEST) -v -sweep=$(SWEEP) $(SWEEPARGS)
@@ -37,7 +39,7 @@ testacc: fmtcheck
 			echo "ERROR: Product $$product has no acceptance tests" >&2; \
 			exit 3; \
 		fi; \
-		TF_ACC=1 go test -cover "./products/$$product" -v -timeout 120m -parallel=32
+		TF_ACC=1 go test -cover "./products/$$product" -v $(TESTARGS) -timeout 120m -parallel=32
 
 vet:
 	@echo "go vet ."
