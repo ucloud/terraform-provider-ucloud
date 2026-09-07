@@ -18,7 +18,7 @@
     },
     "ipsecvpn": {
       "github_users": [
-        "Ali1213"
+        "heyimcy"
       ],
       "paths": [
         "products/ipsecvpn/**",
@@ -103,7 +103,8 @@
     },
     "uhost": {
       "github_users": [
-        "Ali1213"
+        "UFOXD",
+        "wangxueliang"
       ],
       "paths": [
         "products/uhost/**",
@@ -192,7 +193,8 @@
     },
     "vpc": {
       "github_users": [
-        "Ali1213"
+        "brezQuill",
+        "heyimcy"
       ],
       "paths": [
         "products/vpc/**",
