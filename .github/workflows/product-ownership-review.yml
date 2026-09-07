@@ -1,0 +1,15 @@
+name: Product ownership review
+
+on:
+  pull_request_review:
+    types: [submitted, dismissed, edited]
+
+permissions: {}
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      # Only signal the trusted workflow_run handler. No PR code or artifacts
+      # are consumed by the handler, including for fork pull requests.
+      - run: "true"
