@@ -10,6 +10,8 @@ FEATURES:
 
 ENHANCEMENTS:
 
+* `resource/ucloud_instance`: the `data_disks.type` argument now supports `cloud_essd`, the economy
+  SSD cloud disk, as a data disk type.
 * `resource/ucloud_disk`: `disk_type` is now computed when it is omitted, so that a disk cloned
   from a snapshot keeps the type of its source snapshot instead of being rebuilt against the
   default value on every plan.
