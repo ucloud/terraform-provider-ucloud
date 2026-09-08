@@ -282,7 +282,7 @@ func TestAccUCloudInstance_dataDisksEssd(t *testing.T) {
 					testAccCheckInstanceHasEssdDataDisk("ucloud_instance.foo", &instance),
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "name", "tf-acc-instance-data-disks-essd"),
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "tag", "tf-acc"),
-					resource.TestCheckResourceAttr("ucloud_instance.foo", "instance_type", "n-basic-1"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "instance_type", "o-standard-1"),
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "data_disks.0.type", "cloud_essd"),
 					resource.TestCheckResourceAttr("ucloud_instance.foo", "data_disks.0.size", "20"),
 				),
@@ -297,7 +297,7 @@ func testAccCheckInstanceHasEssdDataDisk(name string, instance *uhost.UHostInsta
 			if disk.IsBoot == "True" {
 				continue
 			}
-			if disk.Type == "CLOUD_ESSD" {
+			if disk.DiskType == "CLOUD_ESSD" {
 				return nil
 			}
 		}
@@ -800,10 +800,10 @@ resource "ucloud_instance" "foo" {
   tag               = "tf-acc"
   availability_zone = "${data.ucloud_zones.default.zones.0.id}"
   image_id          = "${data.ucloud_images.default.images.0.id}"
-  instance_type     = "n-basic-1"
+  instance_type     = "o-standard-1"
   root_password     = "wA1234567"
   security_group = "${data.ucloud_security_groups.default.security_groups.0.id}"
-  boot_disk_type = "cloud_ssd"
+  boot_disk_type = "cloud_rssd"
   data_disks {
     size = 20
     type = "cloud_essd"
