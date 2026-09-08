@@ -117,6 +117,100 @@ func TestProductOwnershipWorkflowNeverExecutesPullRequestCode(t *testing.T) {
 	}
 }
 
+func TestReleaseIntentWorkflowUsesTrustedPullRequestMetadata(t *testing.T) {
+	workflow, err := os.ReadFile("../../.github/workflows/release-intent.yml")
+	if err != nil {
+		t.Fatalf("read release intent workflow: %v", err)
+	}
+	content := string(workflow)
+	for _, required := range []string{
+		"pull_request_target:",
+		"- labeled",
+		"- unlabeled",
+		"statuses: write",
+		"bash scripts/release-policy.sh check-pr",
+	} {
+		if !strings.Contains(content, required) {
+			t.Fatalf("release intent workflow must contain %q", required)
+		}
+	}
+	for _, forbidden := range []string{
+		"github.event.pull_request.head",
+		"uses: actions/checkout@v",
+		"gh pr checkout",
+	} {
+		if strings.Contains(content, forbidden) {
+			t.Fatalf("release intent workflow contains unsafe pull request token %q", forbidden)
+		}
+	}
+}
+
+func TestReleaseWorkflowRunsOnlyAfterSuccessfulMasterCI(t *testing.T) {
+	workflow, err := os.ReadFile("../../.github/workflows/release.yml")
+	if err != nil {
+		t.Fatalf("read release workflow: %v", err)
+	}
+	content := string(workflow)
+	for _, required := range []string{
+		"workflow_run:",
+		"workflows: [test]",
+		"types: [completed]",
+		"branches: [master]",
+		"github.event.workflow_run.event == 'push'",
+		"github.event.workflow_run.conclusion == 'success'",
+		"pull-requests: read",
+		"contents: write",
+		"cancel-in-progress: false",
+		"bash scripts/release-policy.sh plan-auto",
+		"bash scripts/release-policy.sh plan-tag",
+		"git checkout --detach \"${RELEASE_SHA}\"",
+		"git push origin \"refs/tags/${RELEASE_TAG}\"",
+		"version: v2.18.1",
+		"args: release --clean",
+		"GORELEASER_CURRENT_TAG: ${{ steps.plan.outputs.tag }}",
+		"GORELEASER_PREVIOUS_TAG: ${{ steps.plan.outputs.previous_tag }}",
+	} {
+		if !strings.Contains(content, required) {
+			t.Fatalf("release workflow must contain %q", required)
+		}
+	}
+	for _, forbidden := range []string{
+		"workflow_dispatch:",
+		"uses: actions/checkout@v",
+		"uses: actions/setup-go@v",
+		"uses: crazy-max/ghaction-import-gpg@v",
+		"uses: goreleaser/goreleaser-action@v",
+		"version: \"~> v2\"",
+	} {
+		if strings.Contains(content, forbidden) {
+			t.Fatalf("release workflow contains disallowed token %q", forbidden)
+		}
+	}
+}
+
+func TestGoReleaserConfigurationUsesCurrentArchiveFormat(t *testing.T) {
+	configuration, err := os.ReadFile("../../.goreleaser.yml")
+	if err != nil {
+		t.Fatalf("read GoReleaser configuration: %v", err)
+	}
+	content := string(configuration)
+	if !strings.Contains(content, "- formats: [zip]") {
+		t.Fatal("GoReleaser archives must use the current formats property")
+	}
+	if strings.Contains(content, "- format: zip") {
+		t.Fatal("GoReleaser archives must not use the deprecated format property")
+	}
+	for _, required := range []string{
+		"use_existing_draft: true",
+		"replace_existing_artifacts: true",
+		"fail_on_error: true",
+	} {
+		if !strings.Contains(content, required) {
+			t.Fatalf("GoReleaser retry configuration must contain %q", required)
+		}
+	}
+}
+
 func TestProductAcceptanceWorkflowUsesProductEnvironmentOnMaster(t *testing.T) {
 	workflow, err := os.ReadFile("../../.github/workflows/product-acceptance.yml")
 	if err != nil {

@@ -27,7 +27,7 @@ builds:
       goarch: '386'
   binary: '{{ .ProjectName }}_v{{ .Version }}'
 archives:
-- format: zip
+- formats: [zip]
   name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
 checksum:
   extra_files:
@@ -48,6 +48,10 @@ signs:
       - "--detach-sign"
       - "${artifact}"
 release:
+  use_existing_draft: true
+  replace_existing_artifacts: true
+  preflight:
+    fail_on_error: true
   extra_files:
     - glob: 'terraform-registry-manifest.json'
       name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
