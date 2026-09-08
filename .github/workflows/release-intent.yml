@@ -1,0 +1,32 @@
+name: Release intent
+
+on:
+  pull_request_target:
+    branches:
+      - master
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+      - labeled
+      - unlabeled
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  release-intent:
+    name: Enforce release intent
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out trusted default branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Require one release label
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: bash scripts/release-policy.sh check-pr
