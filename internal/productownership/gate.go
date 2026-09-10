@@ -49,11 +49,13 @@ func (gate Gate) Run(ctx context.Context, event PullRequestEvent) (GateResult, e
 	}
 	if checkErr != nil && gate.OnboardingAuthorizer != nil && isOnboardingPolicyChange(changes) {
 		decision, checkErr = gate.OnboardingAuthorizer(ctx, event)
-		onboardingAuthorized = checkErr == nil
 		if checkErr == nil && decision.Owner == "" {
 			checkErr = fmt.Errorf("product onboarding authorizer returned an empty owner")
-			onboardingAuthorized = false
 		}
+		if checkErr == nil {
+			checkErr = gate.GitHub.RequireCoreApproval(ctx, event, gate.Policy.Core)
+		}
+		onboardingAuthorized = checkErr == nil
 	}
 	if checkErr == nil && !onboardingAuthorized && normalizeUser(event.Sender) != normalizeUser(event.Author) {
 		if _, senderErr := gate.Policy.Authorize(event.Sender, changes); senderErr != nil {

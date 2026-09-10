@@ -18,7 +18,7 @@
     },
     "ipsecvpn": {
       "github_users": [
-        "Ali1213"
+        "heyimcy"
       ],
       "paths": [
         "products/ipsecvpn/**",
@@ -71,7 +71,8 @@
     },
     "udisk": {
       "github_users": [
-        "Ali1213"
+        "Ali1213",
+        "pearlinpan"
       ],
       "paths": [
         "products/udisk/**",
@@ -103,7 +104,8 @@
     },
     "uhost": {
       "github_users": [
-        "Ali1213"
+        "UFOXD",
+        "wxliang512"
       ],
       "paths": [
         "products/uhost/**",
@@ -119,7 +121,10 @@
     },
     "uk8s": {
       "github_users": [
-        "Ali1213"
+        "aixiak",
+        "Andrewmatilde",
+        "HelloHJC",
+        "NatureLR"
       ],
       "paths": [
         "products/uk8s/**",
@@ -142,7 +147,7 @@
     },
     "umem": {
       "github_users": [
-        "Ali1213"
+        "sunpuxi"
       ],
       "paths": [
         "products/umem/**",
@@ -189,7 +194,8 @@
     },
     "vpc": {
       "github_users": [
-        "Ali1213"
+        "brezQuill",
+        "heyimcy"
       ],
       "paths": [
         "products/vpc/**",

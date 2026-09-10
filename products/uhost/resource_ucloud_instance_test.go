@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
 	"github.com/ucloud/ucloud-sdk-go/services/uhost"
 )
@@ -258,6 +259,50 @@ func TestAccUCloudInstance_dataDisks(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccUCloudInstance_dataDisksEssd(t *testing.T) {
+	var instance uhost.UHostInstanceSet
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		IDRefreshName: "ucloud_instance.foo",
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckInstanceDestroy,
+
+		Steps: []resource.TestStep{
+			{
+				Config: testAccInstanceConfigDataDisksEssd,
+
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckInstanceExists("ucloud_instance.foo", &instance),
+					testAccCheckInstanceHasEssdDataDisk("ucloud_instance.foo", &instance),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "name", "tf-acc-instance-data-disks-essd"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "tag", "tf-acc"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "instance_type", "o-standard-1"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "data_disks.0.type", "cloud_essd"),
+					resource.TestCheckResourceAttr("ucloud_instance.foo", "data_disks.0.size", "20"),
+				),
+			},
+		},
+	})
+}
+
+func testAccCheckInstanceHasEssdDataDisk(name string, instance *uhost.UHostInstanceSet) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		for _, disk := range instance.DiskSet {
+			if disk.IsBoot == "True" {
+				continue
+			}
+			if disk.DiskType == "CLOUD_ESSD" {
+				return nil
+			}
+		}
+		return fmt.Errorf("instance %q has no cloud_essd data disk, disk set: %#v", name, instance.DiskSet)
+	}
 }
 
 func TestAccUCloudInstance_isolationGroup(t *testing.T) {
@@ -731,6 +776,37 @@ resource "ucloud_instance" "foo" {
   data_disks {
     size = 20
     type = "cloud_ssd"
+  }
+  delete_disks_with_instance = true
+}
+`
+
+const testAccInstanceConfigDataDisksEssd = `
+data "ucloud_zones" "default" {
+}
+
+data "ucloud_security_groups" "default" {
+  type = "recommend_web"
+}
+
+data "ucloud_images" "default" {
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  name_regex        = "^CentOS 6.5 64"
+  image_type        = "base"
+}
+
+resource "ucloud_instance" "foo" {
+  name              = "tf-acc-instance-data-disks-essd"
+  tag               = "tf-acc"
+  availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+  image_id          = "${data.ucloud_images.default.images.0.id}"
+  instance_type     = "o-standard-1"
+  root_password     = "wA1234567"
+  security_group = "${data.ucloud_security_groups.default.security_groups.0.id}"
+  boot_disk_type = "cloud_rssd"
+  data_disks {
+    size = 20
+    type = "cloud_essd"
   }
   delete_disks_with_instance = true
 }

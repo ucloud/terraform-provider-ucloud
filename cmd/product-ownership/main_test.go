@@ -15,6 +15,26 @@ import (
 )
 
 func TestRunAuthorizesGeneratedProductOnboardingPolicy(t *testing.T) {
+	for _, test := range []struct {
+		name    string
+		reviews string
+		wantErr bool
+	}{
+		{"current core approval", `[{"id":1,"user":{"login":"CoreOwner"},"state":"APPROVED","commit_id":"0123456789abcdef0123456789abcdef01234567"}]`, false},
+		{"no approval", `[]`, true},
+		{"non-core approval", `[{"id":1,"user":{"login":"OldOwner"},"state":"APPROVED","commit_id":"0123456789abcdef0123456789abcdef01234567"}]`, true},
+		{"old commit approval", `[{"id":1,"user":{"login":"CoreOwner"},"state":"APPROVED","commit_id":"89abcdef0123456789abcdef0123456789abcdef"}]`, true},
+		{"dismissed approval", `[{"id":1,"user":{"login":"CoreOwner"},"state":"DISMISSED","commit_id":"0123456789abcdef0123456789abcdef01234567"}]`, true},
+		{"subsequent changes requested", `[{"id":1,"user":{"login":"CoreOwner"},"state":"APPROVED","commit_id":"0123456789abcdef0123456789abcdef01234567"},{"id":2,"user":{"login":"CoreOwner"},"state":"CHANGES_REQUESTED","commit_id":"0123456789abcdef0123456789abcdef01234567"}]`, true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			testGeneratedProductOnboardingPolicy(t, test.reviews, test.wantErr)
+		})
+	}
+}
+
+func testGeneratedProductOnboardingPolicy(t *testing.T, reviews string, wantErr bool) {
+	t.Helper()
 	root := t.TempDir()
 	if err := os.MkdirAll(filepath.Join(root, ".github"), 0755); err != nil {
 		t.Fatalf("create policy directory: %v", err)
@@ -48,6 +68,9 @@ func TestRunAuthorizesGeneratedProductOnboardingPolicy(t *testing.T) {
 	contentRequested := false
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		switch {
+		case request.Method == http.MethodGet && strings.HasSuffix(request.URL.Path, "/pulls/42/reviews"):
+			writer.Header().Set("Content-Type", "application/json")
+			_, _ = writer.Write([]byte(reviews))
 		case request.Method == http.MethodGet && strings.HasSuffix(request.URL.Path, "/pulls/42/files"):
 			writer.Header().Set("Content-Type", "application/json")
 			_, _ = writer.Write([]byte(`[{"filename":".github/product-owners.json","status":"modified"}]`))
@@ -106,6 +129,15 @@ func TestRunAuthorizesGeneratedProductOnboardingPolicy(t *testing.T) {
 		&stderr,
 		getenv,
 	)
+	if wantErr {
+		if err == nil || !strings.Contains(err.Error(), "core approval") {
+			t.Fatalf("run() error = %v, want missing core approval", err)
+		}
+		if got := strings.Join(states, ","); got != "pending,failure" {
+			t.Fatalf("status states = %q, want pending,failure", got)
+		}
+		return
+	}
 	if err != nil {
 		t.Fatalf("run() error = %v, stderr = %s", err, stderr.String())
 	}

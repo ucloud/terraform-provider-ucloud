@@ -117,29 +117,96 @@ func TestProductOwnershipWorkflowNeverExecutesPullRequestCode(t *testing.T) {
 	}
 }
 
-func TestOwnerGateWorkflowsNeverExecutePullRequestCode(t *testing.T) {
-	for _, filename := range []string{"owner-gate.yml", "auto-merge.yml"} {
-		workflow, err := os.ReadFile(filepath.Join("../../.github/workflows", filename))
-		if err != nil {
-			t.Fatalf("read %s: %v", filename, err)
+func TestReleaseIntentWorkflowUsesTrustedPullRequestMetadata(t *testing.T) {
+	workflow, err := os.ReadFile("../../.github/workflows/release-intent.yml")
+	if err != nil {
+		t.Fatalf("read release intent workflow: %v", err)
+	}
+	content := string(workflow)
+	for _, required := range []string{
+		"pull_request_target:",
+		"- labeled",
+		"- unlabeled",
+		"statuses: write",
+		"bash scripts/release-policy.sh check-pr",
+	} {
+		if !strings.Contains(content, required) {
+			t.Fatalf("release intent workflow must contain %q", required)
 		}
-		content := string(workflow)
-		if !strings.Contains(content, "pull_request_target:") {
-			t.Fatalf("%s must run from pull_request_target", filename)
+	}
+	for _, forbidden := range []string{
+		"github.event.pull_request.head",
+		"uses: actions/checkout@v",
+		"gh pr checkout",
+	} {
+		if strings.Contains(content, forbidden) {
+			t.Fatalf("release intent workflow contains unsafe pull request token %q", forbidden)
 		}
-		for _, forbidden := range []string{
-			"gh pr checkout",
-			"git fetch",
-			"ref: ${{ github.event.pull_request.head.sha }}",
-			"uses: actions/checkout@v",
-			"uses: actions/setup-go@v",
-		} {
-			if strings.Contains(content, forbidden) {
-				t.Fatalf("%s contains unsafe pull request checkout token %q", filename, forbidden)
-			}
+	}
+}
+
+func TestReleaseWorkflowRunsOnlyAfterSuccessfulMasterCI(t *testing.T) {
+	workflow, err := os.ReadFile("../../.github/workflows/release.yml")
+	if err != nil {
+		t.Fatalf("read release workflow: %v", err)
+	}
+	content := string(workflow)
+	for _, required := range []string{
+		"workflow_run:",
+		"workflows: [test]",
+		"types: [completed]",
+		"branches: [master]",
+		"github.event.workflow_run.event == 'push'",
+		"github.event.workflow_run.conclusion == 'success'",
+		"pull-requests: read",
+		"contents: write",
+		"cancel-in-progress: false",
+		"bash scripts/release-policy.sh plan-auto",
+		"bash scripts/release-policy.sh plan-tag",
+		"git checkout --detach \"${RELEASE_SHA}\"",
+		"git push origin \"refs/tags/${RELEASE_TAG}\"",
+		"version: v2.18.1",
+		"args: release --clean",
+		"GORELEASER_CURRENT_TAG: ${{ steps.plan.outputs.tag }}",
+		"GORELEASER_PREVIOUS_TAG: ${{ steps.plan.outputs.previous_tag }}",
+	} {
+		if !strings.Contains(content, required) {
+			t.Fatalf("release workflow must contain %q", required)
 		}
-		if !strings.Contains(content, "ref: ${{ github.event.pull_request.base.sha }}") {
-			t.Fatalf("%s must check out the trusted base SHA", filename)
+	}
+	for _, forbidden := range []string{
+		"workflow_dispatch:",
+		"uses: actions/checkout@v",
+		"uses: actions/setup-go@v",
+		"uses: crazy-max/ghaction-import-gpg@v",
+		"uses: goreleaser/goreleaser-action@v",
+		"version: \"~> v2\"",
+	} {
+		if strings.Contains(content, forbidden) {
+			t.Fatalf("release workflow contains disallowed token %q", forbidden)
+		}
+	}
+}
+
+func TestGoReleaserConfigurationUsesCurrentArchiveFormat(t *testing.T) {
+	configuration, err := os.ReadFile("../../.goreleaser.yml")
+	if err != nil {
+		t.Fatalf("read GoReleaser configuration: %v", err)
+	}
+	content := string(configuration)
+	if !strings.Contains(content, "- formats: [zip]") {
+		t.Fatal("GoReleaser archives must use the current formats property")
+	}
+	if strings.Contains(content, "- format: zip") {
+		t.Fatal("GoReleaser archives must not use the deprecated format property")
+	}
+	for _, required := range []string{
+		"use_existing_draft: true",
+		"replace_existing_artifacts: true",
+		"fail_on_error: true",
+	} {
+		if !strings.Contains(content, required) {
+			t.Fatalf("GoReleaser retry configuration must contain %q", required)
 		}
 	}
 }
@@ -203,5 +270,32 @@ func TestMakefileDiscoversProductDirectories(t *testing.T) {
 	if !strings.Contains(content, "PRODUCT_DIRS:=$(wildcard products/*/)") ||
 		!strings.Contains(content, "PRODUCTS:=$(sort $(notdir $(patsubst %/,%,$(PRODUCT_DIRS))))") {
 		t.Fatal("GNUmakefile must derive its product list from products/*/")
+	}
+}
+
+func TestOwnerGateWorkflowsNeverExecutePullRequestCode(t *testing.T) {
+	for _, filename := range []string{"owner-gate.yml", "auto-merge.yml"} {
+		workflow, err := os.ReadFile(filepath.Join("../../.github/workflows", filename))
+		if err != nil {
+			t.Fatalf("read %s: %v", filename, err)
+		}
+		content := string(workflow)
+		if !strings.Contains(content, "pull_request_target:") {
+			t.Fatalf("%s must run from pull_request_target", filename)
+		}
+		for _, forbidden := range []string{
+			"gh pr checkout",
+			"git fetch",
+			"ref: ${{ github.event.pull_request.head.sha }}",
+			"uses: actions/checkout@v",
+			"uses: actions/setup-go@v",
+		} {
+			if strings.Contains(content, forbidden) {
+				t.Fatalf("%s contains unsafe pull request checkout token %q", filename, forbidden)
+			}
+		}
+		if !strings.Contains(content, "ref: ${{ github.event.pull_request.base.sha }}") {
+			t.Fatalf("%s must check out the trusted base SHA", filename)
+		}
 	}
 }

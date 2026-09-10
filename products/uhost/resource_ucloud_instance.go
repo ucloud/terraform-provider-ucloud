@@ -235,6 +235,7 @@ func resourceUCloudInstance() *schema.Resource {
 								"cloud_normal",
 								"cloud_ssd",
 								"cloud_rssd",
+								"cloud_essd",
 							}, false),
 							ForceNew: true,
 						},
