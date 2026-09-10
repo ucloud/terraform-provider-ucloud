@@ -4,13 +4,13 @@ provider "ucloud" {
 }
 
 resource "ucloud_vpc" "foo" {
-  name        = "tf-acc-uk8s-cluster2"
-  tag         = "tf-acc"
+  name        = "uk8s-vpc-test"
+  tag         = "uk8s-vpc"
   cidr_blocks = ["192.168.0.0/16"]
 }
 resource "ucloud_subnet" "foo" {
-  name       = "tf-acc-uk8s-cluster2"
-  tag        = "tf-acc"
+  name       = "uk8s-subnet-test"
+  tag        = "uk8s-subnet"
   cidr_block = "192.168.1.0/24"
   vpc_id     = ucloud_vpc.foo.id
 }
@@ -18,7 +18,7 @@ resource "ucloud_subnet" "foo" {
 resource "ucloud_uk8s_cluster" "foo" {
   vpc_id       = ucloud_vpc.foo.id
   subnet_id    = ucloud_subnet.foo.id
-  name         = "tfuk8so2i0909a2"
+  name         = "uk8s-test"
   service_cidr = "172.16.0.0/16"
   cni_mode     = "VPC"
   password     = var.password
