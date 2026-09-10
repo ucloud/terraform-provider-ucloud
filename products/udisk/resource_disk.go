@@ -56,7 +56,7 @@ func resourceUCloudDisk() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"data_disk", "ssd_data_disk", "rssd_data_disk"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"data_disk", "ssd_data_disk", "rssd_data_disk", "essd_data_disk}, false),
 			},
 
 			"snapshot_id": {

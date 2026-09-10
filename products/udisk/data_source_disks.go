@@ -46,6 +46,8 @@ func dataSourceUCloudDisks() *schema.Resource {
 					"system_disk",
 					"ssd_system_disk",
 					"rssd_data_disk",
+					"essd_data_disk",
+					"essd_system_disk",
 				}, false),
 			},
 
