@@ -125,6 +125,7 @@ var snapshotDiskTypeCvt = intConverter{
 	3: "ssd_system_disk",
 	4: "rssd_data_disk",
 	5: "essd_data_disk",
+	6: "essd_system_disk",
 }
 
 var upperCamelCvt = newStringConverter(map[string]string{
