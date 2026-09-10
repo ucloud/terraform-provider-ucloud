@@ -71,7 +71,8 @@
     },
     "udisk": {
       "github_users": [
-        "Ali1213"
+        "Ali1213",
+        "pearlinpan"
       ],
       "paths": [
         "products/udisk/**",
