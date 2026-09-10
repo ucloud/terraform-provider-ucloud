@@ -294,7 +294,7 @@ func describeIAMPolicyByURN(client *iamapi.IAMClient, urn string) (*iamapi.IAMPo
 	return &response.Policy, true, nil
 }
 
-func describeIAMUserPolicyAttachment(client *iamapi.IAMClient, userName, policyURN, projectID string) (*iamapi.Policy, bool, error) {
+func describeIAMUserPolicyAttachment(client *iamapi.IAMClient, userName, policyURN, projectID string) (*iamapi.AttachedPolicy, bool, error) {
 	const limit = 100
 	for offset := 0; ; offset += limit {
 		request := client.NewListPoliciesForUserRequest()
@@ -332,7 +332,7 @@ func describeIAMUserPolicyAttachment(client *iamapi.IAMClient, userName, policyU
 	}
 }
 
-func describeIAMGroupPolicyAttachment(client *iamapi.IAMClient, groupName, policyURN, projectID string) (*iamapi.Policy, bool, error) {
+func describeIAMGroupPolicyAttachment(client *iamapi.IAMClient, groupName, policyURN, projectID string) (*iamapi.AttachedPolicy, bool, error) {
 	const limit = 100
 	for offset := 0; ; offset += limit {
 		request := client.NewListPoliciesForGroupRequest()
@@ -680,7 +680,7 @@ func testAccCheckIAMUserDestroy(state *terraform.State) error {
 	return nil
 }
 
-func testAccCheckIAMUserPolicyAttachmentExists(name string, value *iamapi.Policy) resource.TestCheckFunc {
+func testAccCheckIAMUserPolicyAttachmentExists(name string, value *iamapi.AttachedPolicy) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		item, ok := state.RootModule().Resources[name]
 		if !ok {
@@ -710,7 +710,7 @@ func testAccCheckIAMUserPolicyAttachmentExists(name string, value *iamapi.Policy
 	}
 }
 
-func testAccCheckIAMUserPolicyAttachmentAttributes(value *iamapi.Policy) resource.TestCheckFunc {
+func testAccCheckIAMUserPolicyAttachmentAttributes(value *iamapi.AttachedPolicy) resource.TestCheckFunc {
 	return func(*terraform.State) error {
 		if value.PolicyName == "" {
 			return fmt.Errorf("policy name is empty")
@@ -739,7 +739,7 @@ func testAccCheckIAMUserPolicyAttachmentDestroy(state *terraform.State) error {
 	return nil
 }
 
-func testAccCheckIAMGroupPolicyAttachmentExists(name string, value *iamapi.Policy) resource.TestCheckFunc {
+func testAccCheckIAMGroupPolicyAttachmentExists(name string, value *iamapi.AttachedPolicy) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		item, ok := state.RootModule().Resources[name]
 		if !ok {
@@ -769,7 +769,7 @@ func testAccCheckIAMGroupPolicyAttachmentExists(name string, value *iamapi.Polic
 	}
 }
 
-func testAccCheckIAMGroupPolicyAttachmentAttributes(value *iamapi.Policy) resource.TestCheckFunc {
+func testAccCheckIAMGroupPolicyAttachmentAttributes(value *iamapi.AttachedPolicy) resource.TestCheckFunc {
 	return func(*terraform.State) error {
 		if value.PolicyName == "" {
 			return fmt.Errorf("policy name is empty")
