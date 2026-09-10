@@ -117,6 +117,33 @@ func TestProductOwnershipWorkflowNeverExecutesPullRequestCode(t *testing.T) {
 	}
 }
 
+func TestOwnerGateWorkflowsNeverExecutePullRequestCode(t *testing.T) {
+	for _, filename := range []string{"owner-gate.yml", "auto-merge.yml"} {
+		workflow, err := os.ReadFile(filepath.Join("../../.github/workflows", filename))
+		if err != nil {
+			t.Fatalf("read %s: %v", filename, err)
+		}
+		content := string(workflow)
+		if !strings.Contains(content, "pull_request_target:") {
+			t.Fatalf("%s must run from pull_request_target", filename)
+		}
+		for _, forbidden := range []string{
+			"gh pr checkout",
+			"git fetch",
+			"ref: ${{ github.event.pull_request.head.sha }}",
+			"uses: actions/checkout@v",
+			"uses: actions/setup-go@v",
+		} {
+			if strings.Contains(content, forbidden) {
+				t.Fatalf("%s contains unsafe pull request checkout token %q", filename, forbidden)
+			}
+		}
+		if !strings.Contains(content, "ref: ${{ github.event.pull_request.base.sha }}") {
+			t.Fatalf("%s must check out the trusted base SHA", filename)
+		}
+	}
+}
+
 func TestProductAcceptanceWorkflowUsesProductEnvironmentOnMaster(t *testing.T) {
 	workflow, err := os.ReadFile("../../.github/workflows/product-acceptance.yml")
 	if err != nil {

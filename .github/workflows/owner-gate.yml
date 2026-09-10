@@ -1,0 +1,54 @@
+name: Owner gate
+
+on:
+  pull_request_target:
+    branches:
+      - master
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+      - edited
+  pull_request_review:
+    types:
+      - submitted
+      - dismissed
+      - edited
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: owner-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  owner-gate:
+    name: owner-gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out trusted base
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: "1.19.5"
+          cache: false
+      - name: Evaluate owner gate
+        id: decision
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: go run ./cmd/owner-gate -config .github/product-owners.json -event "${GITHUB_EVENT_PATH}"
+      - name: Enforce platform clearance
+        if: steps.decision.outputs.blocking == 'true'
+        env:
+          REASON: ${{ steps.decision.outputs.reason }}
+        run: |
+          echo "::error::$REASON"
+          exit 1
