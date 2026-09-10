@@ -166,7 +166,6 @@ github.com/hashicorp/terraform-plugin-sdk/helper/customdiff
 github.com/hashicorp/terraform-plugin-sdk/helper/encryption
 github.com/hashicorp/terraform-plugin-sdk/helper/hashcode
 github.com/hashicorp/terraform-plugin-sdk/helper/logging
-github.com/hashicorp/terraform-plugin-sdk/helper/mutexkv
 github.com/hashicorp/terraform-plugin-sdk/helper/resource
 github.com/hashicorp/terraform-plugin-sdk/helper/schema
 github.com/hashicorp/terraform-plugin-sdk/helper/structure
@@ -298,13 +297,12 @@ github.com/tidwall/match
 # github.com/tidwall/pretty v1.2.0
 ## explicit; go 1.16
 github.com/tidwall/pretty
-# github.com/ucloud/ucloud-sdk-go v0.22.70
+# github.com/ucloud/ucloud-sdk-go v0.22.123
 ## explicit; go 1.13
 github.com/ucloud/ucloud-sdk-go/external
 github.com/ucloud/ucloud-sdk-go/private/protocol/http
 github.com/ucloud/ucloud-sdk-go/private/services/umem
 github.com/ucloud/ucloud-sdk-go/private/utils
-github.com/ucloud/ucloud-sdk-go/services/cube
 github.com/ucloud/ucloud-sdk-go/services/iam
 github.com/ucloud/ucloud-sdk-go/services/ipsecvpn
 github.com/ucloud/ucloud-sdk-go/services/label

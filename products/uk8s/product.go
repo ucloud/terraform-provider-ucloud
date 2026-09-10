@@ -21,8 +21,9 @@ func (adapterV1) Registration() product.Registration {
 	return product.Registration{
 		Name: Name,
 		Resources: map[string]*schema.Resource{
-			"ucloud_uk8s_cluster": resourceUCloudUK8SCluster(),
-			"ucloud_uk8s_node":    resourceUCloudUK8SNode(),
+			"ucloud_uk8s_cluster":    resourceUCloudUK8SCluster(),
+			"ucloud_uk8s_node":       resourceUCloudUK8SNode(),
+			"ucloud_uk8s_node_group": resourceUCloudUK8SNodeGroup(),
 		},
 	}
 }

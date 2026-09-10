@@ -8,7 +8,7 @@ import (
 )
 
 func TestAccUCloudIAMUserPolicyAttachment_basic(t *testing.T) {
-	var value iam.Policy
+	var value iam.AttachedPolicy
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

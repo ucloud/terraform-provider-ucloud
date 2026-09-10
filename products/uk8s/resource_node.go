@@ -42,6 +42,12 @@ func resourceUCloudUK8SNode() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"node_group_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
 			"image_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -65,6 +71,13 @@ func resourceUCloudUK8SNode() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validateInstanceType,
+			},
+
+			"uhost_family": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"o1i", "o2i"}, false),
 			},
 
 			"charge_type": {
@@ -232,6 +245,20 @@ func resourceUK8SNodeCreate(d *schema.ResourceData, meta interface{}) error {
 	req.SubnetId = ucloud.String(d.Get("subnet_id").(string))
 	req.Zone = ucloud.String(d.Get("availability_zone").(string))
 	req.Count = ucloud.Int(1)
+	if value, ok := d.GetOk("node_group_id"); ok {
+		req.NodeGroupId = ucloud.String(value.(string))
+		groups, groupErr := listUK8SNodeGroups(client, d.Get("cluster_id").(string))
+		if groupErr != nil {
+			return fmt.Errorf("error on reading uk8s node group %q when creating node, %s", value.(string), groupErr)
+		}
+		for _, group := range groups {
+			if group.NodeGroupId == value.(string) {
+				req.Labels = ucloud.String(group.Labels)
+				req.Taints = ucloud.String(group.Taints)
+				break
+			}
+		}
+	}
 
 	if value, ok := d.GetOk("disable_schedule_on_create"); ok {
 		req.DisableSchedule = ucloud.Bool(value.(bool))
@@ -281,6 +308,9 @@ func resourceUK8SNodeCreate(d *schema.ResourceData, meta interface{}) error {
 		req.MinmalCpuPlatform = ucloud.String(value.(string))
 	} else {
 		req.MinmalCpuPlatform = ucloud.String("Intel/Auto")
+	}
+	if value, ok := d.GetOk("uhost_family"); ok {
+		req.UHostFamily = ucloud.String(value.(string))
 	}
 
 	resp, err := client.AddUK8SUHostNode(req)
