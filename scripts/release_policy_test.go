@@ -18,14 +18,16 @@ const (
 func TestReleasePolicyChecksPullRequestLabels(t *testing.T) {
 	script := releasePolicyScript(t)
 	for _, test := range []struct {
-		name        string
-		labels      []string
-		wantFailure bool
-		wantMessage string
-		wantState   string
+		name            string
+		labels          []string
+		wantFailure     bool
+		wantMessage     string
+		wantDescription string
+		wantState       string
 	}{
 		{name: "one supported label", labels: []string{"release:minor", "uhost"}, wantState: "success"},
-		{name: "missing release label", labels: []string{"uhost"}, wantFailure: true, wantMessage: "exactly one release label", wantState: "failure"},
+		{name: "missing release label defaults to minor", labels: []string{"uhost"}, wantDescription: "description=release intent defaults to minor", wantState: "success"},
+		{name: "explicit none", labels: []string{"release:none"}, wantState: "success"},
 		{name: "multiple release labels", labels: []string{"release:minor", "release:patch"}, wantFailure: true, wantMessage: "exactly one release label", wantState: "failure"},
 		{name: "unsupported release label", labels: []string{"release:preview"}, wantFailure: true, wantMessage: "unsupported release label", wantState: "failure"},
 	} {
@@ -61,6 +63,9 @@ func TestReleasePolicyChecksPullRequestLabels(t *testing.T) {
 			}
 			if count := strings.Count(got, "state="+test.wantState); count != 2 {
 				t.Fatalf("%s status count = %d, want 2; calls: %s", test.wantState, count, got)
+			}
+			if test.wantDescription != "" && !strings.Contains(got, test.wantDescription) {
+				t.Fatalf("status calls = %q, want description %q", got, test.wantDescription)
 			}
 			if strings.Count(got, "context=release-intent") != 4 {
 				t.Fatalf("release-intent status count is wrong; calls: %s", got)
@@ -105,14 +110,23 @@ func TestReleasePolicySkipsChangesMarkedNone(t *testing.T) {
 	})
 }
 
-func TestReleasePolicyFailsClosedForMissingIntent(t *testing.T) {
+func TestReleasePolicyDefaultsMissingIntentToMinor(t *testing.T) {
 	repo := newReleaseRepository(t)
 	output, err := runReleasePolicyPlan(t, repo, repo.head, map[string]string{
 		"PR_11_LABEL": "release:patch",
 	})
-	if err == nil || !strings.Contains(output, "pull request #10 must have exactly one release label") {
+	if err != nil {
 		t.Fatalf("plan-auto error = %v, output = %q", err, output)
 	}
+	assertReleaseOutput(t, output, map[string]string{
+		"release":       "true",
+		"tag":           "v1.40.0",
+		"previous_tag":  "v1.39.6",
+		"level":         "minor",
+		"pull_requests": "10,11",
+		"existing_tag":  "false",
+		"release_sha":   repo.head,
+	})
 }
 
 func TestReleasePolicyFailsClosedForDirectCommit(t *testing.T) {

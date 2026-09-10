@@ -3,6 +3,8 @@
 set -euo pipefail
 
 readonly RELEASE_LABEL_PREFIX='release:'
+readonly DEFAULT_RELEASE_LEVEL='minor'
+readonly DEFAULT_RELEASE_LABEL="${RELEASE_LABEL_PREFIX}${DEFAULT_RELEASE_LEVEL}"
 readonly RELEASE_STATUS_CONTEXT='release-intent'
 readonly STABLE_TAG_PATTERN='^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
 
@@ -80,7 +82,7 @@ fail_pull_request_check() {
   local merge_sha="$3"
   local message="$4"
 
-  if ! set_pull_request_statuses "${repository}" "${head_sha}" "${merge_sha}" failure 'select exactly one supported release label'; then
+  if ! set_pull_request_statuses "${repository}" "${head_sha}" "${merge_sha}" failure 'select one supported release label or leave it unset for default minor'; then
     printf 'release policy: failed to publish release-intent failure status\n' >&2
   fi
   die "${message}"
@@ -113,12 +115,19 @@ check_pull_request() {
   release_labels="$(jq -c '[.pull_request.labels[]?.name | strings | select(startswith("release:"))]' "${GITHUB_EVENT_PATH}")" ||
     fail_pull_request_check "${repository}" "${head_sha}" "${merge_sha}" 'cannot read pull request labels'
   label_count="$(jq -r 'length' <<<"${release_labels}")"
-  if [[ "${label_count}" != '1' ]]; then
+  if ((label_count > 1)); then
     fail_pull_request_check "${repository}" "${head_sha}" "${merge_sha}" \
-      "pull request must have exactly one release label; found ${label_count}"
+      "pull request must have exactly one release label or leave it unset for default minor; found ${label_count}"
   fi
 
-  release_label="$(jq -r '.[0]' <<<"${release_labels}")"
+  local release_description
+  if ((label_count == 0)); then
+    release_label="${DEFAULT_RELEASE_LABEL}"
+    release_description="release intent defaults to ${DEFAULT_RELEASE_LEVEL}"
+  else
+    release_label="$(jq -r '.[0]' <<<"${release_labels}")"
+    release_description="release intent is ${release_label#"${RELEASE_LABEL_PREFIX}"}"
+  fi
   case "${release_label}" in
     release:major | release:minor | release:patch | release:none) ;;
     *)
@@ -128,7 +137,7 @@ check_pull_request() {
   esac
 
   set_pull_request_statuses "${repository}" "${head_sha}" "${merge_sha}" success \
-    "release intent is ${release_label#"${RELEASE_LABEL_PREFIX}"}"
+    "${release_description}"
   printf 'release policy: %s\n' "${release_label}"
 }
 
@@ -234,8 +243,12 @@ release_level_for_pull_request() {
 
   label_count="$(jq '[.labels[]?.name | strings | select(startswith("release:"))] | length' <<<"${metadata}")" ||
     die "cannot read labels for pull request #${pull_request}"
-  if [[ "${label_count}" != '1' ]]; then
-    die "pull request #${pull_request} must have exactly one release label; found ${label_count}"
+  if ((label_count > 1)); then
+    die "pull request #${pull_request} must have exactly one release label or leave it unset; found ${label_count}"
+  fi
+  if ((label_count == 0)); then
+    printf '%s\n' "${DEFAULT_RELEASE_LEVEL}"
+    return 0
   fi
   release_label="$(jq -r '[.labels[]?.name | strings | select(startswith("release:"))][0]' <<<"${metadata}")"
   case "${release_label}" in
