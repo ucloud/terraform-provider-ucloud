@@ -49,10 +49,6 @@ func uk8sClusterWorkerSchema(master *schema.Resource) *schema.Schema {
 	fields["gpu_type"] = &schema.Schema{
 		Type: schema.TypeString, Optional: true, ForceNew: true,
 	}
-	fields["net_capability"] = &schema.Schema{
-		Type: schema.TypeString, Optional: true, ForceNew: true,
-		ValidateFunc: validation.StringInSlice([]string{"Normal", "Super", "Ultra", "Extreme"}, false),
-	}
 	fields["max_pods"] = &schema.Schema{
 		Type: schema.TypeInt, Optional: true, ForceNew: true, Default: 110,
 		ValidateFunc: validation.IntBetween(1, 256),
@@ -118,7 +114,7 @@ func expandUK8SWorkers(items []interface{}) ([]map[string]interface{}, error) {
 			return nil, fmt.Errorf("worker.%d: %w", i, err)
 		}
 		// Use the wire names directly: the pinned SDK misspells BootDiskSize
-		// and omits UHostFamily and NetCapability from its Nodes struct.
+		// and omits UHostFamily from its Nodes struct.
 		node := map[string]interface{}{
 			"Zone": worker["availability_zone"], "MachineType": worker["machine_type"],
 			"CPU": worker["cpu"], "Mem": worker["memory"], "Count": worker["count"],
@@ -132,7 +128,7 @@ func expandUK8SWorkers(items []interface{}) ([]map[string]interface{}, error) {
 			node["DataDiskType"] = upperCvt.unconvert(worker["data_disk_type"].(string))
 		}
 		for key, param := range map[string]string{
-			"image_id": "ImageId", "uhost_family": "UHostFamily", "net_capability": "NetCapability",
+			"image_id": "ImageId", "uhost_family": "UHostFamily",
 			"security_group_id": "SecurityGroupId", "gpu_type": "GpuType",
 		} {
 			if value := worker[key].(string); value != "" {

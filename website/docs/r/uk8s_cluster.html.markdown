@@ -165,7 +165,6 @@ worker {
   boot_disk_size = 40
   data_disk_type = "cloud_rssd"
   data_disk_size = 20
-  net_capability = "Ultra"
   max_pods       = 110
 
   labels = {
@@ -196,7 +195,6 @@ worker {
 | `data_disk_size` | Optional, 0 or 20–1000 GB in multiples of 10; default 0 means no data disk | `Nodes.N.DataDiskSize` |
 | `gpu` | Optional, non-negative, default 0 | `Nodes.N.GPU` |
 | `gpu_type` | Optional; availability depends on machine type and region | `Nodes.N.GpuType` |
-| `net_capability` | Optional, `Normal`, `Super`, `Ultra`, `Extreme` | `Nodes.N.NetCapability` |
 | `max_pods` | Optional, 1–256, default 110 | `Nodes.N.MaxPods` |
 | `security_group_id` | Optional string; the API's firewall ID | `Nodes.N.SecurityGroupId` |
 | `labels` | Optional map, at most 5 entries | `Nodes.N.Labels` |

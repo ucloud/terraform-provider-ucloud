@@ -35,7 +35,7 @@ func TestClusterWorkerRequest(t *testing.T) {
 					"availability_zone": "sg-02", "machine_type": "O", "cpu": 2, "memory": 4096,
 					"count": 1, "gpu": 0, "uhost_family": "o2i", "min_cpu_platform": "Intel/EmeraldRapids",
 					"boot_disk_type": "cloud_rssd", "boot_disk_size": 40,
-					"data_disk_type": "cloud_rssd", "data_disk_size": 20, "net_capability": "Ultra",
+					"data_disk_type": "cloud_rssd", "data_disk_size": 20,
 					"max_pods": 110, "image_id": "uimage-1rgr4ndomwqa", "security_group_id": "291852",
 					"labels": map[string]interface{}{"role": "worker", "env": "test"},
 					"taint":  []interface{}{map[string]interface{}{"key": "dedicated", "value": "test", "effect": "NoSchedule"}},
@@ -47,13 +47,16 @@ func TestClusterWorkerRequest(t *testing.T) {
 				"Nodes.0.Count": "1", "Nodes.0.GPU": "0", "Nodes.0.UHostFamily": "o2i",
 				"Nodes.0.MinimalCpuPlatform": "Intel/EmeraldRapids", "Nodes.0.BootDiskType": "CLOUD_RSSD",
 				"Nodes.0.BootDiskSize": "40", "Nodes.0.DataDiskType": "CLOUD_RSSD", "Nodes.0.DataDiskSize": "20",
-				"Nodes.0.NetCapability": "Ultra", "Nodes.0.MaxPods": "110", "Nodes.0.ImageId": "uimage-1rgr4ndomwqa",
+				"Nodes.0.MaxPods": "110", "Nodes.0.ImageId": "uimage-1rgr4ndomwqa",
 				"Nodes.0.SecurityGroupId": "291852", "Nodes.0.Labels": "env=test,role=worker", "Nodes.0.Taints": "dedicated=test:NoSchedule",
 				"Nodes.1.Zone": "sg-01", "Nodes.1.MachineType": "N", "Nodes.1.CPU": "4", "Nodes.1.Mem": "8192", "Nodes.1.Count": "2",
 				"Nodes.1.BootDiskSize": "40", "Nodes.1.BootDiskType": "CLOUD_SSD", "Nodes.1.MinimalCpuPlatform": "Intel/Auto",
 				"ImageId": "uimage-default",
 			},
-			absent: []string{"Nodes.0.BootDiskSIze", "Nodes.0.MinmalCpuPlatform", "Nodes.1.ImageId", "Nodes.1.UHostFamily", "Nodes.1.DataDiskSize", "Nodes.1.Labels", "Nodes.1.Taints", "Nodes.2.Zone"},
+			absent: []string{
+				"Nodes.0.BootDiskSIze", "Nodes.0.MinmalCpuPlatform", "Nodes.0.NetCapability", "Nodes.1.NetCapability",
+				"Nodes.1.ImageId", "Nodes.1.UHostFamily", "Nodes.1.DataDiskSize", "Nodes.1.Labels", "Nodes.1.Taints", "Nodes.2.Zone",
+			},
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -116,7 +119,6 @@ func TestClusterWorkerPlan(t *testing.T) {
 		{name: "data disk size", change: map[string]interface{}{"data_disk_size": 10}, wantError: true},
 		{name: "family", change: map[string]interface{}{"uhost_family": "o2i"}, wantError: true},
 		{name: "outstanding disks", change: map[string]interface{}{"machine_type": "O"}, wantError: true},
-		{name: "network", change: map[string]interface{}{"net_capability": "invalid"}, wantError: true},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			r := resourceUCloudUK8SCluster()

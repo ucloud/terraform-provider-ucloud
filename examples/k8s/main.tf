@@ -16,14 +16,14 @@ resource "ucloud_subnet" "foo" {
 }
 
 resource "ucloud_uk8s_cluster" "foo" {
-  vpc_id       = ucloud_vpc.foo.id
-  subnet_id    = ucloud_subnet.foo.id
-  name         = "uk8s-test"
-  service_cidr = "172.16.0.0/16"
-  cni_mode     = "VPC"
-  password     = var.password
-  charge_type  = "dynamic"
-  k8s_version  = "1.32.8"
+  vpc_id                     = ucloud_vpc.foo.id
+  subnet_id                  = ucloud_subnet.foo.id
+  name                       = "uk8s-test"
+  service_cidr               = "172.16.0.0/16"
+  cni_mode                   = "VPC"
+  password                   = var.password
+  charge_type                = "dynamic"
+  k8s_version                = "1.32.8"
   enable_external_api_server = true
   kube_proxy {
     mode = "iptables"
@@ -63,7 +63,6 @@ resource "ucloud_uk8s_cluster" "foo" {
     boot_disk_size = 40
     data_disk_type = "cloud_rssd"
     data_disk_size = 20
-    net_capability = "Ultra"
     max_pods       = 110
 
     labels = {

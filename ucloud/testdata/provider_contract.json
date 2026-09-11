@@ -2837,12 +2837,6 @@
                 "default": "\"Intel/Auto\"",
                 "validate": "StringInSlice"
               },
-              "net_capability": {
-                "type": "TypeString",
-                "optional": true,
-                "force_new": true,
-                "validate": "StringInSlice"
-              },
               "security_group_id": {
                 "type": "TypeString",
                 "optional": true,
