@@ -2921,6 +2921,12 @@
           "required": true,
           "force_new": true
         },
+        "cpu": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "validate": "IntAtLeast"
+        },
         "create_time": {
           "type": "TypeString",
           "computed": true
@@ -2972,9 +2978,15 @@
         },
         "instance_type": {
           "type": "TypeString",
-          "required": true,
+          "optional": true,
           "force_new": true,
-          "validate": "validateInstanceType"
+          "validate": "validateInstanceType",
+          "conflicts_with": [
+            "cpu",
+            "machine_type",
+            "memory"
+          ],
+          "deprecated": "Use machine_type, cpu and memory together for new nodes. Existing configurations remain supported."
         },
         "ip_set": {
           "type": "TypeList",
@@ -2998,6 +3010,18 @@
           "optional": true,
           "computed": true,
           "force_new": true
+        },
+        "machine_type": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringMatch"
+        },
+        "memory": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "validate": "validateAll"
         },
         "min_cpu_platform": {
           "type": "TypeString",
@@ -3042,11 +3066,19 @@
           "validate": "StringLenBetween"
         }
       },
+      "schema_version": 1,
       "create": "resourceUK8SNodeCreate",
       "read": "resourceUK8SNodeRead",
       "update": "resourceUK8SNodeUpdate",
       "delete": "resourceUK8SNodeDelete",
       "customize_diff": "All",
+      "state_upgraders": [
+        {
+          "version": 0,
+          "type": "cty.Object(map[string]cty.Type{\"availability_zone\":cty.String, \"boot_disk_type\":cty.String, \"charge_type\":cty.String, \"cluster_id\":cty.String, \"create_time\":cty.String, \"data_disk_size\":cty.Number, \"data_disk_type\":cty.String, \"delete_disks_with_instance\":cty.Bool, \"disable_schedule_on_create\":cty.Bool, \"duration\":cty.Number, \"expire_time\":cty.String, \"id\":cty.String, \"image_id\":cty.String, \"init_script\":cty.String, \"instance_type\":cty.String, \"ip_set\":cty.List(cty.Object(map[string]cty.Type{\"internet_type\":cty.String, \"ip\":cty.String})), \"isolation_group\":cty.String, \"min_cpu_platform\":cty.String, \"node_group_id\":cty.String, \"password\":cty.String, \"status\":cty.String, \"subnet_id\":cty.String, \"timeouts\":cty.Object(map[string]cty.Type{\"create\":cty.String, \"delete\":cty.String, \"update\":cty.String}), \"uhost_family\":cty.String, \"user_data\":cty.String})",
+          "upgrade": "upgradeUK8SNodeStateV0"
+        }
+      ],
       "timeouts": {
         "create": "30m0s",
         "delete": "10m0s",

@@ -136,7 +136,9 @@ resource "ucloud_uk8s_node" "foo" {
   cluster_id    = "${ucloud_uk8s_cluster.foo.id}"
   subnet_id     = "${ucloud_subnet.foo.id}"
   password      = "ucloud_2021"
-  instance_type = "n-basic-2"
+  machine_type  = "N"
+  cpu           = 2
+  memory        = 4096
   charge_type   = "dynamic"
   availability_zone = "${data.ucloud_zones.default.zones.0.id}"
 }

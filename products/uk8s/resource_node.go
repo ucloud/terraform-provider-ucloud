@@ -3,6 +3,7 @@ package uk8s
 import (
 	"encoding/base64"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -15,10 +16,16 @@ import (
 
 func resourceUCloudUK8SNode() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceUK8SNodeCreate,
-		Read:   resourceUK8SNodeRead,
-		Update: resourceUK8SNodeUpdate,
-		Delete: resourceUK8SNodeDelete,
+		Create:        resourceUK8SNodeCreate,
+		Read:          resourceUK8SNodeRead,
+		Update:        resourceUK8SNodeUpdate,
+		Delete:        resourceUK8SNodeDelete,
+		SchemaVersion: 1,
+		StateUpgraders: []schema.StateUpgrader{{
+			Version: 0,
+			Type:    uk8sNodeStateV0Type(),
+			Upgrade: upgradeUK8SNodeStateV0,
+		}},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
@@ -26,7 +33,7 @@ func resourceUCloudUK8SNode() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 		CustomizeDiff: customdiff.All(
-			diffValidateBootDiskTypeWithInstanceTypeOfUK8sNode,
+			diffValidateUK8SNodeSpec,
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -67,10 +74,30 @@ func resourceUCloudUK8SNode() *schema.Resource {
 			},
 
 			"instance_type": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ValidateFunc:  validateInstanceType,
+				Deprecated:    "Use machine_type, cpu and memory together for new nodes. Existing configurations remain supported.",
+				ConflictsWith: []string{"machine_type", "cpu", "memory"},
+			},
+			"machine_type": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validateInstanceType,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^[A-Z][A-Z0-9]*$`), "must be an uppercase machine type, such as O"),
+			},
+			"cpu": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IntAtLeast(2),
+			},
+			"memory": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validateAll(validation.IntAtLeast(4096), validateMod(1024)),
 			},
 
 			"uhost_family": {
@@ -235,6 +262,10 @@ func resourceUCloudUK8SNode() *schema.Resource {
 }
 
 func resourceUK8SNodeCreate(d *schema.ResourceData, meta interface{}) error {
+	spec, err := resolveUK8SNodeSpec(d)
+	if err != nil {
+		return err
+	}
 	client, err := clientFromMeta(meta)
 	if err != nil {
 		return fmt.Errorf("error on getting client when creating uk8s node, %s", err)
@@ -287,10 +318,9 @@ func resourceUK8SNodeCreate(d *schema.ResourceData, meta interface{}) error {
 		req.IsolationGroup = ucloud.String(value.(string))
 	}
 
-	parsedInstanceType, _ := parseInstanceType(d.Get("instance_type").(string))
-	req.CPU = ucloud.Int(parsedInstanceType.CPU)
-	req.Mem = ucloud.Int(parsedInstanceType.Memory)
-	req.MachineType = ucloud.String(strings.ToUpper(parsedInstanceType.HostType))
+	req.CPU = ucloud.Int(spec.CPU)
+	req.Mem = ucloud.Int(spec.Memory)
+	req.MachineType = ucloud.String(strings.ToUpper(spec.HostType))
 	if value, ok := d.GetOk("boot_disk_type"); ok {
 		req.BootDiskType = ucloud.String(upperCvt.unconvert(value.(string)))
 	} else {
@@ -415,6 +445,43 @@ func resourceUK8SNodeDelete(d *schema.ResourceData, meta interface{}) error {
 		}
 		return resource.RetryableError(fmt.Errorf("the specified k8s cluster %q has not been deleted due to unknown error", d.Id()))
 	})
+}
+
+// Both ResourceData and ResourceDiff expose Get, so plan and create use the same specification resolver.
+func resolveUK8SNodeSpec(values interface{ Get(string) interface{} }) (*instanceType, error) {
+	legacy := values.Get("instance_type").(string)
+	machine := values.Get("machine_type").(string)
+	cpu := values.Get("cpu").(int)
+	memory := values.Get("memory").(int)
+	if legacy != "" {
+		if machine != "" || cpu != 0 || memory != 0 {
+			return nil, fmt.Errorf("instance_type conflicts with machine_type, cpu and memory")
+		}
+		return parseInstanceType(legacy)
+	}
+	if machine == "" || cpu < 2 || memory < 4096 || memory%1024 != 0 {
+		return nil, fmt.Errorf("node requires instance_type or all of machine_type, cpu >= 2 and memory >= 4096 MB in multiples of 1024")
+	}
+	return &instanceType{HostType: machine, CPU: cpu, Memory: memory}, nil
+}
+
+func diffValidateUK8SNodeSpec(diff *schema.ResourceDiff, meta interface{}) error {
+	for _, key := range []string{"instance_type", "machine_type", "cpu", "memory"} {
+		if !diff.NewValueKnown(key) {
+			return nil
+		}
+	}
+	spec, err := resolveUK8SNodeSpec(diff)
+	if err != nil {
+		return err
+	}
+	if diff.Get("instance_type").(string) != "" {
+		return diffValidateBootDiskTypeWithInstanceTypeOfUK8sNode(diff, meta)
+	}
+	if diff.NewValueKnown("boot_disk_type") && strings.HasPrefix(spec.HostType, "O") && diff.Get("boot_disk_type").(string) != "cloud_rssd" {
+		return fmt.Errorf("boot_disk_type must be cloud_rssd for machine_type %s", spec.HostType)
+	}
+	return nil
 }
 
 func diffValidateBootDiskTypeWithInstanceTypeOfUK8sNode(diff *schema.ResourceDiff, meta interface{}) error {

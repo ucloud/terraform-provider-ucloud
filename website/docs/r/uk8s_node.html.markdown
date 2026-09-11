@@ -51,7 +51,9 @@ resource "ucloud_uk8s_node" "foo" {
   cluster_id    = "${ucloud_uk8s_cluster.foo.id}"
   subnet_id     = "${ucloud_subnet.foo.id}"
   password      = "ucloud_2021"
-  instance_type = "n-basic-2"
+  machine_type  = "N"
+  cpu           = 2
+  memory        = 4096
   charge_type   = "dynamic"
   availability_zone = "${data.ucloud_zones.default.zones.0.id}"
   
@@ -63,7 +65,7 @@ resource "ucloud_uk8s_node" "foo" {
 
 ### O2 Intel nodes with RSSD cloud disks
 
-Use `instance_type = "o-basic-2"` for 2 CPU cores and 4 GB memory, and
+Use `machine_type = "O"`, `cpu = 2` and `memory = 4096` for 2 CPU cores and 4 GB memory, and
 `uhost_family = "o2i"` to select the O2 Intel family. `o2i` is a family, not
 a `MachineType`; the provider sends `MachineType=O` and `UHostFamily=o2i`.
 
@@ -74,7 +76,9 @@ resource "ucloud_uk8s_node" "o2i_worker" {
   availability_zone = var.zone
   password          = var.password
   image_id          = "uimage-1rgr4qmrvmjm" # Choose an image available in your zone.
-  instance_type     = "o-basic-2"
+  machine_type      = "O"
+  cpu               = 2
+  memory            = 4096
   uhost_family      = "o2i"
   min_cpu_platform  = "Intel/Auto"
   charge_type       = "dynamic"
@@ -96,7 +100,18 @@ The following arguments are supported:
 * `uhost_family` - (Optional, ForceNew) The Intel outstanding instance family: `o1i` or `o2i`. Requires an `o` instance type and an Intel CPU platform. When omitted, UK8S selects the default or inherits the node group family.
 * `image_id` - (Required, ForceNew) The ID for the image to use for the instance.
 * `password` - (Required, ForceNew) The password for the instance, which contains 8-30 characters, and at least 2 items of capital letters, lower case letters, numbers and special characters. The special characters include <code>`()~!@#$%^&*-+=_|{}\[]:;'<>,.?/</code>. If not specified, terraform will auto-generate a password.
-* `instance_type` - (Required, ForceNew) The type of instance, please visit the [instance type table](https://docs.ucloud.cn/terraform/specification/instance)
+* `machine_type` - (Optional, ForceNew) Uppercase machine type, such as `N` or `O`. Set together with `cpu` and `memory`; conflicts with `instance_type`. Outstanding machine types require `boot_disk_type = "cloud_rssd"`.
+* `cpu` - (Optional, ForceNew) Number of CPU cores, at least 2. Required when using `machine_type`.
+* `memory` - (Optional, ForceNew) Memory in MB, at least 4096 and a multiple of 1024. Required when using `machine_type`.
+* `instance_type` - (Optional, Deprecated, ForceNew) Legacy instance specification. Use either this field or all three of `machine_type`, `cpu` and `memory`. Existing configurations remain supported; see the [instance type table](https://docs.ucloud.cn/terraform/specification/instance).
+
+Existing nodes can keep their `instance_type` configuration. The version 0 to
+version 1 state upgrade preserves the resource ID and legacy specification
+without populating the new fields. Read also preserves the configured specification.
+Upgrading the provider alone does not require replacing these nodes.
+Changing an existing configuration from `instance_type` to the new fields
+plans a replacement, even when the requested CPU and memory are equivalent.
+Review the plan before applying this configuration change.
   
 ---
 

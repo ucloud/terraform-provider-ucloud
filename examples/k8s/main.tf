@@ -102,7 +102,9 @@ resource "ucloud_uk8s_node" "foo" {
   subnet_id         = ucloud_subnet.foo.id
   password          = var.password
   image_id          = "uimage-1rgr0eytog7f"
-  instance_type     = "o-basic-2"
+  machine_type      = "O"
+  cpu               = 2
+  memory            = 4096
   charge_type       = "dynamic"
   availability_zone = var.zone
   boot_disk_type    = "cloud_rssd"
