@@ -5,7 +5,7 @@ terraform {
 terraform {
   required_providers {
     ucloud = {
-      source = "ucloud/ucloud"
+      source  = "ucloud/ucloud"
       version = "~>1.27.0"
     }
   }

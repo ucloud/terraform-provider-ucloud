@@ -135,7 +135,9 @@ resource "ucloud_uk8s_cluster" "foo" {
         "${data.ucloud_zones.default.zones.0.id}",
         "${data.ucloud_zones.default.zones.0.id}",
       ]
-      instance_type = "n-basic-2"
+      machine_type = "N"
+      cpu          = 2
+      memory       = 4096
       }
 }
 `
@@ -170,7 +172,9 @@ resource "ucloud_uk8s_cluster" "foo" {
         "${data.ucloud_zones.default.zones.0.id}",
         "${data.ucloud_zones.default.zones.0.id}",
       ]
-      instance_type = "n-basic-2"
+      machine_type = "N"
+      cpu          = 2
+      memory       = 4096
     }
 }
 `

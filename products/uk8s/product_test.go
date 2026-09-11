@@ -21,7 +21,7 @@ func TestRegistration(t *testing.T) {
 		t.Fatalf("validate provider with UK8S product: %v", err)
 	}
 
-	for _, name := range []string{"ucloud_uk8s_cluster", "ucloud_uk8s_node"} {
+	for _, name := range []string{"ucloud_uk8s_cluster", "ucloud_uk8s_node", "ucloud_uk8s_node_group"} {
 		if provider.ResourcesMap[name] == nil {
 			t.Fatalf("%s is not registered", name)
 		}
@@ -44,6 +44,7 @@ func TestClusterSchemaCompatibility(t *testing.T) {
 		sensitive bool
 	}{
 		"service_cidr":               {typeValue: schema.TypeString, required: true, forceNew: true},
+		"cni_mode":                   {typeValue: schema.TypeString, optional: true, computed: true, forceNew: true},
 		"vpc_id":                     {typeValue: schema.TypeString, required: true, forceNew: true},
 		"subnet_id":                  {typeValue: schema.TypeString, required: true, forceNew: true},
 		"password":                   {typeValue: schema.TypeString, required: true, forceNew: true, sensitive: true},
@@ -57,11 +58,14 @@ func TestClusterSchemaCompatibility(t *testing.T) {
 		"delete_disks_with_instance": {typeValue: schema.TypeBool, optional: true, forceNew: true},
 		"kube_proxy":                 {typeValue: schema.TypeList, optional: true},
 		"master":                     {typeValue: schema.TypeList, required: true},
+		"worker":                     {typeValue: schema.TypeList, optional: true, forceNew: true},
 		"status":                     {typeValue: schema.TypeString, computed: true},
 		"create_time":                {typeValue: schema.TypeString, computed: true},
 		"api_server":                 {typeValue: schema.TypeString, computed: true},
 		"external_api_server":        {typeValue: schema.TypeString, computed: true},
 		"pod_cidr":                   {typeValue: schema.TypeString, computed: true},
+		"kubeconfig":                 {typeValue: schema.TypeString, computed: true, sensitive: true},
+		"external_kubeconfig":        {typeValue: schema.TypeString, computed: true, sensitive: true},
 		"image_id":                   {typeValue: schema.TypeString, optional: true, forceNew: true},
 	}
 	assertSchemaFields(t, resource, wantFields)
@@ -85,6 +89,17 @@ func TestClusterSchemaCompatibility(t *testing.T) {
 	if master.Schema["min_cpu_platform"].Default != "Intel/Auto" {
 		t.Errorf("master min_cpu_platform default = %#v, want Intel/Auto", master.Schema["min_cpu_platform"].Default)
 	}
+	for _, name := range []string{"machine_type", "cpu", "memory"} {
+		if master.Schema[name] == nil || !master.Schema[name].Optional {
+			t.Errorf("master %q must be optional to preserve legacy configuration", name)
+		}
+	}
+	if legacy := master.Schema["instance_type"]; legacy == nil || !legacy.Optional || legacy.Deprecated == "" {
+		t.Fatal("master instance_type must remain available with a deprecation warning")
+	}
+	if resource.SchemaVersion != 1 || len(resource.StateUpgraders) != 1 || resource.StateUpgraders[0].Version != 0 {
+		t.Fatal("cluster requires a version 0 StateUpgrader")
+	}
 }
 
 func TestNodeSchemaCompatibility(t *testing.T) {
@@ -101,9 +116,14 @@ func TestNodeSchemaCompatibility(t *testing.T) {
 	}{
 		"availability_zone":          {typeValue: schema.TypeString, required: true, forceNew: true},
 		"cluster_id":                 {typeValue: schema.TypeString, required: true, forceNew: true},
+		"node_group_id":              {typeValue: schema.TypeString, optional: true, forceNew: true},
+		"uhost_family":               {typeValue: schema.TypeString, optional: true, forceNew: true},
 		"image_id":                   {typeValue: schema.TypeString, optional: true, forceNew: true},
 		"password":                   {typeValue: schema.TypeString, required: true, forceNew: true, sensitive: true},
-		"instance_type":              {typeValue: schema.TypeString, required: true, forceNew: true},
+		"instance_type":              {typeValue: schema.TypeString, optional: true, forceNew: true},
+		"machine_type":               {typeValue: schema.TypeString, optional: true, forceNew: true},
+		"cpu":                        {typeValue: schema.TypeInt, optional: true, forceNew: true},
+		"memory":                     {typeValue: schema.TypeInt, optional: true, forceNew: true},
 		"charge_type":                {typeValue: schema.TypeString, optional: true, computed: true, forceNew: true},
 		"duration":                   {typeValue: schema.TypeInt, optional: true, forceNew: true},
 		"boot_disk_type":             {typeValue: schema.TypeString, optional: true, computed: true, forceNew: true},
@@ -134,6 +154,51 @@ func TestNodeSchemaCompatibility(t *testing.T) {
 		if nested.Schema[name] == nil || !nested.Schema[name].Computed {
 			t.Errorf("ip_set nested field %q must be computed", name)
 		}
+	}
+}
+
+func TestNodeGroupSchemaCompatibility(t *testing.T) {
+	resource := New().Registration().Resources["ucloud_uk8s_node_group"]
+	assertResourceCallbacksAndTimeouts(t, resource, "ucloud_uk8s_node_group")
+
+	wantFields := map[string]struct {
+		typeValue schema.ValueType
+		required  bool
+		optional  bool
+		computed  bool
+		forceNew  bool
+		sensitive bool
+	}{
+		"cluster_id":        {typeValue: schema.TypeString, required: true, forceNew: true},
+		"name":              {typeValue: schema.TypeString, required: true},
+		"availability_zone": {typeValue: schema.TypeString, required: true},
+		"subnet_id":         {typeValue: schema.TypeString, required: true},
+		"image_id":          {typeValue: schema.TypeString, optional: true},
+		"instance_type":     {typeValue: schema.TypeString, required: true},
+		"charge_type":       {typeValue: schema.TypeString, optional: true},
+		"boot_disk_type":    {typeValue: schema.TypeString, optional: true},
+		"boot_disk_size":    {typeValue: schema.TypeInt, optional: true},
+		"data_disk_type":    {typeValue: schema.TypeString, optional: true},
+		"data_disk_size":    {typeValue: schema.TypeInt, optional: true},
+		"isolation_group":   {typeValue: schema.TypeString, optional: true},
+		"min_cpu_platform":  {typeValue: schema.TypeString, optional: true},
+		"max_pods":          {typeValue: schema.TypeInt, optional: true},
+		"tag":               {typeValue: schema.TypeString, optional: true},
+		"user_data":         {typeValue: schema.TypeString, optional: true},
+		"init_script":       {typeValue: schema.TypeString, optional: true},
+		"labels":            {typeValue: schema.TypeMap, optional: true},
+		"taint":             {typeValue: schema.TypeSet, optional: true},
+		"node_ids":          {typeValue: schema.TypeSet, computed: true},
+		"uhost_family":      {typeValue: schema.TypeString, optional: true, computed: true},
+		"create_time":       {typeValue: schema.TypeString, computed: true},
+		"update_time":       {typeValue: schema.TypeString, computed: true},
+	}
+	assertSchemaFields(t, resource, wantFields)
+	if resource.Schema["labels"].ForceNew || resource.Schema["taint"].ForceNew {
+		t.Fatal("node group labels and taint must update in place")
+	}
+	if got := resource.Schema["taint"].MaxItems; got != maxUK8SNodeGroupTaints {
+		t.Fatalf("taint MaxItems = %d, want %d", got, maxUK8SNodeGroupTaints)
 	}
 }
 

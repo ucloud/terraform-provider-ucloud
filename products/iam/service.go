@@ -245,7 +245,7 @@ func (client *productClient) describeIAMPolicyByURN(urn string) (*iam.IAMPolicy,
 	return &resp.Policy, nil
 }
 
-func (client *productClient) describeIAMUserPolicyAttachment(userName, policyURN, projectID string) (*iam.Policy, error) {
+func (client *productClient) describeIAMUserPolicyAttachment(userName, policyURN, projectID string) (*iam.AttachedPolicy, error) {
 	limit := 100
 	for offset := 0; ; offset += limit {
 		req := client.iamconn.NewListPoliciesForUserRequest()
@@ -275,7 +275,7 @@ func (client *productClient) describeIAMUserPolicyAttachment(userName, policyURN
 	}
 }
 
-func (client *productClient) describeIAMGroupPolicyAttachment(groupName, policyURN, projectID string) (*iam.Policy, error) {
+func (client *productClient) describeIAMGroupPolicyAttachment(groupName, policyURN, projectID string) (*iam.AttachedPolicy, error) {
 	limit := 100
 	for offset := 0; ; offset += limit {
 		req := client.iamconn.NewListPoliciesForGroupRequest()

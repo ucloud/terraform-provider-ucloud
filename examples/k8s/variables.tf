@@ -1,12 +1,11 @@
 variable "region" {
-  default = "cn-bj2"
+  default = "sg"
 }
 
 variable "zone" {
-  default = "cn-bj2-05"
+  default = "sg-02"
 }
 
 variable "password" {
-  default = "ucloud_2021"
+  default = "ucloud123"
 }
-
