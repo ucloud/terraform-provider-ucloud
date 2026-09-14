@@ -156,3 +156,108 @@ func (c *productClient) describeVIPById(vipID string) (*vpc.VIPDetailSet, error)
 
 	return &resp.VIPSet[0], nil
 }
+
+func (c *productClient) describeRouteTableById(routeTableID string) (*vpc.RouteTableInfo, error) {
+	if routeTableID == "" {
+		return nil, newNotFoundError(getNotFoundMessage("route_table", routeTableID))
+	}
+	conn := c.vpcconn
+
+	req := conn.NewDescribeRouteTableRequest()
+	req.RouteTableId = ucloud.String(routeTableID)
+
+	resp, err := conn.DescribeRouteTable(req)
+	if err != nil {
+		return nil, err
+	}
+	if resp != nil && resp.GetRetCode() != 0 {
+		return nil, fmt.Errorf("error on reading route table %q, %s", routeTableID, resp.GetMessage())
+	}
+	if resp == nil || len(resp.RouteTables) < 1 {
+		return nil, newNotFoundError(getNotFoundMessage("route_table", routeTableID))
+	}
+
+	return &resp.RouteTables[0], nil
+}
+
+func (c *productClient) describeRouteRuleById(routeTableID, routeRuleID string) (*vpc.RouteRuleInfo, error) {
+	if routeTableID == "" || routeRuleID == "" {
+		return nil, newNotFoundError(getNotFoundMessage("route_table_rule", routeRuleID))
+	}
+	routeTable, err := c.describeRouteTableById(routeTableID)
+	if err != nil {
+		return nil, err
+	}
+	for i := range routeTable.RouteRules {
+		if routeTable.RouteRules[i].RouteRuleId == routeRuleID {
+			return &routeTable.RouteRules[i], nil
+		}
+	}
+	return nil, newNotFoundError(getNotFoundMessage("route_table_rule", routeRuleID))
+}
+
+func (c *productClient) describeNetworkInterfaceById(interfaceID string) (*vpc.NetworkInterface, error) {
+	if interfaceID == "" {
+		return nil, newNotFoundError(getNotFoundMessage("network_interface", interfaceID))
+	}
+	conn := c.vpcconn
+
+	req := conn.NewDescribeNetworkInterfaceRequest()
+	req.InterfaceId = []string{interfaceID}
+
+	resp, err := conn.DescribeNetworkInterface(req)
+	if err != nil {
+		if uCloudErr, ok := err.(uerr.Error); ok && uCloudErr.Code() == 54002 {
+			return nil, newNotFoundError(getNotFoundMessage("network_interface", interfaceID))
+		}
+		return nil, err
+	}
+	if resp != nil && resp.GetRetCode() != 0 {
+		return nil, fmt.Errorf("error on reading network interface %q, %s", interfaceID, resp.GetMessage())
+	}
+	if resp == nil || len(resp.NetworkInterfaceSet) < 1 {
+		return nil, newNotFoundError(getNotFoundMessage("network_interface", interfaceID))
+	}
+
+	return &resp.NetworkInterfaceSet[0], nil
+}
+
+// modifyNetworkInterfaceAttribute updates the name/tag/remark extend info of a
+// network interface via the ModifyNetworkInterface action. The vendored SDK
+// (v0.22.70) does not expose this action as a typed client method, so it is
+// invoked through the SDK generic client. The backend only updates non-empty
+// fields, so empty values are ignored rather than cleared.
+func (c *productClient) modifyNetworkInterfaceAttribute(interfaceID, name, tag, remark string) error {
+	req := c.vpcconn.NewGenericRequest()
+	if err := req.SetPayload(map[string]interface{}{
+		"Action":      "ModifyNetworkInterface",
+		"InterfaceId": interfaceID,
+		"Name":        name,
+		"Tag":         tag,
+		"Remark":      remark,
+	}); err != nil {
+		return err
+	}
+	resp, err := c.vpcconn.GenericInvoke(req)
+	if err != nil {
+		return err
+	}
+	if resp.GetRetCode() != 0 {
+		return fmt.Errorf("error on modifying network interface %q, %s", interfaceID, resp.GetMessage())
+	}
+	return nil
+}
+
+func (c *productClient) describeRouteRuleByAttrs(routeTableID, dstAddr, nexthopID string) (*vpc.RouteRuleInfo, error) {
+	routeTable, err := c.describeRouteTableById(routeTableID)
+	if err != nil {
+		return nil, err
+	}
+	for i := range routeTable.RouteRules {
+		rule := routeTable.RouteRules[i]
+		if rule.DstAddr == dstAddr && rule.NexthopId == nexthopID {
+			return &rule, nil
+		}
+	}
+	return nil, newNotFoundError(getNotFoundMessage("route_table_rule", dstAddr+" "+nexthopID))
+}
