@@ -297,7 +297,7 @@ github.com/tidwall/match
 # github.com/tidwall/pretty v1.2.0
 ## explicit; go 1.16
 github.com/tidwall/pretty
-# github.com/ucloud/ucloud-sdk-go v0.22.123
+# github.com/ucloud/ucloud-sdk-go v0.22.125
 ## explicit; go 1.13
 github.com/ucloud/ucloud-sdk-go/external
 github.com/ucloud/ucloud-sdk-go/private/protocol/http

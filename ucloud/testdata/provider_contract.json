@@ -2122,6 +2122,65 @@
       "delete": "resourceUCloudNatGatewayRuleDelete",
       "customize_diff": "All"
     },
+    "ucloud_network_interface": {
+      "schema": {
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "instance_id": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "mac_address": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "name": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "validate": "StringMatch"
+        },
+        "private_ip": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        },
+        "remark": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true
+        },
+        "status": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "subnet_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "tag": {
+          "type": "TypeString",
+          "optional": true,
+          "default": "\"Default\"",
+          "state_func": "stateFuncTag",
+          "validate": "StringMatch"
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudNetworkInterfaceCreate",
+      "read": "resourceUCloudNetworkInterfaceRead",
+      "update": "resourceUCloudNetworkInterfaceUpdate",
+      "delete": "resourceUCloudNetworkInterfaceDelete",
+      "importer": "ImportStatePassthrough"
+    },
     "ucloud_redis_instance": {
       "schema": {
         "auto_backup": {
@@ -2235,6 +2294,117 @@
       "update": "resourceUCloudRedisInstanceUpdate",
       "delete": "resourceUCloudRedisInstanceDelete",
       "customize_diff": "All"
+    },
+    "ucloud_route_table": {
+      "schema": {
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "name": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "validate": "StringMatch"
+        },
+        "remark": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true
+        },
+        "route_table_type": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "subnet_count": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "subnet_ids": {
+          "type": "TypeSet",
+          "computed": true,
+          "set": "HashString",
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "tag": {
+          "type": "TypeString",
+          "optional": true,
+          "default": "\"Default\"",
+          "state_func": "stateFuncTag",
+          "validate": "StringMatch"
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "vpc_name": {
+          "type": "TypeString",
+          "computed": true
+        }
+      },
+      "create": "resourceUCloudRouteTableCreate",
+      "read": "resourceUCloudRouteTableRead",
+      "update": "resourceUCloudRouteTableUpdate",
+      "delete": "resourceUCloudRouteTableDelete",
+      "importer": "ImportStatePassthrough"
+    },
+    "ucloud_route_table_association": {
+      "schema": {
+        "route_table_id": {
+          "type": "TypeString",
+          "required": true
+        },
+        "subnet_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudRouteTableAssociationCreate",
+      "read": "resourceUCloudRouteTableAssociationRead",
+      "update": "resourceUCloudRouteTableAssociationUpdate",
+      "delete": "resourceUCloudRouteTableAssociationDelete",
+      "importer": "ImportStatePassthrough"
+    },
+    "ucloud_route_table_rule": {
+      "schema": {
+        "dst_addr": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true,
+          "validate": "validateRouteRuleDstAddr"
+        },
+        "nexthop_id": {
+          "type": "TypeString",
+          "required": true
+        },
+        "nexthop_type": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "remark": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true
+        },
+        "route_table_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudRouteTableRuleCreate",
+      "read": "resourceUCloudRouteTableRuleRead",
+      "update": "resourceUCloudRouteTableRuleUpdate",
+      "delete": "resourceUCloudRouteTableRuleDelete"
     },
     "ucloud_security_group": {
       "schema": {

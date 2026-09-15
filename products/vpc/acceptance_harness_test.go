@@ -548,3 +548,336 @@ func testAccCheckEIPExists(name string, target *unetapi.UnetEIPSet) resource.Tes
 		return nil
 	}
 }
+
+func describeAccRouteTableByID(client *vpcapi.VPCClient, id string) (*vpcapi.RouteTableInfo, bool, error) {
+	if id == "" {
+		return nil, false, fmt.Errorf("route table id is empty")
+	}
+	request := client.NewDescribeRouteTableRequest()
+	request.RouteTableId = ucloud.String(id)
+	response, err := client.DescribeRouteTable(request)
+	if err != nil {
+		if isNotFoundError(err) {
+			return nil, false, nil
+		}
+		return nil, false, err
+	}
+	if response == nil {
+		return nil, false, nil
+	}
+	if response.GetRetCode() != 0 {
+		if isNotFoundCode(response.GetRetCode()) {
+			return nil, false, nil
+		}
+		return nil, false, fmt.Errorf("error on reading route table %q, %s", id, response.GetMessage())
+	}
+	if len(response.RouteTables) == 0 {
+		return nil, false, nil
+	}
+	return &response.RouteTables[0], true, nil
+}
+
+func testAccCheckRouteTableExists(name string, target *vpcapi.RouteTableInfo) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		item, ok := state.RootModule().Resources[name]
+		if !ok {
+			return fmt.Errorf("not found: %s", name)
+		}
+		if item.Primary.ID == "" {
+			return fmt.Errorf("route table id is empty")
+		}
+		clients, err := testAccClients()
+		if err != nil {
+			return err
+		}
+		value, found, err := describeAccRouteTableByID(clients.vpcconn, item.Primary.ID)
+		log.Printf("[INFO] route table id %#v", item.Primary.ID)
+		if err != nil {
+			return err
+		}
+		if !found {
+			return fmt.Errorf("route table %q is not found", item.Primary.ID)
+		}
+		*target = *value
+		return nil
+	}
+}
+
+func testAccCheckRouteTableAttributes(value *vpcapi.RouteTableInfo) resource.TestCheckFunc {
+	return func(*terraform.State) error {
+		if value.RouteTableId == "" {
+			return fmt.Errorf("route table id is empty")
+		}
+		if value.VPCId == "" {
+			return fmt.Errorf("route table vpc id is empty")
+		}
+		return nil
+	}
+}
+
+func testAccCheckRouteTableDestroy(state *terraform.State) error {
+	for _, item := range state.RootModule().Resources {
+		if item.Type != "ucloud_route_table" {
+			continue
+		}
+		clients, err := testAccClients()
+		if err != nil {
+			return err
+		}
+		value, found, err := describeAccRouteTableByID(clients.vpcconn, item.Primary.ID)
+		if err != nil {
+			return err
+		}
+		if found && value.RouteTableId != "" {
+			return fmt.Errorf("route table still exist")
+		}
+	}
+	return nil
+}
+
+func describeAccRouteRuleByID(client *vpcapi.VPCClient, routeTableID, routeRuleID string) (*vpcapi.RouteRuleInfo, bool, error) {
+	if routeTableID == "" || routeRuleID == "" {
+		return nil, false, fmt.Errorf("route table id or route rule id is empty")
+	}
+	request := client.NewDescribeRouteTableRequest()
+	request.RouteTableId = ucloud.String(routeTableID)
+	response, err := client.DescribeRouteTable(request)
+	if err != nil {
+		if isNotFoundError(err) {
+			return nil, false, nil
+		}
+		return nil, false, err
+	}
+	if response == nil {
+		return nil, false, nil
+	}
+	if response.GetRetCode() != 0 {
+		if isNotFoundCode(response.GetRetCode()) {
+			return nil, false, nil
+		}
+		return nil, false, fmt.Errorf("error on reading route table %q, %s", routeTableID, response.GetMessage())
+	}
+	if len(response.RouteTables) == 0 {
+		return nil, false, nil
+	}
+	for i := range response.RouteTables[0].RouteRules {
+		if response.RouteTables[0].RouteRules[i].RouteRuleId == routeRuleID {
+			return &response.RouteTables[0].RouteRules[i], true, nil
+		}
+	}
+	return nil, false, nil
+}
+
+func testAccCheckRouteTableRuleExists(name string, target *vpcapi.RouteRuleInfo) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		item, ok := state.RootModule().Resources[name]
+		if !ok {
+			return fmt.Errorf("not found: %s", name)
+		}
+		if item.Primary.ID == "" {
+			return fmt.Errorf("route table rule id is empty")
+		}
+		routeTableID := item.Primary.Attributes["route_table_id"]
+		clients, err := testAccClients()
+		if err != nil {
+			return err
+		}
+		value, found, err := describeAccRouteRuleByID(clients.vpcconn, routeTableID, item.Primary.ID)
+		log.Printf("[INFO] route table rule id %#v", item.Primary.ID)
+		if err != nil {
+			return err
+		}
+		if !found {
+			return fmt.Errorf("route table rule %q is not found", item.Primary.ID)
+		}
+		*target = *value
+		return nil
+	}
+}
+
+func testAccCheckRouteTableRuleAttributes(value *vpcapi.RouteRuleInfo) resource.TestCheckFunc {
+	return func(*terraform.State) error {
+		if value.RouteRuleId == "" {
+			return fmt.Errorf("route table rule id is empty")
+		}
+		if value.DstAddr == "" {
+			return fmt.Errorf("route table rule dst addr is empty")
+		}
+		if value.NexthopId == "" {
+			return fmt.Errorf("route table rule nexthop id is empty")
+		}
+		return nil
+	}
+}
+
+func testAccCheckRouteTableRuleDestroy(state *terraform.State) error {
+	for _, item := range state.RootModule().Resources {
+		if item.Type != "ucloud_route_table_rule" {
+			continue
+		}
+		clients, err := testAccClients()
+		if err != nil {
+			return err
+		}
+		routeTableID := item.Primary.Attributes["route_table_id"]
+		value, found, err := describeAccRouteRuleByID(clients.vpcconn, routeTableID, item.Primary.ID)
+		if err != nil {
+			return err
+		}
+		if found && value.RouteRuleId != "" {
+			return fmt.Errorf("route table rule still exist")
+		}
+	}
+	return nil
+}
+
+func testAccCheckRouteTableAssociationExists(name string, target *vpcapi.SubnetInfo) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		item, ok := state.RootModule().Resources[name]
+		if !ok {
+			return fmt.Errorf("not found: %s", name)
+		}
+		subnetID := item.Primary.Attributes["subnet_id"]
+		if subnetID == "" {
+			return fmt.Errorf("route table association subnet id is empty")
+		}
+		clients, err := testAccClients()
+		if err != nil {
+			return err
+		}
+		value, found, err := describeAccSubnetByID(clients.vpcconn, subnetID)
+		log.Printf("[INFO] route table association subnet id %#v", subnetID)
+		if err != nil {
+			return err
+		}
+		if !found {
+			return fmt.Errorf("subnet %q for route table association is not found", subnetID)
+		}
+		*target = *value
+		return nil
+	}
+}
+
+func testAccCheckRouteTableAssociationAttributes(value *vpcapi.SubnetInfo) resource.TestCheckFunc {
+	return func(*terraform.State) error {
+		if value.SubnetId == "" {
+			return fmt.Errorf("route table association subnet id is empty")
+		}
+		if value.RouteTableId == "" {
+			return fmt.Errorf("route table association route table id is empty")
+		}
+		return nil
+	}
+}
+
+func testAccCheckRouteTableAssociationDestroy(state *terraform.State) error {
+	for _, item := range state.RootModule().Resources {
+		if item.Type != "ucloud_route_table_association" {
+			continue
+		}
+		clients, err := testAccClients()
+		if err != nil {
+			return err
+		}
+		subnetID := item.Primary.Attributes["subnet_id"]
+		routeTableID := item.Primary.Attributes["route_table_id"]
+		value, found, err := describeAccSubnetByID(clients.vpcconn, subnetID)
+		if err != nil {
+			return err
+		}
+		if found && value.RouteTableId == routeTableID {
+			return fmt.Errorf("route table association still exist")
+		}
+	}
+	return nil
+}
+
+func describeAccNetworkInterfaceByID(client *vpcapi.VPCClient, id string) (*vpcapi.NetworkInterface, bool, error) {
+	if id == "" {
+		return nil, false, fmt.Errorf("network interface id is empty")
+	}
+	request := client.NewDescribeNetworkInterfaceRequest()
+	request.InterfaceId = []string{id}
+	response, err := client.DescribeNetworkInterface(request)
+	if err != nil {
+		if isNotFoundError(err) {
+			return nil, false, nil
+		}
+		return nil, false, err
+	}
+	if response == nil {
+		return nil, false, nil
+	}
+	if response.GetRetCode() != 0 {
+		if isNotFoundCode(response.GetRetCode()) {
+			return nil, false, nil
+		}
+		return nil, false, fmt.Errorf("error on reading network interface %q, %s", id, response.GetMessage())
+	}
+	if len(response.NetworkInterfaceSet) == 0 {
+		return nil, false, nil
+	}
+	return &response.NetworkInterfaceSet[0], true, nil
+}
+
+func testAccCheckNetworkInterfaceExists(name string, target *vpcapi.NetworkInterface) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		item, ok := state.RootModule().Resources[name]
+		if !ok {
+			return fmt.Errorf("not found: %s", name)
+		}
+		interfaceID := item.Primary.ID
+		if interfaceID == "" {
+			return fmt.Errorf("network interface id is empty")
+		}
+		clients, err := testAccClients()
+		if err != nil {
+			return err
+		}
+		value, found, err := describeAccNetworkInterfaceByID(clients.vpcconn, interfaceID)
+		log.Printf("[INFO] network interface id %#v", interfaceID)
+		if err != nil {
+			return err
+		}
+		if !found {
+			return fmt.Errorf("network interface %q is not found", interfaceID)
+		}
+		*target = *value
+		return nil
+	}
+}
+
+func testAccCheckNetworkInterfaceAttributes(value *vpcapi.NetworkInterface) resource.TestCheckFunc {
+	return func(*terraform.State) error {
+		if value.InterfaceId == "" {
+			return fmt.Errorf("network interface id is empty")
+		}
+		if value.SubnetId == "" {
+			return fmt.Errorf("network interface subnet id is empty")
+		}
+		if value.VPCId == "" {
+			return fmt.Errorf("network interface vpc id is empty")
+		}
+		return nil
+	}
+}
+
+func testAccCheckNetworkInterfaceDestroy(state *terraform.State) error {
+	for _, item := range state.RootModule().Resources {
+		if item.Type != "ucloud_network_interface" {
+			continue
+		}
+		clients, err := testAccClients()
+		if err != nil {
+			return err
+		}
+		value, found, err := describeAccNetworkInterfaceByID(clients.vpcconn, item.Primary.ID)
+		if err != nil {
+			return err
+		}
+		if found && value.InterfaceId != "" {
+			return fmt.Errorf("network interface still exist")
+		}
+	}
+	return nil
+}

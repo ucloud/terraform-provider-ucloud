@@ -21,12 +21,16 @@ func (adapterV1) Registration() product.Registration {
 	return product.Registration{
 		Name: Name,
 		Resources: map[string]*schema.Resource{
-			"ucloud_vpc":                    resourceUCloudVPC(),
-			"ucloud_subnet":                 resourceUCloudSubnet(),
-			"ucloud_vpc_peering_connection": resourceUCloudVPCPeeringConnection(),
-			"ucloud_vip":                    resourceUCloudVIP(),
-			"ucloud_nat_gateway":            resourceUCloudNatGateway(),
-			"ucloud_nat_gateway_rule":       resourceUCloudNatGatewayRule(),
+			"ucloud_vpc":                     resourceUCloudVPC(),
+			"ucloud_subnet":                  resourceUCloudSubnet(),
+			"ucloud_vpc_peering_connection":  resourceUCloudVPCPeeringConnection(),
+			"ucloud_vip":                     resourceUCloudVIP(),
+			"ucloud_nat_gateway":             resourceUCloudNatGateway(),
+			"ucloud_nat_gateway_rule":        resourceUCloudNatGatewayRule(),
+			"ucloud_route_table":             resourceUCloudRouteTable(),
+			"ucloud_route_table_rule":        resourceUCloudRouteTableRule(),
+			"ucloud_route_table_association": resourceUCloudRouteTableAssociation(),
+			"ucloud_network_interface":       resourceUCloudNetworkInterface(),
 		},
 		DataSources: map[string]*schema.Resource{
 			"ucloud_vpcs":         dataSourceUCloudVPCs(),
