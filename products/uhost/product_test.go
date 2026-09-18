@@ -149,7 +149,7 @@ func TestDataSourcesPreserveSchemaAndStateMigration(t *testing.T) {
 	}
 
 	instances := dataSourceUCloudInstances()
-	assertDataSourceFields(t, instances, []string{"availability_zone", "name_regex", "ids", "tag", "output_file", "total_count", "instances"})
+	assertDataSourceFields(t, instances, []string{"availability_zone", "name_regex", "ids", "tag", "isolation_group", "vpc_id", "subnet_id", "output_file", "total_count", "instances"})
 	if instances.SchemaVersion != 1 || instances.MigrateState == nil {
 		t.Fatalf("instances state migration = version %d callback %v, want version 1 with callback", instances.SchemaVersion, instances.MigrateState != nil)
 	}

@@ -1018,7 +1018,8 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	passwordNeedUpdate := false
-	if d.HasChange("root_password") && !d.IsNewResource() {
+	loginModeNeedUpdate := d.HasChange("login_mode") || d.HasChange("key_pair_id")
+	if (d.HasChange("root_password") || loginModeNeedUpdate) && !d.IsNewResource() {
 		instance, err := client.describeInstanceById(d.Id())
 
 		if err != nil {
@@ -1071,7 +1072,7 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 		passwordNeedUpdate = true
 	}
 
-	if passwordNeedUpdate || resizeNeedUpdate || dataDiskNeedUpdate || bootDiskNeedUpdate {
+	if passwordNeedUpdate || resizeNeedUpdate || dataDiskNeedUpdate || bootDiskNeedUpdate || loginModeNeedUpdate {
 		// instance update these attributes need to wait it stopped
 		stopReq := conn.NewStopUHostInstanceRequest()
 		stopReq.UHostId = ucloud.String(d.Id())
@@ -1088,7 +1089,7 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 		if instance.State != statusStopped {
 			//!d.IsNewResource in order to avoid the err of boot disk initialize
 			if !d.Get("allow_stopping_for_update").(bool) && !d.IsNewResource() {
-				return fmt.Errorf("updating the root_password, boot_disk_size, data_disk_size or instance_type on an instance requires stopping it, please set allow_stopping_for_update = true in your config to acknowledge it")
+				return fmt.Errorf("updating the root_password, login_mode, key_pair_id, boot_disk_size, data_disk_size or instance_type on an instance requires stopping it, please set allow_stopping_for_update = true in your config to acknowledge it")
 			}
 
 			_, err := conn.StopUHostInstance(stopReq)
@@ -1111,10 +1112,25 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 			}
 		}
 
-		if passwordNeedUpdate {
+		if passwordNeedUpdate || loginModeNeedUpdate {
 			reqPassword := conn.NewResetUHostInstancePasswordRequest()
 			reqPassword.UHostId = ucloud.String(d.Id())
-			reqPassword.Password = ucloud.String(d.Get("root_password").(string))
+
+			loginMode := "Password"
+			if v, ok := d.GetOk("login_mode"); ok && v.(string) != "" {
+				loginMode = v.(string)
+			}
+			reqPassword.LoginMode = ucloud.String(loginMode)
+
+			if loginMode == "KeyPair" {
+				if v, ok := d.GetOk("key_pair_id"); ok {
+					reqPassword.KeyPairId = ucloud.String(v.(string))
+				} else {
+					return fmt.Errorf("%q is required when %q is %q", "key_pair_id", "login_mode", "KeyPair")
+				}
+			} else if shouldPreserveInstanceRootPasswordState(loginMode) {
+				reqPassword.Password = ucloud.String(d.Get("root_password").(string))
+			}
 
 			_, err := conn.ResetUHostInstancePassword(reqPassword)
 			if err != nil {
@@ -1122,6 +1138,8 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 			}
 
 			d.SetPartial("root_password")
+			d.SetPartial("login_mode")
+			d.SetPartial("key_pair_id")
 		}
 
 		if resizeNeedUpdate {
