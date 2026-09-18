@@ -399,6 +399,78 @@ func resourceUCloudInstance() *schema.Resource {
 				Computed: true,
 			},
 
+			"net_capability": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"normal", "super", "ultra", "extreme"}, false),
+			},
+
+			"hotplug_feature": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+			},
+
+			"uni_feature": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Default:  false,
+			},
+
+			"gpu": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IntBetween(1, 8),
+			},
+
+			"gpu_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"K80", "P40", "V100", "V100S", "T4", "T4A", "T4S", "2080",
+					"2080Ti", "2080Ti-4C", "2080TiS", "2080TiPro", "1080Ti",
+					"3080Ti", "3090", "4090", "4090Pro", "4090_48G", "4090LD",
+					"5090", "5090Pro", "BR104P", "MR-V100",
+					"A100", "A800", "H20", "H800",
+				}, false),
+			},
+
+			"alarm_template_id": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IntBetween(1, 2147483647),
+			},
+
+			"auto_data_disk_init": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"On", "Off"}, false),
+			},
+
+			"coupon_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
+			"uhost_family": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"o1i", "o1a", "o1r", "o1h", "o2i", "o2a", "om1i", "om2i",
+					"opro1a", "opro2a", "oprog1i", "oprog2i", "oprog1a",
+				}, false),
+			},
+
 			"cpu": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -674,6 +746,44 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 		req.MinimalCpuPlatform = ucloud.String(v.(string))
 	} else {
 		req.MinimalCpuPlatform = ucloud.String("Intel/Auto")
+	}
+
+	if v, ok := d.GetOk("net_capability"); ok {
+		req.NetCapability = ucloud.String(upperCamelCvt.unconvert(v.(string)))
+	}
+
+	if v, ok := d.GetOkExists("hotplug_feature"); ok {
+		req.HotplugFeature = ucloud.Bool(v.(bool))
+	}
+
+	if v, ok := d.GetOkExists("uni_feature"); ok && v.(bool) {
+		req.Features = &uhost.CreateUHostInstanceParamFeatures{
+			UNI: ucloud.Bool(true),
+		}
+	}
+
+	if v, ok := d.GetOk("gpu"); ok {
+		req.GPU = ucloud.Int(v.(int))
+	}
+
+	if v, ok := d.GetOk("gpu_type"); ok {
+		req.GpuType = ucloud.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("alarm_template_id"); ok {
+		req.AlarmTemplateId = ucloud.Int(v.(int))
+	}
+
+	if v, ok := d.GetOk("auto_data_disk_init"); ok {
+		req.AutoDataDiskInit = ucloud.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("coupon_id"); ok {
+		req.CouponId = ucloud.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("uhost_family"); ok {
+		req.UHostFamily = ucloud.String(v.(string))
 	}
 
 	resp, err := conn.CreateUHostInstance(req)
@@ -1154,6 +1264,22 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 	d.Set("auto_renew", boolCamelCvt.unconvert(instance.AutoRenew))
 	d.Set("remark", instance.Remark)
 	d.Set("cpu_platform", instance.CpuPlatform)
+
+	// these params are create-only, so just keep the value returned by describe
+	// api to avoid unexpected diffs.
+	if notEmptyStringInSet(instance.NetCapability) {
+		d.Set("net_capability", strings.ToLower(instance.NetCapability))
+	}
+	d.Set("hotplug_feature", instance.HotplugFeature)
+	if instance.GPU > 0 {
+		d.Set("gpu", instance.GPU)
+	}
+	if notEmptyStringInSet(instance.GpuType) {
+		d.Set("gpu_type", instance.GpuType)
+	}
+	if notEmptyStringInSet(instance.UHostFamily) {
+		d.Set("uhost_family", instance.UHostFamily)
+	}
 
 	//in order to be compatible with returns null
 	if notEmptyStringInSet(instance.ChargeType) {
