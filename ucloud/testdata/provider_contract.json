@@ -1201,9 +1201,21 @@
     },
     "ucloud_instance": {
       "schema": {
+        "alarm_template_id": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "validate": "IntBetween"
+        },
         "allow_stopping_for_update": {
           "type": "TypeBool",
           "optional": true
+        },
+        "auto_data_disk_init": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringInSlice"
         },
         "auto_renew": {
           "type": "TypeBool",
@@ -1233,6 +1245,11 @@
           "computed": true,
           "force_new": true,
           "validate": "StringInSlice"
+        },
+        "coupon_id": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
         },
         "cpu": {
           "type": "TypeInt",
@@ -1331,6 +1348,23 @@
           "type": "TypeString",
           "computed": true
         },
+        "gpu": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "validate": "IntBetween"
+        },
+        "gpu_type": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "hotplug_feature": {
+          "type": "TypeBool",
+          "optional": true,
+          "force_new": true
+        },
         "image_id": {
           "type": "TypeString",
           "required": true,
@@ -1389,6 +1423,13 @@
           "optional": true,
           "computed": true,
           "validate": "StringMatch"
+        },
+        "net_capability": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringInSlice"
         },
         "network_interface": {
           "type": "TypeList",
@@ -1487,6 +1528,19 @@
           "default": "\"Default\"",
           "state_func": "stateFuncTag",
           "validate": "StringMatch"
+        },
+        "uhost_family": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "uni_feature": {
+          "type": "TypeBool",
+          "optional": true,
+          "force_new": true,
+          "default": "false"
         },
         "user_data": {
           "type": "TypeString",
@@ -5155,12 +5209,20 @@
             }
           }
         },
+        "isolation_group": {
+          "type": "TypeString",
+          "optional": true
+        },
         "name_regex": {
           "type": "TypeString",
           "optional": true,
           "validate": "ValidateRegexp"
         },
         "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "subnet_id": {
           "type": "TypeString",
           "optional": true
         },
@@ -5171,6 +5233,10 @@
         "total_count": {
           "type": "TypeInt",
           "computed": true
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "optional": true
         }
       },
       "schema_version": 1,

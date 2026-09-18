@@ -160,7 +160,16 @@ The following arguments are supported:
 
  * `network_interface` - (Optional, ForceNew) Additional network interface eips to attach to the instance. `network_interface` configurations only apply on resource creation. The count of `network_interface` can only be one. See [network_interface](#network_interface) below for details on attributes. When set `network_interface`, the argument `delete_eips_with_instance` must bet set.
  * `delete_eips_with_instance` - (Optional, ForceNew, Required when set `network_interface`)  Whether the network interface eips associated instance should be destroyed on instance termination.
-* `min_cpu_platform` - (Optional, ForceNew) Specifies a minimum CPU platform for the the VM instance. (Default: `Intel/Auto`). You may refer to [product documentation](https://docs.ucloud.cn/uhost/introduction/uhost/type_new) and [API documentation](https://docs.ucloud.cn/api/uhost-api/create_uhost_instance).    
+* `min_cpu_platform` - (Optional, ForceNew) Specifies a minimum CPU platform for the the VM instance. (Default: `Intel/Auto`). You may refer to [product documentation](https://docs.ucloud.cn/uhost/introduction/uhost/type_new) and [API documentation](https://docs.ucloud.cn/api/uhost-api/create_uhost_instance).
+* `net_capability` - (Optional, ForceNew) The network enhancement feature of the instance. Possible values are: `normal` for no enhancement, `super` for network enhancement 1.0, `ultra` for network enhancement 2.0, `extreme` for network enhancement 3.0. (Default: `normal`).
+* `hotplug_feature` - (Optional, ForceNew) Enable the hot upgrade feature of the instance. (Default: `false`).
+* `uni_feature` - (Optional, ForceNew) Enable the elastic network interface feature of the instance. (Default: `false`).
+* `gpu` - (Optional, ForceNew) The count of GPU cores, only supported by GPU machine types.
+* `gpu_type` - (Optional, ForceNew) The type of GPU, required when the machine type is `G`. Possible values are: `K80`, `P40`, `V100`, `V100S`, `T4`, `T4A`, `T4S`, `T4/4`, `2080Ti`, `2080Ti-4C`, `2080TiS`, `2080TiPro`, `1080Ti`, `3090`, `4090`, `4090Pro`, `4090_48G`, `A100`, `A800`, `H20`.
+* `alarm_template_id` - (Optional, ForceNew) The ID of the alarm template to bind to the instance. Binding failure does not affect instance creation.
+* `auto_data_disk_init` - (Optional, ForceNew) Whether to automatically partition and mount the data disks when the image supports Cloud-init. Possible values are: `On` for auto mount (default), `Off` for no auto mount.
+* `coupon_id` - (Optional, ForceNew) The ID of the host coupon to use for payment.
+* `uhost_family` - (Optional, ForceNew) The instance family, composed of the machine type code and CPU platform. Possible values for machine type `O`: `o1i` (O1, Intel), `o1a` (O1, AMD), `o1r` (O1, ARM), `o2i` (O2, Intel); for machine type `OM`: `om1i`, `om2i`. The family must match the machine type, otherwise the request is rejected.
 ### data_disks
 
 The `data_disks` supports the following:
