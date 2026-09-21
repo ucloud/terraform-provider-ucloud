@@ -69,6 +69,17 @@
         "website/docs/r/db_*"
       ]
     },
+    "udb_mysql": {
+      "github_users": [
+        "Episkey-G"
+      ],
+      "paths": [
+        "products/udb_mysql/**",
+        "examples/udb_mysql/**",
+        "website/docs/d/udb_mysql_*",
+        "website/docs/r/udb_mysql_*"
+      ]
+    },
     "udisk": {
       "github_users": [
         "Ali1213",
