@@ -13,6 +13,7 @@ import (
 	"github.com/terraform-providers/terraform-provider-ucloud/products/uaccount"
 	"github.com/terraform-providers/terraform-provider-ucloud/products/uads"
 	"github.com/terraform-providers/terraform-provider-ucloud/products/udb"
+	"github.com/terraform-providers/terraform-provider-ucloud/products/udb_mysql"
 	"github.com/terraform-providers/terraform-provider-ucloud/products/udisk"
 	"github.com/terraform-providers/terraform-provider-ucloud/products/udpn"
 	"github.com/terraform-providers/terraform-provider-ucloud/products/ufs"
@@ -63,6 +64,7 @@ var definitions = []definition{
 	{name: "uaccount", masterData: ProductMasterDataIdentity{EnSampleName: "UAccount", Key: "uaccount"}, newAdapter: uaccount.New, terraformNamespaces: []string{"projects", "zones"}, testBaseline: TestBaseline{AcceptanceTests: 2}},
 	{name: "uads", masterData: ProductMasterDataIdentity{EnSampleName: "UDDoS", Key: "uddos"}, newAdapter: uads.New, terraformNamespaces: []string{"anti_ddos"}, testBaseline: TestBaseline{AcceptanceTests: 2, ImportTests: 1}},
 	{name: "udb", masterData: ProductMasterDataIdentity{EnSampleName: "UDB", Key: "udb"}, newAdapter: udb.New, terraformNamespaces: []string{"db"}, testBaseline: TestBaseline{AcceptanceTests: 11, ImportTests: 1}},
+	{name: "udb_mysql", masterData: ProductMasterDataIdentity{EnSampleName: "MySQL", Key: "udb_mysql"}, newAdapter: udb_mysql.New, testBaseline: TestBaseline{AcceptanceTests: 5, ImportTests: 1}},
 	{name: "udisk", masterData: ProductMasterDataIdentity{EnSampleName: "UDisk", Key: "udisk"}, newAdapter: udisk.New, terraformNamespaces: []string{"disk", "disks"}, testBaseline: TestBaseline{AcceptanceTests: 16, ImportTests: 2}},
 	{name: "udpn", masterData: ProductMasterDataIdentity{EnSampleName: "UDPN", Key: "udpn"}, newAdapter: udpn.New, testBaseline: TestBaseline{AcceptanceTests: 2, ImportTests: 1}},
 	{name: "ufs", masterData: ProductMasterDataIdentity{EnSampleName: "UFS", Key: "ufs"}, newAdapter: ufs.New, testBaseline: TestBaseline{AcceptanceTests: 4}},

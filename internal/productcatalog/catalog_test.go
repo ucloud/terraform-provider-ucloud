@@ -57,7 +57,7 @@ func TestBindingsRegisterEveryProduct(t *testing.T) {
 
 func TestNamesReturnsCopy(t *testing.T) {
 	want := []string{
-		"iam", "ipsecvpn", "label", "uaccount", "uads", "udb", "udisk", "udpn", "ufs",
+		"iam", "ipsecvpn", "label", "uaccount", "uads", "udb", "udb_mysql", "udisk", "udpn", "ufs",
 		"uhost", "uk8s", "ulb", "umem", "unet", "uphost", "us3", "vpc",
 	}
 	if got := Names(); !reflect.DeepEqual(got, want) {
@@ -72,23 +72,24 @@ func TestNamesReturnsCopy(t *testing.T) {
 
 func TestProductMasterDataIdentityFor(t *testing.T) {
 	want := map[string]ProductMasterDataIdentity{
-		"iam":      {EnSampleName: "IAM", Key: "iam"},
-		"ipsecvpn": {EnSampleName: "IPSecVPN", Key: "ipsecvpn"},
-		"label":    {EnSampleName: "Label", Key: "label"},
-		"uaccount": {EnSampleName: "UAccount", Key: "uaccount"},
-		"uads":     {EnSampleName: "UDDoS", Key: "uddos"},
-		"udb":      {EnSampleName: "UDB", Key: "udb"},
-		"udisk":    {EnSampleName: "UDisk", Key: "udisk"},
-		"udpn":     {EnSampleName: "UDPN", Key: "udpn"},
-		"ufs":      {EnSampleName: "UFS", Key: "ufs"},
-		"uhost":    {EnSampleName: "UHost", Key: "uhost"},
-		"uk8s":     {EnSampleName: "UK8S", Key: "uk8s"},
-		"ulb":      {EnSampleName: "ULB", Key: "ulb"},
-		"umem":     {EnSampleName: "UMem", Key: "umem"},
-		"unet":     {EnSampleName: "UNet", Key: "unet"},
-		"uphost":   {EnSampleName: "UPHost", Key: "uphost"},
-		"us3":      {EnSampleName: "UFile", Key: "ufile"},
-		"vpc":      {EnSampleName: "VPC", Key: "vpc"},
+		"iam":       {EnSampleName: "IAM", Key: "iam"},
+		"ipsecvpn":  {EnSampleName: "IPSecVPN", Key: "ipsecvpn"},
+		"label":     {EnSampleName: "Label", Key: "label"},
+		"uaccount":  {EnSampleName: "UAccount", Key: "uaccount"},
+		"uads":      {EnSampleName: "UDDoS", Key: "uddos"},
+		"udb":       {EnSampleName: "UDB", Key: "udb"},
+		"udb_mysql": {EnSampleName: "MySQL", Key: "udb_mysql"},
+		"udisk":     {EnSampleName: "UDisk", Key: "udisk"},
+		"udpn":      {EnSampleName: "UDPN", Key: "udpn"},
+		"ufs":       {EnSampleName: "UFS", Key: "ufs"},
+		"uhost":     {EnSampleName: "UHost", Key: "uhost"},
+		"uk8s":      {EnSampleName: "UK8S", Key: "uk8s"},
+		"ulb":       {EnSampleName: "ULB", Key: "ulb"},
+		"umem":      {EnSampleName: "UMem", Key: "umem"},
+		"unet":      {EnSampleName: "UNet", Key: "unet"},
+		"uphost":    {EnSampleName: "UPHost", Key: "uphost"},
+		"us3":       {EnSampleName: "UFile", Key: "ufile"},
+		"vpc":       {EnSampleName: "VPC", Key: "vpc"},
 	}
 	if got := len(Names()); got != len(want) {
 		t.Fatalf("historical product count = %d, mapped count = %d", got, len(want))
