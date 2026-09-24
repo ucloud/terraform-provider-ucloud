@@ -70,6 +70,15 @@ func TestInstanceSchemaCompatibility(t *testing.T) {
 		"user_data":                  {typeValue: schema.TypeString, optional: true, forceNew: true},
 		"min_cpu_platform":           {typeValue: schema.TypeString, optional: true, forceNew: true},
 		"cpu_platform":               {typeValue: schema.TypeString, computed: true},
+		"net_capability":             {typeValue: schema.TypeString, optional: true, computed: true, forceNew: true},
+		"hotplug_feature":            {typeValue: schema.TypeBool, optional: true, forceNew: true},
+		"uni_feature":                {typeValue: schema.TypeBool, optional: true, forceNew: true},
+		"gpu":                        {typeValue: schema.TypeInt, optional: true, forceNew: true},
+		"gpu_type":                   {typeValue: schema.TypeString, optional: true, forceNew: true},
+		"alarm_template_id":          {typeValue: schema.TypeInt, optional: true, forceNew: true},
+		"auto_data_disk_init":        {typeValue: schema.TypeString, optional: true, forceNew: true},
+		"coupon_id":                  {typeValue: schema.TypeString, optional: true, forceNew: true},
+		"uhost_family":               {typeValue: schema.TypeString, optional: true, computed: true, forceNew: true},
 		"cpu":                        {typeValue: schema.TypeInt, computed: true},
 		"memory":                     {typeValue: schema.TypeInt, computed: true},
 		"status":                     {typeValue: schema.TypeString, computed: true},
@@ -140,7 +149,7 @@ func TestDataSourcesPreserveSchemaAndStateMigration(t *testing.T) {
 	}
 
 	instances := dataSourceUCloudInstances()
-	assertDataSourceFields(t, instances, []string{"availability_zone", "name_regex", "ids", "tag", "output_file", "total_count", "instances"})
+	assertDataSourceFields(t, instances, []string{"availability_zone", "name_regex", "ids", "tag", "isolation_group", "vpc_id", "subnet_id", "output_file", "total_count", "instances"})
 	if instances.SchemaVersion != 1 || instances.MigrateState == nil {
 		t.Fatalf("instances state migration = version %d callback %v, want version 1 with callback", instances.SchemaVersion, instances.MigrateState != nil)
 	}

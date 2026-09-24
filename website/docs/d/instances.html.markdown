@@ -31,6 +31,9 @@ The following arguments are supported:
 * `name_regex` - (Optional) A regex string to filter resulting instances by name.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 * `tag` - (Optional) A tag assigned to instance.
+* `isolation_group` - (Optional) The ID of isolation group to filter instances.
+* `vpc_id` - (Optional) The ID of VPC to filter instances.
+* `subnet_id` - (Optional) The ID of subnet to filter instances.
 
 ## Attributes Reference
 

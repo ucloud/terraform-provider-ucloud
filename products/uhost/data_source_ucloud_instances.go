@@ -44,6 +44,21 @@ func dataSourceUCloudInstances() *schema.Resource {
 				Optional: true,
 			},
 
+			"isolation_group": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
+			"vpc_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
+			"subnet_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
 			"output_file": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -210,6 +225,18 @@ func dataSourceUCloudInstancesRead(d *schema.ResourceData, meta interface{}) err
 
 	if v, ok := d.GetOk("tag"); ok {
 		req.Tag = ucloud.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("isolation_group"); ok {
+		req.IsolationGroup = ucloud.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("vpc_id"); ok {
+		req.VPCId = ucloud.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("subnet_id"); ok {
+		req.SubnetId = ucloud.String(v.(string))
 	}
 
 	var allInstances []uhost.UHostInstanceSet
