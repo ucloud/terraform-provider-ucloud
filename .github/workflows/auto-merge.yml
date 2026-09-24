@@ -13,6 +13,11 @@ on:
       - converted_to_draft
       - labeled
       - unlabeled
+  pull_request_review:
+    types:
+      - submitted
+      - dismissed
+      - edited
 
 concurrency:
   group: auto-merge-${{ github.event.pull_request.number }}

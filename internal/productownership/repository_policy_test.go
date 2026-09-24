@@ -273,6 +273,22 @@ func TestMakefileDiscoversProductDirectories(t *testing.T) {
 	}
 }
 
+func TestAutoMergeWorkflowReevaluatesReviewDecisions(t *testing.T) {
+	workflow, err := os.ReadFile("../../.github/workflows/auto-merge.yml")
+	if err != nil {
+		t.Fatalf("read auto-merge.yml: %v", err)
+	}
+	content := string(workflow)
+	if !strings.Contains(content, "pull_request_review:") {
+		t.Fatal("auto-merge must re-run on reviews so platform clearance enables native auto-merge")
+	}
+	for _, reviewType := range []string{"- submitted", "- dismissed", "- edited"} {
+		if !strings.Contains(content, reviewType) {
+			t.Fatalf("auto-merge must react to %s reviews", reviewType)
+		}
+	}
+}
+
 func TestOwnerGateWorkflowsNeverExecutePullRequestCode(t *testing.T) {
 	for _, filename := range []string{"owner-gate.yml", "auto-merge.yml"} {
 		workflow, err := os.ReadFile(filepath.Join("../../.github/workflows", filename))
