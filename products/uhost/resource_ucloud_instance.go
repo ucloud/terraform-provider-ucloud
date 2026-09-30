@@ -471,7 +471,7 @@ func resourceUCloudInstance() *schema.Resource {
 				ForceNew: true,
 				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"o1i", "o1a", "o1r", "o1h", "o2i", "o2a", "om1i", "om2i",
+					"o1i", "o1a", "o1r", "o1h", "o2i", "o2a", "om1i", "om2i", "om1a",
 					"opro1a", "opro2a", "oprog1i", "oprog2i", "oprog1a",
 				}, false),
 			},
