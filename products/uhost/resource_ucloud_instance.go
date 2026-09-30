@@ -374,6 +374,11 @@ func resourceUCloudInstance() *schema.Resource {
 				Optional: true,
 			},
 
+			"auto_start": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+
 			"user_data": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -1115,6 +1120,7 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 		if passwordNeedUpdate || loginModeNeedUpdate {
 			reqPassword := conn.NewResetUHostInstancePasswordRequest()
 			reqPassword.UHostId = ucloud.String(d.Id())
+			reqPassword.AutoStart = ucloud.Bool(d.Get("auto_start").(bool))
 
 			loginMode := "Password"
 			if v, ok := d.GetOk("login_mode"); ok && v.(string) != "" {

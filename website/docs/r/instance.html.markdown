@@ -124,9 +124,10 @@ The following arguments are supported:
 
 * `allow_stopping_for_update` - (Optional) If you try to update some properties which requires stopping the instance, you must set `allow_stopping_for_update` to `true` in your config to allows Terraform to stop the instance to update its properties like `instance_type`, `root_password`, `boot_disk_size`, `data_disk_size`.
 
-* `root_password` - (Optional) The password for the instance, which contains 8-30 characters, and at least 2 items of capital letters, lower case letters, numbers and special characters. The special characters include <code>`()~!@#$%^&*-+=_|{}\[]:;'<>,.?/</code>. If not specified, terraform will auto-generate a password. 
+* `root_password` - (Optional) The password for the instance, which contains 8-30 characters, and at least 2 items of capital letters, lower case letters, numbers and special characters. The special characters include <code>`()~!@#$%^&*-+=_|{}\[]:;'<>,.?/</code>. If not specified, terraform will auto-generate a password.
 
     ~> **Note** If you want to update this value, you must set `allow_stopping_for_update`to `true`.
+* `auto_start` - (Optional) Whether to start the instance immediately after resetting its password is completed, default is `false`. It takes effect only when updating `root_password`, `login_mode` or `key_pair_id`, and is not supported for `dynamic` (pay by hour) and preemptible instances.
 * `login_mode` - (Optional) The login mode of instance. Possible values are: `Password` and `KeyPair`. If not specified, Terraform uses `Password` for backward compatibility.
 * `key_pair_id` - (Optional) The ID of the key pair used when `login_mode` is `KeyPair`. This argument is required when `login_mode` is `KeyPair`, and cannot be used when `login_mode` is `Password`.
 * `deletion_protection` - (Optional) Whether deletion protection is enabled when creating the instance.

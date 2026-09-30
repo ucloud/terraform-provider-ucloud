@@ -59,6 +59,11 @@ func dataSourceUCloudInstances() *schema.Resource {
 				Optional: true,
 			},
 
+			"udisk_id_for_attachment": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
 			"output_file": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -237,6 +242,10 @@ func dataSourceUCloudInstancesRead(d *schema.ResourceData, meta interface{}) err
 
 	if v, ok := d.GetOk("subnet_id"); ok {
 		req.SubnetId = ucloud.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("udisk_id_for_attachment"); ok {
+		req.UDiskIdForAttachment = ucloud.String(v.(string))
 	}
 
 	var allInstances []uhost.UHostInstanceSet

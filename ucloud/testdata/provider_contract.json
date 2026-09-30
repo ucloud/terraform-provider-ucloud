@@ -1221,6 +1221,10 @@
           "type": "TypeBool",
           "computed": true
         },
+        "auto_start": {
+          "type": "TypeBool",
+          "optional": true
+        },
         "availability_zone": {
           "type": "TypeString",
           "required": true,
@@ -4964,6 +4968,11 @@
           "type": "TypeString",
           "optional": true
         },
+        "func_type": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "StringInSlice"
+        },
         "ids": {
           "type": "TypeSet",
           "optional": true,
@@ -5019,7 +5028,15 @@
                   }
                 }
               },
+              "func_type": {
+                "type": "TypeString",
+                "computed": true
+              },
               "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "integrated_software": {
                 "type": "TypeString",
                 "computed": true
               },
@@ -5035,6 +5052,37 @@
                 "type": "TypeString",
                 "computed": true
               },
+              "price_set": {
+                "type": "TypeList",
+                "computed": true,
+                "element": {
+                  "kind": "resource",
+                  "resource": {
+                    "charge_type": {
+                      "type": "TypeString",
+                      "computed": true
+                    },
+                    "original_price": {
+                      "type": "TypeFloat",
+                      "computed": true
+                    },
+                    "price": {
+                      "type": "TypeFloat",
+                      "computed": true
+                    }
+                  }
+                }
+              },
+              "scene_categories": {
+                "type": "TypeList",
+                "computed": true,
+                "element": {
+                  "kind": "schema",
+                  "schema": {
+                    "type": "TypeString"
+                  }
+                }
+              },
               "size": {
                 "type": "TypeInt",
                 "computed": true
@@ -5046,9 +5094,17 @@
               "type": {
                 "type": "TypeString",
                 "computed": true
+              },
+              "vendor": {
+                "type": "TypeString",
+                "computed": true
               }
             }
           }
+        },
+        "include_price": {
+          "type": "TypeBool",
+          "optional": true
         },
         "most_recent": {
           "type": "TypeBool",
@@ -5066,6 +5122,10 @@
           "validate": "StringInSlice"
         },
         "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "tag": {
           "type": "TypeString",
           "optional": true
         },
@@ -5233,6 +5293,10 @@
         "total_count": {
           "type": "TypeInt",
           "computed": true
+        },
+        "udisk_id_for_attachment": {
+          "type": "TypeString",
+          "optional": true
         },
         "vpc_id": {
           "type": "TypeString",

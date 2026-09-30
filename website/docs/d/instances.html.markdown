@@ -34,6 +34,7 @@ The following arguments are supported:
 * `isolation_group` - (Optional) The ID of isolation group to filter instances.
 * `vpc_id` - (Optional) The ID of VPC to filter instances.
 * `subnet_id` - (Optional) The ID of subnet to filter instances.
+* `udisk_id_for_attachment` - (Optional) The ID of UDisk to filter instances which the disk can be attached to, mainly for RSSD cloud disks.
 
 ## Attributes Reference
 
