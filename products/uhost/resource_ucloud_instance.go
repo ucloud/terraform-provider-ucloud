@@ -127,6 +127,12 @@ func resourceUCloudInstance() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"Password", "KeyPair"}, false),
 			},
 
+			"disk_password": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+			},
+
 			"key_pair_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -1103,6 +1109,9 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 			if instance.State != statusRunning {
 				startReq := conn.NewStartUHostInstanceRequest()
 				startReq.UHostId = ucloud.String(d.Id())
+				if v, ok := d.GetOk("disk_password"); ok {
+					startReq.DiskPassword = ucloud.String(v.(string))
+				}
 				_, err := conn.StartUHostInstance(startReq)
 				if err != nil {
 					return fmt.Errorf("error on starting instance when updating %q, %s", d.Id(), err)
@@ -1288,6 +1297,9 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 			// after instance update, we need to wait it started
 			startReq := conn.NewStartUHostInstanceRequest()
 			startReq.UHostId = ucloud.String(d.Id())
+			if v, ok := d.GetOk("disk_password"); ok {
+				startReq.DiskPassword = ucloud.String(v.(string))
+			}
 
 			if _, err := conn.StartUHostInstance(startReq); err != nil {
 				return fmt.Errorf("error on starting instance when updating %q, %s", d.Id(), err)

@@ -43,6 +43,7 @@ func TestInstanceSchemaCompatibility(t *testing.T) {
 		"image_id":                   {typeValue: schema.TypeString, required: true},
 		"root_password":              {typeValue: schema.TypeString, optional: true, computed: true, sensitive: true},
 		"login_mode":                 {typeValue: schema.TypeString, optional: true},
+		"disk_password":              {typeValue: schema.TypeString, optional: true, sensitive: true},
 		"key_pair_id":                {typeValue: schema.TypeString, optional: true},
 		"deletion_protection":        {typeValue: schema.TypeBool, optional: true},
 		"instance_type":              {typeValue: schema.TypeString, required: true},
@@ -122,9 +123,10 @@ func TestInstanceStateAndIsolationGroupCompatibility(t *testing.T) {
 		t.Fatal("ucloud_instance_state importer is missing")
 	}
 	assertSchemaFields(t, state, map[string]schemaFieldExpectation{
-		"instance_id": {typeValue: schema.TypeString, required: true},
-		"state":       {typeValue: schema.TypeString, required: true},
-		"force":       {typeValue: schema.TypeBool, optional: true},
+		"instance_id":   {typeValue: schema.TypeString, required: true},
+		"state":         {typeValue: schema.TypeString, required: true},
+		"force":         {typeValue: schema.TypeBool, optional: true},
+		"disk_password": {typeValue: schema.TypeString, optional: true, sensitive: true},
 	})
 
 	isolationGroup := resourceUCloudIsolationGroup()

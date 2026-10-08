@@ -129,6 +129,7 @@ The following arguments are supported:
     ~> **Note** If you want to update this value, you must set `allow_stopping_for_update`to `true`.
 * `auto_start` - (Optional) Whether to start the instance immediately after resetting its password or resizing the instance is completed, default is `false`. It takes effect only when updating `root_password`, `login_mode`, `key_pair_id`, `instance_type` or `net_capability`, and is not supported for `dynamic` (pay by hour) and preemptible instances.
 * `login_mode` - (Optional) The login mode of instance. Possible values are: `Password` and `KeyPair`. If not specified, Terraform uses `Password` for backward compatibility.
+* `disk_password` - (Optional, Sensitive) The password of the encrypted disk, required to start the instance when it has encrypted disks attached. It is only sent to `StartUHostInstance` and is not stored in the instance state beyond the Terraform configuration.
 * `key_pair_id` - (Optional) The ID of the key pair used when `login_mode` is `KeyPair`. This argument is required when `login_mode` is `KeyPair`, and cannot be used when `login_mode` is `Password`.
 * `deletion_protection` - (Optional) Whether deletion protection is enabled when creating the instance.
 

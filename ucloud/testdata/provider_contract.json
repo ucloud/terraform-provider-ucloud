@@ -1317,6 +1317,11 @@
           "type": "TypeBool",
           "optional": true
         },
+        "disk_password": {
+          "type": "TypeString",
+          "optional": true,
+          "sensitive": true
+        },
         "disk_set": {
           "type": "TypeList",
           "computed": true,
@@ -1598,6 +1603,11 @@
     },
     "ucloud_instance_state": {
       "schema": {
+        "disk_password": {
+          "type": "TypeString",
+          "optional": true,
+          "sensitive": true
+        },
         "force": {
           "type": "TypeBool",
           "optional": true

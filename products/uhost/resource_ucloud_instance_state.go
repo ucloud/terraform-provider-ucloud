@@ -35,6 +35,11 @@ func resourceUCloudInstanceState() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			"disk_password": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+			},
 		},
 	}
 }
@@ -47,8 +52,9 @@ func resourceUCloudInstanceStateCreate(d *schema.ResourceData, meta interface{})
 	instanceId := d.Get("instance_id").(string)
 	state := d.Get("state").(string)
 	force := d.Get("force").(bool)
+	diskPassword := d.Get("disk_password").(string)
 
-	err = WaitAndUpdateInstanceState(client, instanceId, state, force, d.Timeout(schema.TimeoutCreate))
+	err = WaitAndUpdateInstanceState(client, instanceId, state, force, diskPassword, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return err
 	}
@@ -81,8 +87,9 @@ func resourceUCloudInstanceStateUpdate(d *schema.ResourceData, meta interface{})
 	instanceId := d.Id()
 	state := d.Get("state").(string)
 	force := d.Get("force").(bool)
+	diskPassword := d.Get("disk_password").(string)
 
-	err = WaitAndUpdateInstanceState(client, instanceId, state, force, d.Timeout(schema.TimeoutUpdate))
+	err = WaitAndUpdateInstanceState(client, instanceId, state, force, diskPassword, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err
 	}
@@ -135,11 +142,11 @@ func getInstanceStateRefreshFunc(client *productClient, instanceId string) resou
 	}
 }
 
-func updateInstanceState(client *productClient, instance uhost.UHostInstanceSet, state string, force bool) error {
+func updateInstanceState(client *productClient, instance uhost.UHostInstanceSet, state string, force bool, diskPassword string) error {
 	switch instance.State {
 	case instanceStatusStopped:
 		if state == instanceStatusRunning {
-			return client.startInstanceById(instance.UHostId)
+			return client.startInstanceById(instance.UHostId, diskPassword)
 		}
 	case instanceStatusRunning:
 		if state == instanceStatusStopped {
@@ -153,12 +160,12 @@ func updateInstanceState(client *productClient, instance uhost.UHostInstanceSet,
 	return nil
 }
 
-func WaitAndUpdateInstanceState(client *productClient, instanceId string, state string, force bool, timeout time.Duration) error {
+func WaitAndUpdateInstanceState(client *productClient, instanceId string, state string, force bool, diskPassword string, timeout time.Duration) error {
 	instance, instanceErr := waitInstanceReady(client, instanceId, timeout)
 	if instanceErr != nil {
 		return fmt.Errorf("error on waiting instance reach a ready status %v", instanceErr)
 	}
-	err := updateInstanceState(client, *instance, state, force)
+	err := updateInstanceState(client, *instance, state, force, diskPassword)
 	if err != nil {
 		return err
 	}
