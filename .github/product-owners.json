@@ -200,12 +200,18 @@
       "paths": [
         "products/vpc/**",
         "examples/nat_gateway/**",
+        "examples/network_interface/**",
+        "examples/route_table/**",
         "examples/vpc/**",
         "website/docs/d/nat_gateway*",
         "website/docs/d/sec_groups.html.markdown",
         "website/docs/d/subnets.html.markdown",
         "website/docs/d/vpcs.html.markdown",
         "website/docs/r/nat_gateway*",
+        "website/docs/r/network_interface.html.markdown",
+        "website/docs/r/route_table.html.markdown",
+        "website/docs/r/route_table_association.html.markdown",
+        "website/docs/r/route_table_rule.html.markdown",
         "website/docs/r/subnet.html.markdown",
         "website/docs/r/vip.html.markdown",
         "website/docs/r/vpc*"

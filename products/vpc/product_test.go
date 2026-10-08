@@ -12,7 +12,7 @@ import (
 )
 
 var vpcTerraformNamespaces = []string{
-	"vpc", "subnet", "vpcs", "subnets", "vip", "nat_gateway", "nat_gateways", "sec_groups",
+	"vpc", "subnet", "vpcs", "subnets", "vip", "nat_gateway", "nat_gateways", "sec_groups", "route_table", "network_interface",
 }
 
 func TestRegistrationKeepsLegacyTerraformSurface(t *testing.T) {
@@ -30,6 +30,10 @@ func TestRegistrationKeepsLegacyTerraformSurface(t *testing.T) {
 		"ucloud_vip",
 		"ucloud_nat_gateway",
 		"ucloud_nat_gateway_rule",
+		"ucloud_route_table",
+		"ucloud_route_table_rule",
+		"ucloud_route_table_association",
+		"ucloud_network_interface",
 	} {
 		if provider.ResourcesMap[name] == nil {
 			t.Errorf("resource %q is not registered", name)
@@ -62,6 +66,18 @@ func TestResourceSchemasKeepCompatibility(t *testing.T) {
 		},
 		"ucloud_nat_gateway_rule": {
 			"nat_gateway_id", "protocol", "src_eip_id", "src_port_range", "dst_ip", "dst_port_range", "name",
+		},
+		"ucloud_route_table": {
+			"name", "tag", "remark", "vpc_id", "vpc_name", "route_table_type", "subnet_count", "subnet_ids", "create_time",
+		},
+		"ucloud_route_table_rule": {
+			"route_table_id", "dst_addr", "nexthop_type", "nexthop_id", "remark",
+		},
+		"ucloud_route_table_association": {
+			"subnet_id", "route_table_id",
+		},
+		"ucloud_network_interface": {
+			"name", "tag", "remark", "vpc_id", "subnet_id", "private_ip", "instance_id", "mac_address", "status", "create_time",
 		},
 	}
 	for name, fields := range wantFields {

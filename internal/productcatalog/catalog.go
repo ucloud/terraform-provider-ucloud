@@ -73,7 +73,7 @@ var definitions = []definition{
 	{name: "unet", masterData: ProductMasterDataIdentity{EnSampleName: "UNet", Key: "unet"}, newAdapter: unet.New, terraformNamespaces: []string{"eip", "eips", "security_group", "security_groups"}, testBaseline: TestBaseline{AcceptanceTests: 11, ImportTests: 2}},
 	{name: "uphost", masterData: ProductMasterDataIdentity{EnSampleName: "UPHost", Key: "uphost"}, newAdapter: uphost.New, terraformNamespaces: []string{"baremetal"}, testBaseline: TestBaseline{AcceptanceTests: 3}},
 	{name: "us3", masterData: ProductMasterDataIdentity{EnSampleName: "UFile", Key: "ufile"}, newAdapter: us3.New, testBaseline: TestBaseline{AcceptanceTests: 2}},
-	{name: "vpc", masterData: ProductMasterDataIdentity{EnSampleName: "VPC", Key: "vpc"}, newAdapter: vpc.New, terraformNamespaces: []string{"vpc", "vpcs", "subnet", "subnets", "vip", "nat_gateway", "nat_gateways", "sec_group", "sec_groups"}, testBaseline: TestBaseline{AcceptanceTests: 16, ImportTests: 3}},
+	{name: "vpc", masterData: ProductMasterDataIdentity{EnSampleName: "VPC", Key: "vpc"}, newAdapter: vpc.New, terraformNamespaces: []string{"vpc", "vpcs", "subnet", "subnets", "vip", "nat_gateway", "nat_gateways", "sec_group", "sec_groups", "route_table", "network_interface"}, testBaseline: TestBaseline{AcceptanceTests: 20, ImportTests: 6}},
 }
 
 // Bindings returns fresh provider bindings for all products.

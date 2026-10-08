@@ -221,6 +221,18 @@ func validateCIDRBlock(value interface{}, key string) (warnings []string, errors
 	return warnings, errors
 }
 
+func validateRouteRuleDstAddr(value interface{}, key string) (warnings []string, errors []error) {
+	addr := value.(string)
+	check := addr
+	if !strings.Contains(check, "/") {
+		check = check + "/32"
+	}
+	if _, _, err := net.ParseCIDR(check); err != nil {
+		errors = append(errors, fmt.Errorf("%q is invalid, expected an IPv4 address or CIDR network, got %q", key, addr))
+	}
+	return warnings, errors
+}
+
 func validatePortRange(value interface{}, key string) (warnings []string, errors []error) {
 	portRange := value.(string)
 	split := strings.Split(portRange, "-")

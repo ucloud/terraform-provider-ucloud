@@ -51,6 +51,7 @@ func TestClassifyForMerge(t *testing.T) {
 			changes:       []productownership.Change{{Path: "products/ulb/resource.go"}},
 			platformClear: true,
 			wantType:      productownership.MergeDecisionPlatform,
+			wantAuto:      true,
 		},
 		{
 			name:         "cross product",

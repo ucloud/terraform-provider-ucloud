@@ -20,7 +20,6 @@ resource "ucloud_uk8s_cluster" "foo" {
   subnet_id                  = ucloud_subnet.foo.id
   name                       = "uk8s-test"
   service_cidr               = "172.16.0.0/16"
-  cni_mode                   = "VPC"
   password                   = var.password
   charge_type                = "dynamic"
   k8s_version                = "1.32.8"

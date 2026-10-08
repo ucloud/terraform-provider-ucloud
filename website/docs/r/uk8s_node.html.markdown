@@ -119,7 +119,7 @@ Review the plan before applying this configuration change.
 * `duration` - (Optional, ForceNew) The duration that you will buy the instance (Default: `1`). The value is `0` when pay by month and the instance will be valid till the last day of that month. It is not required when `dynamic` (pay by hour).
 * `boot_disk_type` - (Optional, ForceNew) The type of boot disk. Possible values are: `local_normal` and `local_ssd` for local boot disk, `cloud_ssd` for cloud SSD boot disk,`cloud_rssd` as RDMA-SSD cloud disk. (Default: `cloud_ssd`). The `local_ssd` and `cloud_ssd` are not fully support by all regions as boot disk type, please proceed to UCloud console for more details.
 * `data_disk_type` - (Optional, ForceNew) The type of local data disk. Possible values are: `local_normal` and `local_ssd` for local data disk, `cloud_ssd` for cloud SSD boot disk,`cloud_rssd` as RDMA-SSD cloud disk. (Default: `cloud_ssd`). The `local_ssd` is not fully support by all regions as data disk type, please proceed to UCloud console for more details.
-* `data_disk_size` - (Optional, ForceNew) The size of local data disk, measured in GB (GigaByte), 20-2000 for local sata disk and 20-1000 for local ssd disk (all the GPU type instances are included). The volume adjustment must be a multiple of 10 GB. In addition, any reduction of data disk size is not supported. 
+* `data_disk_size` - (Optional, ForceNew) The size of the data disk in GB. Changing this value replaces the node; in-place disk expansion is not supported. The size must be a multiple of 10 GB and is subject to the disk type's capacity limits.
 * `isolation_group` - (Optional, ForceNew) The ID of the associated isolation group.
 * `subnet_id` - (Optional, ForceNew) The ID of subnet. If defined `vpc_id`, the `subnet_id` is Required. If not defined `vpc_id` and `subnet_id`, the instance will use the default subnet in the current region.
 * `user_data` - (Optional, ForceNew) The user data to customize the startup behaviors when launching the instance. You may refer to [user_data_document](https://docs.ucloud.cn/uhost/guide/metadata/userdata)
@@ -149,7 +149,7 @@ Review the plan before applying this configuration change.
 The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration/resources.html#timeouts) for certain actions:
 
 * `create` - (Defaults to 30 mins) Used when launching the instance (until it reaches the initial `Ready` state)
-* `update` - (Defaults to 20 mins) Used when updating the arguments of the instance if necessary  - e.g. when changing `instance_type`
+* `update` - (Defaults to 20 mins) Retained for compatibility with existing configurations; node argument changes replace the node.
 * `delete` - (Defaults to 10 mins) Used when terminating the instance
 
 ## Attributes Reference

@@ -22,15 +22,15 @@ func masterTestConfig(master map[string]interface{}) map[string]interface{} {
 
 func TestMasterCreateRequest(t *testing.T) {
 	for _, test := range []struct {
-		name    string
-		cniMode string
-		master  map[string]interface{}
-		want    map[string]string
-		absent  []string
+		name     string
+		userData string
+		master   map[string]interface{}
+		want     map[string]string
+		absent   []string
 	}{
 		{
-			name:    "console specification",
-			cniMode: "VPC",
+			name:     "console specification",
+			userData: "echo hello",
 			master: map[string]interface{}{
 				"machine_type": "O", "cpu": 2, "memory": 4096, "uhost_family": "o2i",
 				"min_cpu_platform": "Intel/EmeraldRapids", "image_id": "uimage-1rgr4ndomwqa",
@@ -38,7 +38,7 @@ func TestMasterCreateRequest(t *testing.T) {
 				"data_disk_type": "cloud_rssd", "data_disk_size": 20,
 			},
 			want: map[string]string{
-				"CNIMode":           "VPC",
+				"UserData":          "ZWNobyBoZWxsbw==",
 				"MasterMachineType": "O", "MasterCPU": "2", "MasterMem": "4096",
 				"MasterUHostFamily": "o2i", "MasterMinimalCpuPlatform": "Intel/EmeraldRapids",
 				"MasterImageId": "uimage-1rgr4ndomwqa", "MasterBootDiskType": "CLOUD_RSSD",
@@ -49,20 +49,14 @@ func TestMasterCreateRequest(t *testing.T) {
 			name:   "legacy specification and image fallback",
 			master: map[string]interface{}{"instance_type": "n-basic-2"},
 			want:   map[string]string{"MasterMachineType": "N", "MasterCPU": "2", "MasterMem": "4096", "MasterMinimalCpuPlatform": "Intel/Auto"},
-			absent: []string{"CNIMode", "MasterUHostFamily", "MasterImageId", "MasterBootDiskSize"},
-		},
-		{
-			name:    "Calico network",
-			cniMode: "Calico",
-			master:  map[string]interface{}{"machine_type": "N", "cpu": 2, "memory": 4096},
-			want:    map[string]string{"CNIMode": "Calico"},
+			absent: []string{"UserData", "MasterUHostFamily", "MasterImageId", "MasterBootDiskSize"},
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			r := resourceUCloudUK8SCluster()
 			config := masterTestConfig(test.master)
-			if test.cniMode != "" {
-				config["cni_mode"] = test.cniMode
+			if test.userData != "" {
+				config["user_data"] = test.userData
 			}
 			if _, errs := r.Validate(terraform.NewResourceConfigRaw(config)); len(errs) > 0 {
 				t.Fatalf("validate: %v", errs)
@@ -79,6 +73,9 @@ func TestMasterCreateRequest(t *testing.T) {
 			if req.GetRetryable() {
 				t.Fatal("create request must not be automatically retried")
 			}
+			if err := req.SetAction("CreateUK8SClusterV2"); err != nil {
+				t.Fatal(err)
+			}
 			form, err := request.EncodeForm(req)
 			if err != nil {
 				t.Fatal(err)
@@ -94,7 +91,7 @@ func TestMasterCreateRequest(t *testing.T) {
 					t.Errorf("%s = %q, want %q", key, form[key], want)
 				}
 			}
-			for _, key := range append(test.absent, "MasterMinmalCpuPlatform", "InstanceType") {
+			for _, key := range append(test.absent, "CNIMode", "MasterMinmalCpuPlatform", "InstanceType") {
 				if _, ok := form[key]; ok {
 					t.Errorf("unexpected parameter %s", key)
 				}
@@ -127,52 +124,6 @@ func TestMasterConfigurationValidation(t *testing.T) {
 			}
 			if _, err := r.Diff(nil, config, nil); err == nil {
 				t.Fatal("invalid configuration accepted")
-			}
-		})
-	}
-}
-
-func TestClusterCNIModePlan(t *testing.T) {
-	for _, test := range []struct {
-		name        string
-		mode        string
-		wantReplace bool
-		wantInvalid bool
-	}{
-		{name: "preserve API selected mode"},
-		{name: "configure existing mode", mode: "VPC"},
-		{name: "change mode", mode: "Calico", wantReplace: true},
-		{name: "invalid mode", mode: "unknown", wantInvalid: true},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			r := resourceUCloudUK8SCluster()
-			config := masterTestConfig(map[string]interface{}{"machine_type": "N", "cpu": 2, "memory": 4096})
-			d := schema.TestResourceDataRaw(t, r.Schema, config)
-			d.SetId("uk8s-test")
-			if err := d.Set("cni_mode", "VPC"); err != nil {
-				t.Fatal(err)
-			}
-			if test.mode != "" {
-				config["cni_mode"] = test.mode
-			}
-			raw := terraform.NewResourceConfigRaw(config)
-			_, errs := r.Validate(raw)
-			if (len(errs) > 0) != test.wantInvalid {
-				t.Fatalf("validation errors = %v, wantInvalid = %v", errs, test.wantInvalid)
-			}
-			if test.wantInvalid {
-				return
-			}
-			diff, err := r.Diff(d.State(), raw, nil)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if test.wantReplace {
-				if diff == nil || !diff.RequiresNew() {
-					t.Fatal("changing CNI mode must require replacement")
-				}
-			} else if diff != nil && !diff.Empty() {
-				t.Fatalf("unchanged CNI mode produced a diff: %#v", diff)
 			}
 		})
 	}

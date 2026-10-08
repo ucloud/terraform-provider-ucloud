@@ -207,21 +207,6 @@ type InstanceNetworkInterface struct {
 }
 
 /*
-NatGatewaySubnetSet - natgw里面的子网信息
-*/
-type NatGatewaySubnetSet struct {
-
-	// 子网网段
-	Subnet string
-
-	// 子网名字
-	SubnetName string
-
-	// 子网id
-	SubnetworkId string
-}
-
-/*
 NatGWIPResInfo - IP信息
 */
 type NatGWIPResInfo struct {
@@ -252,6 +237,21 @@ type NatGatewayIPSet struct {
 
 	// 权重为100的为出口
 	Weight int
+}
+
+/*
+NatGatewaySubnetSet - natgw里面的子网信息
+*/
+type NatGatewaySubnetSet struct {
+
+	// 子网网段
+	Subnet string
+
+	// 子网名字
+	SubnetName string
+
+	// 子网id
+	SubnetworkId string
 }
 
 /*
@@ -432,30 +432,6 @@ type AclInfo struct {
 }
 
 /*
-FwInfo - 防火墙信息
-*/
-type FwInfo struct {
-
-	// 防火墙资源 ID
-	Id string
-
-	// 防火墙资源名称
-	Name string
-}
-
-/*
-UNIQuotaInfo - 虚拟网卡内网IP配额使用情况
-*/
-type UNIQuotaInfo struct {
-
-	// 网卡拥有的内网IP数量
-	PrivateIpCount int
-
-	// 网卡内网IP配额
-	PrivateIpQuota int
-}
-
-/*
 UNIIpInfo - 虚拟网卡内网IP信息
 */
 type UNIIpInfo struct {
@@ -483,6 +459,18 @@ type SimpleIPv6AddressInfo struct {
 }
 
 /*
+UNIQuotaInfo - 虚拟网卡内网IP配额使用情况
+*/
+type UNIQuotaInfo struct {
+
+	// 网卡拥有的内网IP数量
+	PrivateIpCount int
+
+	// 网卡内网IP配额
+	PrivateIpQuota int
+}
+
+/*
 SecGroup - UNI关联的安全组信息
 */
 type SecGroup struct {
@@ -495,6 +483,18 @@ type SecGroup struct {
 
 	// 安全组ID
 	SecGroupId string
+}
+
+/*
+FwInfo - 防火墙信息
+*/
+type FwInfo struct {
+
+	// 防火墙资源 ID
+	Id string
+
+	// 防火墙资源名称
+	Name string
 }
 
 /*
@@ -560,7 +560,7 @@ type NetworkInterface struct {
 	PrivateIp []UNIIpInfo
 
 	// 私有 IP 配额
-	PrivateIpLimit []UNIQuotaInfo
+	PrivateIpLimit UNIQuotaInfo
 
 	// 关联内网IP。当前一个网卡仅支持绑定一个内网IP
 	PrivateIpSet []string
@@ -588,6 +588,18 @@ type NetworkInterface struct {
 }
 
 /*
+SecGroupSimpleInfo - 安全组简略信息
+*/
+type SecGroupSimpleInfo struct {
+
+	// 安全组名称
+	Name string
+
+	// 安全组资源ID
+	SecGroupId string
+}
+
+/*
 BindingSecGroupInfo -
 */
 type BindingSecGroupInfo struct {
@@ -603,18 +615,6 @@ type BindingSecGroupInfo struct {
 
 	// 安全组所属 VPC
 	VPCId string
-}
-
-/*
-SecGroupSimpleInfo - 安全组简略信息
-*/
-type SecGroupSimpleInfo struct {
-
-	// 安全组名称
-	Name string
-
-	// 安全组资源ID
-	SecGroupId string
 }
 
 /*

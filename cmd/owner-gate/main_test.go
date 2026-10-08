@@ -75,8 +75,11 @@ func TestRunClearsPlatformAfterCurrentAdminApproval(t *testing.T) {
 	if err := run(root, []string{"-config", configPath}, &stdout, &stderr, env); err != nil {
 		t.Fatalf("run() error = %v, stderr = %s", err, stderr.String())
 	}
-	if !strings.Contains(stdout.String(), `"blocking":false`) || !strings.Contains(stdout.String(), `"autoMergeEligible":false`) {
+	if !strings.Contains(stdout.String(), `"blocking":false`) || !strings.Contains(stdout.String(), `"autoMergeEligible":true`) {
 		t.Fatalf("decision = %s", stdout.String())
+	}
+	if !strings.Contains(stdout.String(), "platform review cleared") {
+		t.Fatalf("cleared platform decision must record the clearance: %s", stdout.String())
 	}
 }
 

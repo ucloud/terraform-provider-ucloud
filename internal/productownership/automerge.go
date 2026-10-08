@@ -12,7 +12,8 @@ const (
 )
 
 // MergeDecision routes a pull request to product autonomy or platform review.
-// Platform decisions are blocking until an administrator clears the pull request.
+// Platform decisions block merging until an administrator clears the pull
+// request; a cleared platform decision is eligible for native auto-merge.
 type MergeDecision struct {
 	Type              string `json:"type"`
 	Product           string `json:"product,omitempty"`
@@ -99,9 +100,10 @@ func (policy *Policy) ClassifyForMerge(author string, changes []Change, platform
 
 func platformMergeDecision(detail string, platformCleared bool) MergeDecision {
 	decision := MergeDecision{
-		Type:     MergeDecisionPlatform,
-		Reason:   detail,
-		Blocking: !platformCleared,
+		Type:              MergeDecisionPlatform,
+		Reason:            detail,
+		AutoMergeEligible: platformCleared,
+		Blocking:          !platformCleared,
 	}
 	if platformCleared {
 		decision.Reason = "platform review cleared: " + detail

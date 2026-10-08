@@ -4,6 +4,8 @@ import (
 	"encoding/base64"
 	"fmt"
 	"regexp"
+	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -13,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	sdkuk8s "github.com/ucloud/ucloud-sdk-go/services/uk8s"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
-	"github.com/ucloud/ucloud-sdk-go/ucloud/request"
 )
 
 func resourceUCloudUK8SCluster() *schema.Resource {
@@ -41,12 +42,33 @@ func resourceUCloudUK8SCluster() *schema.Resource {
 		),
 
 		Schema: map[string]*schema.Schema{
+			"cluster_domain": {Type: schema.TypeString, Optional: true, ForceNew: true},
+			"tag":            {Type: schema.TypeString, Optional: true, ForceNew: true},
+			"lb_class": {
+				Type: schema.TypeString, Optional: true, ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{"ulb", "nlb"}, false),
+			},
+			"forward_src_ip_method": {
+				Type: schema.TypeString, Optional: true, ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{"", "Toa"}, false),
+			},
+			"kms_plugin_key_id": {Type: schema.TypeString, Optional: true, ForceNew: true},
+			"kms_plugin_resources": {
+				Type: schema.TypeSet, Optional: true, ForceNew: true,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validation.StringMatch(regexp.MustCompile(`\S`), "must not be empty"),
+				},
+			},
+			"user_labels": {
+				Type: schema.TypeMap, Optional: true, ForceNew: true,
+				Elem:         &schema.Schema{Type: schema.TypeString},
+				ValidateFunc: validateUK8SUserLabels,
+				Description:  "UCloud resource labels, separate from Kubernetes Worker labels.",
+			},
 			"cni_mode": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"VPC", "Calico"}, false),
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 
 			"service_cidr": {
@@ -157,6 +179,25 @@ func resourceUCloudUK8SCluster() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"data_disk_kms_key_id": {Type: schema.TypeString, Optional: true, ForceNew: true},
+						"security_group": {
+							Type: schema.TypeList, Optional: true, ForceNew: true, MaxItems: 15,
+							Elem: &schema.Resource{Schema: map[string]*schema.Schema{
+								"master_index": {
+									Type: schema.TypeInt, Required: true, ForceNew: true,
+									ValidateFunc: validation.IntBetween(0, 2),
+								},
+								"id": {
+									Type: schema.TypeString, Required: true, ForceNew: true,
+									ValidateFunc: validation.StringMatch(regexp.MustCompile(`\S`), "must not be empty"),
+								},
+								"priority": {
+									Type: schema.TypeInt, Optional: true, ForceNew: true,
+									ValidateFunc: validation.IntBetween(1, 5),
+								},
+								"name": {Type: schema.TypeString, Optional: true, ForceNew: true},
+							}},
+						},
 						"availability_zones": {
 							Type: schema.TypeList,
 							Elem: &schema.Schema{
@@ -198,7 +239,7 @@ func resourceUCloudUK8SCluster() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							ForceNew:     true,
-							ValidateFunc: validation.StringInSlice([]string{"o1i", "o2i"}, false),
+							ValidateFunc: validation.StringMatch(regexp.MustCompile(`^[a-z][a-z0-9]*$`), "must be a host family such as o1a or o2i"),
 						},
 						"image_id": {
 							Type:         schema.TypeString,
@@ -344,8 +385,7 @@ func resourceUCloudUK8SClusterCreate(d *schema.ResourceData, meta interface{}) e
 	if err != nil {
 		return err
 	}
-	var resp sdkuk8s.CreateUK8SClusterV2Response
-	err = client.Client.InvokeAction("CreateUK8SClusterV2", req, &resp)
+	resp, err := client.CreateUK8SClusterV2(req)
 	if err != nil {
 		return fmt.Errorf("error on creating uk8s cluster, %s", err)
 	}
@@ -525,7 +565,7 @@ func diffValidateUK8SMaster(diff *schema.ResourceDiff, meta interface{}) error {
 			return fmt.Errorf("master.boot_disk_type must be cloud_rssd for machine_type %s", machine)
 		}
 	}
-	if family != "" {
+	if family == "o1i" || family == "o2i" {
 		if machine != "O" {
 			return fmt.Errorf("master.uhost_family %s requires machine_type O", family)
 		}
@@ -536,7 +576,7 @@ func diffValidateUK8SMaster(diff *schema.ResourceDiff, meta interface{}) error {
 	return nil
 }
 
-func buildUK8SClusterCreateRequest(client *sdkuk8s.UK8SClient, d *schema.ResourceData) (request.GenericRequest, error) {
+func buildUK8SClusterCreateRequest(client *sdkuk8s.UK8SClient, d *schema.ResourceData) (*sdkuk8s.CreateUK8SClusterV2Request, error) {
 	req := client.NewCreateUK8SClusterV2Request()
 	req.ServiceCIDR = ucloud.String(d.Get("service_cidr").(string))
 	req.VPCId = ucloud.String(d.Get("vpc_id").(string))
@@ -549,6 +589,9 @@ func buildUK8SClusterCreateRequest(client *sdkuk8s.UK8SClient, d *schema.Resourc
 	}
 	req.Password = ucloud.String(base64.StdEncoding.EncodeToString([]byte(d.Get("password").(string))))
 
+	if value, ok := d.GetOk("user_data"); ok {
+		req.UserData = ucloud.String(base64.StdEncoding.EncodeToString([]byte(value.(string))))
+	}
 	if value, ok := d.GetOk("init_script"); ok {
 		req.InitScript = ucloud.String(base64.StdEncoding.EncodeToString([]byte(value.(string))))
 	}
@@ -582,9 +625,67 @@ func buildUK8SClusterCreateRequest(client *sdkuk8s.UK8SClient, d *schema.Resourc
 		}
 	}
 
+	if value, ok := d.GetOk("cluster_domain"); ok {
+		req.ClusterDomain = ucloud.String(value.(string))
+	}
+	if value, ok := d.GetOk("tag"); ok {
+		req.Tag = ucloud.String(value.(string))
+	}
+	if value, ok := d.GetOk("lb_class"); ok {
+		req.LbClass = ucloud.String(value.(string))
+	}
+	if value, ok := d.GetOk("forward_src_ip_method"); ok {
+		if d.Get("lb_class") != "nlb" {
+			return nil, fmt.Errorf("forward_src_ip_method Toa requires lb_class nlb")
+		}
+		req.ForwardSrcIPMethod = ucloud.String(value.(string))
+	}
+	if value, ok := d.GetOk("kms_plugin_key_id"); ok {
+		req.KmsPluginKeyId = ucloud.String(value.(string))
+	}
+	resources := d.Get("kms_plugin_resources").(*schema.Set).List()
+	if len(resources) > 0 && d.Get("kms_plugin_key_id") == "" {
+		return nil, fmt.Errorf("kms_plugin_resources requires kms_plugin_key_id")
+	}
+	for _, resource := range resources {
+		req.KmsPluginResource = append(req.KmsPluginResource, resource.(string))
+	}
+	labels := d.Get("user_labels").(map[string]interface{})
+	keys := make([]string, 0, len(labels))
+	for key := range labels {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		req.UserLabels = append(req.UserLabels, sdkuk8s.CreateUK8SClusterV2ParamUserLabels{
+			Key: ucloud.String(key), Value: ucloud.String(labels[key].(string)),
+		})
+	}
+
 	master := d.Get("master").([]interface{})[0].(map[string]interface{})
-	for _, item := range master["availability_zones"].([]interface{}) {
+	groups := master["security_group"].([]interface{})
+	for i, item := range master["availability_zones"].([]interface{}) {
+		selected := make([]interface{}, 0, 5)
+		for _, group := range groups {
+			if group.(map[string]interface{})["master_index"].(int) == i {
+				selected = append(selected, group)
+			}
+		}
+		if err := validateUK8SSecurityGroups(selected); err != nil {
+			return nil, fmt.Errorf("master.security_group for master_index %d: %w", i, err)
+		}
 		masterNode := sdkuk8s.CreateUK8SClusterV2ParamMaster{Zone: ucloud.String(item.(string))}
+		for _, item := range selected {
+			group := item.(map[string]interface{})
+			binding := sdkuk8s.CreateUK8SClusterV2ParamMasterSecGroupId{Id: ucloud.String(group["id"].(string))}
+			if priority := group["priority"].(int); priority != 0 {
+				binding.Priority = ucloud.String(strconv.Itoa(priority))
+			}
+			if name := group["name"].(string); name != "" {
+				binding.Name = ucloud.String(name)
+			}
+			masterNode.SecGroupId = append(masterNode.SecGroupId, binding)
+		}
 		req.Master = append(req.Master, masterNode)
 	}
 
@@ -620,32 +721,18 @@ func buildUK8SClusterCreateRequest(client *sdkuk8s.UK8SClient, d *schema.Resourc
 	if value := master["boot_disk_size"].(int); value != 0 {
 		req.MasterBootDiskSize = ucloud.Int(value)
 	}
-	// The pinned SDK lacks CNIMode and MasterUHostFamily on its create request. Keep its
-	// existing parameter encoding and add the field through a generic request.
-	payload, err := request.EncodeJSON(req)
-	if err != nil {
-		return nil, fmt.Errorf("encode uk8s cluster request: %w", err)
-	}
-	payload["Action"] = "CreateUK8SClusterV2"
-	if value, ok := d.GetOk("cni_mode"); ok {
-		payload["CNIMode"] = value.(string)
-	}
 	if value := master["uhost_family"].(string); value != "" {
-		payload["MasterUHostFamily"] = value
+		req.MasterUHostFamily = ucloud.String(value)
+	}
+	if key := master["data_disk_kms_key_id"].(string); key != "" {
+		req.MasterDataDiskKmsKeyId = ucloud.String(key)
 	}
 	workers, err := expandUK8SWorkers(d.Get("worker").([]interface{}))
 	if err != nil {
 		return nil, err
 	}
-	if len(workers) > 0 {
-		payload["Nodes"] = workers
-	}
-	generic := client.NewGenericRequest()
-	generic.SetRetryable(false)
-	if err := generic.SetPayload(payload); err != nil {
-		return nil, err
-	}
-	return generic, nil
+	req.Nodes = workers
+	return req, nil
 }
 
 func diffValidateBootDiskTypeWithInstanceTypeOfUK8sCluster(diff *schema.ResourceDiff, meta interface{}) error {
@@ -668,4 +755,28 @@ func diffValidateBootDiskTypeWithInstanceTypeOfUK8sCluster(diff *schema.Resource
 		return fmt.Errorf("the boot_disk_type must be set one of  %v when instance type is belong to outstanding machine , got %q", []string{"cloud_rssd"}, bootDiskType)
 	}
 	return nil
+}
+
+func validateUK8SSecurityGroups(items []interface{}) error {
+	if len(items) > 5 {
+		return fmt.Errorf("at most 5 security groups can be attached to each node")
+	}
+	seen := make(map[string]bool, len(items))
+	for _, item := range items {
+		id := item.(map[string]interface{})["id"].(string)
+		if seen[id] {
+			return fmt.Errorf("duplicate security group id %q", id)
+		}
+		seen[id] = true
+	}
+	return nil
+}
+
+func validateUK8SUserLabels(value interface{}, key string) ([]string, []error) {
+	for label := range value.(map[string]interface{}) {
+		if strings.TrimSpace(label) == "" {
+			return nil, []error{fmt.Errorf("%s keys must not be empty", key)}
+		}
+	}
+	return nil, nil
 }
