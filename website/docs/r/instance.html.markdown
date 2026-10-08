@@ -127,7 +127,7 @@ The following arguments are supported:
 * `root_password` - (Optional) The password for the instance, which contains 8-30 characters, and at least 2 items of capital letters, lower case letters, numbers and special characters. The special characters include <code>`()~!@#$%^&*-+=_|{}\[]:;'<>,.?/</code>. If not specified, terraform will auto-generate a password.
 
     ~> **Note** If you want to update this value, you must set `allow_stopping_for_update`to `true`.
-* `auto_start` - (Optional) Whether to start the instance immediately after resetting its password is completed, default is `false`. It takes effect only when updating `root_password`, `login_mode` or `key_pair_id`, and is not supported for `dynamic` (pay by hour) and preemptible instances.
+* `auto_start` - (Optional) Whether to start the instance immediately after resetting its password or resizing the instance is completed, default is `false`. It takes effect only when updating `root_password`, `login_mode`, `key_pair_id`, `instance_type` or `net_capability`, and is not supported for `dynamic` (pay by hour) and preemptible instances.
 * `login_mode` - (Optional) The login mode of instance. Possible values are: `Password` and `KeyPair`. If not specified, Terraform uses `Password` for backward compatibility.
 * `key_pair_id` - (Optional) The ID of the key pair used when `login_mode` is `KeyPair`. This argument is required when `login_mode` is `KeyPair`, and cannot be used when `login_mode` is `Password`.
 * `deletion_protection` - (Optional) Whether deletion protection is enabled when creating the instance.
@@ -162,7 +162,7 @@ The following arguments are supported:
  * `network_interface` - (Optional, ForceNew) Additional network interface eips to attach to the instance. `network_interface` configurations only apply on resource creation. The count of `network_interface` can only be one. See [network_interface](#network_interface) below for details on attributes. When set `network_interface`, the argument `delete_eips_with_instance` must bet set.
  * `delete_eips_with_instance` - (Optional, ForceNew, Required when set `network_interface`)  Whether the network interface eips associated instance should be destroyed on instance termination.
 * `min_cpu_platform` - (Optional, ForceNew) Specifies a minimum CPU platform for the the VM instance. (Default: `Intel/Auto`). You may refer to [product documentation](https://docs.ucloud.cn/uhost/introduction/uhost/type_new) and [API documentation](https://docs.ucloud.cn/api/uhost-api/create_uhost_instance).
-* `net_capability` - (Optional, ForceNew) The network enhancement feature of the instance. Possible values are: `normal` for no enhancement, `super` for network enhancement 1.0, `ultra` for network enhancement 2.0, `extreme` for network enhancement 3.0. (Default: `normal`).
+* `net_capability` - (Optional) The network enhancement feature of the instance. Possible values are: `normal` for no enhancement, `super` for network enhancement 1.0, `ultra` for network enhancement 2.0, `extreme` for network enhancement 3.0. (Default: `normal`). It can only be changed between `normal` and an enhancement level in place (upgrade or downgrade through `ResizeUHostInstance`); switching between enhancement levels requires rebuilding the instance. Updating it to a value other than `normal` requires stopping the instance, please set `allow_stopping_for_update` to `true` to acknowledge it, and the instance is restarted automatically after the update when `auto_start` is `true`.
 * `hotplug_feature` - (Optional, ForceNew) Enable the hot upgrade feature of the instance. (Default: `false`).
 * `uni_feature` - (Optional, ForceNew) Enable the elastic network interface feature of the instance. (Default: `false`).
 * `gpu` - (Optional, ForceNew) The count of GPU cores, only supported by GPU machine types.
@@ -171,6 +171,9 @@ The following arguments are supported:
 * `auto_data_disk_init` - (Optional, ForceNew) Whether to automatically partition and mount the data disks when the image supports Cloud-init. Possible values are: `On` for auto mount (default), `Off` for no auto mount.
 * `coupon_id` - (Optional, ForceNew) The ID of the host coupon to use for payment.
 * `uhost_family` - (Optional, ForceNew) The instance family, composed of the machine type code and CPU platform. Possible values for machine type `O`: `o1i` (O1, Intel), `o1a` (O1, AMD), `o1r` (O1, ARM), `o2i` (O2, Intel); for machine type `OM`: `om1i`, `om2i`. The family must match the machine type, otherwise the request is rejected.
+* `udset_id` - (Optional, ForceNew) The ID of the private dedicated zone (UDSet) in which the instance is created. It is required by other dedicated zone arguments, and cannot be changed once the instance is created.
+* `udhost_id` - (Optional, ForceNew) The ID of the dedicated host (UDHost) inside the private dedicated zone on which the instance is created. It requires `udset_id` to be set.
+* `host_binding` - (Optional, ForceNew) Whether to bind the dedicated zone instance to the dedicated host. It requires `udset_id` to be set. (Default: `false`).
 ### data_disks
 
 The `data_disks` supports the following:

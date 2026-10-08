@@ -85,6 +85,8 @@ func resourceUCloudInstance() *schema.Resource {
 			customdiff.ValidateChange("data_disk_size", diffValidateInstanceDataDiskSize),
 			customdiff.ValidateChange("boot_disk_size", diffValidateInstanceBootDiskSize),
 			customdiff.ValidateChange("instance_type", diffValidateInstanceType),
+			customdiff.ValidateChange("net_capability", diffValidateInstanceNetCapability),
+			diffValidateInstanceUDSet,
 			validateInstanceLoginMode,
 			diffValidateBootDiskTypeWithDataDiskType,
 			diffValidateChargeTypeWithDuration,
@@ -407,7 +409,6 @@ func resourceUCloudInstance() *schema.Resource {
 			"net_capability": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ForceNew:     true,
 				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"normal", "super", "ultra", "extreme"}, false),
 			},
@@ -474,6 +475,24 @@ func resourceUCloudInstance() *schema.Resource {
 					"o1i", "o1a", "o1r", "o1h", "o2i", "o2a", "om1i", "om2i", "om1a",
 					"opro1a", "opro2a", "oprog1i", "oprog2i", "oprog1a",
 				}, false),
+			},
+
+			"udset_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
+			"udhost_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
+			"host_binding": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
 			},
 
 			"cpu": {
@@ -791,6 +810,19 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 		req.UHostFamily = ucloud.String(v.(string))
 	}
 
+	// private dedicated zone params, only valid for instances created in a UDSet
+	if v, ok := d.GetOk("udset_id"); ok {
+		req.UDSetId = ucloud.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("udhost_id"); ok {
+		req.UDHostId = ucloud.String(v.(string))
+	}
+
+	if v, ok := d.GetOkExists("host_binding"); ok {
+		req.HostBinding = ucloud.Bool(v.(bool))
+	}
+
 	resp, err := conn.CreateUHostInstance(req)
 	if err != nil {
 		return fmt.Errorf("error on creating instance, %s", err)
@@ -971,6 +1003,7 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 	resizeReq := conn.NewResizeUHostInstanceRequest()
 	resizeReq.UHostId = ucloud.String(d.Id())
 	resizeReq.Zone = ucloud.String(zone)
+	resizeReq.AutoStart = ucloud.Bool(d.Get("auto_start").(bool))
 	dataDiskReq := conn.NewResizeAttachedDiskRequest()
 	dataDiskReq.UHostId = ucloud.String(d.Id())
 	dataDiskReq.Zone = ucloud.String(zone)
@@ -992,6 +1025,21 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 		}
 
 		resizeNeedUpdate = true
+	}
+
+	// net_capability is upgraded/downgraded through ResizeUHostInstance, where
+	// NetCapValue 1 means upgrade and 2 means downgrade.
+	if d.HasChange("net_capability") && !d.IsNewResource() {
+		oldNetCap, newNetCap := d.GetChange("net_capability")
+		switch {
+		case oldNetCap.(string) == "normal" && newNetCap.(string) != "normal":
+			resizeReq.NetCapValue = ucloud.Int(1)
+		case oldNetCap.(string) != "normal" && newNetCap.(string) == "normal":
+			resizeReq.NetCapValue = ucloud.Int(2)
+		}
+		if resizeReq.NetCapValue != nil {
+			resizeNeedUpdate = resizeNeedUpdate || true
+		}
 	}
 
 	if d.HasChange("data_disk_size") && !d.IsNewResource() {
@@ -1155,6 +1203,7 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 			}
 
 			d.SetPartial("instance_type")
+			d.SetPartial("net_capability")
 		}
 
 		if dataDiskNeedUpdate {
@@ -1546,6 +1595,45 @@ func diffValidateInstanceType(old, new, meta interface{}) error {
 
 	if o.HostType != n.HostType {
 		return fmt.Errorf("update host type: %q to %q of %q not be allowed, please rebuild instance if required", o.HostType, n.HostType, "instance_type")
+	}
+	return nil
+}
+
+// diffValidateInstanceNetCapability guards in-place network enhancement changes.
+// ResizeUHostInstance only upgrades or downgrades the network capability and
+// does not switch between enhancement levels, so only transitions to or from
+// `normal` are allowed.
+func diffValidateInstanceNetCapability(old, new, meta interface{}) error {
+	if old.(string) == "" || new.(string) == "" || old.(string) == new.(string) {
+		return nil
+	}
+
+	if old.(string) != "normal" && new.(string) != "normal" {
+		return fmt.Errorf("update net_capability: %q to %q not allowed, network enhancement level cannot be changed in place, please rebuild instance if required", old.(string), new.(string))
+	}
+	return nil
+}
+
+// diffValidateInstanceUDSet guards the private dedicated zone params.
+// UDSetId/UDHostId/HostBinding are accepted only when creating inside a
+// dedicated zone, so they require udset_id and cannot be changed afterwards.
+func diffValidateInstanceUDSet(diff *schema.ResourceDiff, meta interface{}) error {
+	udsetID := diff.Get("udset_id").(string)
+	udhostID := diff.Get("udhost_id").(string)
+	hostBinding, hostBindingSet := diff.GetOkExists("host_binding")
+
+	if udsetID == "" {
+		if udhostID != "" {
+			return fmt.Errorf("%q is required when set %q", "udset_id", "udhost_id")
+		}
+		if hostBindingSet && hostBinding.(bool) {
+			return fmt.Errorf("%q is required when set %q", "udset_id", "host_binding")
+		}
+		return nil
+	}
+
+	if diff.HasChange("udset_id") && diff.Id() != "" {
+		return fmt.Errorf("the %q cannot be changed, please rebuild instance if required", "udset_id")
 	}
 	return nil
 }

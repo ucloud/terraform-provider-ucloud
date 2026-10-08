@@ -1364,6 +1364,11 @@
           "force_new": true,
           "validate": "StringInSlice"
         },
+        "host_binding": {
+          "type": "TypeBool",
+          "optional": true,
+          "force_new": true
+        },
         "hotplug_feature": {
           "type": "TypeBool",
           "optional": true,
@@ -1432,7 +1437,6 @@
           "type": "TypeString",
           "optional": true,
           "computed": true,
-          "force_new": true,
           "validate": "StringInSlice"
         },
         "network_interface": {
@@ -1532,6 +1536,16 @@
           "default": "\"Default\"",
           "state_func": "stateFuncTag",
           "validate": "StringMatch"
+        },
+        "udhost_id": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        },
+        "udset_id": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
         },
         "uhost_family": {
           "type": "TypeString",
