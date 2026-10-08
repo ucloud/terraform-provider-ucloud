@@ -18,7 +18,6 @@ func resourceUCloudUK8SNode() *schema.Resource {
 	return &schema.Resource{
 		Create:        resourceUK8SNodeCreate,
 		Read:          resourceUK8SNodeRead,
-		Update:        resourceUK8SNodeUpdate,
 		Delete:        resourceUK8SNodeDelete,
 		SchemaVersion: 1,
 		StateUpgraders: []schema.StateUpgrader{{
@@ -144,6 +143,7 @@ func resourceUCloudUK8SNode() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
+				ForceNew: true,
 				ValidateFunc: validateAll(
 					validation.IntBetween(0, 2000),
 					validateMod(10),
@@ -379,10 +379,6 @@ func resourceUK8SNodeCreate(d *schema.ResourceData, meta interface{}) error {
 	if _, err = stateConf.WaitForState(); err != nil {
 		return fmt.Errorf("error on waiting for uk8s cluster %q complete creating, %s", d.Id(), err)
 	}
-	return resourceUK8SNodeRead(d, meta)
-}
-
-func resourceUK8SNodeUpdate(d *schema.ResourceData, meta interface{}) error {
 	return resourceUK8SNodeRead(d, meta)
 }
 
