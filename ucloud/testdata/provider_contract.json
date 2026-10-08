@@ -2679,10 +2679,7 @@
         },
         "cni_mode": {
           "type": "TypeString",
-          "optional": true,
-          "computed": true,
-          "force_new": true,
-          "validate": "StringInSlice"
+          "computed": true
         },
         "create_time": {
           "type": "TypeString",
@@ -3105,6 +3102,7 @@
           "type": "TypeInt",
           "optional": true,
           "computed": true,
+          "force_new": true,
           "validate": "validateAll"
         },
         "data_disk_type": {
@@ -3239,7 +3237,6 @@
       "schema_version": 1,
       "create": "resourceUK8SNodeCreate",
       "read": "resourceUK8SNodeRead",
-      "update": "resourceUK8SNodeUpdate",
       "delete": "resourceUK8SNodeDelete",
       "customize_diff": "All",
       "state_upgraders": [

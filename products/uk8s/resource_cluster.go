@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	sdkuk8s "github.com/ucloud/ucloud-sdk-go/services/uk8s"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
-	"github.com/ucloud/ucloud-sdk-go/ucloud/request"
 )
 
 func resourceUCloudUK8SCluster() *schema.Resource {
@@ -42,11 +41,8 @@ func resourceUCloudUK8SCluster() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"cni_mode": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"VPC", "Calico"}, false),
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 
 			"service_cidr": {
@@ -344,8 +340,7 @@ func resourceUCloudUK8SClusterCreate(d *schema.ResourceData, meta interface{}) e
 	if err != nil {
 		return err
 	}
-	var resp sdkuk8s.CreateUK8SClusterV2Response
-	err = client.Client.InvokeAction("CreateUK8SClusterV2", req, &resp)
+	resp, err := client.CreateUK8SClusterV2(req)
 	if err != nil {
 		return fmt.Errorf("error on creating uk8s cluster, %s", err)
 	}
@@ -536,7 +531,7 @@ func diffValidateUK8SMaster(diff *schema.ResourceDiff, meta interface{}) error {
 	return nil
 }
 
-func buildUK8SClusterCreateRequest(client *sdkuk8s.UK8SClient, d *schema.ResourceData) (request.GenericRequest, error) {
+func buildUK8SClusterCreateRequest(client *sdkuk8s.UK8SClient, d *schema.ResourceData) (*sdkuk8s.CreateUK8SClusterV2Request, error) {
 	req := client.NewCreateUK8SClusterV2Request()
 	req.ServiceCIDR = ucloud.String(d.Get("service_cidr").(string))
 	req.VPCId = ucloud.String(d.Get("vpc_id").(string))
@@ -549,6 +544,9 @@ func buildUK8SClusterCreateRequest(client *sdkuk8s.UK8SClient, d *schema.Resourc
 	}
 	req.Password = ucloud.String(base64.StdEncoding.EncodeToString([]byte(d.Get("password").(string))))
 
+	if value, ok := d.GetOk("user_data"); ok {
+		req.UserData = ucloud.String(base64.StdEncoding.EncodeToString([]byte(value.(string))))
+	}
 	if value, ok := d.GetOk("init_script"); ok {
 		req.InitScript = ucloud.String(base64.StdEncoding.EncodeToString([]byte(value.(string))))
 	}
@@ -620,32 +618,15 @@ func buildUK8SClusterCreateRequest(client *sdkuk8s.UK8SClient, d *schema.Resourc
 	if value := master["boot_disk_size"].(int); value != 0 {
 		req.MasterBootDiskSize = ucloud.Int(value)
 	}
-	// The pinned SDK lacks CNIMode and MasterUHostFamily on its create request. Keep its
-	// existing parameter encoding and add the field through a generic request.
-	payload, err := request.EncodeJSON(req)
-	if err != nil {
-		return nil, fmt.Errorf("encode uk8s cluster request: %w", err)
-	}
-	payload["Action"] = "CreateUK8SClusterV2"
-	if value, ok := d.GetOk("cni_mode"); ok {
-		payload["CNIMode"] = value.(string)
-	}
 	if value := master["uhost_family"].(string); value != "" {
-		payload["MasterUHostFamily"] = value
+		req.MasterUHostFamily = ucloud.String(value)
 	}
 	workers, err := expandUK8SWorkers(d.Get("worker").([]interface{}))
 	if err != nil {
 		return nil, err
 	}
-	if len(workers) > 0 {
-		payload["Nodes"] = workers
-	}
-	generic := client.NewGenericRequest()
-	generic.SetRetryable(false)
-	if err := generic.SetPayload(payload); err != nil {
-		return nil, err
-	}
-	return generic, nil
+	req.Nodes = workers
+	return req, nil
 }
 
 func diffValidateBootDiskTypeWithInstanceTypeOfUK8sCluster(diff *schema.ResourceDiff, meta interface{}) error {

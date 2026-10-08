@@ -6,6 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	sdkuk8s "github.com/ucloud/ucloud-sdk-go/services/uk8s"
+	"github.com/ucloud/ucloud-sdk-go/ucloud"
 )
 
 func uk8sClusterWorkerSchema(master *schema.Resource) *schema.Schema {
@@ -93,8 +95,8 @@ func diffValidateUK8SWorkers(diff *schema.ResourceDiff, meta interface{}) error 
 	return err
 }
 
-func expandUK8SWorkers(items []interface{}) ([]map[string]interface{}, error) {
-	workers := make([]map[string]interface{}, 0, len(items))
+func expandUK8SWorkers(items []interface{}) ([]sdkuk8s.CreateUK8SClusterV2ParamNodes, error) {
+	workers := make([]sdkuk8s.CreateUK8SClusterV2ParamNodes, 0, len(items))
 	for i, item := range items {
 		worker, ok := item.(map[string]interface{})
 		if !ok {
@@ -113,33 +115,39 @@ func expandUK8SWorkers(items []interface{}) ([]map[string]interface{}, error) {
 		if err != nil {
 			return nil, fmt.Errorf("worker.%d: %w", i, err)
 		}
-		// Use the wire names directly: the pinned SDK misspells BootDiskSize
-		// and omits UHostFamily from its Nodes struct.
-		node := map[string]interface{}{
-			"Zone": worker["availability_zone"], "MachineType": worker["machine_type"],
-			"CPU": worker["cpu"], "Mem": worker["memory"], "Count": worker["count"],
-			"GPU": worker["gpu"], "MaxPods": worker["max_pods"],
-			"BootDiskType":       upperCvt.unconvert(worker["boot_disk_type"].(string)),
-			"BootDiskSize":       worker["boot_disk_size"],
-			"MinimalCpuPlatform": worker["min_cpu_platform"],
+		node := sdkuk8s.CreateUK8SClusterV2ParamNodes{
+			Zone:               ucloud.String(worker["availability_zone"].(string)),
+			MachineType:        ucloud.String(worker["machine_type"].(string)),
+			CPU:                ucloud.Int(worker["cpu"].(int)),
+			Mem:                ucloud.Int(worker["memory"].(int)),
+			Count:              ucloud.Int(worker["count"].(int)),
+			GPU:                ucloud.Int(worker["gpu"].(int)),
+			MaxPods:            ucloud.Int(worker["max_pods"].(int)),
+			BootDiskType:       ucloud.String(upperCvt.unconvert(worker["boot_disk_type"].(string))),
+			BootDiskSize:       ucloud.Int(worker["boot_disk_size"].(int)),
+			MinimalCpuPlatform: ucloud.String(worker["min_cpu_platform"].(string)),
 		}
 		if worker["data_disk_size"].(int) > 0 {
-			node["DataDiskSize"] = worker["data_disk_size"]
-			node["DataDiskType"] = upperCvt.unconvert(worker["data_disk_type"].(string))
+			node.DataDiskSize = ucloud.Int(worker["data_disk_size"].(int))
+			node.DataDiskType = ucloud.String(upperCvt.unconvert(worker["data_disk_type"].(string)))
 		}
-		for key, param := range map[string]string{
-			"image_id": "ImageId", "uhost_family": "UHostFamily",
-			"security_group_id": "SecurityGroupId", "gpu_type": "GpuType",
-		} {
-			if value := worker[key].(string); value != "" {
-				node[param] = value
-			}
+		if value := worker["image_id"].(string); value != "" {
+			node.ImageId = ucloud.String(value)
+		}
+		if value := worker["uhost_family"].(string); value != "" {
+			node.UHostFamily = ucloud.String(value)
+		}
+		if value := worker["security_group_id"].(string); value != "" {
+			node.SecurityGroupId = ucloud.String(value)
+		}
+		if value := worker["gpu_type"].(string); value != "" {
+			node.GpuType = ucloud.String(value)
 		}
 		if labels != "" {
-			node["Labels"] = labels
+			node.Labels = ucloud.String(labels)
 		}
 		if taints != "" {
-			node["Taints"] = taints
+			node.Taints = ucloud.String(taints)
 		}
 		workers = append(workers, node)
 	}

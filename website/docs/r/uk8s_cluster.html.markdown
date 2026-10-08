@@ -33,7 +33,6 @@ resource "ucloud_uk8s_cluster" "foo" {
   subnet_id    = "${ucloud_subnet.foo.id}"
   name         = "tf-acc-uk8s-cluster-basic-update"
   service_cidr = "172.16.0.0/16"
-  cni_mode     = "VPC"
   password     = "ucloud_2021"
   charge_type  = "dynamic"
 
@@ -55,7 +54,6 @@ resource "ucloud_uk8s_cluster" "foo" {
 The following arguments are supported:
 
 * `service_cidr` - (Required, ForceNew) The CIDR block of k8s service.
-* `cni_mode` - (Optional, Computed, ForceNew) The cluster CNI network mode, `VPC` or `Calico`, sent as `CNIMode`. When omitted, the API selects the mode and Terraform reads it from the cluster. Changing the mode replaces the cluster.
 * `vpc_id` - (Required, ForceNew) The ID of VPC linked to the instance. If not defined `vpc_id`, the instance will use the default VPC in the current region.
 * `subnet_id` - (Required, ForceNew) The ID of subnet. If defined `vpc_id`, the `subnet_id` is Required. If not defined `vpc_id` and `subnet_id`, the instance will use the default subnet in the current region.
 * `password` - (Required) The password for the instance, which contains 8-30 characters, and at least 2 items of capital letters, lower case letters, numbers and special characters. The special characters include <code>`()~!@#$%^&*-+=_|{}\[]:;'<>,.?/</code>. If not specified, terraform will auto-generate a password.
@@ -221,6 +219,7 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of the resource instance.
+* `cni_mode` - The CNI network mode reported by the cluster.
 * `api_server` - The api server endpoint in cluster.
 * `external_api_server` - The api server endpoint for external visiting.
 * `kubeconfig` - The kubeconfig for accessing the cluster through the internal API server. This value is sensitive.

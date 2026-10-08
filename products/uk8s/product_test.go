@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/terraform-providers/terraform-provider-ucloud/internal/product"
 	sdkuk8s "github.com/ucloud/ucloud-sdk-go/services/uk8s"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
@@ -44,7 +45,7 @@ func TestClusterSchemaCompatibility(t *testing.T) {
 		sensitive bool
 	}{
 		"service_cidr":               {typeValue: schema.TypeString, required: true, forceNew: true},
-		"cni_mode":                   {typeValue: schema.TypeString, optional: true, computed: true, forceNew: true},
+		"cni_mode":                   {typeValue: schema.TypeString, computed: true},
 		"vpc_id":                     {typeValue: schema.TypeString, required: true, forceNew: true},
 		"subnet_id":                  {typeValue: schema.TypeString, required: true, forceNew: true},
 		"password":                   {typeValue: schema.TypeString, required: true, forceNew: true, sensitive: true},
@@ -105,6 +106,9 @@ func TestClusterSchemaCompatibility(t *testing.T) {
 func TestNodeSchemaCompatibility(t *testing.T) {
 	resource := New().Registration().Resources["ucloud_uk8s_node"]
 	assertResourceCallbacksAndTimeouts(t, resource, "ucloud_uk8s_node")
+	if resource.Update != nil {
+		t.Fatal("node updates must replace the resource")
+	}
 
 	wantFields := map[string]struct {
 		typeValue schema.ValueType
@@ -127,7 +131,7 @@ func TestNodeSchemaCompatibility(t *testing.T) {
 		"charge_type":                {typeValue: schema.TypeString, optional: true, computed: true, forceNew: true},
 		"duration":                   {typeValue: schema.TypeInt, optional: true, forceNew: true},
 		"boot_disk_type":             {typeValue: schema.TypeString, optional: true, computed: true, forceNew: true},
-		"data_disk_size":             {typeValue: schema.TypeInt, optional: true, computed: true},
+		"data_disk_size":             {typeValue: schema.TypeInt, optional: true, computed: true, forceNew: true},
 		"data_disk_type":             {typeValue: schema.TypeString, optional: true, computed: true, forceNew: true},
 		"isolation_group":            {typeValue: schema.TypeString, optional: true, computed: true, forceNew: true},
 		"subnet_id":                  {typeValue: schema.TypeString, optional: true, computed: true, forceNew: true},
@@ -154,6 +158,25 @@ func TestNodeSchemaCompatibility(t *testing.T) {
 		if nested.Schema[name] == nil || !nested.Schema[name].Computed {
 			t.Errorf("ip_set nested field %q must be computed", name)
 		}
+	}
+}
+
+func TestNodeDataDiskSizeChangeReplacesNode(t *testing.T) {
+	r := resourceUCloudUK8SNode()
+	config := map[string]interface{}{
+		"availability_zone": "sg-02", "cluster_id": "uk8s-test",
+		"password": "TestPassword123", "instance_type": "n-basic-2",
+		"data_disk_size": 20,
+	}
+	d := schema.TestResourceDataRaw(t, r.Schema, config)
+	d.SetId("uk8s-node-test")
+	config["data_disk_size"] = 40
+	diff, err := r.Diff(d.State(), terraform.NewResourceConfigRaw(config), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if diff == nil || !diff.RequiresNew() {
+		t.Fatalf("data_disk_size change must replace the node, got %#v", diff)
 	}
 }
 
@@ -207,8 +230,11 @@ func assertResourceCallbacksAndTimeouts(t *testing.T, resource *schema.Resource,
 	if resource == nil {
 		t.Fatalf("%s resource is nil", name)
 	}
-	if resource.Create == nil || resource.Read == nil || resource.Update == nil || resource.Delete == nil {
+	if resource.Create == nil || resource.Read == nil || resource.Delete == nil {
 		t.Fatalf("%s CRUD callbacks are incomplete", name)
+	}
+	if name != "ucloud_uk8s_node" && resource.Update == nil {
+		t.Fatalf("%s Update callback is missing", name)
 	}
 	if resource.CustomizeDiff == nil {
 		t.Fatalf("%s CustomizeDiff is missing", name)
