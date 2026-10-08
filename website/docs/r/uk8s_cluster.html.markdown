@@ -61,7 +61,7 @@ The following arguments are supported:
 ---
 
 * `name` - (Optional) The name of instance, which contains 1-63 characters and only support Chinese, English, numbers, '-', '_', '.'. If not specified, terraform will auto-generate a name beginning with `tf-instance`.
-* `user_data` - (Optional, ForceNew) The user data to customize the startup behaviors when launching the instance. You may refer to [user_data_document](https://docs.ucloud.cn/uhost/guide/metadata/userdata)
+* `user_data` - (Optional, ForceNew) Plain-text user data, up to 16 KiB. The provider base64-encodes it and sends `UserData` when creating the cluster. It customizes startup behaviors when launching the instance. You may refer to [user_data_document](https://docs.ucloud.cn/uhost/guide/metadata/userdata)
 * `init_script` - (Optional, ForceNew) The user data to customize the startup behaviors when launching the instance. You may refer to [user_data_document](https://docs.ucloud.cn/uhost/guide/metadata/userdata)
 * `charge_type` - (Optional, ForceNew) The charge type of instance, possible values are: `year`, `month` and `dynamic` as pay by hour (specific permission required). (Default: `month`).
 * `duration` - (Optional, ForceNew) The duration that you will buy the instance (Default: `1`). The value is `0` when pay by month and the instance will be valid till the last day of that month. It is not required when `dynamic` (pay by hour).
@@ -73,6 +73,39 @@ The following arguments are supported:
 * `worker` - (Optional, ForceNew) Repeatable initial Worker group configuration, sent as `Nodes.N.*` in `CreateUK8SClusterV2`. See [worker](#worker).
 * `image_id` - (Optional, ForceNew) The default image ID. `master.image_id` takes precedence for Master nodes.
 
+### Additional cluster creation options
+
+All options below are optional and ForceNew. They are omitted from the creation request when not configured, leaving API defaults in effect. These are creation settings retained in state; the provider does not reconcile out-of-band changes to them. Adding, changing or removing them on an existing cluster replaces the cluster. Review the Terraform plan before applying.
+
+| Terraform field | API parameter | Description |
+| --- | --- | --- |
+| `cluster_domain` | `ClusterDomain` | Cluster DNS domain. |
+| `tag` | `Tag` | UCloud business group. |
+| `lb_class` | `LbClass` | Master load balancer type: `ulb` or `nlb`; API default is `ulb`. |
+| `forward_src_ip_method` | `ForwardSrcIPMethod` | `Toa` requires `lb_class = "nlb"`. Empty or omitted disables source IP forwarding. |
+| `kms_plugin_key_id` | `KmsPluginKeyId` | KMS key for the cluster encryption plugin. |
+| `kms_plugin_resources` | `KmsPluginResource.N` | Set of resources to encrypt, such as `["secrets"]`; requires `kms_plugin_key_id`. |
+| `user_labels` | `UserLabels.N.Key`, `UserLabels.N.Value` | Map of UCloud resource labels. These are separate from Kubernetes `worker.labels`. |
+
+For example, inside `ucloud_uk8s_cluster`:
+
+```hcl
+cluster_domain        = "cluster.local"
+tag                   = "platform"
+lb_class              = "nlb"
+forward_src_ip_method = "Toa"
+kms_plugin_key_id     = "your-kms-key-id"
+kms_plugin_resources  = ["secrets"]
+user_data             = "#!/bin/sh\necho preparing-node"
+
+user_labels = {
+  environment = "production"
+  owner       = "platform"
+}
+```
+
+The obsolete `MasterIsolationGroup` parameter is not exposed; UK8S manages Master isolation automatically.
+
 ### master
 
 The `master` supports the following:
@@ -82,7 +115,7 @@ The `master` supports the following:
 * `machine_type` - (Optional, ForceNew) The uppercase machine type, such as `N` or `O`. Required together with `cpu` and `memory` when `instance_type` is omitted.
 * `cpu` - (Optional, ForceNew) Number of CPU cores, at least 2. Required with `machine_type` and `memory` when `instance_type` is omitted. Available specifications depend on the machine type and region.
 * `memory` - (Optional, ForceNew) Memory in MB, at least 4096 and a multiple of 1024. Required with `machine_type` and `cpu` when `instance_type` is omitted. For 4 GB, use `4096`.
-* `uhost_family` - (Optional, ForceNew) The Intel outstanding family, `o1i` or `o2i`, sent as `MasterUHostFamily`. Requires `machine_type = "O"`, an Intel CPU platform and `boot_disk_type = "cloud_rssd"`.
+* `uhost_family` - (Optional, ForceNew) The host family, such as `o1a`, `o1i`, or `o2i`, sent as `MasterUHostFamily`. Lowercase alphanumeric family names are accepted; availability and compatibility are checked by the API. Existing `o1i`/`o2i` validation still requires `machine_type = "O"` and an Intel CPU platform. Use a matching CPU platform (for example `Amd/Auto` for `o1a`). Outstanding machines require `boot_disk_type = "cloud_rssd"`.
 * `image_id` - (Optional, ForceNew) The Master image ID, sent as `MasterImageId`. When omitted, the API uses the top-level `image_id` or selects an available base image.
 * `boot_disk_size` - (Optional, ForceNew) System disk size in GB, from 40 to 500. When omitted, the API default is 40 GB.
 * `boot_disk_type` - (Optional, ForceNew) The type of boot disk. Possible values are: `local_normal` and `local_ssd` for local boot disk, `cloud_ssd` for cloud SSD boot disk,`cloud_rssd` as RDMA-SSD cloud disk. (Default: `cloud_ssd`). The `local_ssd` and `cloud_ssd` are not fully support by all regions as boot disk type, please proceed to UCloud console for more details.
@@ -103,6 +136,26 @@ The `master` supports the following:
         - `Amd/Epyc2` as the version of Amd CPU platform selected by system will be `Amd/Epyc2` and above;
     - The Ampere CPU platform:
         - `Ampere/Altra` as the version of Ampere CPU platform selected by system will be `Ampere/Altra` and above.
+
+### Master security groups and disk encryption
+
+* `master.data_disk_kms_key_id` - (Optional, ForceNew) KMS key ID sent as `MasterDataDiskKmsKeyId`, for the Master data disk.
+* `master.security_group` - (Optional, ForceNew) Repeatable security group binding. Each binding has required `master_index` (0, 1, or 2, corresponding to `availability_zones`), required `id`, optional `priority` (1–5), and optional `name`. Up to five distinct groups can be bound to each Master. The same group can be used on different Masters. This maps to `Master.N.SecGroupId.N.{Id,Priority,Name}`.
+
+For example, within the existing `master` block:
+
+```hcl
+# Alongside the existing zone, machine and disk settings:
+data_disk_kms_key_id = "your-master-disk-kms-key-id"
+
+security_group {
+  master_index = 0
+  id           = "your-security-group-id"
+  priority     = 1
+  name         = "master-access"
+}
+# Add bindings for master_index 1 and 2 as needed.
+```
 
 ### Master specification example
 
@@ -184,7 +237,7 @@ worker {
 | `cpu` | Required, at least 2 cores | `Nodes.N.CPU` |
 | `memory` | Required, at least 4096 MB, multiple of 1024 | `Nodes.N.Mem` |
 | `count` | Optional, 1–10, default 1 | `Nodes.N.Count` |
-| `uhost_family` | Optional, `o1i` or `o2i`; requires `O` and an Intel platform | `Nodes.N.UHostFamily` |
+| `uhost_family` | Optional host family, such as `o1a`, `o1i`, or `o2i`; same validation as Master | `Nodes.N.UHostFamily` |
 | `min_cpu_platform` | Optional, default `Intel/Auto`; same supported platforms as Master | `Nodes.N.MinimalCpuPlatform` |
 | `image_id` | Optional | `Nodes.N.ImageId` |
 | `boot_disk_type` | Optional, default `cloud_ssd`; use `cloud_rssd` for `O` machines | `Nodes.N.BootDiskType` |
@@ -201,6 +254,63 @@ worker {
 Disk type values are the same as Master. Taint effects are `NoSchedule`, `PreferNoSchedule`, and `NoExecute`. Multiple Worker blocks may target different zones or specifications; their order determines the API group index.
 
 These blocks record the initial creation configuration in Terraform state. They do not individually track or reconcile subsequently modified, deleted, or added nodes. Adding, removing, reordering, or changing Worker groups requires replacement of the entire cluster, including changes to `count`. For ongoing node management, use `ucloud_uk8s_node_group` and `ucloud_uk8s_node` for separately created nodes. Do not manage the same node through both an initial Worker block and a standalone resource. Cluster deletion continues to use `DelUK8SCluster` and the cluster's `delete_disks_with_instance` setting.
+
+### Additional Worker creation options
+
+All options below belong inside a `worker` block, are optional and ForceNew, and follow the initial Worker lifecycle described above.
+
+| Field | API parameter | Description |
+| --- | --- | --- |
+| `isolation_group` | `Nodes.N.IsolationGroup` | Worker isolation group ID. The API limits each isolation group to eight nodes, including existing nodes. |
+| `name_prefix` | `Nodes.N.NamePrefix` | Hostname prefix; the resulting hostname is `{NamePrefix}-{NodeIP}`. |
+| `security_mode` | `Nodes.N.SecurityMode` | `Firewall` or `SecGroup`; omitted uses the API default `Firewall`. |
+| `security_group` | `Nodes.N.SecGroupId.N.*` | Up to five bindings, each with required `id`, optional `priority` (1–5), and optional `name`. Requires `security_mode = "SecGroup"`. |
+| `uni_feature` | `Nodes.N.UNIFeature` | String `"true"` or `"false"`; omitted uses the API default. Enabling requires the relevant UCloud permission. |
+| `data_disk_kms_key_id` | `Nodes.N.DataDiskKmsKeyId` | KMS key ID for the Worker data disk. |
+| `network_interface` | `Nodes.N.NetworkInterface.N.*` | Repeatable network interface configuration, each containing one `eip` block. |
+| `kubelet_configuration` | `Nodes.N.KubeletConfiguration.ContainerLogMaxFiles` | Map supporting only `ContainerLogMaxFiles`, as an integer string of at least 2. |
+
+`security_group_id` remains the legacy firewall ID. It cannot be combined with `security_mode = "SecGroup"`. This differs from the `security_group` blocks used for the newer security groups.
+
+Each `network_interface.eip` block supports:
+
+| Field | Requirement / values | API field |
+| --- | --- | --- |
+| `operator_name` | Required: `Bgp` or `International`, according to the region | `OperatorName` |
+| `pay_mode` | Optional: `Bandwidth` (default), `Traffic`, `ShareBandwidth`, `Free` | `PayMode` |
+| `bandwidth` | Positive Mbps required outside shared bandwidth mode; `Traffic` 1–300, `Bandwidth` 1–800 | `Bandwidth` |
+| `share_bandwidth_id` | Required for `ShareBandwidth`; only valid with that mode | `ShareBandwidthId` |
+| `coupon_id` | Optional EIP coupon ID | `CouponId` |
+
+For example, within an existing `worker` block:
+
+```hcl
+isolation_group      = "your-isolation-group-id"
+name_prefix          = "worker"
+security_mode        = "SecGroup"
+uni_feature          = "true"
+data_disk_kms_key_id = "your-worker-disk-kms-key-id"
+
+security_group {
+  id       = "your-security-group-id"
+  priority = 1
+  name     = "worker-access"
+}
+
+network_interface {
+  eip {
+    operator_name = "International"
+    pay_mode      = "Bandwidth"
+    bandwidth     = 10
+  }
+}
+
+kubelet_configuration = {
+  ContainerLogMaxFiles = "5"
+}
+```
+
+Only `ContainerLogMaxFiles` is supported in `kubelet_configuration`. It sets the maximum number of container log files and must be an integer string of at least 2. Omitting the map leaves the API default in effect. Unknown keys are rejected during planning; changing this creation setting replaces the cluster.
 
 ### kube_proxy
 

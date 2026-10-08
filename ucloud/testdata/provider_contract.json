@@ -2677,6 +2677,11 @@
           "force_new": true,
           "validate": "StringInSlice"
         },
+        "cluster_domain": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        },
         "cni_mode": {
           "type": "TypeString",
           "computed": true
@@ -2710,6 +2715,12 @@
           "computed": true,
           "sensitive": true
         },
+        "forward_src_ip_method": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
         "image_id": {
           "type": "TypeString",
           "optional": true,
@@ -2728,6 +2739,23 @@
           "optional": true,
           "computed": true,
           "force_new": true
+        },
+        "kms_plugin_key_id": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        },
+        "kms_plugin_resources": {
+          "type": "TypeSet",
+          "optional": true,
+          "force_new": true,
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString",
+              "validate": "StringMatch"
+            }
+          }
         },
         "kube_proxy": {
           "type": "TypeList",
@@ -2749,6 +2777,12 @@
           "type": "TypeString",
           "computed": true,
           "sensitive": true
+        },
+        "lb_class": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringInSlice"
         },
         "master": {
           "type": "TypeList",
@@ -2790,6 +2824,11 @@
                 "optional": true,
                 "force_new": true,
                 "validate": "IntAtLeast"
+              },
+              "data_disk_kms_key_id": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true
               },
               "data_disk_size": {
                 "type": "TypeInt",
@@ -2843,11 +2882,45 @@
                 "diff_suppress": "resourceUCloudUK8SCluster",
                 "validate": "StringInSlice"
               },
+              "security_group": {
+                "type": "TypeList",
+                "optional": true,
+                "force_new": true,
+                "max_items": 15,
+                "element": {
+                  "kind": "resource",
+                  "resource": {
+                    "id": {
+                      "type": "TypeString",
+                      "required": true,
+                      "force_new": true,
+                      "validate": "StringMatch"
+                    },
+                    "master_index": {
+                      "type": "TypeInt",
+                      "required": true,
+                      "force_new": true,
+                      "validate": "IntBetween"
+                    },
+                    "name": {
+                      "type": "TypeString",
+                      "optional": true,
+                      "force_new": true
+                    },
+                    "priority": {
+                      "type": "TypeInt",
+                      "optional": true,
+                      "force_new": true,
+                      "validate": "IntBetween"
+                    }
+                  }
+                }
+              },
               "uhost_family": {
                 "type": "TypeString",
                 "optional": true,
                 "force_new": true,
-                "validate": "StringInSlice"
+                "validate": "StringMatch"
               }
             }
           }
@@ -2883,11 +2956,29 @@
           "required": true,
           "force_new": true
         },
+        "tag": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        },
         "user_data": {
           "type": "TypeString",
           "optional": true,
           "force_new": true,
           "validate": "StringLenBetween"
+        },
+        "user_labels": {
+          "type": "TypeMap",
+          "optional": true,
+          "force_new": true,
+          "description": "UCloud resource labels, separate from Kubernetes Worker labels.",
+          "validate": "validateUK8SUserLabels",
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
         },
         "vpc_id": {
           "type": "TypeString",
@@ -2935,6 +3026,11 @@
                 "force_new": true,
                 "validate": "IntAtLeast"
               },
+              "data_disk_kms_key_id": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true
+              },
               "data_disk_size": {
                 "type": "TypeInt",
                 "optional": true,
@@ -2966,6 +3062,23 @@
                 "optional": true,
                 "force_new": true,
                 "validate": "StringMatch"
+              },
+              "isolation_group": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true
+              },
+              "kubelet_configuration": {
+                "type": "TypeMap",
+                "optional": true,
+                "force_new": true,
+                "description": "Kubelet configuration map supporting only ContainerLogMaxFiles, an integer string of at least 2.",
+                "element": {
+                  "kind": "schema",
+                  "schema": {
+                    "type": "TypeString"
+                  }
+                }
               },
               "labels": {
                 "type": "TypeMap",
@@ -3004,10 +3117,100 @@
                 "default": "\"Intel/Auto\"",
                 "validate": "StringInSlice"
               },
+              "name_prefix": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true
+              },
+              "network_interface": {
+                "type": "TypeList",
+                "optional": true,
+                "force_new": true,
+                "element": {
+                  "kind": "resource",
+                  "resource": {
+                    "eip": {
+                      "type": "TypeList",
+                      "required": true,
+                      "force_new": true,
+                      "min_items": 1,
+                      "max_items": 1,
+                      "element": {
+                        "kind": "resource",
+                        "resource": {
+                          "bandwidth": {
+                            "type": "TypeInt",
+                            "optional": true,
+                            "force_new": true,
+                            "validate": "IntAtLeast"
+                          },
+                          "coupon_id": {
+                            "type": "TypeString",
+                            "optional": true,
+                            "force_new": true
+                          },
+                          "operator_name": {
+                            "type": "TypeString",
+                            "required": true,
+                            "force_new": true,
+                            "validate": "StringInSlice"
+                          },
+                          "pay_mode": {
+                            "type": "TypeString",
+                            "optional": true,
+                            "force_new": true,
+                            "default": "\"Bandwidth\"",
+                            "validate": "StringInSlice"
+                          },
+                          "share_bandwidth_id": {
+                            "type": "TypeString",
+                            "optional": true,
+                            "force_new": true
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "security_group": {
+                "type": "TypeList",
+                "optional": true,
+                "force_new": true,
+                "max_items": 5,
+                "element": {
+                  "kind": "resource",
+                  "resource": {
+                    "id": {
+                      "type": "TypeString",
+                      "required": true,
+                      "force_new": true,
+                      "validate": "StringMatch"
+                    },
+                    "name": {
+                      "type": "TypeString",
+                      "optional": true,
+                      "force_new": true
+                    },
+                    "priority": {
+                      "type": "TypeInt",
+                      "optional": true,
+                      "force_new": true,
+                      "validate": "IntBetween"
+                    }
+                  }
+                }
+              },
               "security_group_id": {
                 "type": "TypeString",
                 "optional": true,
                 "force_new": true
+              },
+              "security_mode": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true,
+                "validate": "StringInSlice"
               },
               "taint": {
                 "type": "TypeSet",
@@ -3034,6 +3237,12 @@
                 }
               },
               "uhost_family": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true,
+                "validate": "StringMatch"
+              },
+              "uni_feature": {
                 "type": "TypeString",
                 "optional": true,
                 "force_new": true,
