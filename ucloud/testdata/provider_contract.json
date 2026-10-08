@@ -1411,6 +1411,17 @@
           "type": "TypeString",
           "optional": true
         },
+        "labels": {
+          "type": "TypeMap",
+          "optional": true,
+          "force_new": true,
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
         "login_mode": {
           "type": "TypeString",
           "optional": true,

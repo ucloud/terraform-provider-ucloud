@@ -477,6 +477,13 @@ func resourceUCloudInstance() *schema.Resource {
 				}, false),
 			},
 
+			"labels": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				ForceNew: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
 			"udset_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -821,6 +828,15 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 
 	if v, ok := d.GetOkExists("host_binding"); ok {
 		req.HostBinding = ucloud.Bool(v.(bool))
+	}
+
+	if v, ok := d.GetOk("labels"); ok {
+		for key, value := range v.(map[string]interface{}) {
+			req.Labels = append(req.Labels, uhost.CreateUHostInstanceParamLabels{
+				Key:   ucloud.String(key),
+				Value: ucloud.String(value.(string)),
+			})
+		}
 	}
 
 	resp, err := conn.CreateUHostInstance(req)

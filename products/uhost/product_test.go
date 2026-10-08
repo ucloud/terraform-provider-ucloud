@@ -80,6 +80,7 @@ func TestInstanceSchemaCompatibility(t *testing.T) {
 		"auto_data_disk_init":        {typeValue: schema.TypeString, optional: true, forceNew: true},
 		"coupon_id":                  {typeValue: schema.TypeString, optional: true, forceNew: true},
 		"uhost_family":               {typeValue: schema.TypeString, optional: true, computed: true, forceNew: true},
+		"labels":                     {typeValue: schema.TypeMap, optional: true, forceNew: true},
 		"udset_id":                   {typeValue: schema.TypeString, optional: true, forceNew: true},
 		"udhost_id":                  {typeValue: schema.TypeString, optional: true, forceNew: true},
 		"host_binding":               {typeValue: schema.TypeBool, optional: true, forceNew: true},
