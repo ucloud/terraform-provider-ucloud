@@ -63,7 +63,7 @@ func (client *productClient) describeIsolationGroupById(igId string) (*sdkuhost.
 
 	resp, err := client.uhostconn.DescribeIsolationGroup(req)
 	if err != nil {
-		if uErr, ok := err.(uerr.Error); ok && uErr.Code() == 8037 {
+		if uErr, ok := err.(uerr.Error); ok && uErr.Code() == 8215 {
 			return nil, newNotFoundError(getNotFoundMessage("isolation group", igId))
 		}
 		return nil, err
