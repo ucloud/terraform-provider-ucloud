@@ -2,6 +2,7 @@ package umem_test
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	pumemapi "github.com/ucloud/ucloud-sdk-go/private/services/umem"
@@ -19,26 +20,15 @@ var testAccProviders = testAccHarness.Providers
 
 func testAccPreCheck(t *testing.T) {
 	testAccHarness.PreCheck(t)
+	// UMem/URedis now require a VPC and subnet. Reuse a pre-created pair so the
+	// suite does not create a fresh VPC per test; fail fast when unset so the
+	// configs do not silently render with empty ids.
+	for _, name := range []string{"UCLOUD_VPC_ID", "UCLOUD_SUBNET_ID"} {
+		if os.Getenv(name) == "" {
+			t.Fatalf("%s must be set for umem acceptance tests", name)
+		}
+	}
 }
-
-// testAccUMemNetworkConfig provisions the VPC and subnet that UMem/URedis
-// instances now require (the service no longer sells classic-network
-// instances). Every acceptance config embeds it, so the suite stays
-// self-contained and does not depend on pre-created ids from the environment.
-const testAccUMemNetworkConfig = `
-resource "ucloud_vpc" "default" {
-  name        = "tf-acc-umem"
-  tag         = "tf-acc"
-  cidr_blocks = ["192.168.0.0/16"]
-}
-
-resource "ucloud_subnet" "default" {
-  name       = "tf-acc-umem"
-  tag        = "tf-acc"
-  cidr_block = "192.168.1.0/24"
-  vpc_id     = "${ucloud_vpc.default.id}"
-}
-`
 
 func testAccUMemClient() (*umemapi.UMemClient, error) {
 	client, err := testAccHarness.ProductClient(productumem.Name+":public", func(

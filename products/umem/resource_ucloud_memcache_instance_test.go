@@ -106,9 +106,9 @@ func testAccCheckActiveStandbyMemcacheDestroy(state *terraform.State) error {
 	return nil
 }
 
-// testAccActiveStandbyMemcacheConfig embeds the shared VPC/subnet provisioned
-// by testAccUMemNetworkConfig (see acceptance_harness_test.go).
-var testAccActiveStandbyMemcacheConfig = testAccUMemNetworkConfig + `
+// See resource_ucloud_redis_instance_test.go: the suite reuses one pre-created
+// VPC/subnet exported via UCLOUD_VPC_ID / UCLOUD_SUBNET_ID.
+var testAccActiveStandbyMemcacheConfig = fmt.Sprintf(`
 data "ucloud_zones" "default" {}
 
 resource "ucloud_memcache_instance" "foo" {
@@ -117,12 +117,12 @@ resource "ucloud_memcache_instance" "foo" {
 	instance_type = "memcache-master-1"
 	charge_type = "month"
 	duration    = 1
-	vpc_id    = "${ucloud_vpc.default.id}"
-	subnet_id = "${ucloud_subnet.default.id}"
+	vpc_id = "%s"
+	subnet_id = "%s"
 }
-`
+`, os.Getenv("UCLOUD_VPC_ID"), os.Getenv("UCLOUD_SUBNET_ID"))
 
-var testAccActiveStandbyMemcacheConfigUpdate = testAccUMemNetworkConfig + `
+var testAccActiveStandbyMemcacheConfigUpdate = fmt.Sprintf(`
 data "ucloud_zones" "default" {}
 
 resource "ucloud_memcache_instance" "foo" {
@@ -131,7 +131,7 @@ resource "ucloud_memcache_instance" "foo" {
 	instance_type = "memcache-master-2"
 	charge_type = "month"
 	duration    = 1
-	vpc_id    = "${ucloud_vpc.default.id}"
-	subnet_id = "${ucloud_subnet.default.id}"
+	vpc_id = "%s"
+	subnet_id = "%s"
 }
-`
+`, os.Getenv("UCLOUD_VPC_ID"), os.Getenv("UCLOUD_SUBNET_ID"))
