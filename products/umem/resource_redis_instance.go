@@ -27,6 +27,7 @@ func resourceUCloudRedisInstance() *schema.Resource {
 			diffValidateBackup,
 			diffValidateBlockCnt,
 			diffValidateRedisRestart,
+			diffValidateRedisTransform,
 			customdiff.ValidateChange("instance_type", diffValidateRedisInstanceType),
 		),
 
@@ -57,15 +58,19 @@ func resourceUCloudRedisInstance() *schema.Resource {
 			},
 
 			// block_cnt is the number of shards (blocks) for a distributed redis
-			// instance, sent as CreateUMemSpace's BlockCnt. The backend now requires
-			// it, so when omitted we send defaultDistributedRedisBlockCnt. It is
-			// create-only and ForceNew: shard count cannot be changed in place (a
-			// capacity resize via ResizeUMemSpace keeps the existing shards). Only
-			// valid for the distributed instance type; rejected for active-standby.
-			// The live shards are exposed via the computed block_set attribute.
+			// instance, sent as CreateUMemSpace's BlockCnt. The backend requires it,
+			// so when omitted we send defaultDistributedRedisBlockCnt. It is
+			// create-only and ForceNew: the shard count cannot be changed in place
+			// (a capacity resize keeps the existing shards). Only valid for the
+			// distributed instance type; rejected for active-standby.
+			// It is also Computed: the live shard count is read back into state, so
+			// writing the current value later does not force a replacement, and an
+			// unreadable DescribeUMemBlockInfo cannot leave the attribute
+			// "known after apply" on every plan.
 			"block_cnt": {
 				Type:         schema.TypeInt,
 				Optional:     true,
+				Computed:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.IntAtLeast(1),
 			},
@@ -659,6 +664,14 @@ func transformActiveStandbyRedis(client *productClient, d *schema.ResourceData) 
 	conn := client.umemconn
 	transformType := d.Get("transform_type").(string)
 
+	// transform_type is not read back from the API, so removing it from the
+	// configuration reaches this branch as an empty value. Send no request in
+	// that case: an empty TransformType is meaningless for the backend and
+	// would surface as an opaque API error.
+	if transformType == "" {
+		return fmt.Errorf("transform_type of redis instance %q is empty: set it explicitly to %q or %q, or keep the previous value; an imperative attribute is not read back from the API, so removing it is itself a change", d.Id(), "Bind", "UNBind")
+	}
+
 	req := conn.NewISolationURedisGroupRequest()
 	req.GroupId = ucloud.String(d.Id())
 	req.TransformType = ucloud.String(transformType)
@@ -840,6 +853,9 @@ func readActiveStandbyRedisInstance(d *schema.ResourceData, meta interface{}) er
 	d.Set("block_set", []map[string]interface{}{})
 	d.Set("proxy_set", []map[string]interface{}{})
 	d.Set("read_mode", "")
+	// block_cnt is Optional+Computed on the shared schema. Write the zero value
+	// for active-standby instances for the same reason as above.
+	d.Set("block_cnt", 0)
 	return nil
 }
 
@@ -890,9 +906,9 @@ func readDistributedRedisInstance(d *schema.ResourceData, meta interface{}) erro
 	// absent from state is marked <computed> in every subsequent plan, which
 	// produces a perpetual diff (the acceptance framework rejects that with
 	// "the plan was not empty").
-	blocks, readMode, err := client.describeDistributedRedisBlockInfoById(d.Id(), inst.Zone)
-	if err != nil {
-		log.Printf("[WARN] could not read block info of redis instance %q: %s", d.Id(), err)
+	blocks, readMode, blockErr := client.describeDistributedRedisBlockInfoById(d.Id(), inst.Zone)
+	if blockErr != nil {
+		log.Printf("[WARN] could not read block info of redis instance %q: %s", d.Id(), blockErr)
 		blocks, readMode = nil, ""
 	}
 
@@ -917,6 +933,15 @@ func readDistributedRedisInstance(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 	d.Set("read_mode", readMode)
+
+	// Persist the shard count: block_cnt is Optional+Computed+ForceNew, so a
+	// state carrying the live count lets the user write the same value later
+	// without triggering a replacement. When block info was unreadable, keep the
+	// configured value (0 when unset) instead of writing nothing, which would
+	// leave the attribute "known after apply" on every plan.
+	if err := d.Set("block_cnt", distributedBlockCnt(blocks, blockErr == nil, d.Get("block_cnt").(int))); err != nil {
+		return err
+	}
 
 	proxies, err := client.describeDistributedRedisProxyInfoById(d.Id(), inst.Zone)
 	if err != nil {
@@ -1168,6 +1193,26 @@ func (c *productClient) waitDistributedRedisResized(id string, size int) error {
 // ResizeUDRedisBlockSize.
 var udredisBlockSizes = []int{4, 8, 12, 16, 20}
 
+// distributedBlockSizeForResize validates a distributed redis resize request and
+// returns the per-shard size in GB. The requested total capacity must divide
+// evenly across the instance's current shards, and every shard may only take one
+// of udredisBlockSizes.
+func distributedBlockSizeForResize(total, shardCount int) (int, error) {
+	if shardCount <= 0 {
+		return 0, fmt.Errorf("no shard information returned by DescribeUMemBlockInfo")
+	}
+	if total%shardCount != 0 {
+		return 0, fmt.Errorf("total size %dGB is not divisible by its %d shards", total, shardCount)
+	}
+	blockSize := total / shardCount
+	for _, size := range udredisBlockSizes {
+		if size == blockSize {
+			return blockSize, nil
+		}
+	}
+	return 0, fmt.Errorf("per-shard size %dGB is invalid, must be one of 4/8/12/16/20GB", blockSize)
+}
+
 // resizeDistributedRedisInstance grows a distributed redis (UDRedis) instance.
 //
 // UDRedis capacity is shardCount x per-shard size, and resizing happens per
@@ -1189,23 +1234,10 @@ func resizeDistributedRedisInstance(client *productClient, d *schema.ResourceDat
 	if err != nil {
 		return fmt.Errorf("error on listing shards of redis instance %q before resizing (distributed resize requires DescribeUMemBlockInfo access): %s", id, err)
 	}
-	if len(blocks) == 0 {
-		return fmt.Errorf("cannot resize redis instance %q: no shard information returned by DescribeUMemBlockInfo", id)
-	}
 
-	if targetTotal%len(blocks) != 0 {
-		return fmt.Errorf("cannot resize redis instance %q: total size %dGB is not divisible by its %d shards", id, targetTotal, len(blocks))
-	}
-	targetBlockSize := targetTotal / len(blocks)
-	validSize := false
-	for _, size := range udredisBlockSizes {
-		if size == targetBlockSize {
-			validSize = true
-			break
-		}
-	}
-	if !validSize {
-		return fmt.Errorf("cannot resize redis instance %q: per-shard size %dGB is invalid, must be one of 4/8/12/16/20GB", id, targetBlockSize)
+	targetBlockSize, err := distributedBlockSizeForResize(targetTotal, len(blocks))
+	if err != nil {
+		return fmt.Errorf("cannot resize redis instance %q: %s", id, err)
 	}
 
 	for _, block := range blocks {
@@ -1387,6 +1419,26 @@ func diffValidateRedisRestart(diff *schema.ResourceDiff, meta interface{}) error
 
 	if _, ok := diff.GetOk("restart_trigger"); ok && t.Type == "distributed" {
 		return fmt.Errorf("the argument %q is only supported for active-standby redis, not supported for distributed redis", "restart_trigger")
+	}
+
+	return nil
+}
+
+// diffValidateRedisTransform rejects transform_type on distributed redis: the
+// SDK only exposes ISolationURedisGroup for active-standby redis.
+func diffValidateRedisTransform(diff *schema.ResourceDiff, meta interface{}) error {
+	if diffIsDestroyPlan(diff) {
+		return nil
+	}
+
+	instanceType, _ := diff.Get("instance_type").(string)
+	t, err := parseRedisInstanceType(instanceType)
+	if err != nil {
+		return err
+	}
+
+	if _, ok := diff.GetOk("transform_type"); ok && t.Type != "master" {
+		return fmt.Errorf("the argument %q is only supported for active-standby redis, not supported for distributed redis", "transform_type")
 	}
 
 	return nil

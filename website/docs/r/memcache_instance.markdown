@@ -39,6 +39,14 @@ resource "ucloud_memcache_instance" "master" {
 }
 ```
 
+## Upgrading to a VPC-only instance
+
+UCloud has stopped selling classic-network UMem/URedis instances, so `vpc_id` and `subnet_id` changed from optional/computed to **required** on `ucloud_memcache_instance` (and `ucloud_redis_instance`):
+
+* Add both attributes to every instance block. Until you do, `terraform plan` fails with `The argument "vpc_id" is required`.
+* Both attributes are `ForceNew`. An instance that cannot be recreated inside a VPC is replaced.
+* State written by an earlier provider version still refreshes; only the configuration needs the two new attributes.
+
 ## Argument Reference
 
 The following arguments are supported:

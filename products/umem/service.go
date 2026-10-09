@@ -100,6 +100,19 @@ func (c *productClient) describeDistributedRedisBlockInfoById(id, zone string) (
 	return blocks, readMode, nil
 }
 
+// distributedBlockCnt decides the shard count written back to state by the read
+// path. When DescribeUMemBlockInfo is readable the live shard count wins, so an
+// explicit block_cnt matching the instance does not force a replacement. When it
+// is not readable the configured value is preserved (0 when unset) instead of
+// leaving the Optional+Computed attribute unset, which would show up as
+// "known after apply" on every plan.
+func distributedBlockCnt(blocks []umem.UMemBlockInfo, readable bool, configured int) int {
+	if readable && len(blocks) > 0 {
+		return len(blocks)
+	}
+	return configured
+}
+
 // describeDistributedRedisProxyInfoById pulls all the proxy information of a
 // distributed redis instance. DescribeUDRedisProxyInfo requires SpaceId and
 // the instance zone (the backend rejects the call with "Missing Params

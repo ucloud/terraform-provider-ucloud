@@ -193,3 +193,41 @@ func TestRedisInstanceRestartTriggerDiffValidation(t *testing.T) {
 		t.Fatalf("active-standby redis with restart_trigger should be valid, got: %v", err)
 	}
 }
+
+// TestRedisInstanceTransformTypeDiffValidation covers diffValidateRedisTransform:
+// transform_type is an active-standby-only knob (the SDK exposes no
+// ISolationURedisGroup equivalent for distributed redis).
+func TestRedisInstanceTransformTypeDiffValidation(t *testing.T) {
+	r := resourceUCloudRedisInstance()
+
+	// distributed redis with transform_type must be rejected
+	distributedTransform := terraform.NewResourceConfigRaw(map[string]interface{}{
+		"availability_zone": "cn-sh2-01",
+		"instance_type":     "redis-distributed-16",
+		"name":              "tf-acc-redis",
+		"vpc_id":            "ucloud-vpc-fake",
+		"subnet_id":         "ucloud-subnet-fake",
+		"transform_type":    "UNBind",
+	})
+	_, err := r.Diff(&terraform.InstanceState{}, distributedTransform, nil)
+	if err == nil {
+		t.Fatal("expected error for distributed redis with transform_type, got nil")
+	}
+	if !strings.Contains(err.Error(), "transform_type") {
+		t.Fatalf("expected transform_type rejection error, got: %v", err)
+	}
+
+	// active-standby redis with transform_type is valid
+	masterTransform := terraform.NewResourceConfigRaw(map[string]interface{}{
+		"availability_zone": "cn-sh2-01",
+		"instance_type":     "redis-master-1",
+		"engine_version":    "4.0",
+		"name":              "tf-acc-redis",
+		"vpc_id":            "ucloud-vpc-fake",
+		"subnet_id":         "ucloud-subnet-fake",
+		"transform_type":    "UNBind",
+	})
+	if _, err := r.Diff(&terraform.InstanceState{}, masterTransform, nil); err != nil {
+		t.Fatalf("active-standby redis with transform_type should be valid, got: %v", err)
+	}
+}

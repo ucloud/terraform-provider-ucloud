@@ -34,6 +34,7 @@ func TestRegistrationUsesStableSchemaFields(t *testing.T) {
 		"availability_zone", "standby_zone", "name", "instance_type", "engine_version",
 		"charge_type", "duration", "vpc_id", "subnet_id", "password", "tag",
 		"auto_backup", "backup_begin_time", "ip_set", "create_time", "expire_time", "status",
+		"block_cnt", "block_set", "proxy_set", "read_mode", "restart_trigger", "transform_type",
 	} {
 		if redis.Schema[field] == nil {
 			t.Errorf("redis schema is missing field %q", field)
@@ -43,6 +44,42 @@ func TestRegistrationUsesStableSchemaFields(t *testing.T) {
 		t.Error("redis password schema must remain sensitive")
 	}
 
+	// Field definitions introduced by the umem 1.1 work (spec 10.1: type,
+	// default, sensitive and validators, plus ForceNew for resources).
+	for _, attr := range []string{"vpc_id", "subnet_id"} {
+		field := redis.Schema[attr]
+		if !field.Required || field.Optional || field.Computed || !field.ForceNew {
+			t.Errorf("redis %q must be Required+ForceNew only, got %#v", attr, field)
+		}
+	}
+	if field := redis.Schema["block_cnt"]; field.Type != schema.TypeInt || !field.Optional || !field.Computed || !field.ForceNew {
+		t.Errorf("redis block_cnt must be Optional+Computed+ForceNew TypeInt, got %#v", field)
+	}
+	for _, attr := range []string{"block_set", "proxy_set"} {
+		if field := redis.Schema[attr]; field.Type != schema.TypeList || !field.Computed || field.Optional {
+			t.Errorf("redis %q must be Computed-only TypeList, got %#v", attr, field)
+		}
+	}
+	if field := redis.Schema["read_mode"]; field.Type != schema.TypeString || !field.Computed || field.Optional {
+		t.Errorf("redis read_mode must be Computed-only TypeString, got %#v", field)
+	}
+	if field := redis.Schema["restart_trigger"]; field.Type != schema.TypeString || !field.Optional || field.Computed || field.ForceNew {
+		t.Errorf("redis restart_trigger must be Optional TypeString, got %#v", field)
+	}
+	transform := redis.Schema["transform_type"]
+	if transform.Type != schema.TypeString || !transform.Optional || transform.Computed || transform.ForceNew {
+		t.Errorf("redis transform_type must be Optional TypeString, got %#v", transform)
+	}
+	if transform.ValidateFunc == nil {
+		t.Fatal("redis transform_type must keep its validator")
+	}
+	if _, errs := transform.ValidateFunc("UNBind", "transform_type"); len(errs) > 0 {
+		t.Errorf("transform_type must accept UNBind: %v", errs)
+	}
+	if _, errs := transform.ValidateFunc("unbind", "transform_type"); len(errs) == 0 {
+		t.Error("transform_type must reject an unknown value")
+	}
+
 	memcache := resourceUCloudMemcacheInstance()
 	for _, field := range []string{
 		"availability_zone", "name", "instance_type", "charge_type", "duration",
@@ -50,6 +87,12 @@ func TestRegistrationUsesStableSchemaFields(t *testing.T) {
 	} {
 		if memcache.Schema[field] == nil {
 			t.Errorf("memcache schema is missing field %q", field)
+		}
+	}
+	for _, attr := range []string{"vpc_id", "subnet_id"} {
+		field := memcache.Schema[attr]
+		if !field.Required || field.Optional || field.Computed || !field.ForceNew {
+			t.Errorf("memcache %q must be Required+ForceNew only, got %#v", attr, field)
 		}
 	}
 }
