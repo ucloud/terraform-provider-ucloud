@@ -10,7 +10,7 @@ description: |-
 
 Provides an UHost Instance resource.
 
-~> **Note** If you try to update some properties which requires stopping the instance, you must set `allow_stopping_for_update` to `true` in your config to allows Terraform to stop the instance to update its properties like `instance_type`, `root_password`, `boot_disk_size`, `data_disk_size`. In addition, once the instance complete creation, it takes around 10 minutes for boot disk initialization for the running instance, and the updates will only be made to some specific attributes (`root_password`, `boot_disk_size`) if required once the instance initialization completed.
+~> **Note** If you try to update some properties which requires stopping the instance, you must set `allow_stopping_for_update` to `true` in your config to allows Terraform to stop the instance to update its properties like `instance_type`, `root_password`, `login_mode`, `key_pair_id`, `boot_disk_size`, `data_disk_size` and `net_capability`. In addition, once the instance complete creation, it takes around 10 minutes for boot disk initialization for the running instance, and the updates will only be made to some specific attributes (`root_password`, `boot_disk_size`) if required once the instance initialization completed.
 
 ## Example Usage
 
@@ -122,7 +122,7 @@ The following arguments are supported:
 
 - - -
 
-* `allow_stopping_for_update` - (Optional) If you try to update some properties which requires stopping the instance, you must set `allow_stopping_for_update` to `true` in your config to allows Terraform to stop the instance to update its properties like `instance_type`, `root_password`, `boot_disk_size`, `data_disk_size`.
+* `allow_stopping_for_update` - (Optional) If you try to update some properties which requires stopping the instance, you must set `allow_stopping_for_update` to `true` in your config to allows Terraform to stop the instance to update its properties like `instance_type`, `root_password`, `login_mode`, `key_pair_id`, `boot_disk_size`, `data_disk_size` and `net_capability`.
 
 * `root_password` - (Optional) The password for the instance, which contains 8-30 characters, and at least 2 items of capital letters, lower case letters, numbers and special characters. The special characters include <code>`()~!@#$%^&*-+=_|{}\[]:;'<>,.?/</code>. If not specified, terraform will auto-generate a password.
 
@@ -137,24 +137,24 @@ The following arguments are supported:
 * `boot_disk_size` - (Optional) The size of the boot disk, measured in GB (GigaByte). Range: 20-500. The value set of disk size must be larger or equal to `20`(default: `20`) for Linux and `40` (default: `40`) for Windows. The responsive time is a bit longer if the value set is larger than default for local boot disk, and further settings may be required on host instance if the value set is larger than default for cloud boot disk. The disk volume adjustment must be a multiple of 10 GB. In addition, any reduction of boot disk size is not supported.
 
     ~> **Note** If you want to update this value, you must set `allow_stopping_for_update`to `true`. In addition, when it is changed, you need to [go to the instance for configuration](https://docs.ucloud.cn/compute/uhost/guide/disk). 
-* `boot_disk_type` - (Optional, ForceNew) The type of boot disk. Possible values are: `local_normal` and `local_ssd` for local boot disk, `cloud_ssd` for cloud SSD boot disk,`rssd_data_disk` as RDMA-SSD cloud disk. (Default: `local_normal`). The `local_ssd` and `cloud_ssd` are not fully support by all regions as boot disk type, please proceed to UCloud console for more details.
+* `boot_disk_type` - (Optional, ForceNew) The type of boot disk. Possible values are: `local_normal` and `local_ssd` for local boot disk, `cloud_ssd` for cloud SSD boot disk, `cloud_rssd` as RDMA-SSD cloud disk. (Default: `local_normal`). The `local_ssd` and `cloud_ssd` are not fully support by all regions as boot disk type, please proceed to UCloud console for more details.
 * `data_disk_type` - (Optional, ForceNew) The type of local data disk. Possible values are: `local_normal` and `local_ssd` for local data disk. (Default: `local_normal`). The `local_ssd` is not fully support by all regions as data disk type, please proceed to UCloud console for more details. In addition, the `data_disk_type` must be same as `boot_disk_type` if specified.
 * `data_disk_size` - (Optional) The size of local data disk, measured in GB (GigaByte), 20-2000 for local sata disk and 20-1000 for local ssd disk (all the GPU type instances are included). The volume adjustment must be a multiple of 10 GB. In addition, any reduction of data disk size is not supported. 
 
     ~> **Note** If you want to update this value, you must set `allow_stopping_for_update`to `true`. In addition, when it is changed, you need to [go to the instance for configuration](https://docs.ucloud.cn/compute/uhost/guide/disk). 
 * `charge_type` - (Optional, ForceNew) The charge type of instance, possible values are: `year`, `month` and `dynamic` as pay by hour (specific permission required). (Default: `month`).
-* `duration` - (Optional, ForceNew) The duration that you will buy the instance (Default: `1`). The value is `0` when pay by month and the instance will be valid till the last day of that month. It is not required when `dynamic` (pay by hour).
+* `duration` - (Optional, ForceNew) The duration that you will buy the instance (Default: `1`, range: 0-9). The value is `0` when pay by month and the instance will be valid till the last day of that month, and it is invalid when `charge_type` is `year` or `dynamic`. It is not required when `dynamic` (pay by hour).
 * `name` - (Optional) The name of instance, which contains 1-63 characters and only support Chinese, English, numbers, '-', '_', '.'. If not specified, terraform will auto-generate a name beginning with `tf-instance`.
 * `remark` - (Optional) The remarks of instance. (Default: `""`).
 * `security_group` - (Optional) The ID of the associated security group (firewall). Only takes effect when `security_mode` is not set or set to `Firewall`.
 * `security_mode` - (Optional, ForceNew) The security mode of instance. Possible values are: `Firewall` and `SecGroup`. If not set, the instance will use `Firewall` mode by default for backward compatibility.
-* `sec_group_id` - (Optional) A list of security group bindings, up to 5. Only takes effect when `security_mode` is `SecGroup`. Each item supports `id` (security group ID) and `priority` (binding priority, range: 1-5).
+* `sec_group_id` - (Optional) A list of security group bindings, up to 5. Only takes effect when `security_mode` is `SecGroup`, and it is required when `security_mode` is `SecGroup`; at least one binding must be kept when updating. Each item supports `id` (security group ID) and `priority` (binding priority, range: 1-5).
 * `vpc_id` - (Optional, ForceNew) The ID of VPC linked to the instance. If not defined `vpc_id`, the instance will use the default VPC in the current region.
 * `subnet_id` - (Optional, ForceNew) The ID of subnet. If defined `vpc_id`, the `subnet_id` is Required. If not defined `vpc_id` and `subnet_id`, the instance will use the default subnet in the current region.
 * `tag` - (Optional) A tag assigned to instance, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
 * `isolation_group` - (Optional, ForceNew) The ID of the associated isolation group.
 * `private_ip` - (Optional, ForceNew) The private IP address assigned to the instance.
-* `user_data` - (Optional, ForceNew) The user data to customize the startup behaviors when launching the instance. You may refer to [user_data_document](https://docs.ucloud.cn/uhost/guide/metadata/userdata)
+* `user_data` - (Optional, ForceNew) The user data to customize the startup behaviors when launching the instance, up to 16384 characters. The image must support the `CloudInit` feature, otherwise instance creation fails. You may refer to [user_data_document](https://docs.ucloud.cn/uhost/guide/metadata/userdata)
 * `data_disks` - (Optional, ForceNew) Additional cloud data disks to attach to the instance. `data_disks` configurations only apply on resource creation. The count of `data_disks` can only be one. See [data_disks](#data_disks) below for details on attributes. When set `data_disks`, the argument `delete_disks_with_instance` must bet set.
 * `delete_disks_with_instance` - (Optional, ForceNew, Required when set `data_disks`)  Whether the cloud data disks attached instance should be destroyed on instance termination.
 
@@ -166,12 +166,12 @@ The following arguments are supported:
 * `net_capability` - (Optional) The network enhancement feature of the instance. Possible values are: `normal` for no enhancement, `super` for network enhancement 1.0, `ultra` for network enhancement 2.0, `extreme` for network enhancement 3.0. (Default: `normal`). It can only be changed between `normal` and an enhancement level in place (upgrade or downgrade through `ResizeUHostInstance`); switching between enhancement levels requires rebuilding the instance. Updating it to a value other than `normal` requires stopping the instance, please set `allow_stopping_for_update` to `true` to acknowledge it, and the instance is restarted automatically after the update when `auto_start` is `true`.
 * `hotplug_feature` - (Optional, ForceNew) Enable the hot upgrade feature of the instance. (Default: `false`).
 * `uni_feature` - (Optional, ForceNew) Enable the elastic network interface feature of the instance. (Default: `false`).
-* `gpu` - (Optional, ForceNew) The count of GPU cores, only supported by GPU machine types.
-* `gpu_type` - (Optional, ForceNew) The type of GPU, required when the machine type is `G`. Possible values are: `K80`, `P40`, `V100`, `V100S`, `T4`, `T4A`, `T4S`, `T4/4`, `2080Ti`, `2080Ti-4C`, `2080TiS`, `2080TiPro`, `1080Ti`, `3090`, `4090`, `4090Pro`, `4090_48G`, `A100`, `A800`, `H20`.
-* `alarm_template_id` - (Optional, ForceNew) The ID of the alarm template to bind to the instance. Binding failure does not affect instance creation.
+* `gpu` - (Optional, ForceNew) The count of GPU cores, range: 1-8, only supported by GPU machine types.
+* `gpu_type` - (Optional, ForceNew) The type of GPU, required when the machine type is `G`. Possible values are: `K80`, `P40`, `V100`, `V100S`, `T4`, `T4A`, `T4S`, `2080`, `2080Ti`, `2080Ti-4C`, `2080TiS`, `2080TiPro`, `1080Ti`, `3080Ti`, `3090`, `4090`, `4090Pro`, `4090_48G`, `4090LD`, `5090`, `5090Pro`, `BR104P`, `MR-V100`, `A100`, `A800`, `H20`, `H800`.
+* `alarm_template_id` - (Optional, ForceNew) The ID of the alarm template to bind to the instance. Binding failure does not affect instance creation. The value is an integer alarm template ID (range: 1-2147483647).
 * `auto_data_disk_init` - (Optional, ForceNew) Whether to automatically partition and mount the data disks when the image supports Cloud-init. Possible values are: `On` for auto mount (default), `Off` for no auto mount.
 * `coupon_id` - (Optional, ForceNew) The ID of the host coupon to use for payment.
-* `uhost_family` - (Optional, ForceNew) The instance family, composed of the machine type code and CPU platform. Possible values for machine type `O`: `o1i` (O1, Intel), `o1a` (O1, AMD), `o1r` (O1, ARM), `o2i` (O2, Intel); for machine type `OM`: `om1i`, `om2i`. The family must match the machine type, otherwise the request is rejected.
+* `uhost_family` - (Optional, ForceNew) The instance family, composed of the machine type code and CPU platform. Possible values for machine type `O`: `o1i` (O1, Intel), `o1a` (O1, AMD), `o1r` (O1, ARM), `o1h`, `o2i` (O2, Intel), `o2a`; for machine type `OM`: `om1i`, `om1a`, `om2i`; for performance-optimized machine types: `opro1a`, `opro2a`, `oprog1i`, `oprog2i`, `oprog1a`. The family must match the machine type, otherwise the request is rejected.
 * `labels` - (Optional, ForceNew) User resource labels to attach to the instance on creation, given as a key/value map. The label key and value should comply with the [label specification](https://docs.ucloud.cn/api/uhost-api/specification). Changing labels after creation is not supported here; use the `ucloud_label_attachment` resource to manage labels of an existing instance.
 * `udset_id` - (Optional, ForceNew) The ID of the private dedicated zone (UDSet) in which the instance is created. It is required by other dedicated zone arguments, and cannot be changed once the instance is created.
 * `udhost_id` - (Optional, ForceNew) The ID of the dedicated host (UDHost) inside the private dedicated zone on which the instance is created. It requires `udset_id` to be set.
@@ -201,7 +201,7 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 
 * `create` - (Defaults to 30 mins) Used when launching the instance (until it reaches the initial `Running` state)
 * `update` - (Defaults to 20 mins) Used when updating the arguments of the instance if necessary  - e.g. when changing `instance_type`
-* `delete` - (Defaults to 10 mins) Used when terminating the instance
+* `delete` - (Defaults to 15 mins) Used when terminating the instance
 
 ## Attributes Reference
 
@@ -213,7 +213,8 @@ In addition to all arguments above, the following attributes are exported:
 * `memory` - The size of memory, measured in GB(Gigabyte).
 * `create_time` - The time of creation for instance, formatted in RFC3339 time string.
 * `expire_time` - The expiration time for instance, formatted in RFC3339 time string.
-* `status` - Instance current status. Possible values are `Initializing`, `Starting`, `Running`, `Stopping`, `Stopped`, `Install Fail`, `ResizeFail` and `Rebooting`.
+* `status` - Instance current status. Possible values are `Initializing`, `Starting`, `Running`, `Stopping`, `Stopped`, `Install Fail`, `ResizeFail`, `Rebooting` and `NetworkModeSwitching`.
+* `cpu_platform` - The CPU platform of the instance, e.g. `Intel/Cascadelake`.
 * `ip_set` - It is a nested type which documented below.
 * `disk_set` - It is a nested type which documented below.
 * `rdma_cluster_id` - The RDMA Cluster ID of instance. This is only available when machine type is `O`.
