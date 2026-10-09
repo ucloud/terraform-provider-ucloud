@@ -1201,13 +1201,29 @@
     },
     "ucloud_instance": {
       "schema": {
+        "alarm_template_id": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "validate": "IntBetween"
+        },
         "allow_stopping_for_update": {
           "type": "TypeBool",
           "optional": true
         },
+        "auto_data_disk_init": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
         "auto_renew": {
           "type": "TypeBool",
           "computed": true
+        },
+        "auto_start": {
+          "type": "TypeBool",
+          "optional": true
         },
         "availability_zone": {
           "type": "TypeString",
@@ -1233,6 +1249,11 @@
           "computed": true,
           "force_new": true,
           "validate": "StringInSlice"
+        },
+        "coupon_id": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
         },
         "cpu": {
           "type": "TypeInt",
@@ -1296,6 +1317,11 @@
           "type": "TypeBool",
           "optional": true
         },
+        "disk_password": {
+          "type": "TypeString",
+          "optional": true,
+          "sensitive": true
+        },
         "disk_set": {
           "type": "TypeList",
           "computed": true,
@@ -1330,6 +1356,28 @@
         "expire_time": {
           "type": "TypeString",
           "computed": true
+        },
+        "gpu": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "validate": "IntBetween"
+        },
+        "gpu_type": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "host_binding": {
+          "type": "TypeBool",
+          "optional": true,
+          "force_new": true
+        },
+        "hotplug_feature": {
+          "type": "TypeBool",
+          "optional": true,
+          "force_new": true
         },
         "image_id": {
           "type": "TypeString",
@@ -1368,6 +1416,17 @@
           "type": "TypeString",
           "optional": true
         },
+        "labels": {
+          "type": "TypeMap",
+          "optional": true,
+          "force_new": true,
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
         "login_mode": {
           "type": "TypeString",
           "optional": true,
@@ -1389,6 +1448,12 @@
           "optional": true,
           "computed": true,
           "validate": "StringMatch"
+        },
+        "net_capability": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "validate": "StringInSlice"
         },
         "network_interface": {
           "type": "TypeList",
@@ -1488,6 +1553,29 @@
           "state_func": "stateFuncTag",
           "validate": "StringMatch"
         },
+        "udhost_id": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        },
+        "udset_id": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        },
+        "uhost_family": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "uni_feature": {
+          "type": "TypeBool",
+          "optional": true,
+          "force_new": true,
+          "default": "false"
+        },
         "user_data": {
           "type": "TypeString",
           "optional": true,
@@ -1515,6 +1603,11 @@
     },
     "ucloud_instance_state": {
       "schema": {
+        "disk_password": {
+          "type": "TypeString",
+          "optional": true,
+          "sensitive": true
+        },
         "force": {
           "type": "TypeBool",
           "optional": true
@@ -5116,6 +5209,11 @@
           "type": "TypeString",
           "optional": true
         },
+        "func_type": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "StringInSlice"
+        },
         "ids": {
           "type": "TypeSet",
           "optional": true,
@@ -5171,7 +5269,15 @@
                   }
                 }
               },
+              "func_type": {
+                "type": "TypeString",
+                "computed": true
+              },
               "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "integrated_software": {
                 "type": "TypeString",
                 "computed": true
               },
@@ -5187,6 +5293,37 @@
                 "type": "TypeString",
                 "computed": true
               },
+              "price_set": {
+                "type": "TypeList",
+                "computed": true,
+                "element": {
+                  "kind": "resource",
+                  "resource": {
+                    "charge_type": {
+                      "type": "TypeString",
+                      "computed": true
+                    },
+                    "original_price": {
+                      "type": "TypeFloat",
+                      "computed": true
+                    },
+                    "price": {
+                      "type": "TypeFloat",
+                      "computed": true
+                    }
+                  }
+                }
+              },
+              "scene_categories": {
+                "type": "TypeList",
+                "computed": true,
+                "element": {
+                  "kind": "schema",
+                  "schema": {
+                    "type": "TypeString"
+                  }
+                }
+              },
               "size": {
                 "type": "TypeInt",
                 "computed": true
@@ -5198,9 +5335,17 @@
               "type": {
                 "type": "TypeString",
                 "computed": true
+              },
+              "vendor": {
+                "type": "TypeString",
+                "computed": true
               }
             }
           }
+        },
+        "include_price": {
+          "type": "TypeBool",
+          "optional": true
         },
         "most_recent": {
           "type": "TypeBool",
@@ -5218,6 +5363,10 @@
           "validate": "StringInSlice"
         },
         "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "tag": {
           "type": "TypeString",
           "optional": true
         },
@@ -5361,12 +5510,20 @@
             }
           }
         },
+        "isolation_group": {
+          "type": "TypeString",
+          "optional": true
+        },
         "name_regex": {
           "type": "TypeString",
           "optional": true,
           "validate": "ValidateRegexp"
         },
         "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "subnet_id": {
           "type": "TypeString",
           "optional": true
         },
@@ -5377,6 +5534,14 @@
         "total_count": {
           "type": "TypeInt",
           "computed": true
+        },
+        "udisk_id_for_attachment": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "optional": true
         }
       },
       "schema_version": 1,
