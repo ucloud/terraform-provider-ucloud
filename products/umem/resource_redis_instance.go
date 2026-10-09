@@ -424,6 +424,13 @@ func createActiveStandbyRedisInstance(d *schema.ResourceData, meta interface{}) 
 	if err != nil {
 		return fmt.Errorf("error on creating redis instance, %s", err)
 	}
+	// See createDistributedRedisInstance: never store an empty id in state.
+	if resp == nil {
+		return fmt.Errorf("error on creating redis instance: empty CreateURedisGroup response")
+	}
+	if resp.GroupId == "" {
+		return fmt.Errorf("error on creating redis instance: CreateURedisGroup returned no GroupId (message %q)", resp.GetMessage())
+	}
 
 	d.SetId(resp.GroupId)
 
@@ -483,6 +490,16 @@ func createDistributedRedisInstance(d *schema.ResourceData, meta interface{}) er
 	resp, err := conn.CreateUMemSpace(req)
 	if err != nil {
 		return fmt.Errorf("error on creating redis instance, %s", err)
+	}
+	// CreateUMemSpace can answer with an empty body (observed in acceptance):
+	// the SDK then reports no error and no RetCode, so without this check the
+	// provider would store an empty id and spin in the create waiter until it
+	// failed minutes later with a misleading "couldn't find resource".
+	if resp == nil {
+		return fmt.Errorf("error on creating redis instance: empty CreateUMemSpace response")
+	}
+	if resp.SpaceId == "" {
+		return fmt.Errorf("error on creating redis instance: CreateUMemSpace returned no SpaceId (message %q)", resp.GetMessage())
 	}
 
 	d.SetId(resp.SpaceId)

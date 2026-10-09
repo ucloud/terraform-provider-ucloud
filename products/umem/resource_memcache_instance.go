@@ -159,6 +159,13 @@ func resourceUCloudMemcacheInstanceCreate(d *schema.ResourceData, meta interface
 	if err != nil {
 		return fmt.Errorf("error on creating memcache instance, %s", err)
 	}
+	// See createDistributedRedisInstance: never store an empty id in state.
+	if resp == nil {
+		return fmt.Errorf("error on creating memcache instance: empty CreateUMemcacheGroup response")
+	}
+	if resp.GroupId == "" {
+		return fmt.Errorf("error on creating memcache instance: CreateUMemcacheGroup returned no GroupId (message %q)", resp.GetMessage())
+	}
 
 	d.SetId(resp.GroupId)
 
