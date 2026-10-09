@@ -31,6 +31,8 @@ func (adapterV1) Registration() product.Registration {
 			"ucloud_route_table_rule":        resourceUCloudRouteTableRule(),
 			"ucloud_route_table_association": resourceUCloudRouteTableAssociation(),
 			"ucloud_network_interface":       resourceUCloudNetworkInterface(),
+			"ucloud_sec_group":               resourceUCloudSecGroup(),
+			"ucloud_sec_group_rule":          resourceUCloudSecGroupRule(),
 		},
 		DataSources: map[string]*schema.Resource{
 			"ucloud_vpcs":         dataSourceUCloudVPCs(),

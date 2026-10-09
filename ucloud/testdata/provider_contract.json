@@ -2406,6 +2406,93 @@
       "update": "resourceUCloudRouteTableRuleUpdate",
       "delete": "resourceUCloudRouteTableRuleDelete"
     },
+    "ucloud_sec_group": {
+      "schema": {
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "name": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "validate": "StringMatch"
+        },
+        "remark": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true
+        },
+        "tag": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "type": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudSecGroupCreate",
+      "read": "resourceUCloudSecGroupRead",
+      "update": "resourceUCloudSecGroupUpdate",
+      "delete": "resourceUCloudSecGroupDelete",
+      "importer": "ImportStatePassthrough"
+    },
+    "ucloud_sec_group_rule": {
+      "schema": {
+        "direction": {
+          "type": "TypeString",
+          "required": true,
+          "validate": "StringInSlice"
+        },
+        "dst_port": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "validateSecGroupPortList"
+        },
+        "ip_range": {
+          "type": "TypeString",
+          "required": true,
+          "validate": "validateSecGroupIPRange"
+        },
+        "priority": {
+          "type": "TypeInt",
+          "required": true,
+          "validate": "IntBetween"
+        },
+        "protocol_type": {
+          "type": "TypeString",
+          "required": true,
+          "validate": "StringInSlice"
+        },
+        "remark": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "rule_action": {
+          "type": "TypeString",
+          "required": true,
+          "validate": "StringInSlice"
+        },
+        "sec_group_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true,
+          "validate": "StringMatch"
+        }
+      },
+      "create": "resourceUCloudSecGroupRuleCreate",
+      "read": "resourceUCloudSecGroupRuleRead",
+      "update": "resourceUCloudSecGroupRuleUpdate",
+      "delete": "resourceUCloudSecGroupRuleDelete",
+      "customize_diff": "All",
+      "importer": "importUCloudSecGroupRule"
+    },
     "ucloud_security_group": {
       "schema": {
         "create_time": {
