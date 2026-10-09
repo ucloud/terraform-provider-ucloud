@@ -2,11 +2,12 @@ package uhost
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/ucloud/ucloud-sdk-go/services/uhost"
-	"time"
 )
 
 func resourceUCloudInstanceState() *schema.Resource {
@@ -102,7 +103,7 @@ func resourceUCloudInstanceStateDelete(d *schema.ResourceData, meta interface{})
 
 func waitInstanceReady(client *productClient, id string, timeout time.Duration) (*uhost.UHostInstanceSet, error) {
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{statusPending, instanceStatusInitializing, instanceStatusStarting, instanceStatusStopping, instanceStatusRebooting},
+		Pending:    []string{statusPending, instanceStatusInitializing, instanceStatusStarting, instanceStatusStopping, instanceStatusRebooting, instanceStatusNetworkModeSwitching},
 		Target:     []string{instanceStatusRunning, instanceStatusStopped},
 		Refresh:    getInstanceStateRefreshFunc(client, id),
 		Timeout:    timeout,
