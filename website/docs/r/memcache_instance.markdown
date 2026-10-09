@@ -15,9 +15,24 @@ The UCloud Memcache instance is a key-value online storage service compatible wi
 ```hcl
 data "ucloud_zones" "default" {}
 
+resource "ucloud_vpc" "example" {
+  name        = "tf-example-vpc"
+  tag         = "tf-example"
+  cidr_blocks = ["192.168.0.0/16"]
+}
+
+resource "ucloud_subnet" "example" {
+  name       = "tf-example-subnet"
+  tag        = "tf-example"
+  cidr_block = "192.168.1.0/24"
+  vpc_id     = ucloud_vpc.example.id
+}
+
 resource "ucloud_memcache_instance" "master" {
   availability_zone = data.ucloud_zones.default.zones[0].id
   instance_type     = "memcache-master-2"
+  vpc_id            = ucloud_vpc.example.id
+  subnet_id         = ucloud_subnet.example.id
 
   name = "tf-example-memcache"
   tag  = "tf-example"
@@ -30,6 +45,8 @@ The following arguments are supported:
 
 * `availability_zone` - (Required, ForceNew) Availability zone where Memcache instance is located. Such as: "cn-bj2-02". You may refer to [list of availability zone](https://docs.ucloud.cn/api/summary/regionlist)
 * `instance_type` - (Required) The type of Memcache instance, please visit the [instance type table](https://docs.ucloud.cn/terraform/specification/umem_instance?id=memcache) for more details.
+* `vpc_id` - (Required, ForceNew) The ID of VPC linked to the Memcache instance.
+* `subnet_id` - (Required, ForceNew) The ID of subnet linked to the Memcache instance.
 
 - - -
 
@@ -37,8 +54,6 @@ The following arguments are supported:
 * `charge_type` - (Optional, ForceNew) The charge type of Memcache instance, possible values are: `year`, `month` and `dynamic` as pay by hour (specific permission required). (Default: `month`).
 * `duration` - (Optional, ForceNew) The duration that you will buy the Memcache instance (Default: `1`). The value is `0` when pay by month and the instance will be valid till the last day of that month. It is not required when `dynamic` (pay by hour).
 * `tag` - (Optional, ForceNew) A tag assigned to Memcache instance, which contains at most 63 characters and only support Chinese, English, numbers, '-', '_', and '.'. If it is not filled in or a empty string is filled in, then default tag will be assigned. (Default: `Default`).
-* `vpc_id` - (Optional, ForceNew) The ID of VPC linked to the Memcache instance.
-* `subnet_id` - (Optional, ForceNew) The ID of subnet linked to the Memcache instance.
 
 ## Attributes Reference
 

@@ -63,16 +63,14 @@ func resourceUCloudMemcacheInstance() *schema.Resource {
 
 			"vpc_id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 				ForceNew: true,
-				Computed: true,
 			},
 
 			"subnet_id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 				ForceNew: true,
-				Computed: true,
 			},
 
 			"tag": {
@@ -148,13 +146,8 @@ func resourceUCloudMemcacheInstanceCreate(d *schema.ResourceData, meta interface
 		req.Name = ucloud.String(resource.PrefixedUniqueId("tf-memcache-instance-"))
 	}
 
-	if v, ok := d.GetOk("vpc_id"); ok {
-		req.VPCId = ucloud.String(v.(string))
-	}
-
-	if v, ok := d.GetOk("subnet_id"); ok {
-		req.SubnetId = ucloud.String(v.(string))
-	}
+	req.VPCId = ucloud.String(d.Get("vpc_id").(string))
+	req.SubnetId = ucloud.String(d.Get("subnet_id").(string))
 
 	if v, ok := d.GetOk("tag"); ok {
 		req.Tag = ucloud.String(v.(string))
@@ -298,9 +291,15 @@ func getMemcacheCapability(instType string) int {
 }
 
 func diffValidateMemcacheInstanceType(old, new, meta interface{}) error {
-	if len(old.(string)) > 0 {
-		oldType, _ := parseMemcacheInstanceType(old.(string))
-		newType, _ := parseMemcacheInstanceType(new.(string))
+	oldValue, _ := old.(string)
+	newValue, _ := new.(string)
+	if newValue == "" {
+		// destroy plan: no new configuration to validate
+		return nil
+	}
+	if len(oldValue) > 0 {
+		oldType, _ := parseMemcacheInstanceType(oldValue)
+		newType, _ := parseMemcacheInstanceType(newValue)
 		if newType.Type != oldType.Type {
 			return fmt.Errorf("memcache instance is not supported update the type of %q", "instance_type")
 		}
@@ -328,5 +327,5 @@ func (c *productClient) waitActiveStandbyMemcacheRunning(id string) error {
 		return resp, statusInitialized, nil
 	}
 
-	return waitForMemoryInstance(refresh)
+	return waitForMemoryInstance(refresh, memoryInstanceWaitTimeout)
 }
