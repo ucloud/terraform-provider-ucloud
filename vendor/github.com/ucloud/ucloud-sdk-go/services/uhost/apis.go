@@ -435,6 +435,15 @@ func (c *UHostClient) CreateIsolationGroup(req *CreateIsolationGroupRequest) (*C
 }
 
 /*
+CreateUHostInstanceParamFeatures is request schema for complex param
+*/
+type CreateUHostInstanceParamFeatures struct {
+
+	// 弹性网卡特性。开启了弹性网卡权限位，此特性才生效，默认 false 未开启，true 开启。
+	UNI *bool `required:"false"`
+}
+
+/*
 CreateUHostInstanceParamNetworkInterfaceEIP is request schema for complex param
 */
 type CreateUHostInstanceParamNetworkInterfaceEIP struct {
@@ -486,30 +495,15 @@ type CreateUHostInstanceParamNetworkInterface struct {
 }
 
 /*
-CreateUHostInstanceParamFeatures is request schema for complex param
+CreateUHostInstanceParamSecGroupId is request schema for complex param
 */
-type CreateUHostInstanceParamFeatures struct {
+type CreateUHostInstanceParamSecGroupId struct {
 
-	// 弹性网卡特性。开启了弹性网卡权限位，此特性才生效，默认 false 未开启，true 开启。
-	UNI *bool `required:"false"`
-}
+	// 安全组 ID。至多可以同时绑定5个安全组。
+	Id *string `required:"false"`
 
-/*
-CreateUHostInstanceParamLabels is request schema for complex param
-*/
-type CreateUHostInstanceParamLabels struct {
-
-	// 用户资源标签的键值
-	Key *string `required:"false"`
-
-	// 用户资源标签的值
-	Value *string `required:"false"`
-}
-
-/*
-CreateUHostInstanceParamVolumes is request schema for complex param
-*/
-type CreateUHostInstanceParamVolumes struct {
+	// 安全组优先级。取值范围[1, 5]
+	Priority *int `required:"false"`
 }
 
 /*
@@ -525,6 +519,24 @@ type UHostDiskCustomBackup struct {
 
 	// Disks.N.BackupMode为"Custom"时，进行设置, 以12小时秒级为基础进行倍数扩增，如12、24、36、48。
 	Journal *string `required:"false"`
+}
+
+/*
+CreateUHostInstanceParamVolumes is request schema for complex param
+*/
+type CreateUHostInstanceParamVolumes struct {
+}
+
+/*
+CreateUHostInstanceParamLabels is request schema for complex param
+*/
+type CreateUHostInstanceParamLabels struct {
+
+	// 用户资源标签的键值
+	Key *string `required:"false"`
+
+	// 用户资源标签的值
+	Value *string `required:"false"`
 }
 
 /*
@@ -561,18 +573,6 @@ type UHostDisk struct {
 
 	// 磁盘类型。请参考[[api:uhost-api:disk_type|磁盘类型]]。
 	Type *string `required:"true"`
-}
-
-/*
-CreateUHostInstanceParamSecGroupId is request schema for complex param
-*/
-type CreateUHostInstanceParamSecGroupId struct {
-
-	// 安全组 ID。至多可以同时绑定5个安全组。
-	Id *string `required:"false"`
-
-	// 安全组优先级。取值范围[1, 5]
-	Priority *int `required:"false"`
 }
 
 // CreateUHostInstanceRequest is request schema for CreateUHostInstance action
@@ -738,7 +738,7 @@ type CreateUHostInstanceRequest struct {
 	// 【私有专区属性】专区id
 	UDSetId *string `required:"false"`
 
-	// 规格族。 由机型代号和 CPU 平台组成，用于指定云主机的硬件类型与处理器平台。 当 MachineType 为 "O"（快杰型）时，支持以下取值：- o1i：快杰型 O1 代，Intel 平台 - o1a：快杰型 O1 代，AMD 平台- o1r：快杰型 O1 代，ARM 平台 - o2i：快杰型 O2 代，Intel 平台 默认值：o1i 或 o1a（系统将根据资源情况自动选择） 当 MachineType 为 "OM"（快杰共享型）时，支持以下取值： - om1i：快杰内存增强型 OM1 代，Intel 平台 - om2i：快杰内存增强型 OM2 代，Intel 平台注意：规格族必须与 MachineType 匹配，否则请求将被拒绝。
+	// 规格族。 由机型代号和 CPU 平台组成，用于指定云主机的硬件类型与处理器平台。 当 MachineType 为 "O"（快杰型）时，支持以下取值：- o1i：快杰型 O1 代，Intel 平台 - o1a：快杰型 O1 代，AMD 平台- o1r：快杰型 O1 代，ARM 平台 - o2i：快杰型 O2 代，Intel 平台 默认值：o1i 或 o1a当 MachineType 为 "OM"（快杰共享型）时，支持以下取值： - om1i：快杰内存增强型 OM1 代，Intel 平台 - om2i：快杰内存增强型 OM2 代，Intel 平台注意：规格族必须与 MachineType 匹配，否则请求将被拒绝。
 	UHostFamily *string `required:"false"`
 
 	// 【建议后续不再使用】云主机机型（V1.0），在本字段和字段MachineType中，仅需要其中1个字段即可。参考[[api:uhost-api:uhost_type|云主机机型说明]]。
@@ -1019,6 +1019,54 @@ func (c *UHostClient) DescribeAvailableInstanceTypes(req *DescribeAvailableInsta
 	return &res, nil
 }
 
+// DescribeHostMachineTypeFamiliesRequest is request schema for DescribeHostMachineTypeFamilies action
+type DescribeHostMachineTypeFamiliesRequest struct {
+	request.CommonBase
+
+	// [公共参数] 项目ID。如果不填写，则使用默认项目，子账户必须填写。请参阅[GetProjectList界面](https://docs.ucloud.cn/api/summary/get_project_list).
+	// ProjectId *string `required:"true"`
+
+}
+
+// DescribeHostMachineTypeFamiliesResponse is response schema for DescribeHostMachineTypeFamilies action
+type DescribeHostMachineTypeFamiliesResponse struct {
+	response.CommonBase
+
+	// 机型配置列表
+	MachineTypes []MachineTypes
+}
+
+// NewDescribeHostMachineTypeFamiliesRequest will create request of DescribeHostMachineTypeFamilies action.
+func (c *UHostClient) NewDescribeHostMachineTypeFamiliesRequest() *DescribeHostMachineTypeFamiliesRequest {
+	req := &DescribeHostMachineTypeFamiliesRequest{}
+
+	// setup request with client config
+	c.Client.SetupRequest(req)
+
+	// setup retryable with default retry policy (retry for non-create action and common error)
+	req.SetRetryable(true)
+	return req
+}
+
+/*
+API: DescribeHostMachineTypeFamilies
+
+获取实例规格族列表（所有机型的信息）
+*/
+func (c *UHostClient) DescribeHostMachineTypeFamilies(req *DescribeHostMachineTypeFamiliesRequest) (*DescribeHostMachineTypeFamiliesResponse, error) {
+	var err error
+	var res DescribeHostMachineTypeFamiliesResponse
+
+	reqCopier := *req
+
+	err = c.Client.InvokeAction("DescribeHostMachineTypeFamilies", &reqCopier, &res)
+	if err != nil {
+		return &res, err
+	}
+
+	return &res, nil
+}
+
 // DescribeImageRequest is request schema for DescribeImage action
 type DescribeImageRequest struct {
 	request.CommonBase
@@ -1157,6 +1205,62 @@ func (c *UHostClient) DescribeIsolationGroup(req *DescribeIsolationGroupRequest)
 	reqCopier := *req
 
 	err = c.Client.InvokeAction("DescribeIsolationGroup", &reqCopier, &res)
+	if err != nil {
+		return &res, err
+	}
+
+	return &res, nil
+}
+
+// DescribeUHostAvailableDiskTypesRequest is request schema for DescribeUHostAvailableDiskTypes action
+type DescribeUHostAvailableDiskTypesRequest struct {
+	request.CommonBase
+
+	// [公共参数] 项目ID。不填写为默认项目，子帐号必须填写。 请参考[GetProjectList接口](https://docs.ucloud.cn/api/summary/get_project_list)
+	// ProjectId *string `required:"false"`
+
+	// [公共参数] 地域。 参见 [地域和可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
+	// Region *string `required:"true"`
+
+	// [公共参数] 可用区。参见 [可用区列表](https://docs.ucloud.cn/api/summary/regionlist)
+	// Zone *string `required:"false"`
+
+	// 实例Id列表。最多100个
+	UHostIds []string `required:"true"`
+}
+
+// DescribeUHostAvailableDiskTypesResponse is response schema for DescribeUHostAvailableDiskTypes action
+type DescribeUHostAvailableDiskTypesResponse struct {
+	response.CommonBase
+
+	// 可挂载的磁盘信息列表
+	DiskTypeSet []AvailableDiskTypes
+}
+
+// NewDescribeUHostAvailableDiskTypesRequest will create request of DescribeUHostAvailableDiskTypes action.
+func (c *UHostClient) NewDescribeUHostAvailableDiskTypesRequest() *DescribeUHostAvailableDiskTypesRequest {
+	req := &DescribeUHostAvailableDiskTypesRequest{}
+
+	// setup request with client config
+	c.Client.SetupRequest(req)
+
+	// setup retryable with default retry policy (retry for non-create action and common error)
+	req.SetRetryable(true)
+	return req
+}
+
+/*
+API: DescribeUHostAvailableDiskTypes
+
+获取主机可挂载的磁盘信息
+*/
+func (c *UHostClient) DescribeUHostAvailableDiskTypes(req *DescribeUHostAvailableDiskTypesRequest) (*DescribeUHostAvailableDiskTypesResponse, error) {
+	var err error
+	var res DescribeUHostAvailableDiskTypesResponse
+
+	reqCopier := *req
+
+	err = c.Client.InvokeAction("DescribeUHostAvailableDiskTypes", &reqCopier, &res)
 	if err != nil {
 		return &res, err
 	}
@@ -1510,12 +1614,6 @@ func (c *UHostClient) GetAttachedDiskUpgradePrice(req *GetAttachedDiskUpgradePri
 }
 
 /*
-GetUHostInstancePriceParamVolumes is request schema for complex param
-*/
-type GetUHostInstancePriceParamVolumes struct {
-}
-
-/*
 getUHostInstancePriceParamDisks is request schema for complex param
 */
 type getUHostInstancePriceParamDisks struct {
@@ -1531,6 +1629,12 @@ type getUHostInstancePriceParamDisks struct {
 
 	// 磁盘类型。请参考[[api:uhost-api:disk_type|磁盘类型]]。
 	Type *string `required:"true"`
+}
+
+/*
+GetUHostInstancePriceParamVolumes is request schema for complex param
+*/
+type GetUHostInstancePriceParamVolumes struct {
 }
 
 // GetUHostInstancePriceRequest is request schema for GetUHostInstancePrice action
@@ -1600,7 +1704,7 @@ type GetUHostInstancePriceRequest struct {
 	// 专区云主机。如果要在专区宿主机上创建云主机，该参数可以填写为true
 	UDSetUHostInstance *bool `required:"false"`
 
-	// 规格族。 由机型代号和 CPU 平台组成，用于指定云主机的硬件类型与处理器平台。当 MachineType 为 "O"（快杰型）时，支持以下取值： - o1i：快杰型 O1 代，Intel 平台 - o1a：快杰型 O1 代，AMD 平台- o1r：快杰型 O1 代，ARM 平台 - o2i：快杰型 O2 代，Intel 平台 默认值：o1i 或 o1a或o1r（系统将根据资源情况自动选择） 当 MachineType 为 "OM"（快杰共享型）时，支持以下取值： - om1i：快杰内存增强型 OM1 代，Intel 平台 - om2i：快杰内存增强型 OM2 代，Intel 平台注意：规格族必须与 MachineType 匹配，否则请求将被拒绝。
+	// 规格族。 由机型代号和 CPU 平台组成，用于指定云主机的硬件类型与处理器平台。当 MachineType 为 "O"（快杰型）时，支持以下取值： - o1i：快杰型 O1 代，Intel 平台 - o1a：快杰型 O1 代，AMD 平台- o1r：快杰型 O1 代，ARM 平台 - o2i：快杰型 O2 代，Intel 平台 默认值：o1i 或 o1a或o1r当 MachineType 为 "OM"（快杰共享型）时，支持以下取值： - om1i：快杰内存增强型 OM1 代，Intel 平台 - om2i：快杰内存增强型 OM2 代，Intel 平台注意：规格族必须与 MachineType 匹配，否则请求将被拒绝。
 	UHostFamily *string `required:"false"`
 
 	// 【待废弃】云主机机型（V1版本概念）。参考[[api:uhost-api:uhost_type|云主机机型说明]]。

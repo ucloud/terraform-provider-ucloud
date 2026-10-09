@@ -56,6 +56,12 @@ jobs:
       UCLOUD_PRIVATE_KEY: ${{ secrets.UCLOUD_PRIVATE_KEY }}
       UCLOUD_REGION: ${{ secrets.UCLOUD_REGION }}
       UCLOUD_PROJECT_ID: ${{ secrets.UCLOUD_PROJECT_ID }}
+      # Optional per-product prefixed VPC/subnet for acceptance tests that can no
+      # longer use the classic network (umem reads UCLOUD_VPC_ID/UCLOUD_SUBNET_ID
+      # in testAccPreCheck). Configure them in the product-<name>-acceptance
+      # environment; products that do not need them simply ignore the values.
+      UCLOUD_VPC_ID: ${{ secrets.UCLOUD_VPC_ID }}
+      UCLOUD_SUBNET_ID: ${{ secrets.UCLOUD_SUBNET_ID }}
       TF_LOG: "OFF"
       TF_LOG_PROVIDER: "OFF"
 

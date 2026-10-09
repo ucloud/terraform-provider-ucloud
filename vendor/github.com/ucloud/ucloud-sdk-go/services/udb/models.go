@@ -3,51 +3,6 @@
 package udb
 
 /*
-UDBBackupSet - DescribeUDBBackup
-*/
-type UDBBackupSet struct {
-
-	// 备份完成时间(Unix时间戳)
-	BackupEndTime int
-
-	// 备份id
-	BackupId int
-
-	// 备份名称
-	BackupName string
-
-	// 备份文件大小(字节)
-	BackupSize int
-
-	// 备份时间(Unix时间戳)
-	BackupTime int
-
-	// 备份类型,取值为0或1,0表示自动，1表示手动
-	BackupType int
-
-	// 跨机房高可用备库所在可用区
-	BackupZone string
-
-	// dbid
-	DBId string
-
-	// 对应的db名称
-	DBName string
-
-	// 备份错误信息
-	ErrorInfo string
-
-	// 备份文件的MD5值，备份完成后显示，备份中或备份失败时为空,目前只支持Mysql NVMe机型与Mongo
-	MD5 string
-
-	// 备份状态 Backuping // 备份中 Success // 备份成功 Failed // 备份失败 Expired // 备份过期
-	State string
-
-	// 备份所在可用区
-	Zone string
-}
-
-/*
 UFileDataSet - 增加ufile的描述
 */
 type UFileDataSet struct {
@@ -112,6 +67,9 @@ type UDBSlaveInstanceSet struct {
 	// DB实例过期时间，采用UTC计时时间戳
 	ExpiredTime int
 
+	//
+	IPv6Address string `deprecated:"true"`
+
 	// UDB实例模式类型, 可选值如下: "Normal": 普通版UDB实例;"HA": 高可用版UDB实例
 	InstanceMode string
 
@@ -151,6 +109,9 @@ type UDBSlaveInstanceSet struct {
 	// SSD类型，SATA/PCI-E
 	SSDType string
 
+	// 规格类型 O: NVME, OM: 共享型，N: 通用型 空的话，显示为-
+	SpecificationClass string
+
 	// 实例计算规格类型，0或不传代表使用内存方式购买，1代表使用内存-cpu可选配比方式购买，需要填写MachineType
 	SpecificationType int
 
@@ -159,6 +120,9 @@ type UDBSlaveInstanceSet struct {
 
 	// DB状态标记 Init：初始化中，Fail：安装失败，Starting：启动中，Running：运行，Shutdown：关闭中，Shutoff：已关闭，Delete：已删除，Upgrading：升级中，Promoting：提升为独库进行中，Recovering：恢复中，Recover fail：恢复失败,Remakeing:重做中,RemakeFail:重做失败, MajorVersionUpgrading:小版本升级中，MajorVersionUpgradeWaitForSwitch:高可用等待切换，MajorVersionUpgradeFail
 	State string
+
+	// CLOUD_SSD: SSD云盘, CLOUD_RSSD: RSSD 云盘， CLOUD_SSD_ESSENTIAL: SSD Essential云盘，LOCAL_SSD: SSD本地盘
+	StorageClass string
 
 	// 子网ID
 	SubnetId string
@@ -192,6 +156,9 @@ type UDBInstanceSet struct {
 
 	// 管理员帐户名，默认root
 	AdminUser string
+
+	// 0 不自动续费， 1 自动续费
+	AutoRenew int
 
 	// 备份策略，不可修改，开始时间，单位小时计，默认3点
 	BackupBeginTime int
@@ -235,10 +202,10 @@ type UDBInstanceSet struct {
 	// DB实例id
 	DBId string
 
-	// mysql实例提供具体小版本信息
+	// 实例提供具体内核版本信息
 	DBSubVersion string
 
-	// DB类型id，mysql/mongodb按版本细分各有一个id 目前id的取值范围为[1,7],数值对应的版本如下： 1：mysql-5.5，2：mysql-5.1，3：percona-5.5 4：mongodb-2.4，5：mongodb-2.6，6：mysql-5.6， 7：percona-5.6
+	// DB类型，mysql/mongodb 按版本细分 mysql-8.4, mysql-8.0, mysql-5.7, percona-5.7, mysql-5.6, percona-5.6、mysql-5.5、mongodb-2.4 、mongodb-2.6 等。可以通过 DescribeUDBType 查询
 	DBTypeId string
 
 	// DB实例数据文件大小，单位GB
@@ -258,6 +225,9 @@ type UDBInstanceSet struct {
 
 	// DB实例过期时间，采用UTC计时时间戳
 	ExpiredTime int
+
+	// 是否强制加密，1为强制加密，0是不强制加密
+	ForceEncryption int
 
 	// 该实例的ipv6地址
 	IPv6Address string
@@ -301,6 +271,9 @@ type UDBInstanceSet struct {
 	// SSL到期时间
 	SSLExpirationTime int
 
+	// 规格类型 O: NVME, OM: 共享型，N: 通用型空的话，显示为-
+	SpecificationClass string
+
 	// 是否使用可选cpu类型规格
 	SpecificationType int
 
@@ -309,6 +282,9 @@ type UDBInstanceSet struct {
 
 	// DB状态标记 Init：初始化中，Fail：安装失败，Starting：启动中，Running：运行，Shutdown：关闭中，Shutoff：已关闭，Delete：已删除，Upgrading：升级中，Promoting：提升为独库进行中，Recovering：恢复中，Recover fail：恢复失败, Remakeing:重做中,RemakeFail:重做失败，VersionUpgrading:小版本升级中，VersionUpgradeWaitForSwitch:高可用等待切换，VersionUpgradeFail：小版本升级失败，UpdatingSSL：修改SSL中，UpdateSSLFail：修改SSL失败,MajorVersionUpgrading:小版本升级中，MajorVersionUpgradeWaitForSwitch:高可用等待切换，MajorVersionUpgradeFail
 	State string
+
+	// CLOUD_SSD: SSD云盘, CLOUD_RSSD: RSSD 云盘， CLOUD_SSD_ESSENTIAL: SSD Essential云盘，LOCAL_SSD: SSD本地盘
+	StorageClass string
 
 	// 子网ID
 	SubnetId string
@@ -336,6 +312,126 @@ type UDBInstanceSet struct {
 
 	// DB实例所在可用区
 	Zone string
+}
+
+/*
+MongoDBShardedClusterSet -
+*/
+type MongoDBShardedClusterSet struct {
+
+	//
+	CreateTime int
+
+	//
+	DBId string
+
+	//
+	DBTypeId string
+
+	//
+	MongosCount int
+
+	//
+	Name string
+
+	//
+	ShardsrvCount int
+
+	//
+	SubnetId string
+
+	//
+	Tag string
+
+	//
+	VPCId string
+
+	//
+	VirtualIPs []string
+
+	//
+	Zone string
+}
+
+/*
+UDBBackupSet - DescribeUDBBackup
+*/
+type UDBBackupSet struct {
+
+	// 备份完成时间(Unix时间戳)
+	BackupEndTime int
+
+	// 备份id
+	BackupId int
+
+	// 备份名称
+	BackupName string
+
+	// 备份文件大小(字节)
+	BackupSize int
+
+	// 备份时间(Unix时间戳)
+	BackupTime int
+
+	// 备份类型,取值为0或1,0表示自动，1表示手动
+	BackupType int
+
+	// 跨机房高可用备库所在可用区
+	BackupZone string
+
+	// dbid
+	DBId string
+
+	// 对应的db名称
+	DBName string
+
+	// 备份错误信息
+	ErrorInfo string
+
+	// 备份文件的MD5值，备份完成后显示，备份中或备份失败时为空,目前只支持Mysql NVMe机型与Mongo
+	MD5 string
+
+	// 备份状态 Backuping // 备份中 Success // 备份成功 Failed // 备份失败 Expired // 备份过期
+	State string
+
+	// 备份所在可用区
+	Zone string
+}
+
+/*
+BinlogBackupSet - DescribeUDBBinlogBackup
+*/
+type BinlogBackupSet struct {
+
+	// 备份id
+	BackupId int
+
+	// 备份名称
+	BackupName string
+
+	// 备份文件大小
+	BackupSize int
+
+	// 备份时间
+	BackupTime int
+
+	// binlog备份类型 Manual:手动备份 ,Auto:自动备份
+	BinlogType string
+
+	// dbid
+	DBId string
+
+	// 日志结束时间
+	LogEndTime int
+
+	// 日志开始时间
+	LogStartTime int
+
+	// 节点标识ID
+	ServerId string
+
+	// 备份状态 Backuping // 备份中 Success // 备份成功 Failed // 备份失败 Expired // 备份过期
+	State string
 }
 
 /*
@@ -451,6 +547,9 @@ type UDBParamGroupSet struct {
 	// 参数组名称
 	GroupName string
 
+	// 参数组类型：1：稳定版参数组，2:高性能版参数组。默认是稳定版参数组
+	GroupType int
+
 	// 参数组是否可修改
 	Modifiable bool
 
@@ -510,6 +609,27 @@ type ConnNumMap struct {
 }
 
 /*
+FailoverRecord - 容灾记录
+*/
+type FailoverRecord struct {
+
+	// 结束时间
+	EndTime int
+
+	// 容灾状态
+	FailoverState string
+
+	// 容灾类型
+	FailoverType int
+
+	// 时间ID
+	SessionId string
+
+	// 开始时间
+	StartTime int
+}
+
+/*
 MachineType - mysql数据库机型
 */
 type MachineType struct {
@@ -529,8 +649,14 @@ type MachineType struct {
 	// 规格内存大小，单位（GB）
 	Memory int
 
-	// 内部云主机机型，可选"o/n"
+	// 内部云主机机型，可选"O/N/OM"
 	Os string
+
+	// 规格类型 O: NVMe型, OM: 共享型，N: 通用型
+	SpecificationClass string
+
+	// 存储类型 CLOUD_SSD: SSD云盘, CLOUD_RSSD: RSSD 云盘， CLOUD_SSD_ESSENTIAL: SSD Essential云盘
+	StorageClass string
 }
 
 /*

@@ -376,23 +376,41 @@ CreateListenerParamHealthCheckConfig is request schema for complex param
 */
 type CreateListenerParamHealthCheckConfig struct {
 
-	// （应用型专用）HTTP检查域名
+	// （应用型专用）HTTP/GRPC检查域名
 	Domain *string `required:"false"`
 
-	// 是否开启健康检查功能。暂时不支持关闭。默认值为：true
+	// （应用型专用）判定失败的连续次数
+	DownCounts *int `required:"false"`
+
+	// 是否开启健康检查功能。默认值为：true
 	Enabled *bool `required:"false"`
+
+	// （应用型专用）检查协议
+	HTTPVersion *string `required:"false"`
+
+	// （应用型专用）间隔时间，秒，必须大于TimeOut
+	Interval *int `required:"false"`
 
 	// （应用型专用）HTTP检查方法。只支持GET和HEAD。
 	Method *string `required:"false"`
 
-	// （应用型专用）HTTP检查路径
+	// （应用型专用）HTTP/GRPC检查路径
 	Path *string `required:"false"`
 
-	// （应用型专用）GRPC检查响应码
+	// （应用型专用）端口
+	Port *int `required:"false"`
+
+	// （应用型专用）HTTP时为2xx,3xx格式(逗号分隔)，GRPC时为数字码(逗号分隔)
 	ResponseCode *string `required:"false"`
+
+	// （应用型专用）超时时间，秒，必须小于Interval
+	TimeOut *int `required:"false"`
 
 	// 健康检查方式。应用型限定取值：“Port”/"HTTP/GRPC"，默认值：“Port”
 	Type *string `required:"false"`
+
+	// （应用型专用）判定成功的连续次数
+	UpCounts *int `required:"false"`
 }
 
 // CreateListenerRequest is request schema for CreateListener action
@@ -449,6 +467,9 @@ type CreateListenerRequest struct {
 
 	//
 	StickinessConfig *CreateListenerParamStickinessConfig `required:"false"`
+
+	// 后端协议。应用型限定取值：“HTTP,HTTPS,GRPC"，默认值“HTTP”
+	TargetProtocol *string `required:"false"`
 }
 
 // CreateListenerResponse is response schema for CreateListener action
@@ -491,18 +512,6 @@ func (c *ULBClient) CreateListener(req *CreateListenerRequest) (*CreateListenerR
 }
 
 /*
-CreateLoadBalancerParamSecGroups is request schema for complex param
-*/
-type CreateLoadBalancerParamSecGroups struct {
-
-	// 安全组优先级
-	Priority *int `required:"false"`
-
-	// 安全组id
-	SecGroupId *string `required:"false"`
-}
-
-/*
 CreateLoadBalancerParamLabelInfos is request schema for complex param
 */
 type CreateLoadBalancerParamLabelInfos struct {
@@ -512,6 +521,18 @@ type CreateLoadBalancerParamLabelInfos struct {
 
 	// 标签值
 	Value *string `required:"false"`
+}
+
+/*
+CreateLoadBalancerParamSecGroups is request schema for complex param
+*/
+type CreateLoadBalancerParamSecGroups struct {
+
+	// 安全组优先级
+	Priority *int `required:"false"`
+
+	// 安全组id
+	SecGroupId *string `required:"false"`
 }
 
 // CreateLoadBalancerRequest is request schema for CreateLoadBalancer action
@@ -672,72 +693,6 @@ func (c *ULBClient) CreatePolicy(req *CreatePolicyRequest) (*CreatePolicyRespons
 }
 
 /*
-CreateRuleParamRuleActionsForwardConfigTargets is request schema for complex param
-*/
-type CreateRuleParamRuleActionsForwardConfigTargets struct {
-
-	// 转发的后端服务节点的标识ID。限定在监听器的服务节点池里；数组长度可以是0；转发服务节点配置的数组长度不为0时，Id必填
-	Id *string `required:"false"`
-
-	// 转发的后端服务节点的权重。仅监听器负载均衡算法是加权轮询是有效
-	Weight *int `required:"false"`
-}
-
-/*
-CreateRuleParamRuleConditionsHostConfig is request schema for complex param
-*/
-type CreateRuleParamRuleConditionsHostConfig struct {
-
-	// 匹配方式。限定枚举值："Regular"/"Wildcard"，默认值："Regular"
-	MatchMode *string `required:"false"`
-
-	// 取值。暂时只支持数组长度为1；取值需符合相关匹配方式的条件；域名匹配时必填
-	Values []string `required:"false"`
-}
-
-/*
-CreateRuleParamRuleConditionsPathConfig is request schema for complex param
-*/
-type CreateRuleParamRuleConditionsPathConfig struct {
-
-	// 取值。暂时只支持数组长度为1；取值需符合相关条件；路径匹配时必填
-	Values []string `required:"false"`
-}
-
-/*
-CreateRuleParamRuleConditions is request schema for complex param
-*/
-type CreateRuleParamRuleConditions struct {
-
-	//
-	HostConfig *CreateRuleParamRuleConditionsHostConfig `required:"false"`
-
-	//
-	PathConfig *CreateRuleParamRuleConditionsPathConfig `required:"false"`
-
-	// 匹配条件类型。限定枚举值："Host"/"Path"
-	Type *string `required:"true"`
-}
-
-/*
-CreateRuleParamRuleActionsForwardConfig is request schema for complex param
-*/
-type CreateRuleParamRuleActionsForwardConfig struct {
-
-	//
-	Targets []CreateRuleParamRuleActionsForwardConfigTargets `required:"false"`
-}
-
-/*
-CreateRuleParamRuleActionsRemoveHeaderConfig is request schema for complex param
-*/
-type CreateRuleParamRuleActionsRemoveHeaderConfig struct {
-
-	// 删除的 header 字段名称，目前只能删除以下几个默认配置的字段X-Real-IP、X-Forwarded-For、X-Forwarded-Proto、X-Forwarded-SrcPort
-	Key *string `required:"false"`
-}
-
-/*
 CreateRuleParamRuleActionsCorsConfig is request schema for complex param
 */
 type CreateRuleParamRuleActionsCorsConfig struct {
@@ -762,18 +717,6 @@ type CreateRuleParamRuleActionsCorsConfig struct {
 }
 
 /*
-CreateRuleParamRuleActionsFixedResponseConfig is request schema for complex param
-*/
-type CreateRuleParamRuleActionsFixedResponseConfig struct {
-
-	// 返回的固定内容。最大支持存储 1 KB，只支持 ASCII 码值ch >= 32 && ch < 127范围内、不包括 $ 的可打印字符。
-	Content *string `required:"false"`
-
-	// 返回的 HTTP 响应码，仅支持 2xx、4xx、5xx 数字，x 为任意数字。
-	HttpCode *int `required:"false"`
-}
-
-/*
 CreateRuleParamRuleActionsInsertHeaderConfig is request schema for complex param
 */
 type CreateRuleParamRuleActionsInsertHeaderConfig struct {
@@ -789,9 +732,108 @@ type CreateRuleParamRuleActionsInsertHeaderConfig struct {
 }
 
 /*
+CreateRuleParamRuleActionsRemoveHeaderConfig is request schema for complex param
+*/
+type CreateRuleParamRuleActionsRemoveHeaderConfig struct {
+
+	// 删除的 header 字段名称，目前只能删除以下几个默认配置的字段X-Real-IP、X-Forwarded-For、X-Forwarded-Proto、X-Forwarded-SrcPort
+	Key *string `required:"false"`
+}
+
+/*
+CreateRuleParamRuleActionsProxyBufferingConfig is request schema for complex param
+*/
+type CreateRuleParamRuleActionsProxyBufferingConfig struct {
+
+	// 关闭缓存
+	CloseProxyBuffering *bool `required:"false"`
+}
+
+/*
+CreateRuleParamRuleActionsForwardConfigTargets is request schema for complex param
+*/
+type CreateRuleParamRuleActionsForwardConfigTargets struct {
+
+	// 转发的后端服务节点的标识ID。限定在监听器的服务节点池里；数组长度可以是0；转发服务节点配置的数组长度不为0时，Id必填
+	Id *string `required:"false"`
+
+	// 转发的后端服务节点的权重。仅监听器负载均衡算法是加权轮询是有效
+	Weight *int `required:"false"`
+}
+
+/*
+CreateRuleParamRuleConditionsPathConfig is request schema for complex param
+*/
+type CreateRuleParamRuleConditionsPathConfig struct {
+
+	// 取值。暂时只支持数组长度为1；取值需符合相关条件；路径匹配时必填
+	Values []string `required:"false"`
+}
+
+/*
+CreateRuleParamRuleActionsBackendConnectionConfig is request schema for complex param
+*/
+type CreateRuleParamRuleActionsBackendConnectionConfig struct {
+
+	// 开启长连接
+	EnablePersistentConnection *bool `required:"false"`
+}
+
+/*
+CreateRuleParamRuleConditionsHostConfig is request schema for complex param
+*/
+type CreateRuleParamRuleConditionsHostConfig struct {
+
+	// 匹配方式。限定枚举值："Regular"/"Wildcard"，默认值："Regular"
+	MatchMode *string `required:"false"`
+
+	// 取值。暂时只支持数组长度为1；取值需符合相关匹配方式的条件；域名匹配时必填
+	Values []string `required:"false"`
+}
+
+/*
+CreateRuleParamRuleActionsFixedResponseConfig is request schema for complex param
+*/
+type CreateRuleParamRuleActionsFixedResponseConfig struct {
+
+	// 返回的固定内容。最大支持存储 1 KB，只支持 ASCII 码值ch >= 32 && ch < 127范围内、不包括 $ 的可打印字符。
+	Content *string `required:"false"`
+
+	// 返回的 HTTP 响应码，仅支持 2xx、4xx、5xx 数字，x 为任意数字。
+	HttpCode *int `required:"false"`
+}
+
+/*
+CreateRuleParamRuleActionsForwardConfig is request schema for complex param
+*/
+type CreateRuleParamRuleActionsForwardConfig struct {
+
+	//
+	Targets []CreateRuleParamRuleActionsForwardConfigTargets `required:"false"`
+}
+
+/*
+CreateRuleParamRuleConditions is request schema for complex param
+*/
+type CreateRuleParamRuleConditions struct {
+
+	//
+	HostConfig *CreateRuleParamRuleConditionsHostConfig `required:"false"`
+
+	//
+	PathConfig *CreateRuleParamRuleConditionsPathConfig `required:"false"`
+
+	// 匹配条件类型。限定枚举值："Host"/"Path"
+	Type *string `required:"true"`
+}
+
+/*
 CreateRuleParamRuleActions is request schema for complex param
 */
 type CreateRuleParamRuleActions struct {
+
+	//
+	BackendConnectionConfig *CreateRuleParamRuleActionsBackendConnectionConfig `required:"false"`
 
 	//
 	CorsConfig *CreateRuleParamRuleActionsCorsConfig `required:"false"`
@@ -807,6 +849,9 @@ type CreateRuleParamRuleActions struct {
 
 	// 转发规则动作执行的顺序，取值为1~1000，按值从小到大执行动作。值不能为空，不能重复。Forward、FixedResponse 类型的动作不判断 Order，最后一个执行
 	Order *int `required:"false"`
+
+	//
+	ProxyBufferingConfig *CreateRuleParamRuleActionsProxyBufferingConfig `required:"false"`
 
 	//
 	RemoveHeaderConfig *CreateRuleParamRuleActionsRemoveHeaderConfig `required:"false"`
@@ -2748,6 +2793,48 @@ func (c *ULBClient) UpdateBackendBatch(req *UpdateBackendBatchRequest) (*UpdateB
 }
 
 /*
+UpdateListenerAttributeParamHealthCheckConfig is request schema for complex param
+*/
+type UpdateListenerAttributeParamHealthCheckConfig struct {
+
+	// （应用型专用）HTTP/GRPC检查域名
+	Domain *string `required:"false"`
+
+	// （应用型专用）判定失败的连续次数
+	DownCounts *int `required:"false"`
+
+	// 是否开启健康检查功能。默认值为：true
+	Enabled *bool `required:"false"`
+
+	// （应用型专用）检查协议
+	HTTPVersion *string `required:"false"`
+
+	// （应用型专用）间隔时间，秒，必须大于TimeOut
+	Interval *int `required:"false"`
+
+	// （应用型专用）HTTP检查方法。只支持GET和HEAD。
+	Method *string `required:"false"`
+
+	// （应用型专用）HTTP/GRPC检查路径
+	Path *string `required:"false"`
+
+	// （应用型专用）端口
+	Port *int `required:"false"`
+
+	// （应用型专用）HTTP时为2xx,3xx格式(逗号分隔)，GRPC时为数字码(逗号分隔)
+	ResponseCode *string `required:"false"`
+
+	// （应用型专用）超时时间，秒，必须小于Interval
+	TimeOut *int `required:"false"`
+
+	// 健康检查方式。应用型限定取值：“Port”/"HTTP/GRPC"，默认值：“Port”
+	Type *string `required:"false"`
+
+	// （应用型专用）判定成功的连续次数
+	UpCounts *int `required:"false"`
+}
+
+/*
 UpdateListenerAttributeParamStickinessConfig is request schema for complex param
 */
 type UpdateListenerAttributeParamStickinessConfig struct {
@@ -2759,30 +2846,6 @@ type UpdateListenerAttributeParamStickinessConfig struct {
 	Enabled *bool `required:"false"`
 
 	// （应用型专用）Cookie处理方式。限定枚举值："ServerInsert" / "UserDefined"，不传值则不修改
-	Type *string `required:"false"`
-}
-
-/*
-UpdateListenerAttributeParamHealthCheckConfig is request schema for complex param
-*/
-type UpdateListenerAttributeParamHealthCheckConfig struct {
-
-	// （应用型专用）HTTP检查域名
-	Domain *string `required:"false"`
-
-	// 是否开启健康检查功能。暂时不支持关闭；默认值为：true
-	Enabled *bool `required:"false"`
-
-	// （应用型专用）HTTP检查方法。只支持GET和HEAD。
-	Method *string `required:"false"`
-
-	// （应用型专用）HTTP检查路径
-	Path *string `required:"false"`
-
-	// （应用型专用）GRPC检查响应码
-	ResponseCode *string `required:"false"`
-
-	// 健康检查方式。应用型限定取值：“Port”/"HTTP"；默认值：“Port”
 	Type *string `required:"false"`
 }
 
@@ -2837,6 +2900,9 @@ type UpdateListenerAttributeRequest struct {
 
 	//
 	StickinessConfig *UpdateListenerAttributeParamStickinessConfig `required:"false"`
+
+	// 后端协议。应用型限定取值：“HTTP,HTTPS,GRPC"，默认值“HTTP”
+	TargetProtocol *string `required:"false"`
 }
 
 // UpdateListenerAttributeResponse is response schema for UpdateListenerAttribute action
@@ -3048,6 +3114,33 @@ type UpdateRuleAttributeParamRuleConditionsPathConfig struct {
 }
 
 /*
+UpdateRuleAttributeParamRuleConditions is request schema for complex param
+*/
+type UpdateRuleAttributeParamRuleConditions struct {
+
+	//
+	HostConfig *UpdateRuleAttributeParamRuleConditionsHostConfig `required:"false"`
+
+	//
+	PathConfig *UpdateRuleAttributeParamRuleConditionsPathConfig `required:"false"`
+
+	// 匹配条件类型。限定枚举值："Host"/"Path"；RuleConditions数组长度不为0时必填
+	Type *string `required:"false"`
+}
+
+/*
+UpdateRuleAttributeParamRuleActionsFixedResponseConfig is request schema for complex param
+*/
+type UpdateRuleAttributeParamRuleActionsFixedResponseConfig struct {
+
+	// 返回的固定内容。最大支持存储 1 KB，只支持 ASCII 码值ch >= 32 && ch < 127范围内、不包括 $ 的可打印字符。
+	Content *string `required:"false"`
+
+	// 返回的 HTTP 响应码，仅支持 2xx、4xx、5xx 数字，x 为任意数字。
+	HttpCode *int `required:"false"`
+}
+
+/*
 UpdateRuleAttributeParamRuleActionsForwardConfigTargets is request schema for complex param
 */
 type UpdateRuleAttributeParamRuleActionsForwardConfigTargets struct {
@@ -3069,12 +3162,45 @@ type UpdateRuleAttributeParamRuleActionsForwardConfig struct {
 }
 
 /*
+UpdateRuleAttributeParamRuleActionsProxyBufferingConfig is request schema for complex param
+*/
+type UpdateRuleAttributeParamRuleActionsProxyBufferingConfig struct {
+
+	// 关闭缓存
+	CloseProxyBuffering *bool `required:"false"`
+}
+
+/*
 UpdateRuleAttributeParamRuleActionsRemoveHeaderConfig is request schema for complex param
 */
 type UpdateRuleAttributeParamRuleActionsRemoveHeaderConfig struct {
 
 	// 删除的 header 字段名称，目前只能删除以下几个默认配置的字段X-Real-IP、X-Forwarded-For、X-Forwarded-Proto、X-Forwarded-SrcPort
 	Key *string `required:"false"`
+}
+
+/*
+UpdateRuleAttributeParamRuleActionsBackendConnectionConfig is request schema for complex param
+*/
+type UpdateRuleAttributeParamRuleActionsBackendConnectionConfig struct {
+
+	// 开启长连接
+	EnablePersistentConnection *bool `required:"false"`
+}
+
+/*
+UpdateRuleAttributeParamRuleActionsInsertHeaderConfig is request schema for complex param
+*/
+type UpdateRuleAttributeParamRuleActionsInsertHeaderConfig struct {
+
+	// 插入的 header 字段名称，长度为 1~40 个字符，支持大小写字母 a~z、数字、下划线（_）和短划线（-）。头字段名称不能重复用于InsertHeader中。header 字段不能使用以下(此处判断大小写不敏感)x-real-ip、x-forwarded-for、x-forwarded-proto、x-forwarded-srcport、ucloud-alb-trace、connection、upgrade、content-length、transfer-encoding、keep-alive、te、host、cookie、remoteip、authority
+	Key *string `required:"false"`
+
+	// 插入的 header 字段内容。ValueType 取值为 SystemDefined 时取值如下：ClientSrcPort：客户端端口。ClientSrcIp：客户端 IP 地址。Protocol：客户端请求的协议（HTTP 或 HTTPS)。RuleID：客户端请求命中的转发规则ID。ALBID：ALB ID。ALBPort：ALB 端口。ValueType 取值为 UserDefined 时：可以自定义头字段内容，限制长度为 1~128 个字符，只支持 ASCII 码值ch >= 32 && ch < 127范围内、不包括 $ 的可打印字符。ValueType 取值为 ReferenceHeader 时：可以引用请求头字段中的某一个字段，限制长度限制为 1~128 个字符，支持小写字母 a~z、数字、短划线（-）和下划线（_）。
+	Value *string `required:"false"`
+
+	// 头字段内容类型。取值：UserDefined：用户指定。ReferenceHeader：引用用户请求头中的某一个字段。SystemDefined：系统定义。
+	ValueType *string `required:"false"`
 }
 
 /*
@@ -3102,36 +3228,12 @@ type UpdateRuleAttributeParamRuleActionsCorsConfig struct {
 }
 
 /*
-UpdateRuleAttributeParamRuleActionsFixedResponseConfig is request schema for complex param
-*/
-type UpdateRuleAttributeParamRuleActionsFixedResponseConfig struct {
-
-	// 返回的固定内容。最大支持存储 1 KB，只支持 ASCII 码值ch >= 32 && ch < 127范围内、不包括 $ 的可打印字符。
-	Content *string `required:"false"`
-
-	// 返回的 HTTP 响应码，仅支持 2xx、4xx、5xx 数字，x 为任意数字。
-	HttpCode *int `required:"false"`
-}
-
-/*
-UpdateRuleAttributeParamRuleActionsInsertHeaderConfig is request schema for complex param
-*/
-type UpdateRuleAttributeParamRuleActionsInsertHeaderConfig struct {
-
-	// 插入的 header 字段名称，长度为 1~40 个字符，支持大小写字母 a~z、数字、下划线（_）和短划线（-）。头字段名称不能重复用于InsertHeader中。header 字段不能使用以下(此处判断大小写不敏感)x-real-ip、x-forwarded-for、x-forwarded-proto、x-forwarded-srcport、ucloud-alb-trace、connection、upgrade、content-length、transfer-encoding、keep-alive、te、host、cookie、remoteip、authority
-	Key *string `required:"false"`
-
-	// 插入的 header 字段内容。ValueType 取值为 SystemDefined 时取值如下：ClientSrcPort：客户端端口。ClientSrcIp：客户端 IP 地址。Protocol：客户端请求的协议（HTTP 或 HTTPS)。RuleID：客户端请求命中的转发规则ID。ALBID：ALB ID。ALBPort：ALB 端口。ValueType 取值为 UserDefined 时：可以自定义头字段内容，限制长度为 1~128 个字符，只支持 ASCII 码值ch >= 32 && ch < 127范围内、不包括 $ 的可打印字符。ValueType 取值为 ReferenceHeader 时：可以引用请求头字段中的某一个字段，限制长度限制为 1~128 个字符，支持小写字母 a~z、数字、短划线（-）和下划线（_）。
-	Value *string `required:"false"`
-
-	// 头字段内容类型。取值：UserDefined：用户指定。ReferenceHeader：引用用户请求头中的某一个字段。SystemDefined：系统定义。
-	ValueType *string `required:"false"`
-}
-
-/*
 UpdateRuleAttributeParamRuleActions is request schema for complex param
 */
 type UpdateRuleAttributeParamRuleActions struct {
+
+	//
+	BackendConnectionConfig *UpdateRuleAttributeParamRuleActionsBackendConnectionConfig `required:"false"`
 
 	//
 	CorsConfig *UpdateRuleAttributeParamRuleActionsCorsConfig `required:"false"`
@@ -3149,24 +3251,12 @@ type UpdateRuleAttributeParamRuleActions struct {
 	Order *int `required:"false"`
 
 	//
+	ProxyBufferingConfig *UpdateRuleAttributeParamRuleActionsProxyBufferingConfig `required:"false"`
+
+	//
 	RemoveHeaderConfig *UpdateRuleAttributeParamRuleActionsRemoveHeaderConfig `required:"false"`
 
 	// 动作类型。限定枚举值："Forward"；RuleActions数组长度不为0时必填
-	Type *string `required:"false"`
-}
-
-/*
-UpdateRuleAttributeParamRuleConditions is request schema for complex param
-*/
-type UpdateRuleAttributeParamRuleConditions struct {
-
-	//
-	HostConfig *UpdateRuleAttributeParamRuleConditionsHostConfig `required:"false"`
-
-	//
-	PathConfig *UpdateRuleAttributeParamRuleConditionsPathConfig `required:"false"`
-
-	// 匹配条件类型。限定枚举值："Host"/"Path"；RuleConditions数组长度不为0时必填
 	Type *string `required:"false"`
 }
 
