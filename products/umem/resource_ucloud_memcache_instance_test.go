@@ -3,6 +3,7 @@ package umem_test
 import (
 	"fmt"
 	"log"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -11,6 +12,14 @@ import (
 )
 
 func TestAccUCloudActiveStandbyMemcache_basic(t *testing.T) {
+	// Memcache is a legacy product that is no longer sold in most regions:
+	// CreateUMemcacheGroup answers RetCode 150 "Service unavailable" (observed
+	// in cn-wlcb). Skip by default; set UCLOUD_ACC_TEST_MEMCACHE=1 to run
+	// against an account/region where the service is still available.
+	if os.Getenv("UCLOUD_ACC_TEST_MEMCACHE") == "" {
+		t.Skip("memcache service unavailable in most regions (RetCode 150); set UCLOUD_ACC_TEST_MEMCACHE=1 to force this test")
+	}
+
 	var inst pumem.UMemDataSet
 
 	resource.Test(t, resource.TestCase{
@@ -97,26 +106,32 @@ func testAccCheckActiveStandbyMemcacheDestroy(state *terraform.State) error {
 	return nil
 }
 
-const testAccActiveStandbyMemcacheConfig = `
+// See resource_ucloud_redis_instance_test.go: the suite reuses one pre-created
+// VPC/subnet exported via UCLOUD_VPC_ID / UCLOUD_SUBNET_ID.
+var testAccActiveStandbyMemcacheConfig = fmt.Sprintf(`
 data "ucloud_zones" "default" {}
 
 resource "ucloud_memcache_instance" "foo" {
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
 	name = "tf-acc-memcache"
 	instance_type = "memcache-master-1"
-    charge_type = "month"
-    duration    = 1
+	charge_type = "month"
+	duration    = 1
+	vpc_id = "%s"
+	subnet_id = "%s"
 }
-`
+`, os.Getenv("UCLOUD_VPC_ID"), os.Getenv("UCLOUD_SUBNET_ID"))
 
-const testAccActiveStandbyMemcacheConfigUpdate = `
+var testAccActiveStandbyMemcacheConfigUpdate = fmt.Sprintf(`
 data "ucloud_zones" "default" {}
 
 resource "ucloud_memcache_instance" "foo" {
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
 	name = "tf-acc-memcache-renamed"
 	instance_type = "memcache-master-2"
-    charge_type = "month"
-    duration    = 1
+	charge_type = "month"
+	duration    = 1
+	vpc_id = "%s"
+	subnet_id = "%s"
 }
-`
+`, os.Getenv("UCLOUD_VPC_ID"), os.Getenv("UCLOUD_SUBNET_ID"))

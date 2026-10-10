@@ -15,9 +15,21 @@ const (
 	notFoundCode = "Notfound"
 	defaultTag   = "Default"
 
+	// defaultDistributedRedisBlockCnt is the shard count sent to CreateUMemSpace
+	// when block_cnt is not set. The backend requires BlockCnt; this mirrors the
+	// UCloud API documentation example. Override per-instance via block_cnt.
+	defaultDistributedRedisBlockCnt = 4
+
 	statusPending     = "pending"
 	statusInitialized = "initialized"
 	statusRunning     = "Running"
+	// terminal failure states reported by the UMem APIs (see the UMemBlockInfo /
+	// UMemSpaceSet state docs in the SDK): fail fast instead of polling to timeout
+	statusFail       = "Fail"
+	statusResizeFail = "ResizeFail"
+
+	// UNBind
+	statusUNBind = "ISolation"
 )
 
 type providerError struct {

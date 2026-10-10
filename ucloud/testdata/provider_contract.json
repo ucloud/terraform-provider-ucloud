@@ -1983,8 +1983,7 @@
         },
         "subnet_id": {
           "type": "TypeString",
-          "optional": true,
-          "computed": true,
+          "required": true,
           "force_new": true
         },
         "tag": {
@@ -1995,8 +1994,7 @@
         },
         "vpc_id": {
           "type": "TypeString",
-          "optional": true,
-          "computed": true,
+          "required": true,
           "force_new": true
         }
       },
@@ -2200,6 +2198,66 @@
           "computed": true,
           "validate": "IntBetween"
         },
+        "block_cnt": {
+          "type": "TypeInt",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "IntAtLeast"
+        },
+        "block_set": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "block_id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "block_name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "block_port": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "block_read_weight": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "block_size": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "block_slot_begin": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "block_slot_end": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "block_state": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "block_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "block_used_size": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "block_vip": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
         "charge_type": {
           "type": "TypeString",
           "optional": true,
@@ -2261,6 +2319,39 @@
           "sensitive": true,
           "validate": "validateKVStoreInstancePassword"
         },
+        "proxy_set": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "proxy_id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "resource_id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "state": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "vip": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "read_mode": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "restart_trigger": {
+          "type": "TypeString",
+          "optional": true
+        },
         "standby_zone": {
           "type": "TypeString",
           "optional": true,
@@ -2272,8 +2363,7 @@
         },
         "subnet_id": {
           "type": "TypeString",
-          "optional": true,
-          "computed": true,
+          "required": true,
           "force_new": true
         },
         "tag": {
@@ -2282,10 +2372,14 @@
           "computed": true,
           "force_new": true
         },
-        "vpc_id": {
+        "transform_type": {
           "type": "TypeString",
           "optional": true,
-          "computed": true,
+          "validate": "StringInSlice"
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "required": true,
           "force_new": true
         }
       },
