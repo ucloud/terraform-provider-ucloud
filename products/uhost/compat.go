@@ -25,14 +25,15 @@ const (
 	statusRunning = "Running"
 	statusStopped = "Stopped"
 
-	instanceStatusInitializing = "Initializing"
-	instanceStatusStarting     = "Starting"
-	instanceStatusRunning      = "Running"
-	instanceStatusStopping     = "Stopping"
-	instanceStatusStopped      = "Stopped"
-	instanceStatusRebooting    = "Rebooting"
-	instanceStatusInstallFail  = "Install Fail"
-	instanceStatusResizeFail   = "ResizeFail"
+	instanceStatusInitializing         = "Initializing"
+	instanceStatusStarting             = "Starting"
+	instanceStatusRunning              = "Running"
+	instanceStatusStopping             = "Stopping"
+	instanceStatusStopped              = "Stopped"
+	instanceStatusRebooting            = "Rebooting"
+	instanceStatusInstallFail          = "Install Fail"
+	instanceStatusResizeFail           = "ResizeFail"
+	instanceStatusNetworkModeSwitching = "NetworkModeSwitching"
 
 	instanceBootDisksStatusNormal = "Normal"
 

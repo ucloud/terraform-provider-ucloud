@@ -50,6 +50,7 @@ The following arguments are required:
 The following arguments are optional:
 
 * `force` - (Optional) Whether to request a forced stop when `state` is `Stopped`. Otherwise (_i.e._, `State` is `Running`), ignored. When an instance is forced to stop, it does not flush system caches and buffer. Defaults to `false`.
+* `disk_password` - (Optional, Sensitive) The password of the encrypted disk, required to start the instance when it has encrypted disks attached. It is only used when `state` is `Running`.
 
 ## Attribute Reference
 
