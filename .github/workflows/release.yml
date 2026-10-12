@@ -1,3 +1,19 @@
+# Release automation
+#
+# Triggers:
+#   - workflow_run: release right after the master "test" workflow succeeds
+#     (the normal path for a human-merged PR).
+#   - push (tag v*): resume an already-pushed release tag.
+#   - schedule / workflow_dispatch: weekly (and manual) fallback that plans a
+#     release straight from origin/master. This is required because GitHub
+#     suppresses workflow events caused by refs pushed with the default
+#     GITHUB_TOKEN, so a native auto-merge performed by github-actions[bot]
+#     leaves no test run behind and the workflow_run path never fires.
+#     See ucloud/ucloud-cli (.github/workflows/release.yml) for the same design.
+#
+# The version/tag decision is always delegated to scripts/release-policy.sh:
+# plan-auto for CI/fallback triggers, plan-tag for an existing tag push.
+
 name: release
 
 on:
@@ -8,6 +24,11 @@ on:
   push:
     tags:
       - "v*"
+  schedule:
+    # Mondays 23:00 Asia/Shanghai (15:00 UTC).
+    - cron: "0 15 * * 1"
+  # Manual trigger for an urgent release or a guarded dry run.
+  workflow_dispatch: {}
 
 permissions: {}
 
@@ -19,6 +40,8 @@ jobs:
   goreleaser:
     if: >-
       github.event_name == 'push' ||
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'workflow_run' &&
        github.event.workflow_run.event == 'push' &&
        github.event.workflow_run.conclusion == 'success')
@@ -42,11 +65,27 @@ jobs:
           RELEASE_TARGET_SHA: ${{ github.event.workflow_run.head_sha }}
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
-          if [[ "${GITHUB_EVENT_NAME}" == 'workflow_run' ]]; then
-            bash scripts/release-policy.sh plan-auto
-          else
-            bash scripts/release-policy.sh plan-tag
-          fi
+          case "${GITHUB_EVENT_NAME}" in
+            push)
+              bash scripts/release-policy.sh plan-tag
+              ;;
+            workflow_run)
+              bash scripts/release-policy.sh plan-auto
+              ;;
+            schedule | workflow_dispatch)
+              # Fallback path: publish whatever master holds right now, using
+              # the exact tip of the freshly fetched default branch as the
+              # release target (a manual run may have been dispatched on
+              # another ref).
+              RELEASE_TARGET_SHA="$(git rev-parse refs/remotes/origin/master)"
+              export RELEASE_TARGET_SHA
+              bash scripts/release-policy.sh plan-auto
+              ;;
+            *)
+              echo "unsupported triggering event: ${GITHUB_EVENT_NAME}" >&2
+              exit 1
+              ;;
+          esac
       - name: Check out release revision
         if: steps.plan.outputs.release == 'true'
         env:
