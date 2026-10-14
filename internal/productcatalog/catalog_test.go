@@ -57,7 +57,7 @@ func TestBindingsRegisterEveryProduct(t *testing.T) {
 
 func TestNamesReturnsCopy(t *testing.T) {
 	want := []string{
-		"iam", "ipsecvpn", "label", "uaccount", "uads", "udb", "udb_mysql", "udisk", "udpn", "ufs",
+		"iam", "ipsecvpn", "label", "sqlserver", "uaccount", "uads", "udb", "udb_mysql", "udisk", "udpn", "ufs",
 		"uhost", "uk8s", "ulb", "umem", "umongodb", "unet", "uphost", "us3", "vpc",
 	}
 	if got := Names(); !reflect.DeepEqual(got, want) {
@@ -75,6 +75,7 @@ func TestProductMasterDataIdentityFor(t *testing.T) {
 		"iam":       {EnSampleName: "IAM", Key: "iam"},
 		"ipsecvpn":  {EnSampleName: "IPSecVPN", Key: "ipsecvpn"},
 		"label":     {EnSampleName: "Label", Key: "label"},
+		"sqlserver": {EnSampleName: "SQLServer", Key: "sqlserver"},
 		"uaccount":  {EnSampleName: "UAccount", Key: "uaccount"},
 		"uads":      {EnSampleName: "UDDoS", Key: "uddos"},
 		"udb":       {EnSampleName: "UDB", Key: "udb"},

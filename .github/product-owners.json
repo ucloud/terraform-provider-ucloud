@@ -37,6 +37,17 @@
         "website/docs/r/label*"
       ]
     },
+    "sqlserver": {
+      "github_users": [
+        "xiaolaohu-hi"
+      ],
+      "paths": [
+        "products/sqlserver/**",
+        "examples/sqlserver/**",
+        "website/docs/d/sqlserver_*",
+        "website/docs/r/sqlserver_*"
+      ]
+    },
     "uaccount": {
       "github_users": [
         "Ali1213"
