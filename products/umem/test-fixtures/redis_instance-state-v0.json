@@ -1,0 +1,29 @@
+{
+  "id": "uredis-compat-0001",
+  "attributes": {
+    "id": "uredis-compat-0001",
+    "availability_zone": "cn-sh2-02",
+    "standby_zone": "cn-sh2-01",
+    "name": "tf-compat-redis",
+    "tag": "Default",
+    "instance_type": "redis-master-2",
+    "engine_version": "4.0",
+    "password": "2018_Tfacc",
+    "vpc_id": "uvnet-compat-0001",
+    "subnet_id": "subnet-compat-0001",
+    "charge_type": "month",
+    "duration": "1",
+    "auto_backup": "disable",
+    "backup_begin_time": "3",
+    "create_time": "2024-01-01T00:00:00Z",
+    "expire_time": "2024-02-01T00:00:00Z",
+    "status": "Running",
+    "ip_set.#": "1",
+    "ip_set.0.ip": "10.0.0.2",
+    "ip_set.0.port": "6379"
+  },
+  "meta": {
+    "schema_version": "0"
+  },
+  "tainted": false
+}
