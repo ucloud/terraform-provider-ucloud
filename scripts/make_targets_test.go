@@ -36,7 +36,12 @@ func TestMakeTestTargets(t *testing.T) {
 		{
 			name: "unit tests retain all packages",
 			args: []string{"test"},
-			want: "TF_ACC= test ./... -timeout=30s -parallel=32\n",
+			want: "TF_ACC= test ./... -timeout=30s -parallel=32 -gcflags=./...=-l\n",
+		},
+		{
+			name: "contract baseline regenerates without inlining",
+			args: []string{"contract"},
+			want: "TF_ACC= run -gcflags=./...=-l ./cmd/provider-contract -output ucloud/testdata/provider_contract.json\n",
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
