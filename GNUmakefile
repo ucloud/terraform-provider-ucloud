@@ -8,6 +8,14 @@ GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
 PKG_NAME=ucloud
 WEBSITE_REPO=github.com/hashicorp/terraform-website
 
+# The provider contract records schema hook names through runtime.FuncForPC. A
+# closure literal is named after the function that encloses it, so inlining the
+# enclosing function reports the hook under the inlined caller's name instead
+# and the recorded names would follow the compiling toolchain. Disabling
+# inlining for this module keeps the baseline identical across Go releases; the
+# check (compat, test) and the regeneration (contract) must use the same flags.
+CONTRACT_GCFLAGS=-gcflags='./...=-l'
+
 unexport PRODUCT
 
 default: build
@@ -22,11 +30,17 @@ sweep:
 	go test $(TEST) -v -sweep=$(SWEEP) $(SWEEPARGS)
 
 test: fmtcheck
-	go test $(TEST) -timeout=30s -parallel=32
+	go test $(TEST) -timeout=30s -parallel=32 $(CONTRACT_GCFLAGS)
 
 compat: fmtcheck
 	go test ./internal/product ./internal/productcatalog ./internal/productownership ./internal/productownershipsync ./internal/providercompat -count=1
-	go test ./ucloud ./products/... -run '^(TestProvider$$|TestProviderContract$$|TestProductClient|TestRegistration|TestBucket|TestUpgradeFixtureSyntax$$)' -count=1
+	go test ./ucloud ./products/... -run '^(TestProvider$$|TestProviderContract$$|TestProductClient|TestRegistration|TestBucket|TestUpgradeFixtureSyntax$$)' -count=1 $(CONTRACT_GCFLAGS)
+
+# Regenerate the provider interface baseline. Use this instead of the bare
+# `go run ./cmd/provider-contract` so the file is written with the same
+# no-inlining build the compat check uses.
+contract:
+	go run $(CONTRACT_GCFLAGS) ./cmd/provider-contract -output ucloud/testdata/provider_contract.json
 
 testacc: fmtcheck
 	@set -eu; \
@@ -84,7 +98,7 @@ ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
 endif
 	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider-test PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
 
-.PHONY: build sweep test compat testacc vet fmt fmtcheck errcheck vendor-status test-compile website website-test
+.PHONY: build sweep test compat contract testacc vet fmt fmtcheck errcheck vendor-status test-compile website website-test
 
 all: mac windows linux
 
