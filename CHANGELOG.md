@@ -2,6 +2,13 @@
 
 FEATURES:
 
+* **New Resource:** `ucloud_sec_group`, which manages a security group of the VPC `SecGroup` API.
+  This is not the `Firewall` API behind `ucloud_security_group`: the two are different objects with
+  different IDs and different rule models, and they are not interchangeable. Rules are managed by
+  `ucloud_sec_group_rule` rather than as blocks inside the group.
+* **New Resource:** `ucloud_sec_group_rule`, which manages one rule of a `ucloud_sec_group`. The API
+  gives every rule an ID of its own, so a rule can be changed in place, imported and destroyed
+  without touching the rest of the group.
 * **New Resource:** `ucloud_disk_snapshot`.
 * **New Datasource:** `ucloud_disk_snapshots`.
 * `resource/ucloud_disk`: add `snapshot_id` to create a cloud disk from an existing snapshot.

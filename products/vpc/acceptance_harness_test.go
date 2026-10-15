@@ -63,8 +63,12 @@ func testAccClients() (*acceptanceClients, error) {
 	return typed, nil
 }
 
+// isNotFoundCode lists the retcodes this product treats as "the resource is
+// gone". 54002 is the generic one, 58103 is the VPC backend's, and 208704 is
+// the security group backend's - the one a destroyed group is reported with,
+// which is what the sec group destroy check has to recognize.
 func isNotFoundCode(code int) bool {
-	return code == 54002 || code == 58103
+	return code == 54002 || code == 58103 || code == 208704
 }
 
 func isNotFoundError(err error) bool {
@@ -212,6 +216,34 @@ func describeAccNatGatewayRuleByID(client *vpcapi.VPCClient, policyID, natGatewa
 		}
 	}
 	return nil, false, nil
+}
+
+func describeAccSecGroupByID(client *vpcapi.VPCClient, id string) (*vpcapi.SecGroupInfo, bool, error) {
+	if id == "" {
+		return nil, false, fmt.Errorf("sec group id is empty")
+	}
+	request := client.NewDescribeSecGroupRequest()
+	request.SecGroupId = []string{id}
+	response, err := client.DescribeSecGroup(request)
+	if err != nil {
+		if isNotFoundError(err) {
+			return nil, false, nil
+		}
+		return nil, false, err
+	}
+	if response == nil {
+		return nil, false, nil
+	}
+	if response.GetRetCode() != 0 {
+		if isNotFoundCode(response.GetRetCode()) {
+			return nil, false, nil
+		}
+		return nil, false, fmt.Errorf("error on reading sec group %q, %s", id, response.GetMessage())
+	}
+	if len(response.DataSet) == 0 {
+		return nil, false, nil
+	}
+	return &response.DataSet[0], true, nil
 }
 
 func describeAccEIPByID(client *unetapi.UNetClient, id string) (*unetapi.UnetEIPSet, bool, error) {
@@ -405,6 +437,177 @@ func testAccCheckVIPDestroy(state *terraform.State) error {
 		}
 		if found && value.VIPId != "" {
 			return fmt.Errorf("vip still exist")
+		}
+	}
+	return nil
+}
+
+func testAccCheckSecGroupExists(name string, target *vpcapi.SecGroupInfo) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		item, ok := state.RootModule().Resources[name]
+		if !ok {
+			return fmt.Errorf("not found: %s", name)
+		}
+		if item.Primary.ID == "" {
+			return fmt.Errorf("sec group id is empty")
+		}
+		clients, err := testAccClients()
+		if err != nil {
+			return err
+		}
+		value, found, err := describeAccSecGroupByID(clients.vpcconn, item.Primary.ID)
+		log.Printf("[INFO] sec group id %#v", item.Primary.ID)
+		if err != nil {
+			return err
+		}
+		if !found {
+			return fmt.Errorf("sec group %q is not found", item.Primary.ID)
+		}
+		*target = *value
+		return nil
+	}
+}
+
+// testAccCheckSecGroupAttributes asserts what the API holds for a group. Rules
+// are deliberately not part of it: they belong to ucloud_sec_group_rule now, so
+// a group is a valid group whether or not anything has been added to it.
+func testAccCheckSecGroupAttributes(value *vpcapi.SecGroupInfo) resource.TestCheckFunc {
+	return func(*terraform.State) error {
+		if value.SecGroupId == "" {
+			return fmt.Errorf("sec group id is empty")
+		}
+		if value.VPCId == "" {
+			return fmt.Errorf("sec group has not been bound to a VPC")
+		}
+		return nil
+	}
+}
+
+func testAccCheckSecGroupDestroy(state *terraform.State) error {
+	for _, item := range state.RootModule().Resources {
+		if item.Type != "ucloud_sec_group" {
+			continue
+		}
+		clients, err := testAccClients()
+		if err != nil {
+			return err
+		}
+		value, found, err := describeAccSecGroupByID(clients.vpcconn, item.Primary.ID)
+		if err != nil {
+			return err
+		}
+		if found && value.SecGroupId != "" {
+			return fmt.Errorf("sec group still exist")
+		}
+	}
+	return nil
+}
+
+// describeAccSecGroupRuleByID looks a rule up inside its group. DescribeSecGroup
+// has no RuleId filter, so the group is fetched and its rules searched.
+func describeAccSecGroupRuleByID(client *vpcapi.VPCClient, secGroupID, ruleID string) (*vpcapi.SecGroupRuleInfo, bool, error) {
+	if secGroupID == "" || ruleID == "" {
+		return nil, false, fmt.Errorf("sec group rule needs both a group id and a rule id")
+	}
+	secGroup, found, err := describeAccSecGroupByID(client, secGroupID)
+	if err != nil || !found {
+		return nil, false, err
+	}
+	for index := range secGroup.Rule {
+		if secGroup.Rule[index].RuleId == ruleID {
+			return &secGroup.Rule[index], true, nil
+		}
+	}
+	return nil, false, nil
+}
+
+func testAccCheckSecGroupRuleExists(name string, target *vpcapi.SecGroupRuleInfo) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		item, ok := state.RootModule().Resources[name]
+		if !ok {
+			return fmt.Errorf("not found: %s", name)
+		}
+		if item.Primary.ID == "" {
+			return fmt.Errorf("sec group rule id is empty")
+		}
+		secGroupID := item.Primary.Attributes["sec_group_id"]
+		if secGroupID == "" {
+			return fmt.Errorf("sec group rule %q has no sec_group_id", item.Primary.ID)
+		}
+		clients, err := testAccClients()
+		if err != nil {
+			return err
+		}
+		value, found, err := describeAccSecGroupRuleByID(clients.vpcconn, secGroupID, item.Primary.ID)
+		log.Printf("[INFO] sec group rule id %#v", item.Primary.ID)
+		if err != nil {
+			return err
+		}
+		if !found {
+			return fmt.Errorf("sec group rule %q is not found in sec group %q", item.Primary.ID, secGroupID)
+		}
+		*target = *value
+		return nil
+	}
+}
+
+// testAccCheckSecGroupRuleAttributes asserts what the API holds for a rule. The
+// ip range is compared whole: a rule carrying several CIDR blocks stays one
+// rule, so the comma separated string has to come back exactly as it went in.
+func testAccCheckSecGroupRuleAttributes(value *vpcapi.SecGroupRuleInfo, wantIPRange string) resource.TestCheckFunc {
+	return func(*terraform.State) error {
+		if value.RuleId == "" {
+			return fmt.Errorf("sec group rule has no id")
+		}
+		if value.IPRange != wantIPRange {
+			return fmt.Errorf("sec group rule ip range = %q, want %q", value.IPRange, wantIPRange)
+		}
+		return nil
+	}
+}
+
+// testAccCheckSecGroupRuleCount asserts how many rules the group actually holds.
+// It is what catches a rule carrying several CIDR blocks being fanned out into
+// several rules, which would break the one rule one resource model.
+func testAccCheckSecGroupRuleCount(secGroupName string, want int) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		item, ok := state.RootModule().Resources[secGroupName]
+		if !ok {
+			return fmt.Errorf("not found: %s", secGroupName)
+		}
+		clients, err := testAccClients()
+		if err != nil {
+			return err
+		}
+		value, found, err := describeAccSecGroupByID(clients.vpcconn, item.Primary.ID)
+		if err != nil {
+			return err
+		}
+		if !found {
+			return fmt.Errorf("sec group %q is not found", item.Primary.ID)
+		}
+		if len(value.Rule) != want {
+			return fmt.Errorf("sec group %q holds %d rules, want %d", item.Primary.ID, len(value.Rule), want)
+		}
+		return nil
+	}
+}
+
+func testAccCheckSecGroupRuleDestroy(state *terraform.State) error {
+	for _, item := range state.RootModule().Resources {
+		if item.Type != "ucloud_sec_group_rule" {
+			continue
+		}
+		clients, err := testAccClients()
+		if err != nil {
+			return err
+		}
+		value, found, err := describeAccSecGroupRuleByID(clients.vpcconn, item.Primary.Attributes["sec_group_id"], item.Primary.ID)
+		if err != nil {
+			return err
+		}
+		if found && value.RuleId != "" {
+			return fmt.Errorf("sec group rule still exist")
 		}
 	}
 	return nil
