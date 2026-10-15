@@ -27,6 +27,10 @@ import (
 // productClient -> SDK client -> HTTP), which is what keeps the base64 password
 // encoding, the zone parameter of the UMemSpace family and the per-shard resize
 // loop honest.
+//
+// The tests that drive the create/update waiters call t.Parallel(): every wait
+// pays the 3s StateChangeConf delay, and running them serially pushes this
+// package past the package test timeout.
 
 // umemAPIStub records the requests made by the resource implementations and
 // answers them from a per-action script.
@@ -245,6 +249,8 @@ func scriptDistributedCreate(stub *umemAPIStub, size, shardCount int) {
 // request conversion (VPC/subnet, zone, standby zone, size, parameter group and
 // the encoded password) and the response expansion into state.
 func TestRedisInstanceCreateConvertsRequestAndExpandsResponse(t *testing.T) {
+	t.Parallel()
+
 	stub := newUmemAPIStub(t)
 	scriptActiveStandbyCreate(stub, 2)
 	server := stub.start()
@@ -354,6 +360,8 @@ func TestRedisInstanceCreateRejectsMissingGroupID(t *testing.T) {
 // distributed create path: the shard count default, protocol, VPC/subnet and the
 // block/proxy/read_mode expansion of the trailing read.
 func TestDistributedRedisCreateConvertsRequestAndExpandsResponse(t *testing.T) {
+	t.Parallel()
+
 	stub := newUmemAPIStub(t)
 	scriptDistributedCreate(stub, 16, defaultDistributedRedisBlockCnt)
 	server := stub.start()
@@ -443,6 +451,8 @@ func TestDistributedRedisCreateRejectsMissingSpaceID(t *testing.T) {
 // "restart requires Running" pre-check are request-conversion details of the
 // update path.
 func TestRedisInstanceUpdateConvertsPasswordAndRestartRequests(t *testing.T) {
+	t.Parallel()
+
 	t.Run("password is base64 encoded", func(t *testing.T) {
 		stub := newUmemAPIStub(t)
 		stub.on("ModifyURedisGroupPassword", `{"RetCode":0}`)
@@ -516,6 +526,8 @@ func TestRedisInstanceUpdateConvertsPasswordAndRestartRequests(t *testing.T) {
 // from the API, so removing it must fail with a clear message instead of sending
 // an empty transform type.
 func TestRedisInstanceTransformRequest(t *testing.T) {
+	t.Parallel()
+
 	t.Run("unbind is sent for isolation", func(t *testing.T) {
 		stub := newUmemAPIStub(t)
 		stub.on("ISolationURedisGroup", `{"RetCode":0}`)
@@ -566,6 +578,8 @@ func TestRedisInstanceTransformRequest(t *testing.T) {
 // every shard is resized through ResizeUDRedisBlockSize, shards already at the
 // target size are skipped and invalid requests fail before any API call.
 func TestDistributedRedisResizeCallsResizeUDRedisBlockSizePerShard(t *testing.T) {
+	t.Parallel()
+
 	t.Run("each shard is resized to the target size", func(t *testing.T) {
 		stub := newUmemAPIStub(t)
 		var blockCalls int
@@ -843,6 +857,8 @@ func TestDistributedRedisReadExpandsShardsProxiesAndReadMode(t *testing.T) {
 // create request conversion, response expansion, the empty-id guard, NotFound on
 // read and the delete call.
 func TestMemcacheCRUDRequests(t *testing.T) {
+	t.Parallel()
+
 	describeMemcache := func(size int, state string) string {
 		return fmt.Sprintf(`{"RetCode":0,"TotalCount":1,"DataSet":[{
 			"ResourceId":"umemcache-1","Name":"tf-acc-memcache","Zone":"cn-sh2-01","Tag":"Default",
