@@ -43,6 +43,7 @@ func TestInstanceSchemaCompatibility(t *testing.T) {
 		"image_id":                   {typeValue: schema.TypeString, required: true},
 		"root_password":              {typeValue: schema.TypeString, optional: true, computed: true, sensitive: true},
 		"login_mode":                 {typeValue: schema.TypeString, optional: true},
+		"disk_password":              {typeValue: schema.TypeString, optional: true, sensitive: true},
 		"key_pair_id":                {typeValue: schema.TypeString, optional: true},
 		"deletion_protection":        {typeValue: schema.TypeBool, optional: true},
 		"instance_type":              {typeValue: schema.TypeString, required: true},
@@ -67,9 +68,23 @@ func TestInstanceSchemaCompatibility(t *testing.T) {
 		"subnet_id":                  {typeValue: schema.TypeString, optional: true, computed: true, forceNew: true},
 		"private_ip":                 {typeValue: schema.TypeString, optional: true, computed: true, forceNew: true},
 		"allow_stopping_for_update":  {typeValue: schema.TypeBool, optional: true},
+		"auto_start":                 {typeValue: schema.TypeBool, optional: true},
 		"user_data":                  {typeValue: schema.TypeString, optional: true, forceNew: true},
 		"min_cpu_platform":           {typeValue: schema.TypeString, optional: true, forceNew: true},
 		"cpu_platform":               {typeValue: schema.TypeString, computed: true},
+		"net_capability":             {typeValue: schema.TypeString, optional: true, computed: true},
+		"hotplug_feature":            {typeValue: schema.TypeBool, optional: true, forceNew: true},
+		"uni_feature":                {typeValue: schema.TypeBool, optional: true, forceNew: true},
+		"gpu":                        {typeValue: schema.TypeInt, optional: true, forceNew: true},
+		"gpu_type":                   {typeValue: schema.TypeString, optional: true, forceNew: true},
+		"alarm_template_id":          {typeValue: schema.TypeInt, optional: true, forceNew: true},
+		"auto_data_disk_init":        {typeValue: schema.TypeString, optional: true, forceNew: true},
+		"coupon_id":                  {typeValue: schema.TypeString, optional: true, forceNew: true},
+		"uhost_family":               {typeValue: schema.TypeString, optional: true, computed: true, forceNew: true},
+		"labels":                     {typeValue: schema.TypeMap, optional: true, forceNew: true},
+		"udset_id":                   {typeValue: schema.TypeString, optional: true, forceNew: true},
+		"udhost_id":                  {typeValue: schema.TypeString, optional: true, forceNew: true},
+		"host_binding":               {typeValue: schema.TypeBool, optional: true, forceNew: true},
 		"cpu":                        {typeValue: schema.TypeInt, computed: true},
 		"memory":                     {typeValue: schema.TypeInt, computed: true},
 		"status":                     {typeValue: schema.TypeString, computed: true},
@@ -108,9 +123,10 @@ func TestInstanceStateAndIsolationGroupCompatibility(t *testing.T) {
 		t.Fatal("ucloud_instance_state importer is missing")
 	}
 	assertSchemaFields(t, state, map[string]schemaFieldExpectation{
-		"instance_id": {typeValue: schema.TypeString, required: true},
-		"state":       {typeValue: schema.TypeString, required: true},
-		"force":       {typeValue: schema.TypeBool, optional: true},
+		"instance_id":   {typeValue: schema.TypeString, required: true},
+		"state":         {typeValue: schema.TypeString, required: true},
+		"force":         {typeValue: schema.TypeBool, optional: true},
+		"disk_password": {typeValue: schema.TypeString, optional: true, sensitive: true},
 	})
 
 	isolationGroup := resourceUCloudIsolationGroup()
@@ -128,19 +144,19 @@ func TestInstanceStateAndIsolationGroupCompatibility(t *testing.T) {
 
 func TestDataSourcesPreserveSchemaAndStateMigration(t *testing.T) {
 	images := dataSourceUCloudImages()
-	assertDataSourceFields(t, images, []string{"availability_zone", "name_regex", "most_recent", "image_type", "os_type", "image_id", "ids", "output_file", "total_count", "images"})
+	assertDataSourceFields(t, images, []string{"availability_zone", "name_regex", "most_recent", "image_type", "os_type", "image_id", "func_type", "tag", "include_price", "ids", "output_file", "total_count", "images"})
 	imageFields, ok := images.Schema["images"].Elem.(*schema.Resource)
 	if !ok {
 		t.Fatalf("images element type = %T, want *schema.Resource", images.Schema["images"].Elem)
 	}
-	for _, field := range []string{"id", "name", "type", "size", "availability_zone", "os_type", "os_name", "features", "create_time", "description", "status"} {
+	for _, field := range []string{"id", "name", "type", "size", "availability_zone", "os_type", "os_name", "features", "create_time", "description", "status", "func_type", "scene_categories", "integrated_software", "vendor", "price_set"} {
 		if imageFields.Schema[field] == nil || !imageFields.Schema[field].Computed {
 			t.Errorf("images nested field %q is not computed", field)
 		}
 	}
 
 	instances := dataSourceUCloudInstances()
-	assertDataSourceFields(t, instances, []string{"availability_zone", "name_regex", "ids", "tag", "output_file", "total_count", "instances"})
+	assertDataSourceFields(t, instances, []string{"availability_zone", "name_regex", "ids", "tag", "isolation_group", "vpc_id", "subnet_id", "udisk_id_for_attachment", "output_file", "total_count", "instances"})
 	if instances.SchemaVersion != 1 || instances.MigrateState == nil {
 		t.Fatalf("instances state migration = version %d callback %v, want version 1 with callback", instances.SchemaVersion, instances.MigrateState != nil)
 	}

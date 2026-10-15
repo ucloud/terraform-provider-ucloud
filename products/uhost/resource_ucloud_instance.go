@@ -85,6 +85,8 @@ func resourceUCloudInstance() *schema.Resource {
 			customdiff.ValidateChange("data_disk_size", diffValidateInstanceDataDiskSize),
 			customdiff.ValidateChange("boot_disk_size", diffValidateInstanceBootDiskSize),
 			customdiff.ValidateChange("instance_type", diffValidateInstanceType),
+			customdiff.ValidateChange("net_capability", diffValidateInstanceNetCapability),
+			diffValidateInstanceUDSet,
 			validateInstanceLoginMode,
 			diffValidateBootDiskTypeWithDataDiskType,
 			diffValidateChargeTypeWithDuration,
@@ -123,6 +125,12 @@ func resourceUCloudInstance() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Password", "KeyPair"}, false),
+			},
+
+			"disk_password": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
 			},
 
 			"key_pair_id": {
@@ -374,6 +382,11 @@ func resourceUCloudInstance() *schema.Resource {
 				Optional: true,
 			},
 
+			"auto_start": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+
 			"user_data": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -397,6 +410,102 @@ func resourceUCloudInstance() *schema.Resource {
 			"cpu_platform": {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+
+			"net_capability": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"normal", "super", "ultra", "extreme"}, false),
+			},
+
+			"hotplug_feature": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+			},
+
+			"uni_feature": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Default:  false,
+			},
+
+			"gpu": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IntBetween(1, 8),
+			},
+
+			"gpu_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"K80", "P40", "V100", "V100S", "T4", "T4A", "T4S", "2080",
+					"2080Ti", "2080Ti-4C", "2080TiS", "2080TiPro", "1080Ti",
+					"3080Ti", "3090", "4090", "4090Pro", "4090_48G", "4090LD",
+					"5090", "5090Pro", "BR104P", "MR-V100",
+					"A100", "A800", "H20", "H800",
+				}, false),
+			},
+
+			"alarm_template_id": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IntBetween(1, 2147483647),
+			},
+
+			"auto_data_disk_init": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"On", "Off"}, false),
+			},
+
+			"coupon_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
+			"uhost_family": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"o1i", "o1a", "o1r", "o1h", "o2i", "o2a", "om1i", "om2i", "om1a",
+					"opro1a", "opro2a", "oprog1i", "oprog2i", "oprog1a",
+				}, false),
+			},
+
+			"labels": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				ForceNew: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
+			"udset_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
+			"udhost_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
+			"host_binding": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
 			},
 
 			"cpu": {
@@ -676,6 +785,66 @@ func resourceUCloudInstanceCreate(d *schema.ResourceData, meta interface{}) erro
 		req.MinimalCpuPlatform = ucloud.String("Intel/Auto")
 	}
 
+	if v, ok := d.GetOk("net_capability"); ok {
+		req.NetCapability = ucloud.String(upperCamelCvt.unconvert(v.(string)))
+	}
+
+	if v, ok := d.GetOkExists("hotplug_feature"); ok {
+		req.HotplugFeature = ucloud.Bool(v.(bool))
+	}
+
+	if v, ok := d.GetOkExists("uni_feature"); ok && v.(bool) {
+		req.Features = &uhost.CreateUHostInstanceParamFeatures{
+			UNI: ucloud.Bool(true),
+		}
+	}
+
+	if v, ok := d.GetOk("gpu"); ok {
+		req.GPU = ucloud.Int(v.(int))
+	}
+
+	if v, ok := d.GetOk("gpu_type"); ok {
+		req.GpuType = ucloud.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("alarm_template_id"); ok {
+		req.AlarmTemplateId = ucloud.Int(v.(int))
+	}
+
+	if v, ok := d.GetOk("auto_data_disk_init"); ok {
+		req.AutoDataDiskInit = ucloud.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("coupon_id"); ok {
+		req.CouponId = ucloud.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("uhost_family"); ok {
+		req.UHostFamily = ucloud.String(v.(string))
+	}
+
+	// private dedicated zone params, only valid for instances created in a UDSet
+	if v, ok := d.GetOk("udset_id"); ok {
+		req.UDSetId = ucloud.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("udhost_id"); ok {
+		req.UDHostId = ucloud.String(v.(string))
+	}
+
+	if v, ok := d.GetOkExists("host_binding"); ok {
+		req.HostBinding = ucloud.Bool(v.(bool))
+	}
+
+	if v, ok := d.GetOk("labels"); ok {
+		for key, value := range v.(map[string]interface{}) {
+			req.Labels = append(req.Labels, uhost.CreateUHostInstanceParamLabels{
+				Key:   ucloud.String(key),
+				Value: ucloud.String(value.(string)),
+			})
+		}
+	}
+
 	resp, err := conn.CreateUHostInstance(req)
 	if err != nil {
 		return fmt.Errorf("error on creating instance, %s", err)
@@ -856,6 +1025,7 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 	resizeReq := conn.NewResizeUHostInstanceRequest()
 	resizeReq.UHostId = ucloud.String(d.Id())
 	resizeReq.Zone = ucloud.String(zone)
+	resizeReq.AutoStart = ucloud.Bool(d.Get("auto_start").(bool))
 	dataDiskReq := conn.NewResizeAttachedDiskRequest()
 	dataDiskReq.UHostId = ucloud.String(d.Id())
 	dataDiskReq.Zone = ucloud.String(zone)
@@ -877,6 +1047,21 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 		}
 
 		resizeNeedUpdate = true
+	}
+
+	// net_capability is upgraded/downgraded through ResizeUHostInstance, where
+	// NetCapValue 1 means upgrade and 2 means downgrade.
+	if d.HasChange("net_capability") && !d.IsNewResource() {
+		oldNetCap, newNetCap := d.GetChange("net_capability")
+		switch {
+		case oldNetCap.(string) == "normal" && newNetCap.(string) != "normal":
+			resizeReq.NetCapValue = ucloud.Int(1)
+		case oldNetCap.(string) != "normal" && newNetCap.(string) == "normal":
+			resizeReq.NetCapValue = ucloud.Int(2)
+		}
+		if resizeReq.NetCapValue != nil {
+			resizeNeedUpdate = resizeNeedUpdate || true
+		}
 	}
 
 	if d.HasChange("data_disk_size") && !d.IsNewResource() {
@@ -908,7 +1093,8 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	passwordNeedUpdate := false
-	if d.HasChange("root_password") && !d.IsNewResource() {
+	loginModeNeedUpdate := d.HasChange("login_mode") || d.HasChange("key_pair_id")
+	if (d.HasChange("root_password") || loginModeNeedUpdate) && !d.IsNewResource() {
 		instance, err := client.describeInstanceById(d.Id())
 
 		if err != nil {
@@ -923,6 +1109,9 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 			if instance.State != statusRunning {
 				startReq := conn.NewStartUHostInstanceRequest()
 				startReq.UHostId = ucloud.String(d.Id())
+				if v, ok := d.GetOk("disk_password"); ok {
+					startReq.DiskPassword = ucloud.String(v.(string))
+				}
 				_, err := conn.StartUHostInstance(startReq)
 				if err != nil {
 					return fmt.Errorf("error on starting instance when updating %q, %s", d.Id(), err)
@@ -961,7 +1150,7 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 		passwordNeedUpdate = true
 	}
 
-	if passwordNeedUpdate || resizeNeedUpdate || dataDiskNeedUpdate || bootDiskNeedUpdate {
+	if passwordNeedUpdate || resizeNeedUpdate || dataDiskNeedUpdate || bootDiskNeedUpdate || loginModeNeedUpdate {
 		// instance update these attributes need to wait it stopped
 		stopReq := conn.NewStopUHostInstanceRequest()
 		stopReq.UHostId = ucloud.String(d.Id())
@@ -978,7 +1167,7 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 		if instance.State != statusStopped {
 			//!d.IsNewResource in order to avoid the err of boot disk initialize
 			if !d.Get("allow_stopping_for_update").(bool) && !d.IsNewResource() {
-				return fmt.Errorf("updating the root_password, boot_disk_size, data_disk_size or instance_type on an instance requires stopping it, please set allow_stopping_for_update = true in your config to acknowledge it")
+				return fmt.Errorf("updating the root_password, login_mode, key_pair_id, boot_disk_size, data_disk_size or instance_type on an instance requires stopping it, please set allow_stopping_for_update = true in your config to acknowledge it")
 			}
 
 			_, err := conn.StopUHostInstance(stopReq)
@@ -1001,10 +1190,26 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 			}
 		}
 
-		if passwordNeedUpdate {
+		if passwordNeedUpdate || loginModeNeedUpdate {
 			reqPassword := conn.NewResetUHostInstancePasswordRequest()
 			reqPassword.UHostId = ucloud.String(d.Id())
-			reqPassword.Password = ucloud.String(d.Get("root_password").(string))
+			reqPassword.AutoStart = ucloud.Bool(d.Get("auto_start").(bool))
+
+			loginMode := "Password"
+			if v, ok := d.GetOk("login_mode"); ok && v.(string) != "" {
+				loginMode = v.(string)
+			}
+			reqPassword.LoginMode = ucloud.String(loginMode)
+
+			if loginMode == "KeyPair" {
+				if v, ok := d.GetOk("key_pair_id"); ok {
+					reqPassword.KeyPairId = ucloud.String(v.(string))
+				} else {
+					return fmt.Errorf("%q is required when %q is %q", "key_pair_id", "login_mode", "KeyPair")
+				}
+			} else if shouldPreserveInstanceRootPasswordState(loginMode) {
+				reqPassword.Password = ucloud.String(d.Get("root_password").(string))
+			}
 
 			_, err := conn.ResetUHostInstancePassword(reqPassword)
 			if err != nil {
@@ -1012,6 +1217,8 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 			}
 
 			d.SetPartial("root_password")
+			d.SetPartial("login_mode")
+			d.SetPartial("key_pair_id")
 		}
 
 		if resizeNeedUpdate {
@@ -1021,6 +1228,7 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 			}
 
 			d.SetPartial("instance_type")
+			d.SetPartial("net_capability")
 		}
 
 		if dataDiskNeedUpdate {
@@ -1089,6 +1297,9 @@ func resourceUCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) erro
 			// after instance update, we need to wait it started
 			startReq := conn.NewStartUHostInstanceRequest()
 			startReq.UHostId = ucloud.String(d.Id())
+			if v, ok := d.GetOk("disk_password"); ok {
+				startReq.DiskPassword = ucloud.String(v.(string))
+			}
 
 			if _, err := conn.StartUHostInstance(startReq); err != nil {
 				return fmt.Errorf("error on starting instance when updating %q, %s", d.Id(), err)
@@ -1154,6 +1365,22 @@ func resourceUCloudInstanceRead(d *schema.ResourceData, meta interface{}) error 
 	d.Set("auto_renew", boolCamelCvt.unconvert(instance.AutoRenew))
 	d.Set("remark", instance.Remark)
 	d.Set("cpu_platform", instance.CpuPlatform)
+
+	// these params are create-only, so just keep the value returned by describe
+	// api to avoid unexpected diffs.
+	if notEmptyStringInSet(instance.NetCapability) {
+		d.Set("net_capability", strings.ToLower(instance.NetCapability))
+	}
+	d.Set("hotplug_feature", instance.HotplugFeature)
+	if instance.GPU > 0 {
+		d.Set("gpu", instance.GPU)
+	}
+	if notEmptyStringInSet(instance.GpuType) {
+		d.Set("gpu_type", instance.GpuType)
+	}
+	if notEmptyStringInSet(instance.UHostFamily) {
+		d.Set("uhost_family", instance.UHostFamily)
+	}
 
 	//in order to be compatible with returns null
 	if notEmptyStringInSet(instance.ChargeType) {
@@ -1396,6 +1623,45 @@ func diffValidateInstanceType(old, new, meta interface{}) error {
 
 	if o.HostType != n.HostType {
 		return fmt.Errorf("update host type: %q to %q of %q not be allowed, please rebuild instance if required", o.HostType, n.HostType, "instance_type")
+	}
+	return nil
+}
+
+// diffValidateInstanceNetCapability guards in-place network enhancement changes.
+// ResizeUHostInstance only upgrades or downgrades the network capability and
+// does not switch between enhancement levels, so only transitions to or from
+// `normal` are allowed.
+func diffValidateInstanceNetCapability(old, new, meta interface{}) error {
+	if old.(string) == "" || new.(string) == "" || old.(string) == new.(string) {
+		return nil
+	}
+
+	if old.(string) != "normal" && new.(string) != "normal" {
+		return fmt.Errorf("update net_capability: %q to %q not allowed, network enhancement level cannot be changed in place, please rebuild instance if required", old.(string), new.(string))
+	}
+	return nil
+}
+
+// diffValidateInstanceUDSet guards the private dedicated zone params.
+// UDSetId/UDHostId/HostBinding are accepted only when creating inside a
+// dedicated zone, so they require udset_id and cannot be changed afterwards.
+func diffValidateInstanceUDSet(diff *schema.ResourceDiff, meta interface{}) error {
+	udsetID := diff.Get("udset_id").(string)
+	udhostID := diff.Get("udhost_id").(string)
+	hostBinding, hostBindingSet := diff.GetOkExists("host_binding")
+
+	if udsetID == "" {
+		if udhostID != "" {
+			return fmt.Errorf("%q is required when set %q", "udset_id", "udhost_id")
+		}
+		if hostBindingSet && hostBinding.(bool) {
+			return fmt.Errorf("%q is required when set %q", "udset_id", "host_binding")
+		}
+		return nil
+	}
+
+	if diff.HasChange("udset_id") && diff.Id() != "" {
+		return fmt.Errorf("the %q cannot be changed, please rebuild instance if required", "udset_id")
 	}
 	return nil
 }

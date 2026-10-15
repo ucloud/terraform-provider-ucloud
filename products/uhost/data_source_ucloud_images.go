@@ -2,10 +2,11 @@ package uhost
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"regexp"
 	"sort"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
 	"github.com/ucloud/ucloud-sdk-go/services/uhost"
 	"github.com/ucloud/ucloud-sdk-go/ucloud"
@@ -48,6 +49,22 @@ func dataSourceUCloudImages() *schema.Resource {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ConflictsWith: []string{"ids"},
+			},
+
+			"func_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"gpu", "app", "uhost"}, false),
+			},
+
+			"tag": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
+			"include_price": {
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 
 			"ids": {
@@ -133,6 +150,52 @@ func dataSourceUCloudImages() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+
+						"func_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
+						"scene_categories": {
+							Type: schema.TypeList,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Computed: true,
+						},
+
+						"integrated_software": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
+						"vendor": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
+						"price_set": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"charge_type": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+
+									"original_price": {
+										Type:     schema.TypeFloat,
+										Computed: true,
+									},
+
+									"price": {
+										Type:     schema.TypeFloat,
+										Computed: true,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -163,6 +226,22 @@ func dataSourceUCloudImagesRead(d *schema.ResourceData, meta interface{}) error 
 
 	if v, ok := d.GetOk("image_id"); ok {
 		req.ImageId = ucloud.String(v.(string))
+	}
+
+	if ids, ok := d.GetOk("ids"); ok {
+		req.ImageIds = schemaSetToStringSlice(ids)
+	}
+
+	if v, ok := d.GetOk("func_type"); ok {
+		req.FuncType = ucloud.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("tag"); ok {
+		req.Tag = ucloud.String(v.(string))
+	}
+
+	if d.Get("include_price").(bool) {
+		req.PriceSet = ucloud.Int(1)
 	}
 
 	var allImages []uhost.UHostImageSet
@@ -241,18 +320,32 @@ func dataSourceUCloudImagesSave(d *schema.ResourceData, projects []uhost.UHostIm
 
 	for _, item := range projects {
 		ids = append(ids, item.ImageId)
+		var priceSet []map[string]interface{}
+		for _, price := range item.PriceSet {
+			priceSet = append(priceSet, map[string]interface{}{
+				"charge_type":    price.ChargeType,
+				"original_price": price.OriginalPrice,
+				"price":          price.Price,
+			})
+		}
+
 		data = append(data, map[string]interface{}{
-			"id":                item.ImageId,
-			"name":              item.ImageName,
-			"availability_zone": item.Zone,
-			"type":              upperCamelCvt.convert(item.ImageType),
-			"os_type":           upperCamelCvt.convert(item.OsType),
-			"os_name":           item.OsName,
-			"features":          item.Features,
-			"create_time":       timestampToString(item.CreateTime),
-			"size":              item.ImageSize,
-			"description":       item.ImageDescription,
-			"status":            item.State,
+			"id":                  item.ImageId,
+			"name":                item.ImageName,
+			"availability_zone":   item.Zone,
+			"type":                upperCamelCvt.convert(item.ImageType),
+			"os_type":             upperCamelCvt.convert(item.OsType),
+			"os_name":             item.OsName,
+			"features":            item.Features,
+			"create_time":         timestampToString(item.CreateTime),
+			"size":                item.ImageSize,
+			"description":         item.ImageDescription,
+			"status":              item.State,
+			"func_type":           item.FuncType,
+			"scene_categories":    item.SceneCategories,
+			"integrated_software": item.IntegratedSoftware,
+			"vendor":              item.Vendor,
+			"price_set":           priceSet,
 		})
 	}
 

@@ -1201,13 +1201,29 @@
     },
     "ucloud_instance": {
       "schema": {
+        "alarm_template_id": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "validate": "IntBetween"
+        },
         "allow_stopping_for_update": {
           "type": "TypeBool",
           "optional": true
         },
+        "auto_data_disk_init": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
         "auto_renew": {
           "type": "TypeBool",
           "computed": true
+        },
+        "auto_start": {
+          "type": "TypeBool",
+          "optional": true
         },
         "availability_zone": {
           "type": "TypeString",
@@ -1233,6 +1249,11 @@
           "computed": true,
           "force_new": true,
           "validate": "StringInSlice"
+        },
+        "coupon_id": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
         },
         "cpu": {
           "type": "TypeInt",
@@ -1296,6 +1317,11 @@
           "type": "TypeBool",
           "optional": true
         },
+        "disk_password": {
+          "type": "TypeString",
+          "optional": true,
+          "sensitive": true
+        },
         "disk_set": {
           "type": "TypeList",
           "computed": true,
@@ -1330,6 +1356,28 @@
         "expire_time": {
           "type": "TypeString",
           "computed": true
+        },
+        "gpu": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "validate": "IntBetween"
+        },
+        "gpu_type": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "host_binding": {
+          "type": "TypeBool",
+          "optional": true,
+          "force_new": true
+        },
+        "hotplug_feature": {
+          "type": "TypeBool",
+          "optional": true,
+          "force_new": true
         },
         "image_id": {
           "type": "TypeString",
@@ -1368,6 +1416,17 @@
           "type": "TypeString",
           "optional": true
         },
+        "labels": {
+          "type": "TypeMap",
+          "optional": true,
+          "force_new": true,
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
         "login_mode": {
           "type": "TypeString",
           "optional": true,
@@ -1389,6 +1448,12 @@
           "optional": true,
           "computed": true,
           "validate": "StringMatch"
+        },
+        "net_capability": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "validate": "StringInSlice"
         },
         "network_interface": {
           "type": "TypeList",
@@ -1488,6 +1553,29 @@
           "state_func": "stateFuncTag",
           "validate": "StringMatch"
         },
+        "udhost_id": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        },
+        "udset_id": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        },
+        "uhost_family": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "uni_feature": {
+          "type": "TypeBool",
+          "optional": true,
+          "force_new": true,
+          "default": "false"
+        },
         "user_data": {
           "type": "TypeString",
           "optional": true,
@@ -1515,6 +1603,11 @@
     },
     "ucloud_instance_state": {
       "schema": {
+        "disk_password": {
+          "type": "TypeString",
+          "optional": true,
+          "sensitive": true
+        },
         "force": {
           "type": "TypeBool",
           "optional": true
@@ -2615,6 +2708,136 @@
       "delete": "resourceUCloudSubnetDelete",
       "importer": "ImportStatePassthrough"
     },
+    "ucloud_udb_mysql_instance": {
+      "schema": {
+        "availability_zone": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "charge_type": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "default": "\"Month\"",
+          "validate": "StringInSlice"
+        },
+        "cpu": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "db_version": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "default": "\"mysql-8.0\"",
+          "validate": "StringInSlice"
+        },
+        "disk_space": {
+          "type": "TypeInt",
+          "required": true,
+          "validate": "IntBetween"
+        },
+        "duration": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "default": "1",
+          "validate": "IntBetween"
+        },
+        "expire_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "instance_mode": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "default": "\"HA\"",
+          "validate": "StringInSlice"
+        },
+        "machine_type": {
+          "type": "TypeString",
+          "required": true,
+          "validate": "StringInSlice"
+        },
+        "memory": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "modify_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "name": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringLenBetween"
+        },
+        "param_group_id": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        },
+        "password": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "sensitive": true,
+          "validate": "StringLenBetween"
+        },
+        "port": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "default": "3306",
+          "validate": "IntBetween"
+        },
+        "private_ip": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "status": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "subnet_id": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        },
+        "tag": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudMySQLInstanceCreate",
+      "read": "resourceUCloudMySQLInstanceRead",
+      "update": "resourceUCloudMySQLInstanceUpdate",
+      "delete": "resourceUCloudMySQLInstanceDelete",
+      "importer": "ImportStatePassthrough",
+      "timeouts": {
+        "create": "30m0s",
+        "delete": "10m0s",
+        "update": "30m0s"
+      }
+    },
     "ucloud_udpn_connection": {
       "schema": {
         "bandwidth": {
@@ -3712,6 +3935,401 @@
         "create": "30m0s",
         "delete": "10m0s",
         "update": "20m0s"
+      }
+    },
+    "ucloud_umongodb_backup": {
+      "schema": {
+        "availability_zone": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "backup_name": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true,
+          "validate": "StringLenBetween"
+        },
+        "backup_size": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "backup_type": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "cluster_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "end_time": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "start_time": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "state": {
+          "type": "TypeString",
+          "computed": true
+        }
+      },
+      "create": "resourceUCloudUMongoDBBackupCreate",
+      "read": "resourceUCloudUMongoDBBackupRead",
+      "delete": "resourceUCloudUMongoDBBackupDelete",
+      "importer": "resourceUCloudUMongoDBBackupImport",
+      "timeouts": {
+        "create": "1h0m0s"
+      }
+    },
+    "ucloud_umongodb_replicaset": {
+      "schema": {
+        "admin_password": {
+          "type": "TypeString",
+          "required": true,
+          "sensitive": true
+        },
+        "auto_backup_time": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "auto_backup_week": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "availability_zone": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "backup_disabled": {
+          "type": "TypeBool",
+          "optional": true
+        },
+        "charge_type": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "default": "\"month\"",
+          "diff_suppress": "suppressUnreadableDefault",
+          "validate": "StringInSlice"
+        },
+        "connect_url": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "create_time": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "cross_zones": {
+          "type": "TypeSet",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "db_version": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "disk_space": {
+          "type": "TypeInt",
+          "required": true,
+          "validate": "validateDiskSpace"
+        },
+        "label": {
+          "type": "TypeSet",
+          "optional": true,
+          "force_new": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "key": {
+                "type": "TypeString",
+                "required": true
+              },
+              "value": {
+                "type": "TypeString",
+                "required": true
+              }
+            }
+          }
+        },
+        "listen_port": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true
+        },
+        "machine_type_id": {
+          "type": "TypeString",
+          "required": true
+        },
+        "name": {
+          "type": "TypeString",
+          "required": true,
+          "validate": "StringLenBetween"
+        },
+        "node_count": {
+          "type": "TypeInt",
+          "required": true,
+          "force_new": true,
+          "validate": "IntInSlice"
+        },
+        "quantity": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "default": "1",
+          "diff_suppress": "suppressUnreadableDefault",
+          "validate": "IntAtLeast"
+        },
+        "restart_trigger": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "sec_group": {
+          "type": "TypeSet",
+          "optional": true,
+          "force_new": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "id": {
+                "type": "TypeString",
+                "required": true
+              },
+              "priority": {
+                "type": "TypeInt",
+                "required": true,
+                "validate": "IntBetween"
+              }
+            }
+          }
+        },
+        "state": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "status": {
+          "type": "TypeString",
+          "optional": true,
+          "default": "\"running\"",
+          "validate": "StringInSlice"
+        },
+        "subnet_id": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        },
+        "tag": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudUMongoDBReplSetCreate",
+      "read": "resourceUCloudUMongoDBReplSetRead",
+      "update": "resourceUCloudUMongoDBReplSetUpdate",
+      "delete": "resourceUCloudUMongoDBReplSetDelete",
+      "customize_diff": "All",
+      "importer": "ImportStatePassthrough",
+      "timeouts": {
+        "create": "1h0m0s",
+        "delete": "30m0s",
+        "update": "45m0s"
+      }
+    },
+    "ucloud_umongodb_sharded_cluster": {
+      "schema": {
+        "admin_password": {
+          "type": "TypeString",
+          "required": true,
+          "sensitive": true
+        },
+        "auto_backup_time": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "auto_backup_week": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "availability_zone": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "backup_disabled": {
+          "type": "TypeBool",
+          "optional": true
+        },
+        "charge_type": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "default": "\"month\"",
+          "diff_suppress": "suppressUnreadableDefault",
+          "validate": "StringInSlice"
+        },
+        "connect_url": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "create_time": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "db_version": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "disk_space": {
+          "type": "TypeInt",
+          "required": true,
+          "validate": "validateDiskSpace"
+        },
+        "label": {
+          "type": "TypeSet",
+          "optional": true,
+          "force_new": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "key": {
+                "type": "TypeString",
+                "required": true
+              },
+              "value": {
+                "type": "TypeString",
+                "required": true
+              }
+            }
+          }
+        },
+        "listen_port": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true
+        },
+        "machine_type_id": {
+          "type": "TypeString",
+          "required": true
+        },
+        "mongos_machine_type_id": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "mongos_node_count": {
+          "type": "TypeInt",
+          "required": true,
+          "force_new": true,
+          "validate": "IntBetween"
+        },
+        "name": {
+          "type": "TypeString",
+          "required": true,
+          "validate": "StringLenBetween"
+        },
+        "node_count": {
+          "type": "TypeInt",
+          "required": true,
+          "force_new": true,
+          "validate": "IntInSlice"
+        },
+        "quantity": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "default": "1",
+          "diff_suppress": "suppressUnreadableDefault",
+          "validate": "IntAtLeast"
+        },
+        "restart_trigger": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "sec_group": {
+          "type": "TypeSet",
+          "optional": true,
+          "force_new": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "id": {
+                "type": "TypeString",
+                "required": true
+              },
+              "priority": {
+                "type": "TypeInt",
+                "required": true,
+                "validate": "IntBetween"
+              }
+            }
+          }
+        },
+        "shard_count": {
+          "type": "TypeInt",
+          "required": true,
+          "force_new": true,
+          "validate": "IntBetween"
+        },
+        "state": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "status": {
+          "type": "TypeString",
+          "optional": true,
+          "default": "\"running\"",
+          "validate": "StringInSlice"
+        },
+        "subnet_id": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        },
+        "tag": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudUMongoDBShardedClusterCreate",
+      "read": "resourceUCloudUMongoDBShardedClusterRead",
+      "update": "resourceUCloudUMongoDBShardedClusterUpdate",
+      "delete": "resourceUCloudUMongoDBShardedClusterDelete",
+      "customize_diff": "All",
+      "importer": "ImportStatePassthrough",
+      "timeouts": {
+        "create": "1h0m0s",
+        "delete": "30m0s",
+        "update": "45m0s"
       }
     },
     "ucloud_us3_bucket": {
@@ -5210,6 +5828,11 @@
           "type": "TypeString",
           "optional": true
         },
+        "func_type": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "StringInSlice"
+        },
         "ids": {
           "type": "TypeSet",
           "optional": true,
@@ -5265,7 +5888,15 @@
                   }
                 }
               },
+              "func_type": {
+                "type": "TypeString",
+                "computed": true
+              },
               "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "integrated_software": {
                 "type": "TypeString",
                 "computed": true
               },
@@ -5281,6 +5912,37 @@
                 "type": "TypeString",
                 "computed": true
               },
+              "price_set": {
+                "type": "TypeList",
+                "computed": true,
+                "element": {
+                  "kind": "resource",
+                  "resource": {
+                    "charge_type": {
+                      "type": "TypeString",
+                      "computed": true
+                    },
+                    "original_price": {
+                      "type": "TypeFloat",
+                      "computed": true
+                    },
+                    "price": {
+                      "type": "TypeFloat",
+                      "computed": true
+                    }
+                  }
+                }
+              },
+              "scene_categories": {
+                "type": "TypeList",
+                "computed": true,
+                "element": {
+                  "kind": "schema",
+                  "schema": {
+                    "type": "TypeString"
+                  }
+                }
+              },
               "size": {
                 "type": "TypeInt",
                 "computed": true
@@ -5292,9 +5954,17 @@
               "type": {
                 "type": "TypeString",
                 "computed": true
+              },
+              "vendor": {
+                "type": "TypeString",
+                "computed": true
               }
             }
           }
+        },
+        "include_price": {
+          "type": "TypeBool",
+          "optional": true
         },
         "most_recent": {
           "type": "TypeBool",
@@ -5312,6 +5982,10 @@
           "validate": "StringInSlice"
         },
         "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "tag": {
           "type": "TypeString",
           "optional": true
         },
@@ -5455,12 +6129,20 @@
             }
           }
         },
+        "isolation_group": {
+          "type": "TypeString",
+          "optional": true
+        },
         "name_regex": {
           "type": "TypeString",
           "optional": true,
           "validate": "ValidateRegexp"
         },
         "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "subnet_id": {
           "type": "TypeString",
           "optional": true
         },
@@ -5471,6 +6153,14 @@
         "total_count": {
           "type": "TypeInt",
           "computed": true
+        },
+        "udisk_id_for_attachment": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "optional": true
         }
       },
       "schema_version": 1,
@@ -6412,6 +7102,220 @@
       },
       "read": "dataSourceUCloudSubnetsRead"
     },
+    "ucloud_udb_mysql_instances": {
+      "schema": {
+        "availability_zone": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "ids": {
+          "type": "TypeSet",
+          "optional": true,
+          "computed": true,
+          "set": "HashString",
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "ValidateRegexp"
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "udb_mysql_instances": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "availability_zone": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "charge_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "cpu": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "create_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "db_version": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "disk_space": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "expire_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "instance_mode": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "memory": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "port": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "private_ip": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "status": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "subnet_id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "vpc_id": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "optional": true
+        }
+      },
+      "read": "dataSourceUCloudMySQLInstancesRead"
+    },
+    "ucloud_udb_mysql_machine_types": {
+      "schema": {
+        "availability_zone": {
+          "type": "TypeString",
+          "required": true
+        },
+        "instance_mode": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "StringInSlice"
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "udb_mysql_machine_types": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "cpu": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "description": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "group": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "memory": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "specification_class": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "storage_class": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        }
+      },
+      "read": "dataSourceUCloudMySQLMachineTypesRead"
+    },
+    "ucloud_udb_mysql_parameter_templates": {
+      "schema": {
+        "availability_zone": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "db_version": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "StringInSlice"
+        },
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "ValidateRegexp"
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "udb_mysql_parameter_templates": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        }
+      },
+      "read": "dataSourceUCloudMySQLParameterTemplatesRead"
+    },
     "ucloud_ufs_volumes": {
       "schema": {
         "ids": {
@@ -6486,6 +7390,148 @@
         }
       },
       "read": "dataSourceUCloudUFSVolumesRead"
+    },
+    "ucloud_umongodb_instance": {
+      "schema": {
+        "availability_zone": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true
+        },
+        "cluster_id": {
+          "type": "TypeString",
+          "required": true
+        },
+        "cluster_type": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "validate": "StringInSlice"
+        },
+        "connect_url": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "create_time": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "db_version": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "disk_space": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "machine_type_id": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "mongos_count": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "name": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "node_count": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "shard_count": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "state": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "subnet_id": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "tag": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "computed": true
+        }
+      },
+      "read": "dataSourceUCloudUMongoDBInstanceRead"
+    },
+    "ucloud_umongodb_instances": {
+      "schema": {
+        "availability_zone": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "cluster_id": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "clusters": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "cluster_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "connect_url": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "create_time": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "db_version": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "disk_space": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "state": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "subnet_id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "tag": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "vpc_id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "zone": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        }
+      },
+      "read": "dataSourceUCloudUMongoDBInstancesRead"
     },
     "ucloud_us3_buckets": {
       "schema": {
