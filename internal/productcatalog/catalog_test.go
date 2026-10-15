@@ -58,7 +58,7 @@ func TestBindingsRegisterEveryProduct(t *testing.T) {
 func TestNamesReturnsCopy(t *testing.T) {
 	want := []string{
 		"iam", "ipsecvpn", "label", "uaccount", "uads", "udb", "udb_mysql", "udisk", "udpn", "ufs",
-		"uhost", "uk8s", "ulb", "umem", "unet", "uphost", "us3", "vpc",
+		"uhost", "uk8s", "ulb", "umem", "umongodb", "unet", "uphost", "us3", "vpc",
 	}
 	if got := Names(); !reflect.DeepEqual(got, want) {
 		t.Fatalf("Names() = %v, want historical names %v", got, want)
@@ -86,6 +86,7 @@ func TestProductMasterDataIdentityFor(t *testing.T) {
 		"uk8s":      {EnSampleName: "UK8S", Key: "uk8s"},
 		"ulb":       {EnSampleName: "ULB", Key: "ulb"},
 		"umem":      {EnSampleName: "UMem", Key: "umem"},
+		"umongodb":  {EnSampleName: "UMongoDB", Key: "umongodb"},
 		"unet":      {EnSampleName: "UNet", Key: "unet"},
 		"uphost":    {EnSampleName: "UPHost", Key: "uphost"},
 		"us3":       {EnSampleName: "UFile", Key: "ufile"},

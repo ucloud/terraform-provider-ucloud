@@ -170,6 +170,17 @@
         "website/docs/r/redis_*"
       ]
     },
+    "umongodb": {
+      "github_users": [
+        "xingxingso"
+      ],
+      "paths": [
+        "products/umongodb/**",
+        "examples/umongodb/**",
+        "website/docs/d/umongodb_*",
+        "website/docs/r/umongodb_*"
+      ]
+    },
     "unet": {
       "github_users": [
         "Ali1213"
