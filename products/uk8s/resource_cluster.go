@@ -89,6 +89,27 @@ func resourceUCloudUK8SCluster() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"dedicated_pod_subnet": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Whether Pods use a dedicated subnet.",
+			},
+
+			"pod_subnet_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The subnet ID used in dedicated Pod subnet mode.",
+			},
+
+			"pod_subnet_sec_group": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The security group used in dedicated Pod subnet mode. If omitted, firewall mode is used.",
+			},
+
 			"password": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -581,6 +602,15 @@ func buildUK8SClusterCreateRequest(client *sdkuk8s.UK8SClient, d *schema.Resourc
 	req.ServiceCIDR = ucloud.String(d.Get("service_cidr").(string))
 	req.VPCId = ucloud.String(d.Get("vpc_id").(string))
 	req.SubnetId = ucloud.String(d.Get("subnet_id").(string))
+	if value, ok := d.GetOkExists("dedicated_pod_subnet"); ok {
+		req.DedicatedPodSubnet = ucloud.Bool(value.(bool))
+	}
+	if value, ok := d.GetOk("pod_subnet_id"); ok {
+		req.PodSubnetId = ucloud.String(value.(string))
+	}
+	if value, ok := d.GetOk("pod_subnet_sec_group"); ok {
+		req.PodSubnetSecGroup = ucloud.String(value.(string))
+	}
 
 	if value, ok := d.GetOk("name"); ok {
 		req.ClusterName = ucloud.String(value.(string))
