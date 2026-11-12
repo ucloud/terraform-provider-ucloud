@@ -3,6 +3,7 @@ package umem_test
 import (
 	"fmt"
 	"log"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -48,6 +49,46 @@ func TestAccUCloudActiveStandbyRedis_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "engine_version", "4.0"),
 					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "backup_begin_time", "0"),
 					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "auto_backup", "disable"),
+					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "status", "ISolation"),
+				),
+			},
+
+			{
+				Config: testAccActiveStandbyRedisConfigShutDown,
+
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckActiveStandbyRedisExists("ucloud_redis_instance.foo", &inst),
+					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "status", "Running"),
+				),
+			},
+
+			{
+				// differs from the previous step only by restart_trigger, so this apply
+				// exercises exactly the restart branch and nothing else; the instance
+				// is Running here, which RestartURedisGroup requires
+				Config: testAccActiveStandbyRedisConfigRestart,
+
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckActiveStandbyRedisExists("ucloud_redis_instance.foo", &inst),
+					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "name", "tf-acc-redis-renamed"),
+					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "instance_type", "redis-master-2"),
+					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "restart_trigger", "tf-acc-restart-1"),
+					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "status", "Running"),
+				),
+			},
+
+			{
+				// differs from the previous step only by password, so this apply
+				// exercises exactly the ModifyURedisGroupPassword branch and nothing
+				// else; transform_type/restart_trigger keep their previous values so
+				// neither re-fires. The instance is Running after the restart step,
+				// which the password-change wait depends on.
+				Config: testAccActiveStandbyRedisConfigPasswordUpdate,
+
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckActiveStandbyRedisExists("ucloud_redis_instance.foo", &inst),
+					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "password", "2019_tfacc"),
+					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "status", "Running"),
 				),
 			},
 		},
@@ -82,7 +123,7 @@ func TestAccUCloudDistributedRedis_basic(t *testing.T) {
 
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDistributedRedisExists("ucloud_redis_instance.foo", &inst),
-					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "instance_type", "redis-distributed-20"),
+					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "instance_type", "redis-distributed-32"),
 					resource.TestCheckResourceAttr("ucloud_redis_instance.foo", "name", "tf-acc-redis-renamed"),
 				),
 			},
@@ -192,7 +233,11 @@ func testAccCheckDistributedRedisDestroy(state *terraform.State) error {
 	return nil
 }
 
-const testAccActiveStandbyRedisConfig = `
+// The acceptance suite reuses one pre-created VPC/subnet (the UCloud region
+// under test no longer sells classic-network UMem/URedis). Export UCLOUD_VPC_ID
+// and UCLOUD_SUBNET_ID before running `make testacc PRODUCT=umem`; testAccPreCheck
+// fails fast when either is missing.
+var testAccActiveStandbyRedisConfig = fmt.Sprintf(`
 data "ucloud_zones" "default" {}
 
 resource "ucloud_redis_instance" "foo" {
@@ -202,11 +247,13 @@ resource "ucloud_redis_instance" "foo" {
 	password = "2018_tfacc"
 	name = "tf-acc-redis"
 	tag = "tf-acc"
+	vpc_id = "%s"
+	subnet_id = "%s"
 	standby_zone = "${data.ucloud_zones.default.zones.1.id}"
 }
-`
+`, os.Getenv("UCLOUD_VPC_ID"), os.Getenv("UCLOUD_SUBNET_ID"))
 
-const testAccActiveStandbyRedisConfigUpdate = `
+var testAccActiveStandbyRedisConfigUpdate = fmt.Sprintf(`
 data "ucloud_zones" "default" {}
 
 resource "ucloud_redis_instance" "foo" {
@@ -216,12 +263,85 @@ resource "ucloud_redis_instance" "foo" {
 	password = "2018_tfacc"
 	name = "tf-acc-redis-renamed"
 	tag = "tf-acc"
+	vpc_id = "%s"
+	subnet_id = "%s"
+	auto_backup = "disable"
 	backup_begin_time = 0
 	standby_zone = "${data.ucloud_zones.default.zones.1.id}"
+	transform_type = "UNBind"
 }
-`
+`, os.Getenv("UCLOUD_VPC_ID"), os.Getenv("UCLOUD_SUBNET_ID"))
 
-const testAccDistributedRedisConfig = `
+var testAccActiveStandbyRedisConfigRestart = fmt.Sprintf(`
+data "ucloud_zones" "default" {}
+
+resource "ucloud_redis_instance" "foo" {
+	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+	engine_version = "4.0"
+	instance_type = "redis-master-2"
+	password = "2018_tfacc"
+	name = "tf-acc-redis-renamed"
+	tag = "tf-acc"
+	vpc_id = "%s"
+	subnet_id = "%s"
+	auto_backup = "disable"
+	backup_begin_time = 0
+	standby_zone = "${data.ucloud_zones.default.zones.1.id}"
+	transform_type = "Bind"
+	restart_trigger = "tf-acc-restart-1"
+}
+`, os.Getenv("UCLOUD_VPC_ID"), os.Getenv("UCLOUD_SUBNET_ID"))
+
+// testAccActiveStandbyRedisConfigPasswordUpdate differs from the restart config
+// only by password, so its apply exercises exactly the password-change branch
+// (ModifyURedisGroupPassword via the private SDK, which base64-encodes the
+// password itself). Everything else — including transform_type and
+// restart_trigger — keeps the previous step's value so no other branch fires.
+var testAccActiveStandbyRedisConfigPasswordUpdate = fmt.Sprintf(`
+data "ucloud_zones" "default" {}
+
+resource "ucloud_redis_instance" "foo" {
+	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+	engine_version = "4.0"
+	instance_type = "redis-master-2"
+	password = "2019_tfacc"
+	name = "tf-acc-redis-renamed"
+	tag = "tf-acc"
+	vpc_id = "%s"
+	subnet_id = "%s"
+	auto_backup = "disable"
+	backup_begin_time = 0
+	standby_zone = "${data.ucloud_zones.default.zones.1.id}"
+	transform_type = "Bind"
+	restart_trigger = "tf-acc-restart-1"
+}
+`, os.Getenv("UCLOUD_VPC_ID"), os.Getenv("UCLOUD_SUBNET_ID"))
+
+// testAccActiveStandbyRedisConfigShutDown starts the instance back up
+// (transform_type = "Bind") after the previous step isolated it. It must NOT
+// set restart_trigger: the restart step below has to differ from this one only
+// by restart_trigger, and a restart fired while the instance is still isolated
+// is rejected by the backend (RetCode 21018).
+var testAccActiveStandbyRedisConfigShutDown = fmt.Sprintf(`
+data "ucloud_zones" "default" {}
+
+resource "ucloud_redis_instance" "foo" {
+	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
+	engine_version = "4.0"
+	instance_type = "redis-master-2"
+	password = "2018_tfacc"
+	name = "tf-acc-redis-renamed"
+	tag = "tf-acc"
+	vpc_id = "%s"
+	subnet_id = "%s"
+	auto_backup = "disable"
+	backup_begin_time = 0
+	standby_zone = "${data.ucloud_zones.default.zones.1.id}"
+	transform_type = "Bind"
+}
+`, os.Getenv("UCLOUD_VPC_ID"), os.Getenv("UCLOUD_SUBNET_ID"))
+
+var testAccDistributedRedisConfig = fmt.Sprintf(`
 data "ucloud_zones" "default" {}
 
 resource "ucloud_redis_instance" "foo" {
@@ -229,16 +349,24 @@ resource "ucloud_redis_instance" "foo" {
 	name = "tf-acc-redis"
 	tag = "tf-acc"
 	instance_type = "redis-distributed-16"
+	password = "2018_tfacc"
+	block_cnt = 2
+	vpc_id = "%s"
+	subnet_id = "%s"
 }
-`
+`, os.Getenv("UCLOUD_VPC_ID"), os.Getenv("UCLOUD_SUBNET_ID"))
 
-const testAccDistributedRedisConfigUpdate = `
+var testAccDistributedRedisConfigUpdate = fmt.Sprintf(`
 data "ucloud_zones" "default" {}
 
 resource "ucloud_redis_instance" "foo" {
 	availability_zone = "${data.ucloud_zones.default.zones.0.id}"
 	name = "tf-acc-redis-renamed"
 	tag = "tf-acc"
-	instance_type = "redis-distributed-20"
+	instance_type = "redis-distributed-32"
+	password = "9393_xnsjnj"
+	block_cnt = 2
+	vpc_id = "%s"
+	subnet_id = "%s"
 }
-`
+`, os.Getenv("UCLOUD_VPC_ID"), os.Getenv("UCLOUD_SUBNET_ID"))

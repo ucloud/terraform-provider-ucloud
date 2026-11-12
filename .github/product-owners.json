@@ -37,6 +37,17 @@
         "website/docs/r/label*"
       ]
     },
+    "sqlserver": {
+      "github_users": [
+        "xiaolaohu-hi"
+      ],
+      "paths": [
+        "products/sqlserver/**",
+        "examples/sqlserver/**",
+        "website/docs/d/sqlserver_*",
+        "website/docs/r/sqlserver_*"
+      ]
+    },
     "uaccount": {
       "github_users": [
         "Ali1213"
@@ -67,6 +78,17 @@
         "website/docs/appendix/db_instance_type.html.markdown",
         "website/docs/d/db_*",
         "website/docs/r/db_*"
+      ]
+    },
+    "udb_mysql": {
+      "github_users": [
+        "xiaolaohu-hi"
+      ],
+      "paths": [
+        "products/udb_mysql/**",
+        "examples/udb_mysql/**",
+        "website/docs/d/udb_mysql_*",
+        "website/docs/r/udb_mysql_*"
       ]
     },
     "udisk": {
@@ -159,6 +181,17 @@
         "website/docs/r/redis_*"
       ]
     },
+    "umongodb": {
+      "github_users": [
+        "xingxingso"
+      ],
+      "paths": [
+        "products/umongodb/**",
+        "examples/umongodb/**",
+        "website/docs/d/umongodb_*",
+        "website/docs/r/umongodb_*"
+      ]
+    },
     "unet": {
       "github_users": [
         "Ali1213"
@@ -202,6 +235,7 @@
         "examples/nat_gateway/**",
         "examples/network_interface/**",
         "examples/route_table/**",
+        "examples/sec_group/**",
         "examples/vpc/**",
         "website/docs/d/nat_gateway*",
         "website/docs/d/sec_groups.html.markdown",
@@ -212,6 +246,7 @@
         "website/docs/r/route_table.html.markdown",
         "website/docs/r/route_table_association.html.markdown",
         "website/docs/r/route_table_rule.html.markdown",
+        "website/docs/r/sec_group*",
         "website/docs/r/subnet.html.markdown",
         "website/docs/r/vip.html.markdown",
         "website/docs/r/vpc*"

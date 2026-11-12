@@ -34,9 +34,12 @@ The following arguments are supported:
 * `image_type` - (Optional) The type of image. Possible values are: `base` as standard image, `business` as owned by market place, and `custom` as custom-image, all the image types will be retrieved by default.
 * `os_type` - (Optional) The type of OS. Possible values are: `linux` and `windows`, all the OS types will be retrieved by default.
 * `most_recent` - (Optional) If more than one result is returned, use the most recent image.
+* `func_type` - (Optional) The category of the image. Possible values are: `gpu` as GPU industry image, `app` as image dedicated to lightweight cloud host, and `uhost` as UHost industry image from marketplace. An invalid value will be ignored by the API.
+* `tag` - (Optional) The ID of business group, default is `Default`.
+* `include_price` - (Optional) Whether to return the price of industry images, the `price_set` attribute will be empty unless this argument is `true`.
 * `image_id` - (Optional) The ID of image.
  ~> **Note** this argument conflicts with `ids`.
-* `ids` - (Optional) A list of image IDs, all the images belong to this region will be retrieved if the ID is `[]`. 
+* `ids` - (Optional) A list of image IDs, all the images belong to this region will be retrieved if the ID is `[]`.
  ~> **Note** this argument conflicts with `image_id`.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
@@ -62,3 +65,14 @@ The attribute (`images`) support the following:
 * `os_name` - The name of OS.
 * `os_type` - The type of OS.
 * `status` - The status of image. Possible values are `Available`, `Making` and `Unavailable`.
+* `func_type` - The category of the image, possible values are `gpu`, `app` and `uhost`.
+* `scene_categories` - The scene categories of the image, such as `Featured`, `PreInstalledDrivers`, `AIPainting`, `AIModels` and `HPC`.
+* `integrated_software` - The name of integrated software (only returned by industry images).
+* `vendor` - The vendor of image (only returned by industry images).
+* `price_set` - It is a nested type which documented below, the price of industry images. It is empty unless `include_price` is `true`.
+
+The attribute (`price_set`) supports the following:
+
+* `charge_type` - The charge type of image price.
+* `original_price` - The original price before discount, in CNY (Chinese Yuan).
+* `price` - The price of image, in CNY (Chinese Yuan), rounded to two decimal places.

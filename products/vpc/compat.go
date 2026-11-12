@@ -266,6 +266,112 @@ func validatePortRange(value interface{}, key string) (warnings []string, errors
 	return warnings, errors
 }
 
+// validateSecGroupPortList validates the security group port syntax, which
+// accepts a comma separated list where every item is a single port or a
+// "from-to" range, e.g. "80,443" or "443,2000-10000". validatePortRange
+// handles a single item and is reused so the two stay in step.
+func validateSecGroupPortList(value interface{}, key string) (warnings []string, errors []error) {
+	portList := value.(string)
+	if portList == "" {
+		return warnings, errors
+	}
+	for _, item := range strings.Split(portList, ",") {
+		if _, itemErrors := validatePortRange(item, key); len(itemErrors) > 0 {
+			errors = append(errors, itemErrors...)
+		}
+	}
+	return warnings, errors
+}
+
+// The prefixes that tell a security group rule's ip_range apart from a CIDR
+// block. Nothing else distinguishes the three, because the API takes them all
+// through the same string field.
+const (
+	secGroupResourceIDPrefix   = "secgroup-"
+	prefixListResourceIDPrefix = "pl-"
+
+	// secGroupIPRangeHint states the constraint once, so every rejection
+	// spells it out the same way.
+	secGroupIPRangeHint = "every value must be a CIDR block, a single security group ID, or a prefix list ID, and the forms cannot be mixed"
+)
+
+// Only the prefix of either ID is pinned down, never the rest: the SDK carries
+// no contract for the shape of an ID, and a stricter pattern would reject a
+// valid one whose shape it guessed wrong -- the very failure this validation
+// exists to prevent. The patterns are shared with validateSecGroupResourceID so
+// the field and the ip_range items cannot drift apart.
+var (
+	secGroupResourceIDPattern   = regexp.MustCompile(`^` + secGroupResourceIDPrefix + `.+$`)
+	prefixListResourceIDPattern = regexp.MustCompile(`^` + prefixListResourceIDPrefix + `.+$`)
+
+	// validateSecGroupResourceID is the schema validator for a field naming a
+	// security group, such as a rule's sec_group_id.
+	validateSecGroupResourceID = validation.StringMatch(
+		secGroupResourceIDPattern,
+		fmt.Sprintf("expected value to be a security group ID, e.g. %sabc123", secGroupResourceIDPrefix),
+	)
+)
+
+// validateSecGroupIPRange validates the security group rule IP range, which
+// carries one of three mutually exclusive forms: a comma separated list of
+// CIDR blocks, a single security group ID, or a comma separated list of prefix
+// list IDs. IPv6 is allowed because ICMPv6 rules need it, unlike the VPC
+// private network validator.
+//
+// The forms are not mixed, and a security group ID stands alone: the API reads
+// the whole string as one kind of source, so a rule naming both a block and a
+// group has no single meaning to read back.
+func validateSecGroupIPRange(value interface{}, key string) (warnings []string, errors []error) {
+	ipRange := value.(string)
+	if ipRange == "" {
+		errors = append(errors, fmt.Errorf("%q is invalid, %s", key, secGroupIPRangeHint))
+		return warnings, errors
+	}
+
+	// The first item decides which form the whole string has to be, so a
+	// string that mixes two of them is rejected against the one it opened
+	// with.
+	items := strings.Split(ipRange, ",")
+	switch {
+	case isSecGroupResourceID(items[0]):
+		if len(items) > 1 {
+			errors = append(errors, fmt.Errorf("%q is invalid, a security group ID must be the only value, got %q", key, ipRange))
+		}
+	case isPrefixListResourceID(items[0]):
+		for _, item := range items {
+			if !isPrefixListResourceID(item) {
+				errors = append(errors, fmt.Errorf("%q is invalid, %q is not a prefix list ID: %s", key, item, secGroupIPRangeHint))
+			}
+		}
+	default:
+		for _, item := range items {
+			ip, ipNet, err := net.ParseCIDR(item)
+			if err != nil {
+				errors = append(errors, fmt.Errorf("%q is invalid, %q is not a valid CIDR block: %s", key, item, secGroupIPRangeHint))
+				continue
+			}
+			// Reject host bits: the API stores the network address, so
+			// accepting "10.0.0.1/8" would make every read produce a diff
+			// against the "10.0.0.0/8" it returns.
+			if !ip.Equal(ipNet.IP) {
+				errors = append(errors, fmt.Errorf("%q is invalid, %q must use its network address %q", key, item, ipNet.String()))
+			}
+		}
+	}
+
+	return warnings, errors
+}
+
+// isSecGroupResourceID reports whether value names a security group.
+func isSecGroupResourceID(value string) bool {
+	return secGroupResourceIDPattern.MatchString(value)
+}
+
+// isPrefixListResourceID reports whether value names a prefix list.
+func isPrefixListResourceID(value string) bool {
+	return prefixListResourceIDPattern.MatchString(value)
+}
+
 func hashCIDR(value interface{}) int {
 	cidr := value.(string)
 	if _, _, err := net.ParseCIDR(cidr); err != nil {

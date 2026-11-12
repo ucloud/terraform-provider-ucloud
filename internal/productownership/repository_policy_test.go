@@ -145,7 +145,7 @@ func TestReleaseIntentWorkflowUsesTrustedPullRequestMetadata(t *testing.T) {
 	}
 }
 
-func TestReleaseWorkflowRunsOnlyAfterSuccessfulMasterCI(t *testing.T) {
+func TestReleaseWorkflowTriggersArePolicyControlled(t *testing.T) {
 	workflow, err := os.ReadFile("../../.github/workflows/release.yml")
 	if err != nil {
 		t.Fatalf("read release workflow: %v", err)
@@ -156,8 +156,15 @@ func TestReleaseWorkflowRunsOnlyAfterSuccessfulMasterCI(t *testing.T) {
 		"workflows: [test]",
 		"types: [completed]",
 		"branches: [master]",
+		"github.event_name == 'workflow_run'",
 		"github.event.workflow_run.event == 'push'",
 		"github.event.workflow_run.conclusion == 'success'",
+		"schedule:",
+		"- cron: \"0 15 * * 1\"",
+		"workflow_dispatch:",
+		"github.event_name == 'schedule'",
+		"github.event_name == 'workflow_dispatch'",
+		"git rev-parse refs/remotes/origin/master",
 		"pull-requests: read",
 		"contents: write",
 		"cancel-in-progress: false",
@@ -175,7 +182,6 @@ func TestReleaseWorkflowRunsOnlyAfterSuccessfulMasterCI(t *testing.T) {
 		}
 	}
 	for _, forbidden := range []string{
-		"workflow_dispatch:",
 		"uses: actions/checkout@v",
 		"uses: actions/setup-go@v",
 		"uses: crazy-max/ghaction-import-gpg@v",

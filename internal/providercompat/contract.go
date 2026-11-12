@@ -280,6 +280,14 @@ func addTimeout(target map[string]string, name string, duration *time.Duration) 
 	}
 }
 
+// functionName resolves the normalized name recorded for a schema hook.
+//
+// For closures the result depends on how the provider was compiled: a closure
+// literal is named after the function that encloses it, so once that function
+// is inlined the hook is reported under the inlined caller's name instead.
+// Callers that compare recorded names across runs (the provider contract
+// baseline) must build the provider with inlining disabled, as `make compat`,
+// `make test` and `make contract` do.
 func functionName(function interface{}) string {
 	if function == nil {
 		return ""

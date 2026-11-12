@@ -1,12 +1,31 @@
 ## Unreleased
 
+BREAKING CHANGES:
+
+* `resource/ucloud_redis_instance`, `resource/ucloud_memcache_instance`: `vpc_id` and `subnet_id` are now
+  required because UCloud no longer offers classic-network UMem/URedis. Add both attributes to existing
+  configurations; they are ForceNew, so an instance that cannot be placed inside a VPC must be recreated.
+
 FEATURES:
 
+* **New Resource:** `ucloud_sec_group`, which manages a security group of the VPC `SecGroup` API.
+  This is not the `Firewall` API behind `ucloud_security_group`: the two are different objects with
+  different IDs and different rule models, and they are not interchangeable. Rules are managed by
+  `ucloud_sec_group_rule` rather than as blocks inside the group.
+* **New Resource:** `ucloud_sec_group_rule`, which manages one rule of a `ucloud_sec_group`. The API
+  gives every rule an ID of its own, so a rule can be changed in place, imported and destroyed
+  without touching the rest of the group.
 * **New Resource:** `ucloud_disk_snapshot`.
 * **New Datasource:** `ucloud_disk_snapshots`.
 * `resource/ucloud_disk`: add `snapshot_id` to create a cloud disk from an existing snapshot.
 * `resource/ucloud_disk`: add `snapshot_service` to enable the snapshot service on the disk, which
   is required before any snapshot can be created from it.
+* `resource/ucloud_redis_instance`: add `restart_trigger` to restart an Active-Standby instance and
+  `transform_type` to isolate (`UNBind`) or restore (`Bind`) it.
+* `resource/ucloud_redis_instance`: add `block_cnt` for Distributed instances, plus the computed
+  `block_set`, `proxy_set` and `read_mode` attributes.
+* `resource/ucloud_redis_instance`: `password` is now supported for Distributed instances, both at
+  create time and on update.
 
 ENHANCEMENTS:
 
@@ -15,6 +34,11 @@ ENHANCEMENTS:
 * `resource/ucloud_disk`: `disk_type` is now computed when it is omitted, so that a disk cloned
   from a snapshot keeps the type of its source snapshot instead of being rebuilt against the
   default value on every plan.
+
+BUG FIXES:
+
+* `resource/ucloud_redis_instance`: resize a Distributed instance shard by shard through
+  `ResizeUDRedisBlockSize`; `ResizeUMemSpace` reported success without ever starting a resize.
 
 ## v1.39.1 (2024-04-25)
 
