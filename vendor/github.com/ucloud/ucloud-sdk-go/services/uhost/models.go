@@ -42,83 +42,32 @@ type KeyPair struct {
 }
 
 /*
-GraphicsMemory - GPU的显存指标
+CpuPlatformWithModels -
 */
-type GraphicsMemory struct {
+type CpuPlatformWithModels struct {
 
-	// 交互展示参数，可忽略
-	Rate int
+	// CPU频率
+	CpuFrequency string
 
-	// 值，单位是GB
-	Value int
-}
+	// CPU Model列表
+	CpuModels []string
 
-/*
-DataDiskInfo - 数据盘信息
-*/
-type DataDiskInfo struct {
-
-	// 支持的快照备份策略
-	BackupMode []string
-
-	// 数据盘可支持的服务
-	Features []string
-
-	// MaximalSize为磁盘最大值
-	MaximalSize int
-
-	// 磁盘最小值，如果没有该字段，最小值取基础镜像Size值即可（linux为20G，windows为40G）。
-	MinimalSize int
-
-	// 数据盘类别，包含普通云盘|CLOUD_NORMAL、SSD云盘|CLOUD_SSD和RSSD云盘|CLOUD_RSSD。普通本地盘只包含普通本地盘|LOCAL_NORMAL一种。SSD本地盘只包含SSD本地盘|LOCAL_SSD一种。
+	// CPU平台
 	Name string
 }
 
 /*
-CpuPlatforms - CPU平台信息
+UHostFamily -
 */
-type CpuPlatforms struct {
+type UHostFamily struct {
 
-	// 返回AMD的CPU平台信息，例如：AMD: ['Amd/Epyc2']
-	Amd []string
+	// CPU频率信息
+	CpuFrequency string
 
-	// 返回Arm的CPU平台信息，例如：Ampere: ['Ampere/Altra']
-	Ampere []string
+	// CPU平台信息
+	CpuPlatforms []CpuPlatformWithModels
 
-	// 返回Intel的CPU平台信息，例如：Intel: ['Intel/CascadeLake','Intel/CascadelakeR','Intel/IceLake']
-	Intel []string
-}
-
-/*
-BootDiskInfo - 系统盘信息
-*/
-type BootDiskInfo struct {
-
-	// 磁盘可支持的服务
-	Features []string
-
-	// 系统盘是否允许扩容，如果是本地盘，则不允许扩容，InstantResize为false。
-	InstantResize bool
-
-	// MaximalSize为磁盘最大值
-	MaximalSize int
-
-	// 系统盘类别，包含普通云盘|CLOUD_NORMAL、SSD云盘|CLOUD_SSD和RSSD云盘|CLOUD_RSSD。普通本地盘只包含普通本地盘|LOCAL_NORMAL一种。SSD本地盘只包含SSD本地盘|LOCAL_SSD一种。
-	Name string
-}
-
-/*
-Disks - 磁盘信息
-*/
-type Disks struct {
-
-	// 系统盘信息
-	BootDisk []BootDiskInfo
-
-	// 数据盘信息
-	DataDisk []DataDiskInfo
-
-	// 磁盘介质类别信息，磁盘主要分类如下：云盘|cloudDisk、普通本地盘|normalLocalDisk和SSD本地盘|ssdLocalDisk。
+	// 规格族
 	Name string
 }
 
@@ -150,6 +99,45 @@ type Features struct {
 }
 
 /*
+GraphicsMemory - GPU的显存指标
+*/
+type GraphicsMemory struct {
+
+	// 交互展示参数，可忽略
+	Rate int
+
+	// 值，单位是GB
+	Value int
+}
+
+/*
+CpuPlatforms - CPU平台信息
+*/
+type CpuPlatforms struct {
+
+	// 返回AMD的CPU平台信息，例如：AMD: ['Amd/Epyc2']
+	Amd []string
+
+	// 返回Arm的CPU平台信息，例如：Ampere: ['Ampere/Altra']
+	Ampere []string
+
+	// 返回Intel的CPU平台信息，例如：Intel: ['Intel/CascadeLake','Intel/CascadelakeR','Intel/IceLake']
+	Intel []string
+}
+
+/*
+Performance - GPU的性能指标
+*/
+type Performance struct {
+
+	// 交互展示参数，可忽略
+	Rate int
+
+	// 值，单位是TFlops
+	Value float64
+}
+
+/*
 Collection - CPU和内存可支持的规格
 */
 type Collection struct {
@@ -177,44 +165,56 @@ type MachineSizes struct {
 }
 
 /*
-Performance - GPU的性能指标
+BootDiskInfo - 系统盘信息
 */
-type Performance struct {
+type BootDiskInfo struct {
 
-	// 交互展示参数，可忽略
-	Rate int
+	// 磁盘可支持的服务
+	Features []string
 
-	// 值，单位是TFlops
-	Value float64
-}
+	// 系统盘是否允许扩容，如果是本地盘，则不允许扩容，InstantResize为false。
+	InstantResize bool
 
-/*
-CpuPlatformWithModels -
-*/
-type CpuPlatformWithModels struct {
+	// MaximalSize为磁盘最大值
+	MaximalSize int
 
-	// CPU频率
-	CpuFrequency string
-
-	// CPU Model列表
-	CpuModels []string
-
-	// CPU平台
+	// 系统盘类别，包含普通云盘|CLOUD_NORMAL、SSD云盘|CLOUD_SSD和RSSD云盘|CLOUD_RSSD。普通本地盘只包含普通本地盘|LOCAL_NORMAL一种。SSD本地盘只包含SSD本地盘|LOCAL_SSD一种。
 	Name string
 }
 
 /*
-UHostFamily -
+DataDiskInfo - 数据盘信息
 */
-type UHostFamily struct {
+type DataDiskInfo struct {
 
-	// CPU频率信息
-	CpuFrequency string
+	// 支持的快照备份策略
+	BackupMode []string
 
-	// CPU平台信息
-	CpuPlatforms []CpuPlatformWithModels
+	// 数据盘可支持的服务
+	Features []string
 
-	// 规格族
+	// MaximalSize为磁盘最大值
+	MaximalSize int
+
+	// 磁盘最小值，如果没有该字段，最小值取基础镜像Size值即可（linux为20G，windows为40G）。
+	MinimalSize int
+
+	// 数据盘类别，包含普通云盘|CLOUD_NORMAL、SSD云盘|CLOUD_SSD和RSSD云盘|CLOUD_RSSD。普通本地盘只包含普通本地盘|LOCAL_NORMAL一种。SSD本地盘只包含SSD本地盘|LOCAL_SSD一种。
+	Name string
+}
+
+/*
+Disks - 磁盘信息
+*/
+type Disks struct {
+
+	// 系统盘信息
+	BootDisk []BootDiskInfo
+
+	// 数据盘信息
+	DataDisk []DataDiskInfo
+
+	// 磁盘介质类别信息，磁盘主要分类如下：云盘|cloudDisk、普通本地盘|normalLocalDisk和SSD本地盘|ssdLocalDisk。
 	Name string
 }
 
@@ -267,18 +267,6 @@ type AvailableInstanceTypes struct {
 }
 
 /*
-CpuPlatformStatus -
-*/
-type CpuPlatformStatus struct {
-
-	// CPU平台
-	Name string
-
-	// 运营Commpont Code
-	OperationStatus string
-}
-
-/*
 NameOperationStatus - 名称及标记
 */
 type NameOperationStatus struct {
@@ -321,6 +309,18 @@ type FamiliesBootDiskInfo struct {
 }
 
 /*
+CpuPlatformStatus -
+*/
+type CpuPlatformStatus struct {
+
+	// CPU平台
+	Name string
+
+	// 运营Commpont Code
+	OperationStatus string
+}
+
+/*
 FamiliesDataDiskInfo - 数据盘信息
 */
 type FamiliesDataDiskInfo struct {
@@ -335,6 +335,27 @@ type FamiliesDataDiskInfo struct {
 	MinimalSize int
 
 	// 数据盘类别，包含普通云盘|CLOUD_NORMAL、SSD云盘|CLOUD_SSD和RSSD云盘|CLOUD_RSSD。普通本地盘只包含普通本地盘|LOCAL_NORMAL一种。SSD本地盘只包含SSD本地盘|LOCAL_SSD一种。
+	Name string
+}
+
+/*
+Frequency - 频率
+*/
+type Frequency struct {
+
+	// 值
+	Value float64
+}
+
+/*
+NameFrequency - 名称及频率
+*/
+type NameFrequency struct {
+
+	// 频率
+	Frequency Frequency
+
+	// 机型名称
 	Name string
 }
 
@@ -357,15 +378,6 @@ type FamiliesDisks struct {
 }
 
 /*
-Frequency - 频率
-*/
-type Frequency struct {
-
-	// 值
-	Value float64
-}
-
-/*
 FamiliesGpuType -
 */
 type FamiliesGpuType struct {
@@ -378,18 +390,6 @@ type FamiliesGpuType struct {
 
 	// 性能信息
 	Performance Performance
-}
-
-/*
-NameFrequency - 名称及频率
-*/
-type NameFrequency struct {
-
-	// 频率
-	Frequency Frequency
-
-	// 机型名称
-	Name string
 }
 
 /*
@@ -591,15 +591,6 @@ type UDSetUDHostAttribute struct {
 }
 
 /*
-SpotAttribute - 竞价实例属性
-*/
-type SpotAttribute struct {
-
-	// 回收时间
-	RecycleTime int
-}
-
-/*
 UHostDiskSet - DescribeUHostInstance
 */
 type UHostDiskSet struct {
@@ -642,6 +633,15 @@ type UHostKeyPair struct {
 
 	// 主机密钥对状态，Normal 正常，Deleted 删除
 	KeyPairState string
+}
+
+/*
+SpotAttribute - 竞价实例属性
+*/
+type SpotAttribute struct {
+
+	// 回收时间
+	RecycleTime int
 }
 
 /*

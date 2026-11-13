@@ -79,6 +79,9 @@ All options below are optional and ForceNew. They are omitted from the creation 
 
 | Terraform field | API parameter | Description |
 | --- | --- | --- |
+| `dedicated_pod_subnet` | `DedicatedPodSubnet` | Whether Pods use a dedicated subnet. Explicit `false` is sent to the API; omitted leaves the API default in effect. |
+| `pod_subnet_id` | `PodSubnetId` | Subnet ID used in dedicated Pod subnet mode. |
+| `pod_subnet_sec_group` | `PodSubnetSecGroup` | Security group used in dedicated Pod subnet mode. If omitted, firewall mode is used. |
 | `cluster_domain` | `ClusterDomain` | Cluster DNS domain. |
 | `tag` | `Tag` | UCloud business group. |
 | `lb_class` | `LbClass` | Master load balancer type: `ulb` or `nlb`; API default is `ulb`. |

@@ -181,7 +181,7 @@ type CheckUHostResourceCapacityRequest struct {
 	// 主机安全模式。Firewall：防火墙；SecGroup：安全组；默认值：Firewall。
 	SecurityMode *string `required:"false"`
 
-	// 规格族。由机型代号和 CPU 平台组成，用于指定云主机的硬件类型与处理器平台。当 MachineType 为 "O"（快杰型）时，支持以下取值：o1i：快杰型 O1 代，Intel 平台o1a：快杰型 O1 代，AMD 平台o1r：快杰型 O1 代，ARM 平台o2i：快杰型 O2 代，Intel 平台默认值：o1i 或 o1a（系统将根据资源情况自动选择）当 MachineType 为 "OM"（快杰共享型）时，支持以下取值：om1i：快杰内存增强型 OM1 代，Intel 平台om2i：快杰内存增强型 OM2 代，Intel 平台⚠️ 注意：规格族必须与 MachineType 匹配，否则请求将被拒绝。
+	// 规格族。 由机型代号和 CPU 平台组成，用于指定云主机的硬件类型与处理器平台。 当 MachineType 为 "O"\"OM"\"OPRO"\"OPROG"（快杰系列）时，支持以下取值：- o1i：快杰型 O1 代，Intel 平台 - o1a：快杰型 O1 代，AMD 平台- o1r：快杰型 O1 代，ARM 平台 - o1h：快杰型 O1 代，Hygon 平台- o2i：快杰型 O2 代，Intel 平台 - o2a：快杰型 O2 代，AMD 平台默认值：o1i 或 o1a当 MachineType 为 "OM"（快杰共享型）时，支持以下取值： - om1i：快杰内存增强型 OM1 代，Intel 平台 - om2i：快杰内存增强型 OM2 代，Intel 平台- om1a：快杰内存增强型 OM1 代，Amd 平台默认值：om1i 或 om1a当 MachineType 为 "OPROG"（快杰PRO通用型）时，支持以下取值： - oprog1i：快杰PRO通用型 OPROG1 代，Intel 平台 - oprog2i：快杰PRO通用型 OPROG2 代，Intel 平台 - oprog1a：快杰PRO通用型 OPROG1 代，Amd 平台 当 MachineType 为 "OPRO"（快杰PRO增强型）时，支持以下取值： - opro1a：快杰PRO增强型 OPRO1 代，Amd 平台 - opro2a：快杰PRO增强型 OPRO2 代，Amd 平台 注意：规格族必须与 MachineType 匹配，否则请求将被拒绝。
 	UHostFamily *string `required:"false"`
 }
 
@@ -435,18 +435,6 @@ func (c *UHostClient) CreateIsolationGroup(req *CreateIsolationGroupRequest) (*C
 }
 
 /*
-CreateUHostInstanceParamLabels is request schema for complex param
-*/
-type CreateUHostInstanceParamLabels struct {
-
-	// 用户资源标签的键值
-	Key *string `required:"false"`
-
-	// 用户资源标签的值
-	Value *string `required:"false"`
-}
-
-/*
 UHostDiskCustomBackup is request schema for complex param
 */
 type UHostDiskCustomBackup struct {
@@ -459,6 +447,30 @@ type UHostDiskCustomBackup struct {
 
 	// Disks.N.BackupMode为"Custom"时，进行设置, 以12小时秒级为基础进行倍数扩增，如12、24、36、48。
 	Journal *string `required:"false"`
+}
+
+/*
+CreateUHostInstanceParamLabels is request schema for complex param
+*/
+type CreateUHostInstanceParamLabels struct {
+
+	// 用户资源标签的键值
+	Key *string `required:"false"`
+
+	// 用户资源标签的值
+	Value *string `required:"false"`
+}
+
+/*
+CreateUHostInstanceParamSecGroupId is request schema for complex param
+*/
+type CreateUHostInstanceParamSecGroupId struct {
+
+	// 安全组 ID。至多可以同时绑定5个安全组。
+	Id *string `required:"false"`
+
+	// 安全组优先级。取值范围[1, 5]
+	Priority *int `required:"false"`
 }
 
 /*
@@ -498,15 +510,33 @@ type UHostDisk struct {
 }
 
 /*
-CreateUHostInstanceParamSecGroupId is request schema for complex param
+CreateUHostInstanceParamNetworkInterfaceIPv6 is request schema for complex param
 */
-type CreateUHostInstanceParamSecGroupId struct {
+type CreateUHostInstanceParamNetworkInterfaceIPv6 struct {
 
-	// 安全组 ID。至多可以同时绑定5个安全组。
-	Id *string `required:"false"`
+	// 第N个网卡对应的IPv6地址，默认不分配IPv6，“Auto”自动分配，不为空的其他字符串为实际要分配的IPv6地址。当前仅支持分配一个IPv6地址
+	Address *string `required:"false"`
 
-	// 安全组优先级。取值范围[1, 5]
-	Priority *int `required:"false"`
+	// 【该字段已废弃，请谨慎使用】
+	Adress *string `required:"false" deprecated:"true"`
+
+	// 【该字段已废弃，请谨慎使用】
+	ShareBandwidthId *string `required:"false" deprecated:"true"`
+}
+
+/*
+CreateUHostInstanceParamFeatures is request schema for complex param
+*/
+type CreateUHostInstanceParamFeatures struct {
+
+	// 弹性网卡特性。开启了弹性网卡权限位，此特性才生效，默认 false 未开启，true 开启。
+	UNI *bool `required:"false"`
+}
+
+/*
+CreateUHostInstanceParamVolumes is request schema for complex param
+*/
+type CreateUHostInstanceParamVolumes struct {
 }
 
 /*
@@ -534,30 +564,6 @@ type CreateUHostInstanceParamNetworkInterfaceEIP struct {
 }
 
 /*
-CreateUHostInstanceParamNetworkInterfaceIPv6 is request schema for complex param
-*/
-type CreateUHostInstanceParamNetworkInterfaceIPv6 struct {
-
-	// 第N个网卡对应的IPv6地址，默认不分配IPv6，“Auto”自动分配，不为空的其他字符串为实际要分配的IPv6地址。当前仅支持分配一个IPv6地址
-	Address *string `required:"false"`
-
-	// 【该字段已废弃，请谨慎使用】
-	Adress *string `required:"false" deprecated:"true"`
-
-	// 【该字段已废弃，请谨慎使用】
-	ShareBandwidthId *string `required:"false" deprecated:"true"`
-}
-
-/*
-CreateUHostInstanceParamFeatures is request schema for complex param
-*/
-type CreateUHostInstanceParamFeatures struct {
-
-	// 弹性网卡特性。开启了弹性网卡权限位，此特性才生效，默认 false 未开启，true 开启。
-	UNI *bool `required:"false"`
-}
-
-/*
 CreateUHostInstanceParamNetworkInterface is request schema for complex param
 */
 type CreateUHostInstanceParamNetworkInterface struct {
@@ -570,12 +576,6 @@ type CreateUHostInstanceParamNetworkInterface struct {
 
 	//
 	IPv6 *CreateUHostInstanceParamNetworkInterfaceIPv6 `required:"false"`
-}
-
-/*
-CreateUHostInstanceParamVolumes is request schema for complex param
-*/
-type CreateUHostInstanceParamVolumes struct {
 }
 
 // CreateUHostInstanceRequest is request schema for CreateUHostInstance action
@@ -741,7 +741,7 @@ type CreateUHostInstanceRequest struct {
 	// 【私有专区属性】专区id
 	UDSetId *string `required:"false"`
 
-	// 规格族。 由机型代号和 CPU 平台组成，用于指定云主机的硬件类型与处理器平台。 当 MachineType 为 "O"（快杰型）时，支持以下取值：- o1i：快杰型 O1 代，Intel 平台 - o1a：快杰型 O1 代，AMD 平台- o1r：快杰型 O1 代，ARM 平台 - o2i：快杰型 O2 代，Intel 平台 默认值：o1i 或 o1a当 MachineType 为 "OM"（快杰共享型）时，支持以下取值： - om1i：快杰内存增强型 OM1 代，Intel 平台 - om2i：快杰内存增强型 OM2 代，Intel 平台注意：规格族必须与 MachineType 匹配，否则请求将被拒绝。
+	// 规格族。 由机型代号和 CPU 平台组成，用于指定云主机的硬件类型与处理器平台。 当 MachineType 为 "O"\"OM"\"OPRO"\"OPROG"（快杰系列）时，支持以下取值：- o1i：快杰型 O1 代，Intel 平台 - o1a：快杰型 O1 代，AMD 平台- o1r：快杰型 O1 代，ARM 平台 - o1h：快杰型 O1 代，Hygon 平台- o2i：快杰型 O2 代，Intel 平台 - o2a：快杰型 O2 代，AMD 平台默认值：o1i 或 o1a当 MachineType 为 "OM"（快杰共享型）时，支持以下取值： - om1i：快杰内存增强型 OM1 代，Intel 平台 - om2i：快杰内存增强型 OM2 代，Intel 平台- om1a：快杰内存增强型 OM1 代，Amd 平台默认值：om1i 或 om1a当 MachineType 为 "OPROG"（快杰PRO通用型）时，支持以下取值： - oprog1i：快杰PRO通用型 OPROG1 代，Intel 平台 - oprog2i：快杰PRO通用型 OPROG2 代，Intel 平台 - oprog1a：快杰PRO通用型 OPROG1 代，Amd 平台 当 MachineType 为 "OPRO"（快杰PRO增强型）时，支持以下取值： - opro1a：快杰PRO增强型 OPRO1 代，Amd 平台 - opro2a：快杰PRO增强型 OPRO2 代，Amd 平台 注意：规格族必须与 MachineType 匹配，否则请求将被拒绝。
 	UHostFamily *string `required:"false"`
 
 	// 【建议后续不再使用】云主机机型（V1.0），在本字段和字段MachineType中，仅需要其中1个字段即可。参考[[api:uhost-api:uhost_type|云主机机型说明]]。
@@ -1707,7 +1707,7 @@ type GetUHostInstancePriceRequest struct {
 	// 专区云主机。如果要在专区宿主机上创建云主机，该参数可以填写为true
 	UDSetUHostInstance *bool `required:"false"`
 
-	// 规格族。 由机型代号和 CPU 平台组成，用于指定云主机的硬件类型与处理器平台。当 MachineType 为 "O"（快杰型）时，支持以下取值： - o1i：快杰型 O1 代，Intel 平台 - o1a：快杰型 O1 代，AMD 平台- o1r：快杰型 O1 代，ARM 平台 - o2i：快杰型 O2 代，Intel 平台 默认值：o1i 或 o1a或o1r当 MachineType 为 "OM"（快杰共享型）时，支持以下取值： - om1i：快杰内存增强型 OM1 代，Intel 平台 - om2i：快杰内存增强型 OM2 代，Intel 平台注意：规格族必须与 MachineType 匹配，否则请求将被拒绝。
+	// 规格族。 由机型代号和 CPU 平台组成，用于指定云主机的硬件类型与处理器平台。 当 MachineType 为 "O"\"OM"\"OPRO"\"OPROG"（快杰系列）时，支持以下取值：- o1i：快杰型 O1 代，Intel 平台 - o1a：快杰型 O1 代，AMD 平台- o1r：快杰型 O1 代，ARM 平台 - o1h：快杰型 O1 代，Hygon 平台- o2i：快杰型 O2 代，Intel 平台 - o2a：快杰型 O2 代，AMD 平台默认值：o1i 或 o1a当 MachineType 为 "OM"（快杰共享型）时，支持以下取值： - om1i：快杰内存增强型 OM1 代，Intel 平台 - om2i：快杰内存增强型 OM2 代，Intel 平台- om1a：快杰内存增强型 OM1 代，Amd 平台默认值：om1i 或 om1a当 MachineType 为 "OPROG"（快杰PRO通用型）时，支持以下取值： - oprog1i：快杰PRO通用型 OPROG1 代，Intel 平台 - oprog2i：快杰PRO通用型 OPROG2 代，Intel 平台 - oprog1a：快杰PRO通用型 OPROG1 代，Amd 平台 当 MachineType 为 "OPRO"（快杰PRO增强型）时，支持以下取值： - opro1a：快杰PRO增强型 OPRO1 代，Amd 平台 - opro2a：快杰PRO增强型 OPRO2 代，Amd 平台 注意：规格族必须与 MachineType 匹配，否则请求将被拒绝。
 	UHostFamily *string `required:"false"`
 
 	// 【待废弃】云主机机型（V1版本概念）。参考[[api:uhost-api:uhost_type|云主机机型说明]]。
