@@ -91,9 +91,10 @@ type mux struct {
 
 	incomingChannels chan NewChannel
 
-	globalSentMu     sync.Mutex
-	globalResponses  chan interface{}
-	incomingRequests chan *Request
+	globalSentMu      sync.Mutex
+	globalSentPending atomic.Bool
+	globalResponses   chan interface{}
+	incomingRequests  chan *Request
 
 	errCond *sync.Cond
 	err     error
@@ -141,6 +142,24 @@ func (m *mux) SendRequest(name string, wantReply bool, payload []byte) (bool, []
 	if wantReply {
 		m.globalSentMu.Lock()
 		defer m.globalSentMu.Unlock()
+
+		// Open the gate so that responses arriving while this request is in
+		// flight are allowed to reach globalResponses. Any response arriving
+		// while no request is pending is dropped by handleGlobalPacket.
+		m.globalSentPending.Store(true)
+		defer m.globalSentPending.Store(false)
+
+		// Drain any spurious responses that may have been buffered. This prevents
+		// a previously buffered unexpected response from being consumed instead
+		// of the actual response for this request.
+	drain:
+		for {
+			select {
+			case <-m.globalResponses:
+			default:
+				break drain
+			}
+		}
 	}
 
 	if err := m.sendMessage(globalRequestMsg{
@@ -231,6 +250,12 @@ func (m *mux) onePacket() error {
 		return m.handleChannelOpen(packet)
 	case msgGlobalRequest, msgRequestSuccess, msgRequestFailure:
 		return m.handleGlobalPacket(packet)
+	case msgPing:
+		var msg pingMsg
+		if err := Unmarshal(packet, &msg); err != nil {
+			return fmt.Errorf("failed to unmarshal ping@openssh.com message: %w", err)
+		}
+		return m.sendMessage(pongMsg(msg))
 	}
 
 	// assume a channel packet.
@@ -240,7 +265,7 @@ func (m *mux) onePacket() error {
 	id := binary.BigEndian.Uint32(packet[1:])
 	ch := m.chanList.getChan(id)
 	if ch == nil {
-		return fmt.Errorf("ssh: invalid channel %d", id)
+		return m.handleUnknownChannelPacket(id, packet)
 	}
 
 	return ch.handlePacket(packet)
@@ -261,7 +286,16 @@ func (m *mux) handleGlobalPacket(packet []byte) error {
 			mux:       m,
 		}
 	case *globalRequestSuccessMsg, *globalRequestFailureMsg:
-		m.globalResponses <- msg
+		// Drop responses that arrive when no SendRequest is waiting, to
+		// prevent a malicious peer from staging responses for a future
+		// caller.
+		if !m.globalSentPending.Load() {
+			return nil
+		}
+		select {
+		case m.globalResponses <- msg:
+		default:
+		}
 	default:
 		panic(fmt.Sprintf("not a global message %#v", msg))
 	}
@@ -326,5 +360,26 @@ func (m *mux) openChannel(chanType string, extra []byte) (*channel, error) {
 		return nil, &OpenChannelError{msg.Reason, msg.Message}
 	default:
 		return nil, fmt.Errorf("ssh: unexpected packet in response to channel open: %T", msg)
+	}
+}
+
+func (m *mux) handleUnknownChannelPacket(id uint32, packet []byte) error {
+	msg, err := decode(packet)
+	if err != nil {
+		return err
+	}
+
+	switch msg := msg.(type) {
+	// RFC 4254 section 5.4 says unrecognized channel requests should
+	// receive a failure response.
+	case *channelRequestMsg:
+		if msg.WantReply {
+			return m.sendMessage(channelRequestFailureMsg{
+				PeersID: msg.PeersID,
+			})
+		}
+		return nil
+	default:
+		return fmt.Errorf("ssh: invalid channel %d", id)
 	}
 }
