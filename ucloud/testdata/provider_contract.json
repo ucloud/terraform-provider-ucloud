@@ -3209,6 +3209,12 @@
           "type": "TypeString",
           "computed": true
         },
+        "dedicated_pod_subnet": {
+          "type": "TypeBool",
+          "optional": true,
+          "force_new": true,
+          "description": "Whether Pods use a dedicated subnet."
+        },
         "delete_disks_with_instance": {
           "type": "TypeBool",
           "optional": true,
@@ -3460,6 +3466,18 @@
         "pod_cidr": {
           "type": "TypeString",
           "computed": true
+        },
+        "pod_subnet_id": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "description": "The subnet ID used in dedicated Pod subnet mode."
+        },
+        "pod_subnet_sec_group": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "description": "The security group used in dedicated Pod subnet mode. If omitted, firewall mode is used."
         },
         "service_cidr": {
           "type": "TypeString",
@@ -4009,6 +4027,11 @@
           "required": true,
           "force_new": true
         },
+        "cpu": {
+          "type": "TypeInt",
+          "required": true,
+          "validate": "IntAtLeast"
+        },
         "create_time": {
           "type": "TypeString",
           "computed": true
@@ -4034,11 +4057,6 @@
           "optional": true,
           "validate": "StringLenBetween"
         },
-        "instance_type": {
-          "type": "TypeString",
-          "required": true,
-          "validate": "validateInstanceType"
-        },
         "isolation_group": {
           "type": "TypeString",
           "optional": true
@@ -4053,11 +4071,21 @@
             }
           }
         },
+        "machine_type": {
+          "type": "TypeString",
+          "required": true,
+          "validate": "StringMatch"
+        },
         "max_pods": {
           "type": "TypeInt",
           "optional": true,
           "default": "110",
           "validate": "IntBetween"
+        },
+        "memory": {
+          "type": "TypeInt",
+          "required": true,
+          "validate": "validateAll"
         },
         "min_cpu_platform": {
           "type": "TypeString",

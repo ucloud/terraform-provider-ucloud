@@ -20,7 +20,7 @@ import (
 // contract` compile the provider with inlining disabled so the recorded names
 // are stable; a bare `go test ./ucloud` is only comparable on a toolchain with
 // the same inlining behaviour.
-const providerContractBaseline = "284a8f2e6a4dfc2a42be986791e62ac041c767f5"
+const providerContractBaseline = "48c45282ac5ba85f2dca3f50b7563a20ee4969a0"
 
 func TestProviderContract(t *testing.T) {
 	provider := Provider().(*schema.Provider)
