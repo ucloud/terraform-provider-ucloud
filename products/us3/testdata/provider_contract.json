@@ -1,0 +1,101 @@
+{
+  "format_version": 1,
+  "resources": {
+    "ucloud_us3_bucket": {
+      "schema": {
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "name": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true,
+          "validate": "All"
+        },
+        "source_domain_names": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "tag": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "default": "\"Default\"",
+          "state_func": "stateFuncTag",
+          "validate": "StringMatch"
+        },
+        "type": {
+          "type": "TypeString",
+          "required": true,
+          "validate": "StringInSlice"
+        }
+      },
+      "create": "resourceUCloudUS3BucketCreate",
+      "read": "resourceUCloudUS3BucketRead",
+      "update": "resourceUCloudUS3BucketUpdate",
+      "delete": "resourceUCloudUS3BucketDelete"
+    }
+  },
+  "data_sources": {
+    "ucloud_us3_buckets": {
+      "schema": {
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "ValidateRegexp"
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "us3_buckets": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "create_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "source_domain_names": {
+                "type": "TypeList",
+                "computed": true,
+                "element": {
+                  "kind": "schema",
+                  "schema": {
+                    "type": "TypeString"
+                  }
+                }
+              },
+              "tag": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "type": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        }
+      },
+      "read": "dataSourceUCloudUS3BucketsRead"
+    }
+  }
+}

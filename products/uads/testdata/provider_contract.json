@@ -1,0 +1,365 @@
+{
+  "format_version": 1,
+  "resources": {
+    "ucloud_anti_ddos_allowed_domain": {
+      "schema": {
+        "comment": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true
+        },
+        "domain": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "instance_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "status": {
+          "type": "TypeString",
+          "computed": true
+        }
+      },
+      "create": "resourceUCloudAntiDDoSAllowedDomainCreate",
+      "read": "resourceUCloudAntiDDoSAllowedDomainRead",
+      "update": "resourceUCloudAntiDDoSAllowedDomainUpdate",
+      "delete": "resourceUCloudAntiDDoSAllowedDomainDelete",
+      "customize_diff": "All",
+      "importer": "ImportStatePassthrough"
+    },
+    "ucloud_anti_ddos_instance": {
+      "schema": {
+        "area": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "bandwidth": {
+          "type": "TypeInt",
+          "required": true,
+          "validate": "IntAtLeast"
+        },
+        "base_defence_value": {
+          "type": "TypeInt",
+          "required": true,
+          "validate": "IntAtLeast"
+        },
+        "charge_type": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "data_center": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "duration": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "validate": "IntBetween"
+        },
+        "expire_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "max_defence_value": {
+          "type": "TypeInt",
+          "required": true,
+          "validate": "IntAtLeast"
+        },
+        "name": {
+          "type": "TypeString",
+          "required": true,
+          "validate": "StringMatch"
+        },
+        "status": {
+          "type": "TypeString",
+          "computed": true
+        }
+      },
+      "create": "resourceUCloudAntiDDoSInstanceCreate",
+      "read": "resourceUCloudAntiDDoSInstanceRead",
+      "update": "resourceUCloudAntiDDoSInstanceUpdate",
+      "delete": "resourceUCloudAntiDDoSInstanceDelete",
+      "customize_diff": "All",
+      "importer": "ImportStatePassthrough"
+    },
+    "ucloud_anti_ddos_ip": {
+      "schema": {
+        "comment": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true
+        },
+        "domain": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "instance_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "ip": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "status": {
+          "type": "TypeString",
+          "computed": true
+        }
+      },
+      "create": "resourceUCloudAntiDDoSIPCreate",
+      "read": "resourceUCloudAntiDDoSIPRead",
+      "update": "resourceUCloudAntiDDoSIPUpdate",
+      "delete": "resourceUCloudAntiDDoSIPDelete",
+      "customize_diff": "All",
+      "importer": "ImportStatePassthrough"
+    },
+    "ucloud_anti_ddos_rule": {
+      "schema": {
+        "backup_server": {
+          "type": "TypeMap",
+          "optional": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "ip": {
+                "type": "TypeString",
+                "required": true
+              },
+              "port": {
+                "type": "TypeString",
+                "optional": true
+              }
+            }
+          }
+        },
+        "comment": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true
+        },
+        "instance_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "ip": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "port": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true
+        },
+        "real_server_detection": {
+          "type": "TypeBool",
+          "optional": true,
+          "default": "false"
+        },
+        "real_server_type": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "real_servers": {
+          "type": "TypeList",
+          "required": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "address": {
+                "type": "TypeString",
+                "required": true
+              },
+              "port": {
+                "type": "TypeInt",
+                "optional": true
+              }
+            }
+          }
+        },
+        "rule_id": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "rule_index": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "status": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "toa_id": {
+          "type": "TypeInt",
+          "optional": true,
+          "default": "200",
+          "validate": "IntBetween"
+        }
+      },
+      "create": "resourceUCloudAntiDDoSRuleCreate",
+      "read": "resourceUCloudAntiDDoSRuleRead",
+      "update": "resourceUCloudAntiDDoSRuleUpdate",
+      "delete": "resourceUCloudAntiDDoSRuleDelete",
+      "customize_diff": "All",
+      "importer": "ImportStatePassthrough"
+    }
+  },
+  "data_sources": {
+    "ucloud_anti_ddos_instances": {
+      "schema": {
+        "ids": {
+          "type": "TypeSet",
+          "optional": true,
+          "computed": true,
+          "set": "HashString",
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "instances": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "area": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "bandwidth": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "base_defence_value": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "charge_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "create_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "data_center": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "expire_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "max_defence_value": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "status": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "ValidateRegexp"
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        }
+      },
+      "read": "dataSourceUCloudAntiDDoSInstancesRead"
+    },
+    "ucloud_anti_ddos_ips": {
+      "schema": {
+        "instance_id": {
+          "type": "TypeString",
+          "required": true
+        },
+        "ips": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "comment": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "domain": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "instance_id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "ip": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "proxy_ips": {
+                "type": "TypeList",
+                "computed": true,
+                "element": {
+                  "kind": "schema",
+                  "schema": {
+                    "type": "TypeString"
+                  }
+                }
+              },
+              "status": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        }
+      },
+      "read": "dataSourceUCloudAntiDDoSIPsRead"
+    }
+  }
+}

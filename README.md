@@ -62,6 +62,29 @@ To run acceptance tests for one product, pass its package name to `make testacc`
 make testacc PRODUCT=us3
 ```
 
+### Provider Contract Baselines
+
+Each product owns its Terraform resource and data source contract in
+`products/<product>/testdata/provider_contract.json`. After reviewing an
+intentional interface change, regenerate only that product's baseline:
+
+```sh
+make contract PRODUCT=uk8s
+make compat
+```
+
+Commit the product code and its baseline together. A configured product owner
+can use the existing automatic merge flow when all required checks pass.
+Changing a product does not require editing a shared baseline or test file.
+The baseline check still detects differences until the product owner
+intentionally regenerates the file.
+
+The core baseline at `ucloud/testdata/provider_contract.json` covers provider
+configuration and its configure callback. Core maintainers can regenerate it
+with `make contract PRODUCT=core`; `make contract` regenerates core and all
+product baselines. These commands disable inlining to keep recorded hook names
+stable across Go toolchains, matching `make compat` and `make test`.
+
 ### Go Package Compatibility
 
 The supported Go compatibility surface of the `ucloud` package is limited to

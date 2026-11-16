@@ -1,0 +1,695 @@
+{
+  "format_version": 1,
+  "resources": {
+    "ucloud_lb": {
+      "schema": {
+        "charge_type": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringInSlice",
+          "deprecated": "attribute `charge_type` is deprecated for optimizing parameters"
+        },
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "expire_time": {
+          "type": "TypeString",
+          "computed": true,
+          "deprecated": "attribute `expire_time` is deprecated for optimizing outputs"
+        },
+        "internal": {
+          "type": "TypeBool",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        },
+        "ip_set": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "internet_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "ip": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "listen_type": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "name": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "validate": "StringMatch"
+        },
+        "private_ip": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "remark": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true
+        },
+        "security_group": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true
+        },
+        "subnet_id": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        },
+        "tag": {
+          "type": "TypeString",
+          "optional": true,
+          "default": "\"Default\"",
+          "state_func": "stateFuncTag",
+          "validate": "StringMatch"
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudLBCreate",
+      "read": "resourceUCloudLBRead",
+      "update": "resourceUCloudLBUpdate",
+      "delete": "resourceUCloudLBDelete",
+      "importer": "ImportStatePassthrough"
+    },
+    "ucloud_lb_attachment": {
+      "schema": {
+        "listener_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "load_balancer_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "port": {
+          "type": "TypeInt",
+          "optional": true,
+          "default": "80",
+          "validate": "IntBetween"
+        },
+        "private_ip": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "resource_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "resource_type": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "diff_suppress": "resourceUCloudLBAttachment"
+        },
+        "status": {
+          "type": "TypeString",
+          "computed": true
+        }
+      },
+      "create": "resourceUCloudLBAttachmentCreate",
+      "read": "resourceUCloudLBAttachmentRead",
+      "update": "resourceUCloudLBAttachmentUpdate",
+      "delete": "resourceUCloudLBAttachmentDelete",
+      "importer": "ImportStatePassthrough"
+    },
+    "ucloud_lb_listener": {
+      "schema": {
+        "domain": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true
+        },
+        "health_check_type": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "validate": "StringInSlice"
+        },
+        "idle_timeout": {
+          "type": "TypeInt",
+          "optional": true,
+          "computed": true,
+          "validate": "IntBetween"
+        },
+        "listen_type": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "load_balancer_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "method": {
+          "type": "TypeString",
+          "optional": true,
+          "default": "\"roundrobin\"",
+          "validate": "StringInSlice"
+        },
+        "name": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "validate": "StringMatch"
+        },
+        "path": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true
+        },
+        "persistence": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true
+        },
+        "persistence_type": {
+          "type": "TypeString",
+          "optional": true,
+          "default": "\"none\"",
+          "validate": "StringInSlice"
+        },
+        "port": {
+          "type": "TypeInt",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "IntBetween"
+        },
+        "protocol": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "status": {
+          "type": "TypeString",
+          "computed": true
+        }
+      },
+      "create": "resourceUCloudLBListenerCreate",
+      "read": "resourceUCloudLBListenerRead",
+      "update": "resourceUCloudLBListenerUpdate",
+      "delete": "resourceUCloudLBListenerDelete",
+      "customize_diff": "All",
+      "importer": "ImportStatePassthrough"
+    },
+    "ucloud_lb_rule": {
+      "schema": {
+        "backend_ids": {
+          "type": "TypeSet",
+          "required": true,
+          "force_new": true,
+          "set": "HashString",
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "domain": {
+          "type": "TypeString",
+          "optional": true,
+          "conflicts_with": [
+            "path"
+          ]
+        },
+        "listener_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "load_balancer_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "path": {
+          "type": "TypeString",
+          "optional": true,
+          "conflicts_with": [
+            "domain"
+          ]
+        }
+      },
+      "create": "resourceUCloudLBRuleCreate",
+      "read": "resourceUCloudLBRuleRead",
+      "update": "resourceUCloudLBRuleUpdate",
+      "delete": "resourceUCloudLBRuleDelete",
+      "customize_diff": "All",
+      "importer": "ImportStatePassthrough"
+    },
+    "ucloud_lb_ssl": {
+      "schema": {
+        "ca_cert": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        },
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "name": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringMatch"
+        },
+        "private_key": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "user_cert": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudLBSSLCreate",
+      "read": "resourceUCloudLBSSLRead",
+      "delete": "resourceUCloudLBSSLDelete"
+    },
+    "ucloud_lb_ssl_attachment": {
+      "schema": {
+        "listener_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "load_balancer_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "ssl_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudLBSSLAttachmentCreate",
+      "read": "resourceUCloudLBSSLAttachmentRead",
+      "delete": "resourceUCloudLBSSLAttachmentDelete"
+    }
+  },
+  "data_sources": {
+    "ucloud_lb_attachments": {
+      "schema": {
+        "ids": {
+          "type": "TypeSet",
+          "optional": true,
+          "computed": true,
+          "set": "HashString",
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "lb_attachments": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "port": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "private_ip": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "resource_id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "status": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "listener_id": {
+          "type": "TypeString",
+          "required": true
+        },
+        "load_balancer_id": {
+          "type": "TypeString",
+          "required": true
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        }
+      },
+      "read": "dataSourceUCloudLBAttachmentsRead"
+    },
+    "ucloud_lb_listeners": {
+      "schema": {
+        "ids": {
+          "type": "TypeSet",
+          "optional": true,
+          "computed": true,
+          "set": "HashString",
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "lb_listeners": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "domain": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "health_check_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "idle_timeout": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "listen_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "method": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "path": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "persistence": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "persistence_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "port": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "protocol": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "status": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "load_balancer_id": {
+          "type": "TypeString",
+          "required": true
+        },
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "ValidateRegexp"
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        }
+      },
+      "read": "dataSourceUCloudLBListenersRead"
+    },
+    "ucloud_lb_rules": {
+      "schema": {
+        "ids": {
+          "type": "TypeSet",
+          "optional": true,
+          "computed": true,
+          "set": "HashString",
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "lb_rules": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "domain": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "path": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "listener_id": {
+          "type": "TypeString",
+          "required": true
+        },
+        "load_balancer_id": {
+          "type": "TypeString",
+          "required": true
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        }
+      },
+      "read": "dataSourceUCloudLBRulesRead"
+    },
+    "ucloud_lb_ssls": {
+      "schema": {
+        "ids": {
+          "type": "TypeSet",
+          "optional": true,
+          "computed": true,
+          "set": "HashString",
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "lb_ssls": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "create_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "ValidateRegexp"
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        }
+      },
+      "read": "dataSourceUCloudLBSSLsRead"
+    },
+    "ucloud_lbs": {
+      "schema": {
+        "ids": {
+          "type": "TypeSet",
+          "optional": true,
+          "computed": true,
+          "set": "HashString",
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "lbs": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "create_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "internal": {
+                "type": "TypeBool",
+                "computed": true
+              },
+              "ip_set": {
+                "type": "TypeList",
+                "computed": true,
+                "element": {
+                  "kind": "resource",
+                  "resource": {
+                    "internet_type": {
+                      "type": "TypeString",
+                      "computed": true
+                    },
+                    "ip": {
+                      "type": "TypeString",
+                      "computed": true
+                    }
+                  }
+                }
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "private_ip": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "remark": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "subnet_id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "tag": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "vpc_id": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "ValidateRegexp"
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "subnet_id": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true
+        }
+      },
+      "read": "dataSourceUCloudLBsRead"
+    }
+  }
+}

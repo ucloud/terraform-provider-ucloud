@@ -1,0 +1,183 @@
+{
+  "format_version": 1,
+  "resources": {
+    "ucloud_ufs_volume": {
+      "schema": {
+        "charge_type": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "duration": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "validate": "IntBetween"
+        },
+        "expire_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "name": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringMatch"
+        },
+        "protocol_type": {
+          "type": "TypeString",
+          "required": true,
+          "validate": "StringInSlice"
+        },
+        "remark": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        },
+        "size": {
+          "type": "TypeInt",
+          "required": true,
+          "validate": "validateAll"
+        },
+        "storage_type": {
+          "type": "TypeString",
+          "required": true,
+          "validate": "StringInSlice"
+        },
+        "tag": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "default": "\"Default\"",
+          "state_func": "stateFuncTag",
+          "validate": "StringMatch"
+        }
+      },
+      "create": "resourceUCloudUFSVolumeCreate",
+      "read": "resourceUCloudUFSVolumeRead",
+      "update": "resourceUCloudUFSVolumeUpdate",
+      "delete": "resourceUCloudUFSVolumeDelete"
+    },
+    "ucloud_ufs_volume_mount_point": {
+      "schema": {
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "mount_point_ip": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "name": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true,
+          "validate": "StringMatch"
+        },
+        "subnet_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "volume_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudUFSVolumeMountPointCreate",
+      "read": "resourceUCloudUFSVolumeMountPointRead",
+      "delete": "resourceUCloudUFSVolumeMountPointDelete"
+    }
+  },
+  "data_sources": {
+    "ucloud_ufs_volumes": {
+      "schema": {
+        "ids": {
+          "type": "TypeSet",
+          "optional": true,
+          "computed": true,
+          "set": "HashString",
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "ValidateRegexp"
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "ufs_volumes": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "create_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "expire_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "protocol_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "remark": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "size": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "storage_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "tag": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        }
+      },
+      "read": "dataSourceUCloudUFSVolumesRead"
+    }
+  }
+}
