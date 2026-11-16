@@ -3,6 +3,7 @@ package uk8s
 import (
 	"encoding/base64"
 	"fmt"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -51,8 +52,17 @@ func resourceUCloudUK8SNodeGroup() *schema.Resource {
 			"image_id": {
 				Type: schema.TypeString, Optional: true,
 			},
-			"instance_type": {
-				Type: schema.TypeString, Required: true, ValidateFunc: validateInstanceType,
+			"machine_type": {
+				Type: schema.TypeString, Required: true,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^[A-Z][A-Z0-9]*$`), "must be an uppercase machine type, such as O"),
+			},
+			"cpu": {
+				Type: schema.TypeInt, Required: true,
+				ValidateFunc: validation.IntAtLeast(2),
+			},
+			"memory": {
+				Type: schema.TypeInt, Required: true,
+				ValidateFunc: validateAll(validation.IntAtLeast(4096), validateMod(1024)),
 			},
 			"uhost_family": {
 				Type: schema.TypeString, Optional: true, Computed: true,
@@ -223,10 +233,6 @@ func resourceUK8SNodeGroupDelete(d *schema.ResourceData, meta interface{}) error
 }
 
 func buildUK8SNodeGroupAddRequest(client *sdkuk8s.UK8SClient, d *schema.ResourceData) (*sdkuk8s.AddUK8SNodeGroupRequest, error) {
-	instance, err := parseInstanceType(d.Get("instance_type").(string))
-	if err != nil {
-		return nil, err
-	}
 	labels, taints, err := expandUK8SNodeGroupScheduling(d)
 	if err != nil {
 		return nil, err
@@ -235,11 +241,11 @@ func buildUK8SNodeGroupAddRequest(client *sdkuk8s.UK8SClient, d *schema.Resource
 	req.ClusterId = ucloud.String(d.Get("cluster_id").(string))
 	req.NodeGroupName = ucloud.String(d.Get("name").(string))
 	req.SubnetId = ucloud.String(d.Get("subnet_id").(string))
-	req.MachineType = ucloud.String(strings.ToUpper(instance.HostType))
+	req.MachineType = ucloud.String(strings.ToUpper(d.Get("machine_type").(string)))
 	req.MinimalCpuPlatform = ucloud.String(d.Get("min_cpu_platform").(string))
 	req.MaxPods = ucloud.String(strconv.Itoa(d.Get("max_pods").(int)))
-	req.CPU = ucloud.Int(instance.CPU)
-	req.Mem = ucloud.Int(instance.Memory)
+	req.CPU = ucloud.Int(d.Get("cpu").(int))
+	req.Mem = ucloud.Int(d.Get("memory").(int))
 	req.Labels = ucloud.String(labels)
 	req.Taints = ucloud.String(taints)
 	req.BootDiskType = ucloud.String(upperCvt.unconvert(d.Get("boot_disk_type").(string)))
@@ -307,7 +313,9 @@ func setUK8SNodeGroupState(d *schema.ResourceData, group sdkuk8s.NodeGroupSet) {
 	_ = d.Set("subnet_id", group.SubnetId)
 	_ = d.Set("image_id", group.ImageId)
 	_ = d.Set("uhost_family", group.UHostFamily)
-	_ = d.Set("instance_type", formatUK8SInstanceType(group.MachineType, group.CPU, group.Mem))
+	_ = d.Set("machine_type", group.MachineType)
+	_ = d.Set("cpu", group.CPU)
+	_ = d.Set("memory", group.Mem)
 	_ = d.Set("charge_type", upperCamelCvt.convert(group.ChargeType))
 	_ = d.Set("boot_disk_type", upperCvt.convert(group.BootDiskType))
 	_ = d.Set("boot_disk_size", group.BootDiskSize)
@@ -343,16 +351,6 @@ func decodeUK8SNodeGroupScript(value string) string {
 		return value
 	}
 	return string(decoded)
-}
-
-func formatUK8SInstanceType(machineType string, cpu, memory int) string {
-	hostType := strings.ToLower(machineType)
-	for mode, scale := range instanceTypeScaleMap {
-		if cpu > 0 && memory == cpu*scale {
-			return fmt.Sprintf("%s-%s-%d", hostType, mode, cpu)
-		}
-	}
-	return fmt.Sprintf("%s-customized-%d-%d", hostType, cpu, memory/1024)
 }
 
 func diffValidateUK8SNodeGroupScheduling(diff *schema.ResourceDiff, meta interface{}) error {

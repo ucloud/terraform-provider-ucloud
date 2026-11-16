@@ -116,7 +116,9 @@ resource "ucloud_uk8s_node_group" "workers" {
   name              = %q
   availability_zone = data.ucloud_zones.default.zones[0].id
   subnet_id         = ucloud_subnet.foo.id
-  instance_type     = "n-basic-2"
+  machine_type      = "N"
+  cpu               = 2
+  memory            = 4096
   charge_type       = "dynamic"
   labels = { environment = %q }
   taint {
