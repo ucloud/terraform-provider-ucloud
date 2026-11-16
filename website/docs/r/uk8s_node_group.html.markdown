@@ -20,7 +20,9 @@ resource "ucloud_uk8s_node_group" "workers" {
   subnet_id         = ucloud_subnet.foo.id
   availability_zone = "cn-sh2-02"
   image_id           = "uimage-1rgr4qmrvmjm"
-  instance_type      = "o-basic-2"
+  machine_type       = "O"
+  cpu                = 2
+  memory             = 4096
   uhost_family       = "o2i"
   charge_type        = "dynamic"
   boot_disk_type     = "cloud_rssd"
@@ -60,8 +62,10 @@ resource "ucloud_uk8s_node" "workers" {
 * `name` - (Required) The name of the node group.
 * `subnet_id` - (Required) The subnet ID used by the node group template.
 * `availability_zone` - (Required) The availability zone used by the node group template.
-* `instance_type` - (Required) The worker instance type, such as `o-basic-2`.
-* `uhost_family` - (Optional, Computed) The Intel outstanding instance family: `o1i` or `o2i`. Use `instance_type = "o-basic-2"`, `uhost_family = "o2i"`, and `boot_disk_type = "cloud_rssd"` for O2 Intel nodes. For an RSSD data disk, also set `data_disk_type = "cloud_rssd"` and a positive `data_disk_size`. Requires an Intel CPU platform. When omitted, the family is read from UK8S. Updates change the template for future nodes without replacing existing nodes.
+* `machine_type` - (Required) The machine type, such as `N` or `O`.
+* `cpu` - (Required) The number of CPU cores. Must be at least 2.
+* `memory` - (Required) Memory in MB. Must be at least 4096 and a multiple of 1024.
+* `uhost_family` - (Optional, Computed) The Intel outstanding instance family: `o1i` or `o2i`. Use `machine_type = "O"`, `cpu = 2`, `memory = 4096`, `uhost_family = "o2i"`, and `boot_disk_type = "cloud_rssd"` for O2 Intel nodes. For an RSSD data disk, also set `data_disk_type = "cloud_rssd"` and a positive `data_disk_size`. Requires an Intel CPU platform. When omitted, the family is read from UK8S. Updates change the template for future nodes without replacing existing nodes.
 * `image_id` - (Optional) The image ID used by new nodes.
 * `charge_type` - (Optional) The charge type. Valid values are `year`, `month`, and `dynamic`. Default is `month`.
 * `boot_disk_type` - (Optional) The boot disk type, including `cloud_rssd`. Default is `cloud_ssd`. Set `cloud_rssd` when using `uhost_family = "o1i"` or `"o2i"`.
@@ -85,7 +89,7 @@ resource "ucloud_uk8s_node" "workers" {
 
 ## Update behavior
 
-Changing `uhost_family`, `instance_type`, `boot_disk_type`, `data_disk_type`, `data_disk_size`, `labels`, or `taint` calls `UpdateUK8SNodeGroup` and keeps the node group ID. The updated template is applied when new nodes are added to the group. Existing nodes are not recreated or modified automatically.
+Changing `machine_type`, `cpu`, `memory`, `uhost_family`, `boot_disk_type`, `data_disk_type`, `data_disk_size`, `labels`, or `taint` calls `UpdateUK8SNodeGroup` and keeps the node group ID. The updated template is applied when new nodes are added to the group. Existing nodes are not recreated or modified automatically.
 
 For example, change the group's `uhost_family` from `o1i` to `o2i` and set `data_disk_type = "cloud_rssd"` with a positive `data_disk_size`. Terraform plans an in-place node group update. New nodes created with this `node_group_id` inherit the group's family when the node's `uhost_family` is omitted. UK8S also uses the group's boot and data disk configuration for those nodes.
 

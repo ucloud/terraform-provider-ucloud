@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	sdkuk8s "github.com/ucloud/ucloud-sdk-go/services/uk8s"
 )
 
 func TestUK8SNodeGroupSchedulingRoundTrip(t *testing.T) {
@@ -57,18 +58,17 @@ func TestUK8SNodeGroupSchedulingRejectsDuplicateTaintKeys(t *testing.T) {
 	}
 }
 
-func TestFormatUK8SInstanceType(t *testing.T) {
-	for _, test := range []struct {
-		machine string
-		cpu     int
-		memory  int
-		want    string
-	}{
-		{machine: "O", cpu: 2, memory: 4096, want: "o-basic-2"},
-		{machine: "N", cpu: 2, memory: 6144, want: "n-customized-2-6"},
-	} {
-		if got := formatUK8SInstanceType(test.machine, test.cpu, test.memory); got != test.want {
-			t.Errorf("formatUK8SInstanceType(%q, %d, %d) = %q, want %q", test.machine, test.cpu, test.memory, got, test.want)
-		}
+func TestSetUK8SNodeGroupStateUsesMachineSpec(t *testing.T) {
+	resource := resourceUCloudUK8SNodeGroup()
+	data := schema.TestResourceDataRaw(t, resource.Schema, map[string]interface{}{
+		"cluster_id": "uk8s-test", "name": "workers", "availability_zone": "sg-02",
+		"subnet_id": "subnet-test", "machine_type": "N", "cpu": 2, "memory": 4096,
+	})
+	setUK8SNodeGroupState(data, sdkuk8s.NodeGroupSet{
+		MachineType: "O", CPU: 4, Mem: 8192,
+	})
+	if data.Get("machine_type") != "O" || data.Get("cpu") != 4 || data.Get("memory") != 8192 {
+		t.Fatalf("node group machine spec = %q/%d/%d, want O/4/8192",
+			data.Get("machine_type"), data.Get("cpu"), data.Get("memory"))
 	}
 }

@@ -68,8 +68,9 @@ func TestNodeGroupImportMatchesCreate(t *testing.T) {
 			r := resourceUCloudUK8SNodeGroup()
 			config := map[string]interface{}{
 				"cluster_id": "uk8s-test", "name": "workers", "availability_zone": "sg-02",
-				"subnet_id": "subnet-test", "instance_type": "n-basic-2", "charge_type": "dynamic",
-				"labels": map[string]interface{}{"env": "test"},
+				"subnet_id": "subnet-test", "machine_type": "N", "cpu": 2, "memory": 4096,
+				"charge_type": "dynamic",
+				"labels":      map[string]interface{}{"env": "test"},
 			}
 			if disk != "" {
 				config["data_disk_type"] = "cloud_rssd"
