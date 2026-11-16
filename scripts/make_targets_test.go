@@ -14,9 +14,10 @@ func TestMakeTestTargets(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, test := range []struct {
-		name string
-		args []string
-		want string
+		name      string
+		args      []string
+		want      string
+		wantError bool
 	}{
 		{
 			name: "acceptance forwards test selection and options",
@@ -39,9 +40,34 @@ func TestMakeTestTargets(t *testing.T) {
 			want: "TF_ACC= test ./... -timeout=30s -parallel=32 -gcflags=./...=-l\n",
 		},
 		{
-			name: "contract baseline regenerates without inlining",
+			name: "all contract baselines regenerate without inlining",
 			args: []string{"contract"},
-			want: "TF_ACC= run -gcflags=./...=-l ./cmd/provider-contract -output ucloud/testdata/provider_contract.json\n",
+			want: "TF_ACC= run -gcflags=./...=-l ./cmd/provider-contract -product all\n",
+		},
+		{
+			name: "contract selects one product without inlining",
+			args: []string{"contract", "PRODUCT=uhost"},
+			want: "TF_ACC= run -gcflags=./...=-l ./cmd/provider-contract -product uhost\n",
+		},
+		{
+			name: "contract selects core without inlining",
+			args: []string{"contract", "PRODUCT=core"},
+			want: "TF_ACC= run -gcflags=./...=-l ./cmd/provider-contract -product core\n",
+		},
+		{
+			name:      "contract rejects unknown product",
+			args:      []string{"contract", "PRODUCT=unknown"},
+			wantError: true,
+		},
+		{
+			name:      "contract rejects multiple products",
+			args:      []string{"contract", "PRODUCT=uhost uk8s"},
+			wantError: true,
+		},
+		{
+			name:      "contract rejects shell expressions",
+			args:      []string{"contract", "PRODUCT=uhost; true"},
+			wantError: true,
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -77,7 +103,17 @@ esac
 				"PATH="+dir+string(os.PathListSeparator)+os.Getenv("PATH"),
 				"MAKE_TEST_CALLS="+calls,
 			)
-			if output, err := command.CombinedOutput(); err != nil {
+			output, err := command.CombinedOutput()
+			if test.wantError {
+				if err == nil {
+					t.Fatalf("make unexpectedly succeeded:\n%s", output)
+				}
+				if _, err := os.Stat(calls); !os.IsNotExist(err) {
+					t.Fatalf("invalid product invoked Go: %v", err)
+				}
+				return
+			}
+			if err != nil {
 				t.Fatalf("make failed: %v\n%s", err, output)
 			}
 			got, err := os.ReadFile(calls)

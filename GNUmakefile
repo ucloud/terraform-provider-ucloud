@@ -4,6 +4,7 @@ PRODUCT?=
 PRODUCT_DIRS:=$(wildcard products/*/)
 PRODUCTS:=$(sort $(notdir $(patsubst %/,%,$(PRODUCT_DIRS))))
 PRODUCT_NAME:=$(if $(word 2,$(value PRODUCT)),,$(filter $(PRODUCTS),$(value PRODUCT)))
+CONTRACT_PRODUCT:=$(if $(strip $(value PRODUCT)),$(if $(word 2,$(value PRODUCT)),,$(filter $(PRODUCTS) core all,$(value PRODUCT))),all)
 GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
 PKG_NAME=ucloud
 WEBSITE_REPO=github.com/hashicorp/terraform-website
@@ -40,7 +41,13 @@ compat: fmtcheck
 # `go run ./cmd/provider-contract` so the file is written with the same
 # no-inlining build the compat check uses.
 contract:
-	go run $(CONTRACT_GCFLAGS) ./cmd/provider-contract -output ucloud/testdata/provider_contract.json
+	@set -eu; \
+		product="$(CONTRACT_PRODUCT)"; \
+		if [ -z "$$product" ]; then \
+			echo "ERROR: Set PRODUCT to one of: $(PRODUCTS) core all" >&2; \
+			exit 2; \
+		fi; \
+		go run $(CONTRACT_GCFLAGS) ./cmd/provider-contract -product "$$product"
 
 testacc: fmtcheck
 	@set -eu; \

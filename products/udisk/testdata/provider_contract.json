@@ -1,0 +1,358 @@
+{
+  "format_version": 1,
+  "resources": {
+    "ucloud_disk": {
+      "schema": {
+        "availability_zone": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "charge_type": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "disk_size": {
+          "type": "TypeInt",
+          "required": true,
+          "validate": "validateAll"
+        },
+        "disk_type": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "duration": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "validate": "IntBetween"
+        },
+        "expire_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "name": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "validate": "StringMatch"
+        },
+        "rdma_cluster_id": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "reboot_instance_for_resizing": {
+          "type": "TypeBool",
+          "optional": true,
+          "default": "true"
+        },
+        "snapshot_id": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        },
+        "snapshot_service": {
+          "type": "TypeBool",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        },
+        "status": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "tag": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "default": "\"Default\"",
+          "state_func": "stateFuncTag",
+          "validate": "StringMatch"
+        }
+      },
+      "create": "resourceUCloudDiskCreate",
+      "read": "resourceUCloudDiskRead",
+      "update": "resourceUCloudDiskUpdate",
+      "delete": "resourceUCloudDiskDelete",
+      "customize_diff": "All",
+      "importer": "ImportStatePassthrough"
+    },
+    "ucloud_disk_attachment": {
+      "schema": {
+        "availability_zone": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "device_name": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "disk_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "instance_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "stop_instance_before_detaching": {
+          "type": "TypeBool",
+          "optional": true
+        }
+      },
+      "schema_version": 1,
+      "create": "resourceUCloudDiskAttachmentCreate",
+      "read": "resourceUCloudDiskAttachmentRead",
+      "update": "Noop",
+      "delete": "resourceUCloudDiskAttachmentDelete",
+      "migrate_state": "resourceUCloudDiskAttachmentMigrateState"
+    },
+    "ucloud_disk_snapshot": {
+      "schema": {
+        "availability_zone": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "comment": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "disk_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "disk_type": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "is_disk_available": {
+          "type": "TypeBool",
+          "computed": true
+        },
+        "name": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringMatch"
+        },
+        "size": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "source_disk_name": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "status": {
+          "type": "TypeString",
+          "computed": true
+        }
+      },
+      "create": "resourceUCloudDiskSnapshotCreate",
+      "read": "resourceUCloudDiskSnapshotRead",
+      "delete": "resourceUCloudDiskSnapshotDelete",
+      "importer": "ImportStatePassthrough"
+    }
+  },
+  "data_sources": {
+    "ucloud_disk_snapshots": {
+      "schema": {
+        "availability_zone": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "disk_id": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "ids": {
+          "type": "TypeSet",
+          "optional": true,
+          "computed": true,
+          "set": "HashString",
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "ValidateRegexp"
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "snapshots": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "availability_zone": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "comment": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "create_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "disk_id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "disk_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "is_disk_available": {
+                "type": "TypeBool",
+                "computed": true
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "size": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "source_disk_name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "status": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        }
+      },
+      "read": "dataSourceUCloudDiskSnapshotsRead"
+    },
+    "ucloud_disks": {
+      "schema": {
+        "availability_zone": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "disk_type": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "StringInSlice"
+        },
+        "disks": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "availability_zone": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "charge_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "create_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "disk_size": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "disk_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "expire_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "status": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "tag": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "ids": {
+          "type": "TypeSet",
+          "optional": true,
+          "computed": true,
+          "set": "HashString",
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "ValidateRegexp"
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        }
+      },
+      "read": "dataSourceUCloudDisksRead"
+    }
+  }
+}

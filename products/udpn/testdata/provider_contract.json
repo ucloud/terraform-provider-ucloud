@@ -1,0 +1,47 @@
+{
+  "format_version": 1,
+  "resources": {
+    "ucloud_udpn_connection": {
+      "schema": {
+        "bandwidth": {
+          "type": "TypeInt",
+          "optional": true,
+          "default": "2",
+          "validate": "IntBetween"
+        },
+        "charge_type": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "default": "\"month\"",
+          "validate": "StringInSlice"
+        },
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "duration": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "validate": "IntBetween"
+        },
+        "expire_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "peer_region": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudUDPNConnectionCreate",
+      "read": "resourceUCloudUDPNConnectionRead",
+      "update": "resourceUCloudUDPNConnectionUpdate",
+      "delete": "resourceUCloudUDPNConnectionDelete",
+      "customize_diff": "All",
+      "importer": "ImportStatePassthrough"
+    }
+  }
+}

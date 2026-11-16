@@ -1,0 +1,90 @@
+{
+  "format_version": 1,
+  "data_sources": {
+    "ucloud_projects": {
+      "schema": {
+        "is_finance": {
+          "type": "TypeBool",
+          "optional": true
+        },
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "ValidateRegexp"
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "projects": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "create_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "member_count": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "parent_id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "parent_name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "resource_count": {
+                "type": "TypeInt",
+                "computed": true
+              }
+            }
+          }
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        }
+      },
+      "read": "dataSourceUCloudProjectsRead"
+    },
+    "ucloud_zones": {
+      "schema": {
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "zones": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        }
+      },
+      "read": "dataSourceUCloudZonesRead"
+    }
+  }
+}

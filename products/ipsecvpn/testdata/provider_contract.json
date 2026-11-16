@@ -1,0 +1,638 @@
+{
+  "format_version": 1,
+  "resources": {
+    "ucloud_vpn_connection": {
+      "schema": {
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "customer_gateway_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "ike_config": {
+          "type": "TypeList",
+          "required": true,
+          "max_items": 1,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "authentication_algorithm": {
+                "type": "TypeString",
+                "optional": true,
+                "default": "\"sha1\"",
+                "validate": "StringInSlice"
+              },
+              "dh_group": {
+                "type": "TypeString",
+                "optional": true,
+                "default": "\"15\"",
+                "validate": "StringInSlice"
+              },
+              "encryption_algorithm": {
+                "type": "TypeString",
+                "optional": true,
+                "default": "\"aes128\"",
+                "validate": "StringInSlice"
+              },
+              "exchange_mode": {
+                "type": "TypeString",
+                "optional": true,
+                "default": "\"main\"",
+                "validate": "StringInSlice"
+              },
+              "ike_version": {
+                "type": "TypeString",
+                "optional": true,
+                "default": "\"ikev1\"",
+                "validate": "StringInSlice"
+              },
+              "local_id": {
+                "type": "TypeString",
+                "optional": true,
+                "computed": true,
+                "validate": "validateVpnAuto"
+              },
+              "pre_shared_key": {
+                "type": "TypeString",
+                "required": true,
+                "validate": "StringMatch"
+              },
+              "remote_id": {
+                "type": "TypeString",
+                "optional": true,
+                "computed": true,
+                "validate": "validateVpnAuto"
+              },
+              "sa_life_time": {
+                "type": "TypeInt",
+                "optional": true,
+                "default": "86400",
+                "validate": "IntBetween"
+              }
+            }
+          }
+        },
+        "ipsec_config": {
+          "type": "TypeList",
+          "required": true,
+          "max_items": 1,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "authentication_algorithm": {
+                "type": "TypeString",
+                "optional": true,
+                "default": "\"sha1\"",
+                "validate": "StringInSlice"
+              },
+              "encryption_algorithm": {
+                "type": "TypeString",
+                "optional": true,
+                "default": "\"aes128\"",
+                "validate": "StringInSlice"
+              },
+              "local_subnet_ids": {
+                "type": "TypeSet",
+                "required": true,
+                "min_items": 1,
+                "max_items": 10,
+                "set": "HashString",
+                "element": {
+                  "kind": "schema",
+                  "schema": {
+                    "type": "TypeString"
+                  }
+                }
+              },
+              "pfs_dh_group": {
+                "type": "TypeString",
+                "optional": true,
+                "default": "\"disable\"",
+                "validate": "StringInSlice"
+              },
+              "protocol": {
+                "type": "TypeString",
+                "optional": true,
+                "default": "\"esp\"",
+                "validate": "StringInSlice"
+              },
+              "remote_subnets": {
+                "type": "TypeSet",
+                "required": true,
+                "min_items": 1,
+                "max_items": 20,
+                "set": "HashString",
+                "element": {
+                  "kind": "schema",
+                  "schema": {
+                    "type": "TypeString",
+                    "validate": "validateCIDRBlock"
+                  }
+                }
+              },
+              "sa_life_time": {
+                "type": "TypeInt",
+                "optional": true,
+                "default": "3600",
+                "validate": "IntBetween"
+              },
+              "sa_life_time_bytes": {
+                "type": "TypeInt",
+                "optional": true,
+                "computed": true,
+                "validate": "IntBetween"
+              }
+            }
+          }
+        },
+        "name": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "StringMatch"
+        },
+        "remark": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true
+        },
+        "tag": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "default": "\"Default\"",
+          "state_func": "stateFuncTag",
+          "validate": "StringMatch"
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "vpn_gateway_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudVPNConnectionCreate",
+      "read": "resourceUCloudVPNConnectionRead",
+      "update": "resourceUCloudVPNConnectionUpdate",
+      "delete": "resourceUCloudVPNConnectionDelete",
+      "importer": "ImportStatePassthrough"
+    },
+    "ucloud_vpn_customer_gateway": {
+      "schema": {
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "ip_address": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true,
+          "validate": "SingleIP"
+        },
+        "name": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringMatch"
+        },
+        "remark": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        },
+        "tag": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "default": "\"Default\"",
+          "state_func": "stateFuncTag",
+          "validate": "StringMatch"
+        }
+      },
+      "create": "resourceUCloudVPNCustomerGatewayCreate",
+      "read": "resourceUCloudVPNCustomerGatewayRead",
+      "delete": "resourceUCloudVPNCustomerGatewayDelete",
+      "importer": "ImportStatePassthrough"
+    },
+    "ucloud_vpn_gateway": {
+      "schema": {
+        "charge_type": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "duration": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "validate": "IntBetween"
+        },
+        "eip_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "expire_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "grade": {
+          "type": "TypeString",
+          "required": true,
+          "validate": "StringInSlice"
+        },
+        "name": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringMatch"
+        },
+        "remark": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        },
+        "tag": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "default": "\"Default\"",
+          "state_func": "stateFuncTag",
+          "validate": "StringMatch"
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudVPNGatewayCreate",
+      "read": "resourceUCloudVPNGatewayRead",
+      "update": "resourceUCloudVPNGatewayUpdate",
+      "delete": "resourceUCloudVPNGatewayDelete",
+      "importer": "ImportStatePassthrough"
+    }
+  },
+  "data_sources": {
+    "ucloud_vpn_connections": {
+      "schema": {
+        "ids": {
+          "type": "TypeSet",
+          "optional": true,
+          "computed": true,
+          "set": "HashString",
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "ValidateRegexp"
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "tag": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "vpn_connections": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "create_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "customer_gateway_id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "ike_config": {
+                "type": "TypeList",
+                "computed": true,
+                "element": {
+                  "kind": "resource",
+                  "resource": {
+                    "authentication_algorithm": {
+                      "type": "TypeString",
+                      "computed": true
+                    },
+                    "dh_group": {
+                      "type": "TypeString",
+                      "computed": true
+                    },
+                    "encryption_algorithm": {
+                      "type": "TypeString",
+                      "computed": true
+                    },
+                    "exchange_mode": {
+                      "type": "TypeString",
+                      "computed": true
+                    },
+                    "ike_version": {
+                      "type": "TypeString",
+                      "computed": true
+                    },
+                    "local_id": {
+                      "type": "TypeString",
+                      "computed": true
+                    },
+                    "pre_shared_key": {
+                      "type": "TypeString",
+                      "computed": true
+                    },
+                    "remote_id": {
+                      "type": "TypeString",
+                      "computed": true
+                    },
+                    "sa_life_time": {
+                      "type": "TypeInt",
+                      "computed": true
+                    }
+                  }
+                }
+              },
+              "ipsec_config": {
+                "type": "TypeList",
+                "computed": true,
+                "element": {
+                  "kind": "resource",
+                  "resource": {
+                    "authentication_algorithm": {
+                      "type": "TypeString",
+                      "computed": true
+                    },
+                    "encryption_algorithm": {
+                      "type": "TypeString",
+                      "computed": true
+                    },
+                    "local_subnet_ids": {
+                      "type": "TypeList",
+                      "computed": true,
+                      "element": {
+                        "kind": "schema",
+                        "schema": {
+                          "type": "TypeString"
+                        }
+                      }
+                    },
+                    "pfs_dh_group": {
+                      "type": "TypeString",
+                      "computed": true
+                    },
+                    "protocol": {
+                      "type": "TypeString",
+                      "computed": true
+                    },
+                    "remote_subnets": {
+                      "type": "TypeList",
+                      "computed": true,
+                      "element": {
+                        "kind": "schema",
+                        "schema": {
+                          "type": "TypeString"
+                        }
+                      }
+                    },
+                    "sa_life_time": {
+                      "type": "TypeInt",
+                      "computed": true
+                    },
+                    "sa_life_time_bytes": {
+                      "type": "TypeInt",
+                      "computed": true
+                    }
+                  }
+                }
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "remark": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "tag": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "vpc_id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "vpn_gateway_id": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        }
+      },
+      "read": "dataSourceUCloudVPNConnectionsRead"
+    },
+    "ucloud_vpn_customer_gateways": {
+      "schema": {
+        "ids": {
+          "type": "TypeSet",
+          "optional": true,
+          "computed": true,
+          "set": "HashString",
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "ValidateRegexp"
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "tag": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "vpn_customer_gateways": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "create_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "ip_address": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "remark": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "tag": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        }
+      },
+      "read": "dataSourceUCloudVPNCustomerGatewaysRead"
+    },
+    "ucloud_vpn_gateways": {
+      "schema": {
+        "ids": {
+          "type": "TypeSet",
+          "optional": true,
+          "computed": true,
+          "set": "HashString",
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "ValidateRegexp"
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "tag": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "vpn_gateways": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "auto_renew": {
+                "type": "TypeBool",
+                "computed": true
+              },
+              "charge_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "create_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "expire_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "grade": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "ip_set": {
+                "type": "TypeList",
+                "computed": true,
+                "element": {
+                  "kind": "resource",
+                  "resource": {
+                    "internet_type": {
+                      "type": "TypeString",
+                      "computed": true
+                    },
+                    "ip": {
+                      "type": "TypeString",
+                      "computed": true
+                    }
+                  }
+                }
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "remark": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "tag": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "vpc_id": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        }
+      },
+      "read": "dataSourceUCloudVPNGatewaysRead"
+    }
+  }
+}

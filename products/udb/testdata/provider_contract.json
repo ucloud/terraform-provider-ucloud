@@ -1,0 +1,455 @@
+{
+  "format_version": 1,
+  "resources": {
+    "ucloud_db_instance": {
+      "schema": {
+        "allow_stopping_for_update": {
+          "type": "TypeBool",
+          "optional": true
+        },
+        "availability_zone": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "backup_begin_time": {
+          "type": "TypeInt",
+          "optional": true,
+          "computed": true,
+          "validate": "IntBetween"
+        },
+        "backup_black_list": {
+          "type": "TypeSet",
+          "optional": true,
+          "computed": true,
+          "set": "HashString",
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString",
+              "validate": "StringMatch"
+            }
+          }
+        },
+        "backup_count": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "default": "7"
+        },
+        "backup_date": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true
+        },
+        "charge_type": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "duration": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "validate": "IntBetween"
+        },
+        "engine": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "engine_version": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "expire_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "from_backup_id": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true
+        },
+        "instance_storage": {
+          "type": "TypeInt",
+          "required": true,
+          "validate": "validateAll"
+        },
+        "instance_type": {
+          "type": "TypeString",
+          "required": true,
+          "validate": "validateDBInstanceType"
+        },
+        "modify_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "name": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "validate": "StringMatch"
+        },
+        "parameter_group": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true
+        },
+        "password": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "sensitive": true,
+          "validate": "validateDBInstancePassword"
+        },
+        "port": {
+          "type": "TypeInt",
+          "optional": true,
+          "computed": true,
+          "validate": "IntBetween"
+        },
+        "private_ip": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "standby_zone": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        },
+        "status": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "subnet_id": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        },
+        "tag": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringMatch"
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudDBInstanceCreate",
+      "read": "resourceUCloudDBInstanceRead",
+      "update": "resourceUCloudDBInstanceUpdate",
+      "delete": "resourceUCloudDBInstanceDelete",
+      "customize_diff": "All",
+      "importer": "ImportStatePassthrough",
+      "timeouts": {
+        "create": "30m0s",
+        "delete": "10m0s",
+        "update": "20m0s"
+      }
+    }
+  },
+  "data_sources": {
+    "ucloud_db_backups": {
+      "schema": {
+        "availability_zone": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "db_backups": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "backup_end_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "backup_id": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "backup_name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "backup_size": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "backup_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "backup_type": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "backup_zone": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "db_id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "db_name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "state": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "zone": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "ValidateRegexp"
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "project_id": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        }
+      },
+      "read": "dataSourceUCloudDBBackupsRead"
+    },
+    "ucloud_db_instances": {
+      "schema": {
+        "availability_zone": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "db_instances": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "availability_zone": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "backup_begin_time": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "backup_black_list": {
+                "type": "TypeList",
+                "computed": true,
+                "element": {
+                  "kind": "schema",
+                  "schema": {
+                    "type": "TypeString"
+                  }
+                }
+              },
+              "backup_count": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "backup_date": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "charge_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "create_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "engine": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "engine_version": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "expire_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "instance_storage": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "instance_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "modify_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "port": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "private_ip": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "standby_zone": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "status": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "subnet_id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "tag": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "vpc_id": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "ids": {
+          "type": "TypeSet",
+          "optional": true,
+          "computed": true,
+          "set": "HashString",
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "ValidateRegexp"
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        }
+      },
+      "read": "dataSourceUCloudDBInstancesRead"
+    },
+    "ucloud_db_parameter_groups": {
+      "schema": {
+        "availability_zone": {
+          "type": "TypeString",
+          "optional": true,
+          "conflicts_with": [
+            "multi_az"
+          ]
+        },
+        "class_type": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "StringInSlice"
+        },
+        "multi_az": {
+          "type": "TypeBool",
+          "optional": true,
+          "conflicts_with": [
+            "availability_zone"
+          ]
+        },
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "ValidateRegexp"
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "parameter_groups": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "availability_zone": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "engine": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "engine_version": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "is_default": {
+                "type": "TypeBool",
+                "computed": true
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        }
+      },
+      "read": "dataSourceUCloudDBParameterGroupsRead"
+    }
+  }
+}

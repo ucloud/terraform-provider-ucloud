@@ -1,0 +1,283 @@
+{
+  "format_version": 1,
+  "resources": {
+    "ucloud_baremetal_instance": {
+      "schema": {
+        "allow_stopping_for_resizing": {
+          "type": "TypeBool",
+          "optional": true
+        },
+        "allow_stopping_for_update": {
+          "type": "TypeBool",
+          "optional": true
+        },
+        "availability_zone": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "boot_disk_id": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "boot_disk_size": {
+          "type": "TypeInt",
+          "optional": true,
+          "validate": "IntBetween"
+        },
+        "boot_disk_type": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "charge_type": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "default": "\"day\"",
+          "validate": "StringInSlice"
+        },
+        "data_disks": {
+          "type": "TypeList",
+          "optional": true,
+          "force_new": true,
+          "max_items": 1,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "device_name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "size": {
+                "type": "TypeInt",
+                "required": true,
+                "validate": "IntBetween"
+              },
+              "type": {
+                "type": "TypeString",
+                "required": true,
+                "force_new": true,
+                "validate": "StringInSlice"
+              }
+            }
+          }
+        },
+        "delete_disks_with_instance": {
+          "type": "TypeBool",
+          "optional": true,
+          "force_new": true
+        },
+        "delete_eips_with_instance": {
+          "type": "TypeBool",
+          "optional": true,
+          "force_new": true
+        },
+        "duration": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "default": "1"
+        },
+        "image_id": {
+          "type": "TypeString",
+          "required": true
+        },
+        "instance_type": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "name": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "StringLenBetween"
+        },
+        "network_interface": {
+          "type": "TypeList",
+          "optional": true,
+          "force_new": true,
+          "max_items": 1,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "eip_bandwidth": {
+                "type": "TypeInt",
+                "required": true,
+                "force_new": true,
+                "validate": "IntBetween"
+              },
+              "eip_charge_mode": {
+                "type": "TypeString",
+                "required": true,
+                "force_new": true,
+                "validate": "StringInSlice"
+              },
+              "eip_internet_type": {
+                "type": "TypeString",
+                "required": true,
+                "force_new": true,
+                "validate": "StringInSlice"
+              }
+            }
+          }
+        },
+        "private_ip": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        },
+        "raid_type": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "rdma_cluster_id": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "remark": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "root_password": {
+          "type": "TypeString",
+          "optional": true,
+          "sensitive": true,
+          "validate": "validateUcloudInstanceRootPassword"
+        },
+        "security_group": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true
+        },
+        "subnet_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "tag": {
+          "type": "TypeString",
+          "optional": true,
+          "default": "\"Default\"",
+          "state_func": "stateFuncTag",
+          "validate": "StringMatch"
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudBareMetalInstanceCreate",
+      "read": "resourceUCloudBareMetalInstanceRead",
+      "update": "resourceUCloudBareMetalInstanceUpdate",
+      "delete": "resourceUCloudBareMetalInstanceDelete",
+      "customize_diff": "bareMetalInstanceCustomizeDiff",
+      "importer": "ImportStatePassthrough"
+    }
+  },
+  "data_sources": {
+    "ucloud_baremetal_images": {
+      "schema": {
+        "availability_zone": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "ids": {
+          "type": "TypeSet",
+          "optional": true,
+          "computed": true,
+          "set": "HashString",
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "image_id": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "image_type": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "images": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "availability_zone": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "description": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "os_name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "os_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "size": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "status": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "type": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "instance_type": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "os_type": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        }
+      },
+      "read": "dataSourceUCloudBareMetalImagesRead"
+    }
+  }
+}

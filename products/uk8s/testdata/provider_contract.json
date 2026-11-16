@@ -1,0 +1,989 @@
+{
+  "format_version": 1,
+  "resources": {
+    "ucloud_uk8s_cluster": {
+      "schema": {
+        "api_server": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "charge_type": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "cluster_domain": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        },
+        "cni_mode": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "dedicated_pod_subnet": {
+          "type": "TypeBool",
+          "optional": true,
+          "force_new": true,
+          "description": "Whether Pods use a dedicated subnet."
+        },
+        "delete_disks_with_instance": {
+          "type": "TypeBool",
+          "optional": true,
+          "force_new": true
+        },
+        "duration": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "validate": "IntBetween"
+        },
+        "enable_external_api_server": {
+          "type": "TypeBool",
+          "optional": true,
+          "force_new": true
+        },
+        "external_api_server": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "external_kubeconfig": {
+          "type": "TypeString",
+          "computed": true,
+          "sensitive": true
+        },
+        "forward_src_ip_method": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "image_id": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "diff_suppress": "resourceUCloudUK8SCluster",
+          "validate": "StringMatch"
+        },
+        "init_script": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringLenBetween"
+        },
+        "k8s_version": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        },
+        "kms_plugin_key_id": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        },
+        "kms_plugin_resources": {
+          "type": "TypeSet",
+          "optional": true,
+          "force_new": true,
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString",
+              "validate": "StringMatch"
+            }
+          }
+        },
+        "kube_proxy": {
+          "type": "TypeList",
+          "optional": true,
+          "min_items": 1,
+          "max_items": 1,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "mode": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true
+              }
+            }
+          }
+        },
+        "kubeconfig": {
+          "type": "TypeString",
+          "computed": true,
+          "sensitive": true
+        },
+        "lb_class": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "master": {
+          "type": "TypeList",
+          "required": true,
+          "min_items": 1,
+          "max_items": 1,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "availability_zones": {
+                "type": "TypeList",
+                "required": true,
+                "force_new": true,
+                "min_items": 3,
+                "max_items": 3,
+                "element": {
+                  "kind": "schema",
+                  "schema": {
+                    "type": "TypeString"
+                  }
+                }
+              },
+              "boot_disk_size": {
+                "type": "TypeInt",
+                "optional": true,
+                "computed": true,
+                "force_new": true,
+                "validate": "IntBetween"
+              },
+              "boot_disk_type": {
+                "type": "TypeString",
+                "optional": true,
+                "computed": true,
+                "force_new": true,
+                "validate": "StringInSlice"
+              },
+              "cpu": {
+                "type": "TypeInt",
+                "optional": true,
+                "force_new": true,
+                "validate": "IntAtLeast"
+              },
+              "data_disk_kms_key_id": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true
+              },
+              "data_disk_size": {
+                "type": "TypeInt",
+                "optional": true,
+                "computed": true,
+                "force_new": true,
+                "validate": "validateAll"
+              },
+              "data_disk_type": {
+                "type": "TypeString",
+                "optional": true,
+                "computed": true,
+                "force_new": true,
+                "validate": "StringInSlice"
+              },
+              "image_id": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true,
+                "validate": "StringMatch"
+              },
+              "instance_type": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true,
+                "validate": "validateInstanceType",
+                "conflicts_with": [
+                  "master.0.cpu",
+                  "master.0.machine_type",
+                  "master.0.memory"
+                ],
+                "deprecated": "Use machine_type, cpu and memory together for new clusters. Existing configurations remain supported."
+              },
+              "machine_type": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true,
+                "validate": "StringMatch"
+              },
+              "memory": {
+                "type": "TypeInt",
+                "optional": true,
+                "force_new": true,
+                "validate": "validateAll"
+              },
+              "min_cpu_platform": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true,
+                "default": "\"Intel/Auto\"",
+                "diff_suppress": "resourceUCloudUK8SCluster",
+                "validate": "StringInSlice"
+              },
+              "security_group": {
+                "type": "TypeList",
+                "optional": true,
+                "force_new": true,
+                "max_items": 15,
+                "element": {
+                  "kind": "resource",
+                  "resource": {
+                    "id": {
+                      "type": "TypeString",
+                      "required": true,
+                      "force_new": true,
+                      "validate": "StringMatch"
+                    },
+                    "master_index": {
+                      "type": "TypeInt",
+                      "required": true,
+                      "force_new": true,
+                      "validate": "IntBetween"
+                    },
+                    "name": {
+                      "type": "TypeString",
+                      "optional": true,
+                      "force_new": true
+                    },
+                    "priority": {
+                      "type": "TypeInt",
+                      "optional": true,
+                      "force_new": true,
+                      "validate": "IntBetween"
+                    }
+                  }
+                }
+              },
+              "uhost_family": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true,
+                "validate": "StringMatch"
+              }
+            }
+          }
+        },
+        "name": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "validate": "StringMatch"
+        },
+        "password": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true,
+          "sensitive": true,
+          "validate": "validateInstancePassword"
+        },
+        "pod_cidr": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "pod_subnet_id": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "description": "The subnet ID used in dedicated Pod subnet mode."
+        },
+        "pod_subnet_sec_group": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "description": "The security group used in dedicated Pod subnet mode. If omitted, firewall mode is used."
+        },
+        "service_cidr": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "status": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "subnet_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "tag": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        },
+        "user_data": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringLenBetween"
+        },
+        "user_labels": {
+          "type": "TypeMap",
+          "optional": true,
+          "force_new": true,
+          "description": "UCloud resource labels, separate from Kubernetes Worker labels.",
+          "validate": "validateUK8SUserLabels",
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "worker": {
+          "type": "TypeList",
+          "optional": true,
+          "force_new": true,
+          "description": "Initial Worker groups created with the cluster. Changes replace the entire cluster.",
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "availability_zone": {
+                "type": "TypeString",
+                "required": true,
+                "force_new": true,
+                "validate": "StringLenBetween"
+              },
+              "boot_disk_size": {
+                "type": "TypeInt",
+                "optional": true,
+                "force_new": true,
+                "default": "40",
+                "validate": "IntBetween"
+              },
+              "boot_disk_type": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true,
+                "default": "\"cloud_ssd\"",
+                "validate": "StringInSlice"
+              },
+              "count": {
+                "type": "TypeInt",
+                "optional": true,
+                "force_new": true,
+                "default": "1",
+                "validate": "IntBetween"
+              },
+              "cpu": {
+                "type": "TypeInt",
+                "required": true,
+                "force_new": true,
+                "validate": "IntAtLeast"
+              },
+              "data_disk_kms_key_id": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true
+              },
+              "data_disk_size": {
+                "type": "TypeInt",
+                "optional": true,
+                "force_new": true,
+                "default": "0",
+                "validate": "uk8sClusterWorkerSchema"
+              },
+              "data_disk_type": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true,
+                "default": "\"cloud_ssd\"",
+                "validate": "StringInSlice"
+              },
+              "gpu": {
+                "type": "TypeInt",
+                "optional": true,
+                "force_new": true,
+                "default": "0",
+                "validate": "IntAtLeast"
+              },
+              "gpu_type": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true
+              },
+              "image_id": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true,
+                "validate": "StringMatch"
+              },
+              "isolation_group": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true
+              },
+              "kubelet_configuration": {
+                "type": "TypeMap",
+                "optional": true,
+                "force_new": true,
+                "description": "Kubelet configuration map supporting only ContainerLogMaxFiles, an integer string of at least 2.",
+                "element": {
+                  "kind": "schema",
+                  "schema": {
+                    "type": "TypeString"
+                  }
+                }
+              },
+              "labels": {
+                "type": "TypeMap",
+                "optional": true,
+                "force_new": true,
+                "element": {
+                  "kind": "schema",
+                  "schema": {
+                    "type": "TypeString"
+                  }
+                }
+              },
+              "machine_type": {
+                "type": "TypeString",
+                "required": true,
+                "force_new": true,
+                "validate": "StringMatch"
+              },
+              "max_pods": {
+                "type": "TypeInt",
+                "optional": true,
+                "force_new": true,
+                "default": "110",
+                "validate": "IntBetween"
+              },
+              "memory": {
+                "type": "TypeInt",
+                "required": true,
+                "force_new": true,
+                "validate": "validateAll"
+              },
+              "min_cpu_platform": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true,
+                "default": "\"Intel/Auto\"",
+                "validate": "StringInSlice"
+              },
+              "name_prefix": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true
+              },
+              "network_interface": {
+                "type": "TypeList",
+                "optional": true,
+                "force_new": true,
+                "element": {
+                  "kind": "resource",
+                  "resource": {
+                    "eip": {
+                      "type": "TypeList",
+                      "required": true,
+                      "force_new": true,
+                      "min_items": 1,
+                      "max_items": 1,
+                      "element": {
+                        "kind": "resource",
+                        "resource": {
+                          "bandwidth": {
+                            "type": "TypeInt",
+                            "optional": true,
+                            "force_new": true,
+                            "validate": "IntAtLeast"
+                          },
+                          "coupon_id": {
+                            "type": "TypeString",
+                            "optional": true,
+                            "force_new": true
+                          },
+                          "operator_name": {
+                            "type": "TypeString",
+                            "required": true,
+                            "force_new": true,
+                            "validate": "StringInSlice"
+                          },
+                          "pay_mode": {
+                            "type": "TypeString",
+                            "optional": true,
+                            "force_new": true,
+                            "default": "\"Bandwidth\"",
+                            "validate": "StringInSlice"
+                          },
+                          "share_bandwidth_id": {
+                            "type": "TypeString",
+                            "optional": true,
+                            "force_new": true
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "security_group": {
+                "type": "TypeList",
+                "optional": true,
+                "force_new": true,
+                "max_items": 5,
+                "element": {
+                  "kind": "resource",
+                  "resource": {
+                    "id": {
+                      "type": "TypeString",
+                      "required": true,
+                      "force_new": true,
+                      "validate": "StringMatch"
+                    },
+                    "name": {
+                      "type": "TypeString",
+                      "optional": true,
+                      "force_new": true
+                    },
+                    "priority": {
+                      "type": "TypeInt",
+                      "optional": true,
+                      "force_new": true,
+                      "validate": "IntBetween"
+                    }
+                  }
+                }
+              },
+              "security_group_id": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true
+              },
+              "security_mode": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true,
+                "validate": "StringInSlice"
+              },
+              "taint": {
+                "type": "TypeSet",
+                "optional": true,
+                "force_new": true,
+                "max_items": 5,
+                "element": {
+                  "kind": "resource",
+                  "resource": {
+                    "effect": {
+                      "type": "TypeString",
+                      "required": true,
+                      "validate": "StringInSlice"
+                    },
+                    "key": {
+                      "type": "TypeString",
+                      "required": true
+                    },
+                    "value": {
+                      "type": "TypeString",
+                      "optional": true
+                    }
+                  }
+                }
+              },
+              "uhost_family": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true,
+                "validate": "StringMatch"
+              },
+              "uni_feature": {
+                "type": "TypeString",
+                "optional": true,
+                "force_new": true,
+                "validate": "StringInSlice"
+              }
+            }
+          }
+        }
+      },
+      "schema_version": 1,
+      "create": "resourceUCloudUK8SClusterCreate",
+      "read": "resourceUCloudUK8SClusterRead",
+      "update": "resourceUCloudUK8SClusterUpdate",
+      "delete": "resourceUCloudUK8SClusterDelete",
+      "customize_diff": "All",
+      "state_upgraders": [
+        {
+          "version": 0,
+          "type": "cty.Object(map[string]cty.Type{\"api_server\":cty.String, \"charge_type\":cty.String, \"create_time\":cty.String, \"delete_disks_with_instance\":cty.Bool, \"duration\":cty.Number, \"enable_external_api_server\":cty.Bool, \"external_api_server\":cty.String, \"id\":cty.String, \"image_id\":cty.String, \"init_script\":cty.String, \"k8s_version\":cty.String, \"kube_proxy\":cty.List(cty.Object(map[string]cty.Type{\"mode\":cty.String})), \"master\":cty.List(cty.Object(map[string]cty.Type{\"availability_zones\":cty.List(cty.String), \"boot_disk_type\":cty.String, \"data_disk_size\":cty.Number, \"data_disk_type\":cty.String, \"instance_type\":cty.String, \"min_cpu_platform\":cty.String})), \"name\":cty.String, \"password\":cty.String, \"pod_cidr\":cty.String, \"service_cidr\":cty.String, \"status\":cty.String, \"subnet_id\":cty.String, \"timeouts\":cty.Object(map[string]cty.Type{\"create\":cty.String, \"delete\":cty.String, \"update\":cty.String}), \"user_data\":cty.String, \"vpc_id\":cty.String})",
+          "upgrade": "upgradeUK8SClusterStateV0"
+        }
+      ],
+      "timeouts": {
+        "create": "30m0s",
+        "delete": "10m0s",
+        "update": "20m0s"
+      }
+    },
+    "ucloud_uk8s_node": {
+      "schema": {
+        "availability_zone": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "boot_disk_type": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "charge_type": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "cluster_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "cpu": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "validate": "IntAtLeast"
+        },
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "data_disk_size": {
+          "type": "TypeInt",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "validateAll"
+        },
+        "data_disk_type": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "delete_disks_with_instance": {
+          "type": "TypeBool",
+          "optional": true,
+          "force_new": true
+        },
+        "disable_schedule_on_create": {
+          "type": "TypeBool",
+          "optional": true,
+          "force_new": true
+        },
+        "duration": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "validate": "IntBetween"
+        },
+        "expire_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "image_id": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "diff_suppress": "resourceUCloudUK8SNode"
+        },
+        "init_script": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringLenBetween"
+        },
+        "instance_type": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "validateInstanceType",
+          "conflicts_with": [
+            "cpu",
+            "machine_type",
+            "memory"
+          ],
+          "deprecated": "Use machine_type, cpu and memory together for new nodes. Existing configurations remain supported."
+        },
+        "ip_set": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "internet_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "ip": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "isolation_group": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        },
+        "machine_type": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringMatch"
+        },
+        "memory": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "validate": "validateAll"
+        },
+        "min_cpu_platform": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "default": "\"Intel/Auto\"",
+          "diff_suppress": "resourceUCloudUK8SNode",
+          "validate": "StringInSlice"
+        },
+        "node_group_id": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        },
+        "password": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true,
+          "sensitive": true,
+          "validate": "validateInstancePassword"
+        },
+        "status": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "subnet_id": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        },
+        "uhost_family": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "user_data": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringLenBetween"
+        }
+      },
+      "schema_version": 1,
+      "create": "resourceUK8SNodeCreate",
+      "read": "resourceUK8SNodeRead",
+      "delete": "resourceUK8SNodeDelete",
+      "customize_diff": "All",
+      "state_upgraders": [
+        {
+          "version": 0,
+          "type": "cty.Object(map[string]cty.Type{\"availability_zone\":cty.String, \"boot_disk_type\":cty.String, \"charge_type\":cty.String, \"cluster_id\":cty.String, \"create_time\":cty.String, \"data_disk_size\":cty.Number, \"data_disk_type\":cty.String, \"delete_disks_with_instance\":cty.Bool, \"disable_schedule_on_create\":cty.Bool, \"duration\":cty.Number, \"expire_time\":cty.String, \"id\":cty.String, \"image_id\":cty.String, \"init_script\":cty.String, \"instance_type\":cty.String, \"ip_set\":cty.List(cty.Object(map[string]cty.Type{\"internet_type\":cty.String, \"ip\":cty.String})), \"isolation_group\":cty.String, \"min_cpu_platform\":cty.String, \"node_group_id\":cty.String, \"password\":cty.String, \"status\":cty.String, \"subnet_id\":cty.String, \"timeouts\":cty.Object(map[string]cty.Type{\"create\":cty.String, \"delete\":cty.String, \"update\":cty.String}), \"uhost_family\":cty.String, \"user_data\":cty.String})",
+          "upgrade": "upgradeUK8SNodeStateV0"
+        }
+      ],
+      "timeouts": {
+        "create": "30m0s",
+        "delete": "10m0s",
+        "update": "20m0s"
+      }
+    },
+    "ucloud_uk8s_node_group": {
+      "schema": {
+        "availability_zone": {
+          "type": "TypeString",
+          "required": true
+        },
+        "boot_disk_size": {
+          "type": "TypeInt",
+          "optional": true,
+          "default": "40",
+          "validate": "IntBetween"
+        },
+        "boot_disk_type": {
+          "type": "TypeString",
+          "optional": true,
+          "default": "\"cloud_ssd\"",
+          "validate": "StringInSlice"
+        },
+        "charge_type": {
+          "type": "TypeString",
+          "optional": true,
+          "default": "\"month\"",
+          "validate": "StringInSlice"
+        },
+        "cluster_id": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "cpu": {
+          "type": "TypeInt",
+          "required": true,
+          "validate": "IntAtLeast"
+        },
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "data_disk_size": {
+          "type": "TypeInt",
+          "optional": true,
+          "default": "0",
+          "validate": "validateAll"
+        },
+        "data_disk_type": {
+          "type": "TypeString",
+          "optional": true,
+          "default": "\"cloud_ssd\"",
+          "validate": "StringInSlice"
+        },
+        "image_id": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "init_script": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "StringLenBetween"
+        },
+        "isolation_group": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "labels": {
+          "type": "TypeMap",
+          "optional": true,
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "machine_type": {
+          "type": "TypeString",
+          "required": true,
+          "validate": "StringMatch"
+        },
+        "max_pods": {
+          "type": "TypeInt",
+          "optional": true,
+          "default": "110",
+          "validate": "IntBetween"
+        },
+        "memory": {
+          "type": "TypeInt",
+          "required": true,
+          "validate": "validateAll"
+        },
+        "min_cpu_platform": {
+          "type": "TypeString",
+          "optional": true,
+          "default": "\"Intel/Auto\"",
+          "validate": "StringInSlice"
+        },
+        "name": {
+          "type": "TypeString",
+          "required": true,
+          "validate": "StringMatch"
+        },
+        "node_ids": {
+          "type": "TypeSet",
+          "computed": true,
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "subnet_id": {
+          "type": "TypeString",
+          "required": true
+        },
+        "tag": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "taint": {
+          "type": "TypeSet",
+          "optional": true,
+          "max_items": 10,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "effect": {
+                "type": "TypeString",
+                "required": true,
+                "validate": "StringInSlice"
+              },
+              "key": {
+                "type": "TypeString",
+                "required": true
+              },
+              "value": {
+                "type": "TypeString",
+                "optional": true
+              }
+            }
+          }
+        },
+        "uhost_family": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "validate": "StringInSlice"
+        },
+        "update_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "user_data": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "StringLenBetween"
+        }
+      },
+      "create": "resourceUK8SNodeGroupCreate",
+      "read": "resourceUK8SNodeGroupRead",
+      "update": "resourceUK8SNodeGroupUpdate",
+      "delete": "resourceUK8SNodeGroupDelete",
+      "customize_diff": "All",
+      "importer": "importUK8SNodeGroup",
+      "timeouts": {
+        "create": "30m0s",
+        "delete": "10m0s",
+        "update": "20m0s"
+      }
+    }
+  }
+}

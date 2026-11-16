@@ -86,6 +86,10 @@ func Marshal(provider *schema.Provider) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	return marshalContract(contract)
+}
+
+func marshalContract(contract Contract) ([]byte, error) {
 	encoded, err := json.MarshalIndent(contract, "", "  ")
 	if err != nil {
 		return nil, fmt.Errorf("marshal provider contract: %w", err)

@@ -1,0 +1,802 @@
+{
+  "format_version": 1,
+  "resources": {
+    "ucloud_instance": {
+      "schema": {
+        "alarm_template_id": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "validate": "IntBetween"
+        },
+        "allow_stopping_for_update": {
+          "type": "TypeBool",
+          "optional": true
+        },
+        "auto_data_disk_init": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "auto_renew": {
+          "type": "TypeBool",
+          "computed": true
+        },
+        "auto_start": {
+          "type": "TypeBool",
+          "optional": true
+        },
+        "availability_zone": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "boot_disk_size": {
+          "type": "TypeInt",
+          "optional": true,
+          "computed": true,
+          "validate": "validateAll"
+        },
+        "boot_disk_type": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "charge_type": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "coupon_id": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        },
+        "cpu": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "cpu_platform": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "data_disk_size": {
+          "type": "TypeInt",
+          "optional": true,
+          "computed": true,
+          "validate": "validateAll"
+        },
+        "data_disk_type": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "data_disks": {
+          "type": "TypeList",
+          "optional": true,
+          "min_items": 1,
+          "max_items": 1,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "size": {
+                "type": "TypeInt",
+                "required": true,
+                "force_new": true,
+                "validate": "validateAll"
+              },
+              "type": {
+                "type": "TypeString",
+                "required": true,
+                "force_new": true,
+                "validate": "StringInSlice"
+              }
+            }
+          }
+        },
+        "delete_disks_with_instance": {
+          "type": "TypeBool",
+          "optional": true,
+          "force_new": true
+        },
+        "delete_eips_with_instance": {
+          "type": "TypeBool",
+          "optional": true,
+          "force_new": true
+        },
+        "deletion_protection": {
+          "type": "TypeBool",
+          "optional": true
+        },
+        "disk_password": {
+          "type": "TypeString",
+          "optional": true,
+          "sensitive": true
+        },
+        "disk_set": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "is_boot": {
+                "type": "TypeBool",
+                "computed": true
+              },
+              "size": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "type": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "duration": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "validate": "IntBetween"
+        },
+        "expire_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "gpu": {
+          "type": "TypeInt",
+          "optional": true,
+          "force_new": true,
+          "validate": "IntBetween"
+        },
+        "gpu_type": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "host_binding": {
+          "type": "TypeBool",
+          "optional": true,
+          "force_new": true
+        },
+        "hotplug_feature": {
+          "type": "TypeBool",
+          "optional": true,
+          "force_new": true
+        },
+        "image_id": {
+          "type": "TypeString",
+          "required": true,
+          "diff_suppress": "resourceUCloudInstance"
+        },
+        "instance_type": {
+          "type": "TypeString",
+          "required": true,
+          "validate": "validateInstanceType"
+        },
+        "ip_set": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "internet_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "ip": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "isolation_group": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        },
+        "key_pair_id": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "labels": {
+          "type": "TypeMap",
+          "optional": true,
+          "force_new": true,
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "login_mode": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "StringInSlice"
+        },
+        "memory": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "min_cpu_platform": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "default": "\"Intel/Auto\"",
+          "diff_suppress": "resourceUCloudInstance"
+        },
+        "name": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "validate": "StringMatch"
+        },
+        "net_capability": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "validate": "StringInSlice"
+        },
+        "network_interface": {
+          "type": "TypeList",
+          "optional": true,
+          "min_items": 1,
+          "max_items": 1,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "eip_bandwidth": {
+                "type": "TypeInt",
+                "required": true,
+                "force_new": true,
+                "validate": "IntBetween"
+              },
+              "eip_charge_mode": {
+                "type": "TypeString",
+                "required": true,
+                "force_new": true,
+                "validate": "StringInSlice"
+              },
+              "eip_internet_type": {
+                "type": "TypeString",
+                "required": true,
+                "force_new": true,
+                "validate": "StringInSlice"
+              }
+            }
+          }
+        },
+        "private_ip": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        },
+        "rdma_cluster_id": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "remark": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true
+        },
+        "root_password": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "sensitive": true,
+          "validate": "validateInstancePassword"
+        },
+        "sec_group_id": {
+          "type": "TypeSet",
+          "optional": true,
+          "max_items": 5,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "id": {
+                "type": "TypeString",
+                "required": true
+              },
+              "priority": {
+                "type": "TypeInt",
+                "required": true,
+                "validate": "IntBetween"
+              }
+            }
+          }
+        },
+        "security_group": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true
+        },
+        "security_mode": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "status": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "subnet_id": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        },
+        "tag": {
+          "type": "TypeString",
+          "optional": true,
+          "default": "\"Default\"",
+          "state_func": "stateFuncTag",
+          "validate": "StringMatch"
+        },
+        "udhost_id": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        },
+        "udset_id": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        },
+        "uhost_family": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "uni_feature": {
+          "type": "TypeBool",
+          "optional": true,
+          "force_new": true,
+          "default": "false"
+        },
+        "user_data": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true,
+          "validate": "StringLenBetween"
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudInstanceCreate",
+      "read": "resourceUCloudInstanceRead",
+      "update": "resourceUCloudInstanceUpdate",
+      "delete": "resourceUCloudInstanceDelete",
+      "customize_diff": "All",
+      "importer": "ImportStatePassthrough",
+      "timeouts": {
+        "create": "30m0s",
+        "delete": "15m0s",
+        "update": "20m0s"
+      }
+    },
+    "ucloud_instance_state": {
+      "schema": {
+        "disk_password": {
+          "type": "TypeString",
+          "optional": true,
+          "sensitive": true
+        },
+        "force": {
+          "type": "TypeBool",
+          "optional": true
+        },
+        "instance_id": {
+          "type": "TypeString",
+          "required": true
+        },
+        "state": {
+          "type": "TypeString",
+          "required": true,
+          "validate": "StringInSlice"
+        }
+      },
+      "create": "resourceUCloudInstanceStateCreate",
+      "read": "resourceUCloudInstanceStateRead",
+      "update": "resourceUCloudInstanceStateUpdate",
+      "delete": "resourceUCloudInstanceStateDelete",
+      "importer": "ImportStatePassthrough"
+    },
+    "ucloud_isolation_group": {
+      "schema": {
+        "name": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true,
+          "validate": "StringMatch"
+        },
+        "remark": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudIsolationGroupCreate",
+      "read": "resourceUCloudIsolationGroupRead",
+      "delete": "resourceUCloudIsolationGroupDelete",
+      "importer": "ImportStatePassthrough"
+    }
+  },
+  "data_sources": {
+    "ucloud_images": {
+      "schema": {
+        "availability_zone": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "func_type": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "StringInSlice"
+        },
+        "ids": {
+          "type": "TypeSet",
+          "optional": true,
+          "computed": true,
+          "set": "HashString",
+          "conflicts_with": [
+            "image_id"
+          ],
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "image_id": {
+          "type": "TypeString",
+          "optional": true,
+          "conflicts_with": [
+            "ids"
+          ]
+        },
+        "image_type": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "StringInSlice"
+        },
+        "images": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "availability_zone": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "create_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "description": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "features": {
+                "type": "TypeList",
+                "computed": true,
+                "element": {
+                  "kind": "schema",
+                  "schema": {
+                    "type": "TypeString"
+                  }
+                }
+              },
+              "func_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "integrated_software": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "os_name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "os_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "price_set": {
+                "type": "TypeList",
+                "computed": true,
+                "element": {
+                  "kind": "resource",
+                  "resource": {
+                    "charge_type": {
+                      "type": "TypeString",
+                      "computed": true
+                    },
+                    "original_price": {
+                      "type": "TypeFloat",
+                      "computed": true
+                    },
+                    "price": {
+                      "type": "TypeFloat",
+                      "computed": true
+                    }
+                  }
+                }
+              },
+              "scene_categories": {
+                "type": "TypeList",
+                "computed": true,
+                "element": {
+                  "kind": "schema",
+                  "schema": {
+                    "type": "TypeString"
+                  }
+                }
+              },
+              "size": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "status": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "vendor": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "include_price": {
+          "type": "TypeBool",
+          "optional": true
+        },
+        "most_recent": {
+          "type": "TypeBool",
+          "optional": true,
+          "default": "false"
+        },
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "ValidateRegexp"
+        },
+        "os_type": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "StringInSlice"
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "tag": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        }
+      },
+      "read": "dataSourceUCloudImagesRead"
+    },
+    "ucloud_instances": {
+      "schema": {
+        "availability_zone": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "ids": {
+          "type": "TypeSet",
+          "optional": true,
+          "computed": true,
+          "set": "HashString",
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "instances": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "auto_renew": {
+                "type": "TypeBool",
+                "computed": true
+              },
+              "availability_zone": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "charge_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "cpu": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "create_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "disk_set": {
+                "type": "TypeList",
+                "computed": true,
+                "element": {
+                  "kind": "resource",
+                  "resource": {
+                    "id": {
+                      "type": "TypeString",
+                      "computed": true
+                    },
+                    "is_boot": {
+                      "type": "TypeBool",
+                      "computed": true
+                    },
+                    "size": {
+                      "type": "TypeInt",
+                      "computed": true
+                    },
+                    "type": {
+                      "type": "TypeString",
+                      "computed": true
+                    }
+                  }
+                }
+              },
+              "expire_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "instance_type": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "ip_set": {
+                "type": "TypeList",
+                "computed": true,
+                "element": {
+                  "kind": "resource",
+                  "resource": {
+                    "internet_type": {
+                      "type": "TypeString",
+                      "computed": true
+                    },
+                    "ip": {
+                      "type": "TypeString",
+                      "computed": true
+                    }
+                  }
+                }
+              },
+              "memory": {
+                "type": "TypeInt",
+                "computed": true
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "private_ip": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "remark": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "status": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "subnet_id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "tag": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "vpc_id": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "isolation_group": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "ValidateRegexp"
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "subnet_id": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "tag": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "udisk_id_for_attachment": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "vpc_id": {
+          "type": "TypeString",
+          "optional": true
+        }
+      },
+      "schema_version": 1,
+      "read": "dataSourceUCloudInstancesRead",
+      "migrate_state": "dataSourceUCloudInstancesMigrateState"
+    }
+  }
+}

@@ -1,0 +1,457 @@
+{
+  "format_version": 1,
+  "resources": {
+    "ucloud_iam_access_key": {
+      "schema": {
+        "encrypted_secret": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "key_fingerprint": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "pgp_key": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        },
+        "secret": {
+          "type": "TypeString",
+          "computed": true,
+          "sensitive": true
+        },
+        "secret_file": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        },
+        "status": {
+          "type": "TypeString",
+          "optional": true,
+          "default": "\"Active\"",
+          "validate": "StringInSlice"
+        },
+        "user_name": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudIAMAccessKeyCreate",
+      "read": "resourceUCloudIAMAccessKeyRead",
+      "update": "resourceUCloudIAMAccessKeyUpdate",
+      "delete": "resourceUCloudIAMAccessKeyDelete"
+    },
+    "ucloud_iam_group": {
+      "schema": {
+        "comment": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "name": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudIAMGroupCreate",
+      "read": "resourceUCloudIAMGroupRead",
+      "update": "resourceUCloudIAMGroupUpdate",
+      "delete": "resourceUCloudIAMGroupDelete",
+      "importer": "ImportStatePassthrough"
+    },
+    "ucloud_iam_group_membership": {
+      "schema": {
+        "group_name": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "user_names": {
+          "type": "TypeSet",
+          "required": true,
+          "set": "HashString",
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        }
+      },
+      "create": "resourceUCloudIAMGroupMembershipCreate",
+      "read": "resourceUCloudIAMGroupMembershipRead",
+      "update": "resourceUCloudIAMGroupMembershipUpdate",
+      "delete": "resourceUCloudIAMGroupMembershipDelete",
+      "importer": "ImportStatePassthrough"
+    },
+    "ucloud_iam_group_policy_attachment": {
+      "schema": {
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "group_name": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "policy_urn": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "project_id": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudIAMGroupPolicyAttachmentCreate",
+      "read": "resourceUCloudIAMGroupPolicyAttachmentRead",
+      "delete": "resourceUCloudIAMGroupPolicyAttachmentDelete",
+      "importer": "ImportStatePassthrough"
+    },
+    "ucloud_iam_policy": {
+      "schema": {
+        "comment": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "name": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "policy": {
+          "type": "TypeString",
+          "required": true
+        },
+        "scope": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true,
+          "validate": "StringInSlice"
+        },
+        "urn": {
+          "type": "TypeString",
+          "computed": true
+        }
+      },
+      "create": "resourceUCloudIAMPolicyCreate",
+      "read": "resourceUCloudIAMPolicyRead",
+      "update": "resourceUCloudIAMPolicyUpdate",
+      "delete": "resourceUCloudIAMPolicyDelete",
+      "importer": "ImportStatePassthrough"
+    },
+    "ucloud_iam_project": {
+      "schema": {
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "name": {
+          "type": "TypeString",
+          "required": true
+        }
+      },
+      "create": "resourceUCloudIAMProjectCreate",
+      "read": "resourceUCloudIAMProjectRead",
+      "update": "resourceUCloudIAMProjectUpdate",
+      "delete": "resourceUCloudIAMProjectDelete",
+      "importer": "ImportStatePassthrough"
+    },
+    "ucloud_iam_user": {
+      "schema": {
+        "display_name": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "email": {
+          "type": "TypeString",
+          "optional": true,
+          "computed": true
+        },
+        "is_frozen": {
+          "type": "TypeBool",
+          "optional": true,
+          "default": "false"
+        },
+        "login_enable": {
+          "type": "TypeBool",
+          "optional": true,
+          "default": "true"
+        },
+        "name": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "status": {
+          "type": "TypeString",
+          "computed": true
+        }
+      },
+      "create": "resourceUCloudIAMUserCreate",
+      "read": "resourceUCloudIAMUserRead",
+      "update": "resourceUCloudIAMUserUpdate",
+      "delete": "resourceUCloudIAMUserDelete",
+      "importer": "ImportStatePassthrough"
+    },
+    "ucloud_iam_user_policy_attachment": {
+      "schema": {
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "policy_urn": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "project_id": {
+          "type": "TypeString",
+          "optional": true,
+          "force_new": true
+        },
+        "user_name": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudIAMUserPolicyAttachmentCreate",
+      "read": "resourceUCloudIAMUserPolicyAttachmentRead",
+      "delete": "resourceUCloudIAMUserPolicyAttachmentDelete",
+      "importer": "ImportStatePassthrough"
+    }
+  },
+  "data_sources": {
+    "ucloud_iam_groups": {
+      "schema": {
+        "groups": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "comment": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "ValidateRegexp"
+        },
+        "names": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        }
+      },
+      "read": "dataSourceUCloudIAMGroupsRead"
+    },
+    "ucloud_iam_policy": {
+      "schema": {
+        "comment": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "create_time": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "name": {
+          "type": "TypeString",
+          "required": true
+        },
+        "policy": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "scope": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "type": {
+          "type": "TypeString",
+          "required": true,
+          "validate": "StringInSlice"
+        },
+        "urn": {
+          "type": "TypeString",
+          "computed": true
+        }
+      },
+      "read": "dataSourceUCloudIAMPolicyRead"
+    },
+    "ucloud_iam_policy_document": {
+      "schema": {
+        "json": {
+          "type": "TypeString",
+          "computed": true
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "statement": {
+          "type": "TypeList",
+          "optional": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "action": {
+                "type": "TypeList",
+                "required": true,
+                "element": {
+                  "kind": "schema",
+                  "schema": {
+                    "type": "TypeString"
+                  }
+                }
+              },
+              "effect": {
+                "type": "TypeString",
+                "optional": true,
+                "default": "\"Allow\"",
+                "validate": "StringInSlice"
+              },
+              "resource": {
+                "type": "TypeList",
+                "optional": true,
+                "element": {
+                  "kind": "schema",
+                  "schema": {
+                    "type": "TypeString"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "version": {
+          "type": "TypeString",
+          "optional": true,
+          "default": "\"1\"",
+          "validate": "StringInSlice"
+        }
+      },
+      "read": "dataSourceUCloudIAMPolicyDocumentRead"
+    },
+    "ucloud_iam_projects": {
+      "schema": {
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "ValidateRegexp"
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "projects": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "create_time": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "user_count": {
+                "type": "TypeInt",
+                "computed": true
+              }
+            }
+          }
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        }
+      },
+      "read": "dataSourceUCloudIAMProjectsRead"
+    },
+    "ucloud_iam_users": {
+      "schema": {
+        "group_name": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "name_regex": {
+          "type": "TypeString",
+          "optional": true,
+          "validate": "ValidateRegexp"
+        },
+        "names": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "users": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "display_name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "email": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "login_enable": {
+                "type": "TypeBool",
+                "computed": true
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "status": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        }
+      },
+      "read": "dataSourceUCloudIAMUsersRead"
+    }
+  }
+}

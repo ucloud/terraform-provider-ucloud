@@ -1,0 +1,181 @@
+{
+  "format_version": 1,
+  "resources": {
+    "ucloud_label": {
+      "schema": {
+        "key": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "value": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudLabelCreate",
+      "read": "resourceUCloudLabelRead",
+      "delete": "resourceUCloudLabelDelete",
+      "importer": "ImportStatePassthrough"
+    },
+    "ucloud_label_attachment": {
+      "schema": {
+        "key": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "resource": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        },
+        "value": {
+          "type": "TypeString",
+          "required": true,
+          "force_new": true
+        }
+      },
+      "create": "resourceUCloudLabelAttachmentCreate",
+      "read": "resourceUCloudLabelAttachmentRead",
+      "delete": "resourceUCloudLabelAttachmentDelete",
+      "importer": "ImportStatePassthrough"
+    }
+  },
+  "data_sources": {
+    "ucloud_label_resources": {
+      "schema": {
+        "key": {
+          "type": "TypeString",
+          "required": true
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "project_ids": {
+          "type": "TypeList",
+          "required": true,
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "resource_types": {
+          "type": "TypeList",
+          "required": true,
+          "element": {
+            "kind": "schema",
+            "schema": {
+              "type": "TypeString"
+            }
+          }
+        },
+        "resources": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "id": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "name": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "type": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        },
+        "value": {
+          "type": "TypeString",
+          "required": true
+        }
+      },
+      "read": "dataSourceUCloudLabelResourcesRead"
+    },
+    "ucloud_labels": {
+      "schema": {
+        "key_regex": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "labels": {
+          "type": "TypeList",
+          "computed": true,
+          "element": {
+            "kind": "resource",
+            "resource": {
+              "key": {
+                "type": "TypeString",
+                "computed": true
+              },
+              "projects": {
+                "type": "TypeList",
+                "computed": true,
+                "element": {
+                  "kind": "resource",
+                  "resource": {
+                    "disabled_resource_types": {
+                      "type": "TypeList",
+                      "computed": true,
+                      "element": {
+                        "kind": "schema",
+                        "schema": {
+                          "type": "TypeString"
+                        }
+                      }
+                    },
+                    "id": {
+                      "type": "TypeString",
+                      "computed": true
+                    },
+                    "name": {
+                      "type": "TypeString",
+                      "computed": true
+                    },
+                    "resource_types": {
+                      "type": "TypeList",
+                      "computed": true,
+                      "element": {
+                        "kind": "schema",
+                        "schema": {
+                          "type": "TypeString"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "value": {
+                "type": "TypeString",
+                "computed": true
+              }
+            }
+          }
+        },
+        "output_file": {
+          "type": "TypeString",
+          "optional": true
+        },
+        "total_count": {
+          "type": "TypeInt",
+          "computed": true
+        }
+      },
+      "read": "dataSourceUCloudLabelsRead"
+    }
+  }
+}

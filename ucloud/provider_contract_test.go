@@ -3,45 +3,53 @@ package ucloud
 import (
 	"bytes"
 	"os"
+	"path/filepath"
+	"sort"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
+	"github.com/terraform-providers/terraform-provider-ucloud/internal/productcatalog"
 	"github.com/terraform-providers/terraform-provider-ucloud/internal/providercompat"
 )
 
-// providerContractBaseline identifies the reviewed provider interface contract.
-//
-// The contract records schema hook names that providercompat resolves through
-// runtime.FuncForPC, and a closure literal is named after the function that
-// encloses it. Compiling the provider with inlining enabled can therefore
-// report that closure under the name of the inlined caller instead, which made
-// the baseline depend on the Go release. `make compat`, `make test` and `make
-// contract` compile the provider with inlining disabled so the recorded names
-// are stable; a bare `go test ./ucloud` is only comparable on a toolchain with
-// the same inlining behaviour.
-const providerContractBaseline = "48c45282ac5ba85f2dca3f50b7563a20ee4969a0"
-
 func TestProviderContract(t *testing.T) {
 	provider := Provider().(*schema.Provider)
-	actual, err := providercompat.Marshal(provider)
+	metadata, err := productcatalog.AllOwnershipMetadata()
 	if err != nil {
-		t.Fatalf("build provider contract: %v", err)
+		t.Fatalf("read product catalog: %v", err)
 	}
-	expected, err := os.ReadFile("testdata/provider_contract.json")
+	baselines, err := providercompat.Baselines(provider, metadata)
 	if err != nil {
-		t.Fatalf("read provider contract baseline %s: %v", providerContractBaseline, err)
+		t.Fatalf("build provider contract baselines: %v", err)
 	}
 
-	if !bytes.Equal(actual, expected) {
-		line, expectedLine, actualLine := firstContractDifference(expected, actual)
-		t.Fatalf(
-			"provider contract differs from baseline %s at line %d\nexpected: %s\nactual:   %s\npackage-only migrations must have zero contract changes; inspect the difference and regenerate with `make contract` if it is intentional (run this check through `make compat` or `make test`, which build the provider without inlining)",
-			providerContractBaseline,
-			line,
-			expectedLine,
-			actualLine,
-		)
+	names := make([]string, 0, len(baselines))
+	for name := range baselines {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		t.Run(name, func(t *testing.T) {
+			filename := filepath.Join("..", providercompat.BaselinePath(name))
+			expected, err := os.ReadFile(filename)
+			if err != nil {
+				t.Fatalf("read %s contract baseline %s: %v", name, filename, err)
+			}
+			actual := baselines[name]
+			if !bytes.Equal(actual, expected) {
+				line, expectedLine, actualLine := firstContractDifference(expected, actual)
+				t.Fatalf(
+					"%s contract differs from baseline %s at line %d\nexpected: %s\nactual:   %s\ninspect the difference and regenerate with `make contract PRODUCT=%s` if it is intentional (run this check through `make compat` or `make test`, which build the provider without inlining)",
+					name,
+					filename,
+					line,
+					expectedLine,
+					actualLine,
+					name,
+				)
+			}
+		})
 	}
 }
 
